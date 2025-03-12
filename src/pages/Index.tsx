@@ -1,13 +1,10 @@
-
 import { ArrowRight, Heart, Gavel, HeartPulse, Book, MessageSquare, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-
 const HomePage = () => {
-  return (
-    <>
+  return <>
       <Navigation />
       
       {/* Hero Section */}
@@ -22,7 +19,7 @@ const HomePage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild className="hero-btn">
-                <Link to="/book">Book a Consultation</Link>
+                <Link to="/book" className="The link is not going to book consultation page">Book a Consultation</Link>
               </Button>
               <Button asChild variant="outline" className="rounded-full px-6 py-3 border-peacefulBlue text-peacefulBlue hover:bg-peacefulBlue/5">
                 <Link to="/services">Explore Our Services</Link>
@@ -215,9 +212,7 @@ const HomePage = () => {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="testimonial-card">
               <div className="mb-4">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <span key={star} className="text-yellow-400">★</span>
-                ))}
+                {[1, 2, 3, 4, 5].map(star => <span key={star} className="text-yellow-400">★</span>)}
               </div>
               <p className="text-gray-600 mb-4 italic">"The combined legal and emotional support I received during my divorce was invaluable. Peace2Hearts guided me through every step of the process with compassion and expertise."</p>
               <div className="flex items-center">
@@ -231,9 +226,7 @@ const HomePage = () => {
             
             <div className="testimonial-card">
               <div className="mb-4">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <span key={star} className="text-yellow-400">★</span>
-                ))}
+                {[1, 2, 3, 4, 5].map(star => <span key={star} className="text-yellow-400">★</span>)}
               </div>
               <p className="text-gray-600 mb-4 italic">"When my partner and I were struggling, the relationship counseling at Peace2Hearts helped us develop better communication skills and rebuild our trust. We're now stronger than ever."</p>
               <div className="flex items-center">
@@ -247,9 +240,7 @@ const HomePage = () => {
             
             <div className="testimonial-card">
               <div className="mb-4">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <span key={star} className="text-yellow-400">★</span>
-                ))}
+                {[1, 2, 3, 4, 5].map(star => <span key={star} className="text-yellow-400">★</span>)}
               </div>
               <p className="text-gray-600 mb-4 italic">"The custody guidance provided by Peace2Hearts was clear, practical, and centered on my child's wellbeing. Their approach helped reduce conflict and find solutions that worked for everyone."</p>
               <div className="flex items-center">
@@ -283,8 +274,6 @@ const HomePage = () => {
       </section>
       
       <Footer />
-    </>
-  );
+    </>;
 };
-
 export default HomePage;
