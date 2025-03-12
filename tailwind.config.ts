@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Peace2Hearts custom colors
+				peacefulBlue: '#6DAEDB',
+				warmPeach: '#F7CAC9',
+				softGray: '#F5F5F5'
+			},
+			fontFamily: {
+				lora: ['Lora', 'serif'],
+				opensans: ['Open Sans', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +93,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'wave': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'wave': 'wave 3s ease-in-out infinite'
+			},
+			backgroundImage: {
+				'gradient-wave': 'linear-gradient(90deg, hsla(201, 54%, 64%, 0.4) 0%, hsla(201, 54%, 64%, 0.1) 100%)',
+				'gradient-peach': 'linear-gradient(90deg, hsla(2, 78%, 88%, 0.4) 0%, hsla(2, 78%, 88%, 0.1) 100%)'
 			}
 		}
 	},
