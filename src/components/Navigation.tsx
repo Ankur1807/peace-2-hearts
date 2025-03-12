@@ -26,9 +26,11 @@ const Navigation = () => {
           <Link to="/services" className="text-gray-700 hover:text-peacefulBlue transition-colors">Services</Link>
           <Link to="/resources" className="text-gray-700 hover:text-peacefulBlue transition-colors">Resources</Link>
           <Link to="/contact" className="text-gray-700 hover:text-peacefulBlue transition-colors">Contact</Link>
-          <Button className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white rounded-full px-6">
-            Book Consultation
-          </Button>
+          <Link to="/book-consultation">
+            <Button className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white rounded-full px-6">
+              Book Consultation
+            </Button>
+          </Link>
         </div>
         
         {/* Mobile Menu Button */}
@@ -50,9 +52,11 @@ const Navigation = () => {
             <Link to="/services" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Services</Link>
             <Link to="/resources" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Resources</Link>
             <Link to="/contact" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Contact</Link>
-            <Button className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white rounded-full mt-2">
-              Book Consultation
-            </Button>
+            <Link to="/book-consultation" onClick={toggleMenu}>
+              <Button className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white rounded-full mt-2">
+                Book Consultation
+              </Button>
+            </Link>
           </div>
         </div>
       )}
