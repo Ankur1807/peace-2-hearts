@@ -1,4 +1,3 @@
-
 import { ArrowRight, Heart, Gavel, HeartPulse, Book, MessageSquare, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -20,7 +19,7 @@ const HomePage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild className="hero-btn">
-                <Link to="/book-consultation">Book a Consultation</Link>
+                <Link to="/book" className="The link is not going to book consultation page">Book a Consultation</Link>
               </Button>
               <Button asChild variant="outline" className="rounded-full px-6 py-3 border-peacefulBlue text-peacefulBlue hover:bg-peacefulBlue/5">
                 <Link to="/services">Explore Our Services</Link>
@@ -264,7 +263,7 @@ const HomePage = () => {
             <p className="text-lg mb-8 text-white/90">Our team of mental health and legal experts is here to support you through your relationship journey.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild className="bg-white text-peacefulBlue hover:bg-white/90 rounded-full px-6 py-3">
-                <Link to="/book-consultation">Book a Consultation</Link>
+                <Link to="/book">Book a Consultation</Link>
               </Button>
               <Button asChild variant="outline" className="border-white text-white hover:bg-white/10 rounded-full px-6 py-3">
                 <Link to="/contact">Contact Us</Link>

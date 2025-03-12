@@ -1,13 +1,10 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, HeartPulse, Gavel, Users, MessageSquare, Book, Calendar } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-
 const Services = () => {
-  return (
-    <>
+  return <>
       <Navigation />
       
       {/* Hero Section */}
@@ -100,7 +97,7 @@ const Services = () => {
               </div>
               
               <Button asChild className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white">
-                <Link to="/services/legal-support">Learn More About Legal Services</Link>
+                <Link to="/services/legal-support" className="mx-0 px-[24px] my-[48px]">Learn More About Legal Services</Link>
               </Button>
             </div>
           </div>
@@ -156,8 +153,6 @@ const Services = () => {
       </section>
       
       <Footer />
-    </>
-  );
+    </>;
 };
-
 export default Services;
