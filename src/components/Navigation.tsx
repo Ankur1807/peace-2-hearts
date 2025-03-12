@@ -1,14 +1,40 @@
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Heart, Menu, X } from 'lucide-react';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Heart, Menu, User, X } from 'lucide-react';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is logged in
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      setIsLoggedIn(true);
+      setUserName(user.name);
+    }
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+    navigate('/sign-in');
   };
 
   return (
@@ -26,11 +52,48 @@ const Navigation = () => {
           <Link to="/services" className="text-gray-700 hover:text-peacefulBlue transition-colors">Services</Link>
           <Link to="/resources" className="text-gray-700 hover:text-peacefulBlue transition-colors">Resources</Link>
           <Link to="/contact" className="text-gray-700 hover:text-peacefulBlue transition-colors">Contact</Link>
-          <Link to="/book-consultation">
-            <Button className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white rounded-full px-6">
-              Book Consultation
-            </Button>
-          </Link>
+          
+          {isLoggedIn ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-peacefulBlue text-white">
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <div className="flex items-center gap-2 p-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-peacefulBlue">
+                    <span className="text-sm font-medium text-white">{userName.charAt(0).toUpperCase()}</span>
+                  </div>
+                  <div className="flex flex-col space-y-0.5">
+                    <p className="text-sm font-medium">{userName}</p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard">Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/book-consultation">Book Consultation</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-4">
+              <Link to="/sign-in" className="text-gray-700 hover:text-peacefulBlue transition-colors">Sign In</Link>
+              <Link to="/book-consultation">
+                <Button className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white rounded-full px-6">
+                  Book Consultation
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
         
         {/* Mobile Menu Button */}
@@ -52,6 +115,27 @@ const Navigation = () => {
             <Link to="/services" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Services</Link>
             <Link to="/resources" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Resources</Link>
             <Link to="/contact" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Contact</Link>
+            
+            {isLoggedIn ? (
+              <>
+                <div className="flex items-center gap-2 py-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-peacefulBlue">
+                    <span className="text-sm font-medium text-white">{userName.charAt(0).toUpperCase()}</span>
+                  </div>
+                  <span className="font-medium">{userName}</span>
+                </div>
+                <Link to="/dashboard" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Dashboard</Link>
+                <Button variant="outline" className="mt-2" onClick={() => { handleSignOut(); toggleMenu(); }}>
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/sign-in" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Sign In</Link>
+                <Link to="/sign-up" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Sign Up</Link>
+              </>
+            )}
+            
             <Link to="/book-consultation" onClick={toggleMenu}>
               <Button className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white rounded-full mt-2">
                 Book Consultation

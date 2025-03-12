@@ -1,5 +1,6 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -10,21 +11,47 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, CheckCircle2 } from 'lucide-react';
+import { CalendarIcon, CheckCircle2, CreditCard, Shield } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 const BookConsultation = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [step, setStep] = useState(1);
   const [consultationType, setConsultationType] = useState('');
+  const [timeSlot, setTimeSlot] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Credit card state
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
+  const [cvv, setCvv] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const userData = localStorage.getItem("user");
+    setIsAuthenticated(!!userData);
+  }, []);
 
   const handleNextStep = () => {
-    if (step < 3) {
+    if (step === 2 && !isAuthenticated) {
+      // If user is not authenticated, redirect to sign in before payment
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to continue booking your consultation.",
+      });
+      navigate("/sign-in");
+      return;
+    }
+    
+    if (step < 4) {
       setStep(step + 1);
       window.scrollTo(0, 0);
     }
@@ -37,14 +64,56 @@ const BookConsultation = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleProcessPayment = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Consultation Booked",
-      description: "Your consultation has been successfully scheduled. You'll receive a confirmation email shortly.",
-    });
-    setSubmitted(true);
-    window.scrollTo(0, 0);
+    setIsProcessing(true);
+    
+    // Mock payment processing
+    setTimeout(() => {
+      setIsProcessing(false);
+      toast({
+        title: "Payment Successful",
+        description: "Your payment has been processed successfully.",
+      });
+      setSubmitted(true);
+      window.scrollTo(0, 0);
+    }, 2000);
+  };
+
+  // Format card number with spaces
+  const formatCardNumber = (value: string) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    const matches = v.match(/\d{4,16}/g);
+    const match = matches && matches[0] || '';
+    const parts = [];
+
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+
+    if (parts.length) {
+      return parts.join(' ');
+    } else {
+      return value;
+    }
+  };
+
+  // Handle card number input
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCardNumber(formatCardNumber(value));
+  };
+
+  // Format expiry date (MM/YY)
+  const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    let formatted = value.replace(/[^\d]/g, '');
+    
+    if (formatted.length > 2) {
+      formatted = `${formatted.slice(0, 2)}/${formatted.slice(2, 4)}`;
+    }
+    
+    setExpiryDate(formatted);
   };
 
   if (submitted) {
@@ -62,8 +131,14 @@ const BookConsultation = () => {
               <p className="text-lg text-gray-600">
                 If you have any questions before your appointment, please don't hesitate to contact us.
               </p>
-              <div className="pt-6">
-                <Button className="hero-btn" onClick={() => window.location.href = '/'}>
+              <div className="pt-6 flex gap-4 justify-center">
+                <Button 
+                  className="bg-peacefulBlue hover:bg-peacefulBlue/90" 
+                  onClick={() => navigate('/dashboard')}
+                >
+                  Go to Dashboard
+                </Button>
+                <Button variant="outline" onClick={() => window.location.href = '/'}>
                   Return to Homepage
                 </Button>
               </div>
@@ -87,7 +162,7 @@ const BookConsultation = () => {
 
           <div className="mb-10">
             <div className="flex justify-between items-center relative mb-6">
-              {[1, 2, 3].map((stepNumber) => (
+              {[1, 2, 3, 4].map((stepNumber) => (
                 <div key={stepNumber} className="flex flex-col items-center relative z-10">
                   <div
                     className={cn(
@@ -101,20 +176,22 @@ const BookConsultation = () => {
                     "text-sm mt-2",
                     step >= stepNumber ? "text-peacefulBlue font-medium" : "text-gray-500"
                   )}>
-                    {stepNumber === 1 ? "Service" : stepNumber === 2 ? "Details" : "Confirmation"}
+                    {stepNumber === 1 ? "Service" : 
+                     stepNumber === 2 ? "Details" : 
+                     stepNumber === 3 ? "Payment" : "Confirmation"}
                   </span>
                 </div>
               ))}
               <div className="absolute top-5 left-0 right-0 h-0.5 bg-gray-200 -z-10"></div>
               <div 
                 className="absolute top-5 left-0 h-0.5 bg-peacefulBlue -z-10 transition-all" 
-                style={{ width: `${(step - 1) * 50}%` }}
+                style={{ width: `${(step - 1) * 33.3}%` }}
               ></div>
             </div>
           </div>
 
           <Card className="p-6 md:p-8">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={step === 3 ? handleProcessPayment : (e) => e.preventDefault()}>
               {step === 1 && (
                 <div className="space-y-8">
                   <h2 className="text-2xl font-lora font-semibold mb-6">Select Consultation Type</h2>
@@ -166,7 +243,7 @@ const BookConsultation = () => {
                       type="button" 
                       onClick={handleNextStep}
                       disabled={!consultationType}
-                      className="hero-btn"
+                      className="bg-peacefulBlue hover:bg-peacefulBlue/90"
                     >
                       Continue
                     </Button>
@@ -233,7 +310,7 @@ const BookConsultation = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="time">Preferred Time</Label>
-                    <Select>
+                    <Select value={timeSlot} onValueChange={setTimeSlot}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a time" />
                       </SelectTrigger>
@@ -265,15 +342,120 @@ const BookConsultation = () => {
                     <Button 
                       type="button" 
                       onClick={handleNextStep}
-                      className="hero-btn"
+                      className="bg-peacefulBlue hover:bg-peacefulBlue/90"
                     >
                       Continue
                     </Button>
                   </div>
                 </div>
               )}
-              
+
               {step === 3 && (
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-lora font-semibold mb-6">Payment Information</h2>
+                  
+                  <div className="mb-6">
+                    <div className="bg-gray-50 p-4 rounded-lg flex items-center justify-between mb-6">
+                      <div>
+                        <h3 className="font-semibold">
+                          {consultationType === 'mental-health' ? 'Mental Health Support' : 
+                           consultationType === 'legal' ? 'Legal Consultation' :
+                           consultationType === 'therapy' ? 'Relationship Therapy' : 'Combined Support'}
+                        </h3>
+                        <p className="text-sm text-gray-600">60-minute consultation</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-bold text-lg">
+                          {consultationType === 'combined' ? '$199.00' : '$149.00'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t border-b py-4 mb-6">
+                      <div className="flex justify-between font-semibold">
+                        <span>Total</span>
+                        <span>{consultationType === 'combined' ? '$199.00' : '$149.00'}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="card-name">Cardholder Name</Label>
+                      <Input 
+                        id="card-name" 
+                        placeholder="John Doe" 
+                        value={cardName}
+                        onChange={(e) => setCardName(e.target.value)}
+                        required 
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="card-number">Card Number</Label>
+                      <div className="relative">
+                        <Input 
+                          id="card-number" 
+                          placeholder="1234 5678 9012 3456" 
+                          value={cardNumber}
+                          onChange={handleCardNumberChange}
+                          maxLength={19}
+                          required 
+                        />
+                        <CreditCard className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="expiry">Expiry Date</Label>
+                        <Input 
+                          id="expiry" 
+                          placeholder="MM/YY" 
+                          value={expiryDate}
+                          onChange={handleExpiryDateChange}
+                          maxLength={5}
+                          required 
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="cvv">CVV</Label>
+                        <Input 
+                          id="cvv" 
+                          placeholder="123" 
+                          value={cvv}
+                          onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                          maxLength={3}
+                          required 
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+                      <Shield className="h-5 w-5 text-gray-500 mr-3" />
+                      <p className="text-sm text-gray-600">
+                        All payment information is encrypted and secure. Your card details are never stored on our servers.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-6 flex justify-between">
+                    <Button type="button" variant="outline" onClick={handlePrevStep}>
+                      Back
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="bg-peacefulBlue hover:bg-peacefulBlue/90"
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? "Processing..." : "Complete Payment"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              {step === 4 && (
                 <div className="space-y-6">
                   <h2 className="text-2xl font-lora font-semibold mb-6">Confirm Your Booking</h2>
                   
@@ -295,7 +477,15 @@ const BookConsultation = () => {
                       
                       <div>
                         <h3 className="text-gray-500 text-sm">Time</h3>
-                        <p className="font-medium">10:00 AM</p>
+                        <p className="font-medium">
+                          {timeSlot === '9-am' ? '9:00 AM' : 
+                           timeSlot === '10-am' ? '10:00 AM' :
+                           timeSlot === '11-am' ? '11:00 AM' :
+                           timeSlot === '1-pm' ? '1:00 PM' :
+                           timeSlot === '2-pm' ? '2:00 PM' :
+                           timeSlot === '3-pm' ? '3:00 PM' :
+                           timeSlot === '4-pm' ? '4:00 PM' : 'Not selected'}
+                        </p>
                       </div>
                     </div>
                     
@@ -307,6 +497,13 @@ const BookConsultation = () => {
                     <div>
                       <h3 className="text-gray-500 text-sm">Format</h3>
                       <p className="font-medium">Video Call (link will be sent via email)</p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-gray-500 text-sm">Payment</h3>
+                      <p className="font-medium">
+                        {consultationType === 'combined' ? '$199.00' : '$149.00'} (Paid)
+                      </p>
                     </div>
                   </div>
                   
@@ -324,7 +521,11 @@ const BookConsultation = () => {
                     <Button type="button" variant="outline" onClick={handlePrevStep}>
                       Back
                     </Button>
-                    <Button type="submit" className="hero-btn">
+                    <Button 
+                      type="button" 
+                      onClick={() => setSubmitted(true)}
+                      className="bg-peacefulBlue hover:bg-peacefulBlue/90"
+                    >
                       Confirm Booking
                     </Button>
                   </div>

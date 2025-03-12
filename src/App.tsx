@@ -17,6 +17,9 @@ import TherapyService from "./pages/services/TherapyService";
 import DivorceService from "./pages/services/DivorceService";
 import CustodyService from "./pages/services/CustodyService";
 import BookConsultation from "./pages/BookConsultation";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +42,9 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/book-consultation" element={<BookConsultation />} />
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/sign-up" element={<SignUp />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
