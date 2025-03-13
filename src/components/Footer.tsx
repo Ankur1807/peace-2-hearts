@@ -6,28 +6,19 @@ const Footer = () => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
 
-  return <footer className="bg-gray-100 pt-12 pb-6">
-      <div className="container mx-auto px-4">
+  return (
+    <footer className="bg-gray-100 pt-12 pb-6 w-full">
+      <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              {isHomePage ? (
-                // PNG/JPEG Logo for homepage
-                <img 
-                  src="/logo.png" 
-                  alt="Peace2Hearts Logo" 
-                  className="h-8 w-auto" 
-                />
-              ) : (
-                // SVG Logo for inner pages
-                <svg width="24" height="24" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-6 w-6">
-                  <circle cx="50" cy="50" r="48" stroke="#6DAEDB" strokeWidth="4" />
-                  <path d="M50 10 L50 90" stroke="#6DAEDB" strokeWidth="4" strokeLinecap="round" />
-                  <path d="M50 50 L20 80" stroke="#F7CAC9" strokeWidth="4" strokeLinecap="round" />
-                  <path d="M50 50 L80 80" stroke="#7E69AB" strokeWidth="4" strokeLinecap="round" />
-                  <path d="M35 30 A10 10 0 0 1 50 25 A10 10 0 0 1 65 30 A10 10 0 0 1 65 45 Q65 55 50 65 Q35 55 35 45 A10 10 0 0 1 35 30Z" fill="#F7CAC9" />
-                </svg>
-              )}
+              <svg width="24" height="24" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-6 w-6">
+                <circle cx="50" cy="50" r="48" stroke="#6DAEDB" strokeWidth="4" />
+                <path d="M50 10 L50 90" stroke="#6DAEDB" strokeWidth="4" strokeLinecap="round" />
+                <path d="M50 50 L20 80" stroke="#F7CAC9" strokeWidth="4" strokeLinecap="round" />
+                <path d="M50 50 L80 80" stroke="#7E69AB" strokeWidth="4" strokeLinecap="round" />
+                <path d="M35 30 A10 10 0 0 1 50 25 A10 10 0 0 1 65 30 A10 10 0 0 1 65 45 Q65 55 50 65 Q35 55 35 45 A10 10 0 0 1 35 30Z" fill="#F7CAC9" />
+              </svg>
               <span className="font-lora text-xl font-semibold text-gray-800">Peace2Hearts</span>
             </div>
             <p className="text-gray-600 mb-4">
@@ -83,8 +74,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-peacefulBlue" />
-                <span className="text-gray-600">7428564364
-              </span>
+                <span className="text-gray-600">7428564364</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-peacefulBlue" />
@@ -100,7 +90,8 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
 
 export default Footer;

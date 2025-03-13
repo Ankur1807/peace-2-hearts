@@ -40,18 +40,25 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-white shadow-sm py-4 sticky top-0 z-50">
-      <div className="container mx-auto px-4 flex justify-between items-center">
+    <nav className="bg-white shadow-sm py-4 sticky top-0 z-50 w-full">
+      <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2">
           {isHomePage ? (
-            // PNG/JPEG Logo for homepage
-            <img 
-              src="/logo.png" 
-              alt="Peace2Hearts Logo" 
-              className="h-10 w-auto" 
-            />
+            // SVG Logo with inline styles for both homepage and inner pages
+            <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7">
+              {/* Outer circle */}
+              <circle cx="50" cy="50" r="48" stroke="#6DAEDB" strokeWidth="4" />
+              
+              {/* Peace symbol */}
+              <path d="M50 10 L50 90" stroke="#6DAEDB" strokeWidth="4" strokeLinecap="round" />
+              <path d="M50 50 L20 80" stroke="#F7CAC9" strokeWidth="4" strokeLinecap="round" />
+              <path d="M50 50 L80 80" stroke="#7E69AB" strokeWidth="4" strokeLinecap="round" />
+              
+              {/* Heart shape at the top */}
+              <path d="M35 30 A10 10 0 0 1 50 25 A10 10 0 0 1 65 30 A10 10 0 0 1 65 45 Q65 55 50 65 Q35 55 35 45 A10 10 0 0 1 35 30Z" fill="#F7CAC9" />
+            </svg>
           ) : (
-            // SVG Logo for inner pages
+            // Same SVG for inner pages
             <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7">
               {/* Outer circle */}
               <circle cx="50" cy="50" r="48" stroke="#6DAEDB" strokeWidth="4" />
@@ -132,7 +139,7 @@ const Navigation = () => {
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-md z-40 animate-fade-in">
-          <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
+          <div className="container mx-auto py-4 flex flex-col gap-4">
             <Link to="/" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Home</Link>
             <Link to="/about" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>About Us</Link>
             <Link to="/services" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Services</Link>
