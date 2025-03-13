@@ -8,7 +8,7 @@ const WaveyHeader = () => {
     // Static wave for mobile devices
     return (
       <div 
-        className="absolute inset-0 w-full h-full z-10 pointer-events-none bg-vibrantPurple overflow-hidden"
+        className="absolute inset-0 w-full h-full z-[10] pointer-events-none bg-vibrantPurple overflow-hidden"
       >
         <svg 
           className="absolute bottom-0 w-full"
@@ -28,7 +28,7 @@ const WaveyHeader = () => {
   // Animated wave for desktop
   return (
     <svg 
-      className="absolute inset-0 w-full h-full z-10 pointer-events-none" 
+      className="absolute inset-0 w-full h-full z-[10] pointer-events-none" 
       preserveAspectRatio="none" 
       viewBox="0 0 1440 120" 
       fill="none" 
