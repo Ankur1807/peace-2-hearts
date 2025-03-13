@@ -24,14 +24,18 @@ import PremaritalCounselling from "./pages/services/mentalhealth/PremaritalCouns
 import CouplesCounselling from "./pages/services/mentalhealth/CouplesCounselling";
 import SexualHealthCounselling from "./pages/services/mentalhealth/SexualHealthCounselling";
 
+// Legal Sub-Services
+import PreMarriageLegal from "./pages/services/legal/PreMarriageLegal";
+import MediationServices from "./pages/services/legal/MediationServices";
+import DivorceConsultation from "./pages/services/legal/DivorceConsultation";
+import ChildCustodyConsultation from "./pages/services/legal/ChildCustodyConsultation";
+import MaintenanceConsultation from "./pages/services/legal/MaintenanceConsultation";
+import GeneralConsultation from "./pages/services/legal/GeneralConsultation";
+
 // Legacy Service Pages
 import TherapyService from "./pages/services/TherapyService";
 import DivorceService from "./pages/services/DivorceService";
 import CustodyService from "./pages/services/CustodyService";
-
-// Legal Sub-Services
-import PreMarriageLegal from "./pages/services/legal/PreMarriageLegal";
-import DivorceConsultation from "./pages/services/legal/DivorceConsultation";
 
 import BookConsultation from "./pages/BookConsultation";
 import SignIn from "./pages/SignIn";
@@ -66,12 +70,11 @@ const App = () => (
           
           {/* Legal Sub-Services */}
           <Route path="/services/legal-support/pre-marriage" element={<PreMarriageLegal />} />
+          <Route path="/services/legal-support/mediation" element={<MediationServices />} />
           <Route path="/services/legal-support/divorce" element={<DivorceConsultation />} />
-          {/* Placeholder routes for remaining legal sub-services */}
-          <Route path="/services/legal-support/mediation" element={<PreMarriageLegal />} />
-          <Route path="/services/legal-support/custody" element={<DivorceConsultation />} />
-          <Route path="/services/legal-support/maintenance" element={<PreMarriageLegal />} />
-          <Route path="/services/legal-support/general" element={<DivorceConsultation />} />
+          <Route path="/services/legal-support/custody" element={<ChildCustodyConsultation />} />
+          <Route path="/services/legal-support/maintenance" element={<MaintenanceConsultation />} />
+          <Route path="/services/legal-support/general" element={<GeneralConsultation />} />
           
           {/* Legacy Service Pages - kept for backward compatibility */}
           <Route path="/services/therapy" element={<TherapyService />} />
