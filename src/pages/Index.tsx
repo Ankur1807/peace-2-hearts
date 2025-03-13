@@ -6,7 +6,6 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import SideWaves from '@/components/SideWaves';
 import WaveBackground from '@/components/WaveBackground';
-
 const HomePage = () => {
   return <>
       <Navigation />
@@ -17,7 +16,7 @@ const HomePage = () => {
       <section className="relative min-h-[600px] flex items-center wave-pattern py-16">
         <div className="container mx-auto px-4 z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-lora font-bold text-gray-800 mb-6 leading-tight text-center lg:text-6xl">Helping You Find Peace, with or Without Love</h1>
+            <h1 className="text-4xl md:text-5xl font-lora font-bold text-gray-800 mb-6 leading-tight text-center lg:text-6xl">Helping you find peace, with or without love</h1>
             <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Expert mental health and legal support for individuals navigating relationship challenges.
             </p>
@@ -280,5 +279,4 @@ const HomePage = () => {
       <Footer />
     </>;
 };
-
 export default HomePage;
