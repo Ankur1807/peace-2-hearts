@@ -14,6 +14,7 @@ const Navigation = () => {
   const [userName, setUserName] = useState('');
   const [scrollPosition, setScrollPosition] = useState(0);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -57,7 +58,9 @@ const Navigation = () => {
       if (
         isMenuOpen &&
         menuButtonRef.current &&
-        !menuButtonRef.current.contains(event.target as Node)
+        !menuButtonRef.current.contains(event.target as Node) &&
+        navRef.current &&
+        navRef.current.contains(event.target as Node)
       ) {
         setIsMenuOpen(false);
       }
@@ -71,28 +74,29 @@ const Navigation = () => {
 
   // Prevent body scroll when menu is open
   useEffect(() => {
-    const preventTouchMove = (e: TouchEvent) => {
-      if (isMenuOpen) {
-        e.preventDefault();
-      }
-    };
-
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
-      document.body.style.height = '100%';
-      document.addEventListener('touchmove', preventTouchMove, { passive: false });
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${scrollPosition}px`;
     } else {
+      const scrollY = document.body.style.top;
       document.body.style.overflow = '';
-      document.body.style.height = '';
-      document.removeEventListener('touchmove', preventTouchMove);
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
+      }
     }
     
     return () => {
       document.body.style.overflow = '';
-      document.body.style.height = '';
-      document.removeEventListener('touchmove', preventTouchMove);
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, scrollPosition]);
 
   // Calculate opacity based on scroll position (0 to 200px scroll range)
   const getHeaderOpacity = () => {
@@ -103,7 +107,8 @@ const Navigation = () => {
     return initialOpacity + opacityChange;
   };
 
-  const toggleMenu = () => {
+  const toggleMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsMenuOpen(!isMenuOpen);
   };
 
@@ -115,7 +120,8 @@ const Navigation = () => {
 
   return (
     <nav 
-      className="shadow-sm py-4 sticky top-0 z-50 w-full relative overflow-hidden transition-colors duration-300"
+      ref={navRef}
+      className="shadow-sm py-4 sticky top-0 z-40 w-full relative overflow-hidden transition-colors duration-300"
       style={{
         backgroundColor: `rgba(139, 92, 246, ${getHeaderOpacity()})`, // vibrantPurple with dynamic opacity
         backdropFilter: 'blur(4px)'
@@ -124,7 +130,7 @@ const Navigation = () => {
       {/* Wavey lines background for header */}
       <WaveyHeader />
 
-      <div className="container mx-auto flex justify-between items-center relative z-10">
+      <div className="container mx-auto flex justify-between items-center relative z-40">
         <Logo />
         
         <DesktopMenu 
@@ -150,7 +156,7 @@ const Navigation = () => {
         userName={userName}
         isMenuOpen={isMenuOpen}
         onSignOut={handleSignOut}
-        onMenuToggle={toggleMenu}
+        onMenuToggle={() => setIsMenuOpen(false)}
       />
     </nav>
   );
