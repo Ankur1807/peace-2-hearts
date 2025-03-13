@@ -111,9 +111,9 @@ const Resources = () => {
             </p>
             <div className="flex flex-wrap justify-center gap-4 pt-2">
               <Button asChild className="bg-peacefulBlue hover:bg-peacefulBlue/90 rounded-full">
-                <Link to="/resources">
+                <a href="#resource-content">
                   Articles & Guides
-                </Link>
+                </a>
               </Button>
               <Button asChild variant="outline" className="border-peacefulBlue text-peacefulBlue hover:bg-peacefulBlue/10 rounded-full gap-2">
                 <Link to="/news">
@@ -126,8 +126,30 @@ const Resources = () => {
         </div>
       </section>
       
+      {/* News Section Banner */}
+      <section className="py-8 bg-warmPeach/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto bg-white rounded-xl p-6 shadow-sm">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-lora font-semibold mb-2 text-gray-800">Latest Relationship News</h2>
+                <p className="text-gray-600">
+                  Stay updated with the latest news related to relationships, marriages, and divorce in India.
+                </p>
+              </div>
+              <Button asChild className="bg-peacefulBlue hover:bg-peacefulBlue/90 rounded-full whitespace-nowrap gap-2">
+                <Link to="/news">
+                  <Newspaper className="h-4 w-4" />
+                  Visit News Section
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
       {/* Search and Filter */}
-      <section className="py-8 bg-softGray">
+      <section className="py-8 bg-softGray" id="resource-content">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
