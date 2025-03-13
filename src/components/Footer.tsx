@@ -127,12 +127,7 @@ const Footer = () => {
         <div className="border-t border-white/20 pt-6 mb-4">
           <div className="bg-white/10 rounded-lg p-4 text-white/80 text-xs text-center">
             <p>
-              The information on Peace2Hearts is for informational purposes only and not legal or psychological advice. 
-              We do not solicit, endorse, or guarantee consultant services. Users must seek independent professional advice. 
-              Peace2Hearts is not responsible for errors, omissions, or outcomes based on platform content.
-            </p>
-            <p className="mt-3 text-white font-medium">
-              We are not a medical service or suicide prevention helpline. If you are feeling suicidal, we would suggest you immediately call up a suicide prevention helpline or seek medical help.
+              Peace2Hearts provides informational content only and does not offer legal, psychological, or medical advice. We do not endorse consultants, and users should seek independent professional guidance. If you are in crisis or feeling suicidal, please contact a suicide prevention helpline.
             </p>
           </div>
         </div>
