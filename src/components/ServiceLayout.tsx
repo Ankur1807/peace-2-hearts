@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
 import { Button } from './ui/button';
+import { FractalButton } from './FractalButton';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
@@ -30,10 +31,10 @@ const ServiceLayout = ({ title, description, forWhom, howItWorks, image, childre
                 <p className="text-gray-600 text-lg">{description}</p>
                 <div className="pt-4">
                   <Link to="/book-consultation">
-                    <Button className="hero-btn">
+                    <FractalButton className="hero-btn rounded-full px-6 py-3" fractalType="primary">
                       Book a Consultation
                       <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
+                    </FractalButton>
                   </Link>
                 </div>
               </div>
@@ -98,10 +99,10 @@ const ServiceLayout = ({ title, description, forWhom, howItWorks, image, childre
               Our professional team is here to support you through every step of your journey.
             </p>
             <Link to="/book-consultation">
-              <Button className="hero-btn">
+              <FractalButton className="hero-btn rounded-full px-6 py-3" fractalType="primary" pulseEffect={true}>
                 Book Your Consultation Now
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              </FractalButton>
             </Link>
           </div>
         </section>

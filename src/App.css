@@ -52,3 +52,219 @@
 .icon-orange {
   color: #F97316;
 }
+
+/* Fractal Border Styles */
+.fractal-border {
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.fractal-border::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-image: conic-gradient(
+    transparent, 
+    rgba(139, 92, 246, 0.8), 
+    rgba(14, 165, 233, 0.8), 
+    rgba(249, 115, 22, 0.8), 
+    rgba(217, 70, 239, 0.8), 
+    transparent
+  );
+  animation: fractalRotate 4s linear infinite;
+}
+
+.fractal-border::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 2px;
+  top: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  border-radius: 0.4rem;
+  background: inherit;
+}
+
+.fractal-border-outline {
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  position: relative;
+  z-index: 0;
+}
+
+.fractal-border-outline::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-image: conic-gradient(
+    transparent, 
+    rgba(14, 165, 233, 0.8), 
+    rgba(139, 92, 246, 0.8), 
+    rgba(249, 115, 22, 0.8), 
+    rgba(134, 239, 172, 0.8), 
+    transparent
+  );
+  animation: fractalRotate 4s linear infinite;
+}
+
+.fractal-border-outline::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 2px;
+  top: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  border-radius: 0.4rem;
+  background: inherit;
+}
+
+.fractal-border-secondary {
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.fractal-border-secondary::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-image: conic-gradient(
+    transparent, 
+    rgba(14, 165, 233, 0.8), 
+    rgba(134, 239, 172, 0.8), 
+    rgba(249, 168, 212, 0.8), 
+    rgba(253, 230, 138, 0.8), 
+    transparent
+  );
+  animation: fractalRotate 4s linear infinite;
+}
+
+.fractal-border-secondary::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 2px;
+  top: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  border-radius: 0.4rem;
+  background: inherit;
+}
+
+.fractal-button-wrapper {
+  position: relative;
+  display: inline-block;
+  border-radius: 0.5rem;
+}
+
+.fractal-button-wrapper.pulse-effect::before {
+  content: "";
+  position: absolute;
+  z-index: -3;
+  left: -1px;
+  top: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  border-radius: 0.5rem;
+  opacity: 0;
+  animation: pulseFractal 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-image: conic-gradient(
+    transparent, 
+    rgba(139, 92, 246, 0.8), 
+    rgba(14, 165, 233, 0.8), 
+    rgba(249, 115, 22, 0.8), 
+    rgba(217, 70, 239, 0.8), 
+    transparent
+  );
+}
+
+@keyframes fractalRotate {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulseFractal {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+/* Hero Button Fractal Styles */
+.hero-btn {
+  @apply rounded-full px-6 py-3 text-white bg-gradient-to-r from-vibrantPurple to-vividPink hover:from-vibrantPurple/90 hover:to-vividPink/90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1;
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero-btn::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-image: conic-gradient(
+    transparent, 
+    rgba(139, 92, 246, 0.7), 
+    rgba(14, 165, 233, 0.7), 
+    rgba(249, 115, 22, 0.7),
+    rgba(217, 70, 239, 0.7), 
+    transparent
+  );
+  opacity: 0.7;
+  animation: fractalRotate 4s linear infinite;
+}
+
+.hero-btn::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 2px;
+  top: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  border-radius: 9999px;
+  background: inherit;
+}

@@ -1,6 +1,7 @@
 
 import { ArrowRight, Heart, Gavel, HeartPulse, Book, MessageSquare, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { FractalButton } from '@/components/FractalButton';
 import { Link } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -22,12 +23,12 @@ const HomePage = () => {
               Expert mental health and legal support for individuals navigating relationship challenges.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild className="hero-btn">
+              <FractalButton asChild fractalType="primary" pulseEffect={true} className="hero-btn rounded-full px-6 py-3">
                 <Link to="/book-consultation">Book a Consultation</Link>
-              </Button>
-              <Button asChild variant="outline" className="rounded-full px-6 py-3 border-peacefulBlue text-peacefulBlue hover:bg-peacefulBlue/5">
+              </FractalButton>
+              <FractalButton asChild fractalType="outline" className="rounded-full px-6 py-3 border-peacefulBlue text-peacefulBlue">
                 <Link to="/services">Explore Our Services</Link>
-              </Button>
+              </FractalButton>
             </div>
           </div>
         </div>
@@ -266,12 +267,12 @@ const HomePage = () => {
             <h2 className="text-3xl md:text-4xl font-lora font-semibold mb-4">Ready to Take the First Step?</h2>
             <p className="text-lg mb-8 text-white/90">Our team of mental health and legal experts is here to support you through your relationship journey.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild className="bg-white text-peacefulBlue hover:bg-white/90 rounded-full px-6 py-3">
+              <FractalButton asChild fractalType="primary" pulseEffect={true} className="bg-white text-peacefulBlue hover:bg-white/90 rounded-full px-6 py-3">
                 <Link to="/book-consultation">Book a Consultation</Link>
-              </Button>
-              <Button asChild variant="outline" className="border-white text-white hover:bg-white/10 rounded-full px-6 py-3">
+              </FractalButton>
+              <FractalButton asChild fractalType="outline" className="border-white text-white hover:bg-white/10 rounded-full px-6 py-3">
                 <Link to="/contact">Contact Us</Link>
-              </Button>
+              </FractalButton>
             </div>
           </div>
         </div>
