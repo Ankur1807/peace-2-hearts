@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -13,8 +13,6 @@ const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
   const [scrollPosition, setScrollPosition] = useState(0);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const navRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -44,24 +42,6 @@ const Navigation = () => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  // Handle clicks outside to close the menu
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isMenuOpen &&
-        menuButtonRef.current &&
-        !menuButtonRef.current.contains(event.target as Node)
-      ) {
-        setIsMenuOpen(false);
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isMenuOpen]);
-
   // Calculate opacity based on scroll position (0 to 200px scroll range)
   const getHeaderOpacity = () => {
     // Start with partial transparency and become fully opaque by 200px scroll
@@ -83,10 +63,9 @@ const Navigation = () => {
 
   return (
     <nav 
-      ref={navRef}
       className="shadow-sm py-4 sticky top-0 z-40 w-full relative overflow-hidden transition-colors duration-300"
       style={{
-        backgroundColor: `rgba(139, 92, 246, ${getHeaderOpacity()})`, // vibrantPurple with dynamic opacity
+        backgroundColor: `rgba(139, 92, 246, ${getHeaderOpacity()})`,
         backdropFilter: 'blur(4px)'
       }}
     >
@@ -106,7 +85,6 @@ const Navigation = () => {
         
         {isMobile && (
           <button 
-            ref={menuButtonRef}
             className="text-white relative z-50"
             onClick={toggleMenu}
             aria-label="Toggle menu"
@@ -117,13 +95,15 @@ const Navigation = () => {
       </div>
       
       {/* Mobile menu */}
-      <MobileMenu 
-        isLoggedIn={isLoggedIn}
-        userName={userName}
-        isMenuOpen={isMenuOpen}
-        onSignOut={handleSignOut}
-        onMenuToggle={toggleMenu}
-      />
+      {isMobile && (
+        <MobileMenu 
+          isLoggedIn={isLoggedIn}
+          userName={userName}
+          isMenuOpen={isMenuOpen}
+          onSignOut={handleSignOut}
+          onMenuToggle={toggleMenu}
+        />
+      )}
     </nav>
   );
 };
