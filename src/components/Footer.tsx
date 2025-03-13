@@ -123,6 +123,17 @@ const Footer = () => {
           </div>
         </div>
         
+        {/* Disclaimer */}
+        <div className="border-t border-white/20 pt-6 mb-4">
+          <div className="bg-white/10 rounded-lg p-4 text-white/80 text-xs text-center">
+            <p>
+              The information on Peace2Hearts is for informational purposes only and not legal or psychological advice. 
+              We do not solicit, endorse, or guarantee consultant services. Users must seek independent professional advice. 
+              Peace2Hearts is not responsible for errors, omissions, or outcomes based on platform content.
+            </p>
+          </div>
+        </div>
+        
         <div className="border-t border-white/20 pt-6">
           <p className="text-center text-white/80 text-sm">
             &copy; {new Date().getFullYear()} Peace2Hearts. All rights reserved.
