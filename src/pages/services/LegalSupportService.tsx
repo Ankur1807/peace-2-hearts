@@ -1,7 +1,47 @@
 
 import ServiceLayout from "@/components/ServiceLayout";
+import SubServicesList from "@/components/SubServicesList";
 
 const LegalSupportService = () => {
+  const legalSubServices = [
+    {
+      id: "pre-marriage-legal",
+      title: "Pre-marriage Legal Consultation",
+      description: "Guidance on rights, agreements, and legal aspects to ensure a secure foundation before marriage.",
+      path: "/services/legal-support/pre-marriage"
+    },
+    {
+      id: "mediation",
+      title: "Mediation Services",
+      description: "Facilitating peaceful resolutions to legal disputes through guided, collaborative dialogue.",
+      path: "/services/legal-support/mediation"
+    },
+    {
+      id: "divorce",
+      title: "Divorce Consultation",
+      description: "Gain expert insights into the legal aspects of divorce to make informed decisions.",
+      path: "/services/legal-support/divorce"
+    },
+    {
+      id: "custody",
+      title: "Child Custody Consultation",
+      description: "Support for understanding and advocating in custody decisions for the best outcomes for children.",
+      path: "/services/legal-support/custody"
+    },
+    {
+      id: "maintenance",
+      title: "Maintenance Consultation",
+      description: "Advice on alimony, financial support, and equitable agreements for separated or divorced partners.",
+      path: "/services/legal-support/maintenance"
+    },
+    {
+      id: "general-legal",
+      title: "General Consultation",
+      description: "Broad legal insights tailored to your unique relationship challenges.",
+      path: "/services/legal-support/general"
+    }
+  ];
+
   return (
     <ServiceLayout
       title="Legal Support & Consultation"
@@ -79,6 +119,8 @@ const LegalSupportService = () => {
               </ul>
             </div>
           </div>
+          
+          <SubServicesList subServices={legalSubServices} />
         </div>
       </section>
     </ServiceLayout>

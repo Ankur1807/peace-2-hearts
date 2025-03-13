@@ -1,10 +1,13 @@
+
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, HeartPulse, Gavel, Users, MessageSquare, Book, Calendar } from 'lucide-react';
+import { ArrowRight, HeartPulse, Gavel, Users, MessageSquare, Calendar } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+
 const Services = () => {
-  return <>
+  return (
+    <>
       <Navigation />
       
       {/* Hero Section */}
@@ -36,23 +39,37 @@ const Services = () => {
               
               <div className="space-y-6 mb-8">
                 <div>
-                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Individual Therapy</h3>
+                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Mental Health Counselling</h3>
                   <p className="text-gray-600">
-                    One-on-one sessions with our experienced therapists to help you process emotions, build coping strategies, and develop personal resilience.
+                    Structured therapy sessions to rebuild trust and resolve conflicts in relationships.
                   </p>
                 </div>
                 
                 <div>
-                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Relationship Counseling</h3>
+                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Family Therapy</h3>
                   <p className="text-gray-600">
-                    Guided sessions for couples to improve communication, resolve conflicts, and strengthen your relationship foundation.
+                    Strengthening family bonds by addressing conflicts and fostering understanding.
                   </p>
                 </div>
                 
                 <div>
-                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Trauma Recovery</h3>
+                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Premarital Counselling</h3>
                   <p className="text-gray-600">
-                    Specialized support for individuals dealing with relationship trauma, including infidelity, abuse, or difficult breakups.
+                    Preparing couples for a strong and fulfilling marriage through guided discussions and planning.
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Couples Counselling</h3>
+                  <p className="text-gray-600">
+                    Professional guidance to strengthen communication and mutual understanding.
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Sexual Health Counselling</h3>
+                  <p className="text-gray-600">
+                    Specialized support for addressing intimacy concerns and enhancing relationship satisfaction.
                   </p>
                 </div>
               </div>
@@ -75,29 +92,43 @@ const Services = () => {
               
               <div className="space-y-6 mb-8">
                 <div>
-                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Pre-marital Legal Advice</h3>
+                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Pre-marriage Legal Consultation</h3>
                   <p className="text-gray-600">
-                    Consultations on prenuptial agreements, asset protection, and legal considerations before marriage.
+                    Guidance on rights, agreements, and legal aspects to ensure a secure foundation before marriage.
                   </p>
                 </div>
                 
                 <div>
-                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Divorce Guidance</h3>
+                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Mediation Services</h3>
                   <p className="text-gray-600">
-                    Comprehensive support through the divorce process, including property division, financial settlements, and legal documentation.
+                    Facilitating peaceful resolutions to legal disputes through guided, collaborative dialogue.
                   </p>
                 </div>
                 
                 <div>
-                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Custody Support</h3>
+                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Divorce Consultation</h3>
                   <p className="text-gray-600">
-                    Expert guidance on child custody arrangements, parenting plans, and legal advocacy for your children's best interests.
+                    Gain expert insights into the legal aspects of divorce to make informed decisions.
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Child Custody Consultation</h3>
+                  <p className="text-gray-600">
+                    Support for understanding and advocating in custody decisions for the best outcomes for children.
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">Maintenance Consultation</h3>
+                  <p className="text-gray-600">
+                    Advice on alimony, financial support, and equitable agreements for separated or divorced partners.
                   </p>
                 </div>
               </div>
               
               <Button asChild className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white">
-                <Link to="/services/legal-support" className="mx-0 px-[24px] my-[48px]">Learn More About Legal Services</Link>
+                <Link to="/services/legal-support">Learn More About Legal Services</Link>
               </Button>
             </div>
           </div>
@@ -146,13 +177,15 @@ const Services = () => {
               Take the first step toward finding clarity and support in your relationship journey. Our initial consultation helps us understand your needs and create a personalized support plan.
             </p>
             <Button asChild className="bg-white text-peacefulBlue hover:bg-white/90 rounded-full px-6 py-3">
-              <Link to="/book">Book Your Consultation Today</Link>
+              <Link to="/book-consultation">Book Your Consultation Today</Link>
             </Button>
           </div>
         </div>
       </section>
       
       <Footer />
-    </>;
+    </>
+  );
 };
+
 export default Services;

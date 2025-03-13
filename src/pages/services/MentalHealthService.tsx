@@ -1,7 +1,41 @@
 
 import ServiceLayout from "@/components/ServiceLayout";
+import SubServicesList from "@/components/SubServicesList";
 
 const MentalHealthService = () => {
+  const mentalHealthSubServices = [
+    {
+      id: "mental-health-counselling",
+      title: "Mental Health Counselling",
+      description: "Structured therapy sessions to rebuild trust and resolve conflicts in relationships.",
+      path: "/services/mental-health/counselling"
+    },
+    {
+      id: "family-therapy",
+      title: "Family Therapy",
+      description: "Strengthening family bonds by addressing conflicts and fostering understanding.",
+      path: "/services/mental-health/family-therapy"
+    },
+    {
+      id: "premarital-counselling",
+      title: "Premarital Counselling",
+      description: "Preparing couples for a strong and fulfilling marriage through guided discussions and planning.",
+      path: "/services/mental-health/premarital-counselling"
+    },
+    {
+      id: "couples-counselling",
+      title: "Couples Counselling",
+      description: "Professional guidance to strengthen communication and mutual understanding.",
+      path: "/services/mental-health/couples-counselling"
+    },
+    {
+      id: "sexual-health-counselling",
+      title: "Sexual Health Counselling",
+      description: "Specialized support for addressing intimacy concerns and enhancing relationship satisfaction.",
+      path: "/services/mental-health/sexual-health-counselling"
+    }
+  ];
+
   return (
     <ServiceLayout
       title="Mental Health Support"
@@ -73,6 +107,8 @@ const MentalHealthService = () => {
               </ul>
             </div>
           </div>
+          
+          <SubServicesList subServices={mentalHealthSubServices} />
         </div>
       </section>
     </ServiceLayout>

@@ -31,6 +31,22 @@ export const formatExpiryDate = (value: string) => {
 
 export const getConsultationTypeLabel = (type: string) => {
   switch(type) {
+    // Mental Health Services
+    case 'mental-health-counselling': return 'Mental Health Counselling';
+    case 'family-therapy': return 'Family Therapy';
+    case 'premarital-counselling': return 'Premarital Counselling';
+    case 'couples-counselling': return 'Couples Counselling';
+    case 'sexual-health-counselling': return 'Sexual Health Counselling';
+    
+    // Legal Services
+    case 'pre-marriage-legal': return 'Pre-marriage Legal Consultation';
+    case 'mediation': return 'Mediation Services';
+    case 'divorce': return 'Divorce Consultation';
+    case 'custody': return 'Child Custody Consultation';
+    case 'maintenance': return 'Maintenance Consultation';
+    case 'general-legal': return 'General Legal Consultation';
+    
+    // Legacy options
     case 'mental-health': return 'Mental Health Support';
     case 'legal': return 'Legal Consultation';
     case 'therapy': return 'Relationship Therapy';
@@ -40,7 +56,30 @@ export const getConsultationTypeLabel = (type: string) => {
 };
 
 export const getConsultationPrice = (type: string) => {
-  return type === 'combined' ? '₹9,999' : '₹7,499';
+  // Legal consultations
+  if (type.includes('legal') || 
+      type === 'divorce' || 
+      type === 'custody' || 
+      type === 'mediation' || 
+      type === 'maintenance') {
+    return '₹7,999';
+  }
+  
+  // Mental health services
+  if (type.includes('counselling') || 
+      type === 'mental-health' || 
+      type === 'therapy' || 
+      type === 'family-therapy') {
+    return '₹5,999';
+  }
+  
+  // Combined support (legacy)
+  if (type === 'combined') {
+    return '₹9,999';
+  }
+  
+  // Default price
+  return '₹7,499';
 };
 
 export const getTimeSlotLabel = (timeSlot: string) => {
