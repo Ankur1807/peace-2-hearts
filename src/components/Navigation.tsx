@@ -50,6 +50,11 @@ const Navigation = () => {
     };
   }, []);
 
+  // Close menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
   // Calculate opacity based on scroll position (0 to 200px scroll range)
   const getHeaderOpacity = () => {
     // Start with partial transparency and become fully opaque by 200px scroll
@@ -69,6 +74,19 @@ const Navigation = () => {
     navigate('/sign-in');
   };
 
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
+
   return (
     <nav 
       className="shadow-sm py-4 sticky top-0 z-50 w-full relative overflow-hidden transition-colors duration-300"
@@ -78,7 +96,7 @@ const Navigation = () => {
       }}
     >
       {/* Wavey lines background for header */}
-      <svg className="absolute inset-0 w-full h-full z-0" preserveAspectRatio="none" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg className="absolute inset-0 w-full h-full z-0 pointer-events-none" preserveAspectRatio="none" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M0 80C240 100 480 40 720 40C960 40 1200 100 1440 90V120H0V80Z" fill="url(#header-wave1)" fillOpacity="0.3"/>
         <path d="M0 50C240 30 480 80 720 70C960 60 1200 30 1440 40V120H0V50Z" fill="url(#header-wave2)" fillOpacity="0.2"/>
         <defs>
@@ -174,7 +192,7 @@ const Navigation = () => {
         </div>
         
         <button 
-          className="md:hidden text-white z-20"
+          className="md:hidden text-white z-50"
           onClick={toggleMenu}
           aria-label="Toggle menu"
         >
@@ -182,9 +200,18 @@ const Navigation = () => {
         </button>
       </div>
       
-      {/* Mobile menu */}
-      <div className={`md:hidden fixed left-0 right-0 top-[72px] bg-vibrantPurple/95 backdrop-blur-md shadow-md z-50 transition-all duration-300 ${isMenuOpen ? 'h-auto opacity-100 visible' : 'h-0 opacity-0 invisible'}`} style={{ overflowY: isMenuOpen ? 'auto' : 'hidden' }}>
-        <div className="container mx-auto py-4 flex flex-col gap-4">
+      {/* Mobile menu - fixed with higher z-index */}
+      <div 
+        className={`md:hidden fixed inset-0 bg-vibrantPurple/95 backdrop-blur-md shadow-md transition-all duration-300 z-40 ${
+          isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+        }`}
+        style={{ 
+          top: '72px',
+          height: 'calc(100vh - 72px)',
+          touchAction: isMenuOpen ? 'none' : 'auto'
+        }}
+      >
+        <div className="container mx-auto py-4 flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
           <Link to="/" className="text-white hover:text-white/80 transition-colors py-2" onClick={toggleMenu}>Home</Link>
           <Link to="/about" className="text-white hover:text-white/80 transition-colors py-2" onClick={toggleMenu}>About Us</Link>
           <Link to="/services" className="text-white hover:text-white/80 transition-colors py-2" onClick={toggleMenu}>Services</Link>
