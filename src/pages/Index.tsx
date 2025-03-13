@@ -6,6 +6,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import SideWaves from '@/components/SideWaves';
 import WaveBackground from '@/components/WaveBackground';
+
 const HomePage = () => {
   return <>
       <Navigation />
@@ -268,7 +269,7 @@ const HomePage = () => {
               <FractalButton asChild fractalType="primary" pulseEffect={true} className="bg-white text-peacefulBlue hover:bg-white/90 rounded-full px-6 py-3">
                 <Link to="/book-consultation">Book a Consultation</Link>
               </FractalButton>
-              <FractalButton asChild fractalType="outline" className="border-white text-white hover:bg-white/10 rounded-full px-6 py-3">
+              <FractalButton asChild fractalType="outline" className="border-white text-peacefulBlue hover:bg-white/10 rounded-full px-6 py-3">
                 <Link to="/contact">Contact Us</Link>
               </FractalButton>
             </div>
@@ -279,4 +280,5 @@ const HomePage = () => {
       <Footer />
     </>;
 };
+
 export default HomePage;
