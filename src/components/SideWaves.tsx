@@ -6,19 +6,19 @@ const SideWaves: React.FC = () => {
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       {/* Left side wavey lines */}
       <svg 
-        className="absolute left-0 h-full w-24 md:w-32 lg:w-40" 
+        className="absolute left-0 h-full w-16 md:w-20 lg:w-24" 
         viewBox="0 0 100 800" 
         preserveAspectRatio="none" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
       >
         <path 
-          d="M0,800 C20,700 -10,600 20,500 C40,400 0,300 20,200 C30,100 10,0 40,0 L0,0 L0,800 Z" 
+          d="M0,800 C15,700 -5,600 15,500 C30,400 0,300 15,200 C25,100 5,0 30,0 L0,0 L0,800 Z" 
           fill="url(#leftWaveGradient)" 
           fillOpacity="0.1"
         />
         <path 
-          d="M0,800 C30,750 10,650 30,550 C50,450 10,350 30,250 C40,150 20,50 50,0 L0,0 L0,800 Z" 
+          d="M0,800 C20,750 5,650 20,550 C35,450 5,350 20,250 C30,150 10,50 35,0 L0,0 L0,800 Z" 
           fill="url(#leftWaveGradientAlt)" 
           fillOpacity="0.08"
         />
@@ -38,19 +38,19 @@ const SideWaves: React.FC = () => {
 
       {/* Right side wavey lines */}
       <svg 
-        className="absolute right-0 h-full w-24 md:w-32 lg:w-40" 
+        className="absolute right-0 h-full w-16 md:w-20 lg:w-24" 
         viewBox="0 0 100 800" 
         preserveAspectRatio="none" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
       >
         <path 
-          d="M100,800 C80,700 110,600 80,500 C60,400 100,300 80,200 C70,100 90,0 60,0 L100,0 L100,800 Z" 
+          d="M100,800 C85,700 105,600 85,500 C70,400 100,300 85,200 C75,100 95,0 70,0 L100,0 L100,800 Z" 
           fill="url(#rightWaveGradient)" 
           fillOpacity="0.1"
         />
         <path 
-          d="M100,800 C70,750 90,650 70,550 C50,450 90,350 70,250 C60,150 80,50 50,0 L100,0 L100,800 Z" 
+          d="M100,800 C80,750 95,650 80,550 C65,450 95,350 80,250 C70,150 90,50 65,0 L100,0 L100,800 Z" 
           fill="url(#rightWaveGradientAlt)" 
           fillOpacity="0.08"
         />
