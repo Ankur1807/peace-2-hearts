@@ -1,4 +1,3 @@
-
 import { ArrowRight, Heart, Gavel, HeartPulse, Book, MessageSquare, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FractalButton } from '@/components/FractalButton';
@@ -8,14 +7,9 @@ import Footer from '@/components/Footer';
 import SideWaves from '@/components/SideWaves';
 import WaveBackground from '@/components/WaveBackground';
 import { SEO } from '@/components/SEO';
-
 const HomePage = () => {
   return <>
-      <SEO 
-        title="Relationship Wellness & Legal Support"
-        description="Expert mental health and legal support for individuals navigating relationship challenges. Find peace with or without love through our professional guidance services."
-        keywords="relationship counseling, divorce support, mental health, legal consultation, couples therapy, family law, relationship challenges"
-      />
+      <SEO title="Relationship Wellness & Legal Support" description="Expert mental health and legal support for individuals navigating relationship challenges. Find peace with or without love through our professional guidance services." keywords="relationship counseling, divorce support, mental health, legal consultation, couples therapy, family law, relationship challenges" />
       <Navigation />
       <SideWaves />
       <WaveBackground />
@@ -25,9 +19,7 @@ const HomePage = () => {
         <div className="container mx-auto px-4 z-10">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-lora font-bold text-gray-800 mb-6 leading-tight text-center lg:text-6xl">Helping you find peace, with or without love</h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Expert mental health and legal support for individuals navigating relationship challenges.
-            </p>
+            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto text-center">India's first integrated platform addresses relationship issues from a mental health and legal perspective. </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <FractalButton asChild fractalType="primary" pulseEffect={true} className="hero-btn rounded-full px-6 py-3">
                 <Link to="/book-consultation">Book a Consultation</Link>
