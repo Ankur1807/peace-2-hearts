@@ -40,7 +40,7 @@ export const getConsultationTypeLabel = (type: string) => {
 };
 
 export const getConsultationPrice = (type: string) => {
-  return type === 'combined' ? '$199.00' : '$149.00';
+  return type === 'combined' ? '₹9,999' : '₹7,499';
 };
 
 export const getTimeSlotLabel = (timeSlot: string) => {
