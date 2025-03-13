@@ -1,4 +1,3 @@
-
 import { ArrowRight, Heart, Gavel, HeartPulse, Book, MessageSquare, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FractalButton } from '@/components/FractalButton';
@@ -6,11 +5,13 @@ import { Link } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import SideWaves from '@/components/SideWaves';
+import WaveBackground from '@/components/WaveBackground';
 
 const HomePage = () => {
   return <>
       <Navigation />
       <SideWaves />
+      <WaveBackground />
       
       {/* Hero Section */}
       <section className="relative min-h-[600px] flex items-center wave-pattern py-16">
