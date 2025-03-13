@@ -37,8 +37,16 @@ const Navigation = () => {
     };
     window.addEventListener('scroll', handleScroll);
     
+    // Close menu when route changes
+    const closeMenu = () => {
+      setIsMenuOpen(false);
+    };
+    
+    window.addEventListener('popstate', closeMenu);
+    
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('popstate', closeMenu);
     };
   }, []);
 
@@ -166,7 +174,7 @@ const Navigation = () => {
         </div>
         
         <button 
-          className="md:hidden text-white"
+          className="md:hidden text-white z-20"
           onClick={toggleMenu}
           aria-label="Toggle menu"
         >
@@ -175,7 +183,7 @@ const Navigation = () => {
       </div>
       
       {/* Mobile menu */}
-      <div className={`md:hidden absolute inset-x-0 top-[72px] bg-vibrantPurple/95 backdrop-blur-md shadow-md z-40 transition-all duration-300 ${isMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+      <div className={`md:hidden fixed left-0 right-0 top-[72px] bg-vibrantPurple/95 backdrop-blur-md shadow-md z-50 transition-all duration-300 ${isMenuOpen ? 'h-auto opacity-100 visible' : 'h-0 opacity-0 invisible'}`} style={{ overflowY: isMenuOpen ? 'auto' : 'hidden' }}>
         <div className="container mx-auto py-4 flex flex-col gap-4">
           <Link to="/" className="text-white hover:text-white/80 transition-colors py-2" onClick={toggleMenu}>Home</Link>
           <Link to="/about" className="text-white hover:text-white/80 transition-colors py-2" onClick={toggleMenu}>About Us</Link>
