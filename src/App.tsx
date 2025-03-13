@@ -20,6 +20,9 @@ import LegalSupportService from "./pages/services/LegalSupportService";
 // Mental Health Sub-Services
 import MentalHealthCounselling from "./pages/services/mentalhealth/MentalHealthCounselling";
 import FamilyTherapy from "./pages/services/mentalhealth/FamilyTherapy";
+import PremaritalCounselling from "./pages/services/mentalhealth/PremaritalCounselling";
+import CouplesCounselling from "./pages/services/mentalhealth/CouplesCounselling";
+import SexualHealthCounselling from "./pages/services/mentalhealth/SexualHealthCounselling";
 
 // Legacy Service Pages
 import TherapyService from "./pages/services/TherapyService";
@@ -57,10 +60,9 @@ const App = () => (
           {/* Mental Health Sub-Services */}
           <Route path="/services/mental-health/counselling" element={<MentalHealthCounselling />} />
           <Route path="/services/mental-health/family-therapy" element={<FamilyTherapy />} />
-          {/* Placeholder routes for remaining mental health sub-services */}
-          <Route path="/services/mental-health/premarital-counselling" element={<FamilyTherapy />} />
-          <Route path="/services/mental-health/couples-counselling" element={<FamilyTherapy />} />
-          <Route path="/services/mental-health/sexual-health-counselling" element={<FamilyTherapy />} />
+          <Route path="/services/mental-health/premarital-counselling" element={<PremaritalCounselling />} />
+          <Route path="/services/mental-health/couples-counselling" element={<CouplesCounselling />} />
+          <Route path="/services/mental-health/sexual-health-counselling" element={<SexualHealthCounselling />} />
           
           {/* Legal Sub-Services */}
           <Route path="/services/legal-support/pre-marriage" element={<PreMarriageLegal />} />
