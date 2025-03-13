@@ -10,21 +10,21 @@ interface MobileHeaderBarProps {
 const MobileHeaderBar = ({ toggleMenu, isMenuOpen }: MobileHeaderBarProps) => {
   return (
     <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-      {/* Logo container with solid translucent background for maximum visibility */}
-      <div className="py-2 px-4 rounded-md bg-white/20 backdrop-blur-sm shadow-md">
+      {/* Logo container with solid background for maximum visibility */}
+      <div className="py-2 px-4 rounded-md bg-white shadow-md">
         <Logo />
       </div>
       
-      {/* Menu button with improved visibility */}
+      {/* Menu button with solid background for maximum visibility */}
       <button
-        className="text-white p-3 bg-white/20 backdrop-blur-sm rounded-md shadow-md hover:bg-white/30 focus:outline-none transition-colors"
+        className="text-vibrantPurple p-3 bg-white rounded-md shadow-md hover:bg-gray-100 focus:outline-none transition-colors"
         onClick={toggleMenu}
         aria-label="Toggle menu"
       >
         {isMenuOpen ? (
-          <X className="h-7 w-7 text-white" />
+          <X className="h-7 w-7" />
         ) : (
-          <Menu className="h-7 w-7 text-white" />
+          <Menu className="h-7 w-7" />
         )}
       </button>
     </div>
