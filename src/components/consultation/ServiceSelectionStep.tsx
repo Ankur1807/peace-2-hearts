@@ -15,12 +15,20 @@ const ServiceSelectionStep = ({
   setConsultationType,
   onNextStep
 }: ServiceSelectionStepProps) => {
+  // Function to handle clicking the entire box
+  const handleBoxClick = (value: string) => {
+    setConsultationType(value);
+  };
+
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-lora font-semibold mb-6">Select Consultation Type</h2>
       
       <RadioGroup value={consultationType} onValueChange={setConsultationType} className="space-y-4">
-        <div className="border rounded-lg p-4 cursor-pointer hover:border-peacefulBlue transition-colors">
+        <div 
+          className={`border rounded-lg p-4 cursor-pointer hover:border-peacefulBlue transition-colors ${consultationType === 'mental-health' ? 'border-peacefulBlue bg-peacefulBlue/5' : ''}`}
+          onClick={() => handleBoxClick('mental-health')}
+        >
           <div className="flex items-start space-x-3">
             <RadioGroupItem value="mental-health" id="mental-health" className="mt-1" />
             <div className="grid gap-1.5">
@@ -30,7 +38,10 @@ const ServiceSelectionStep = ({
           </div>
         </div>
         
-        <div className="border rounded-lg p-4 cursor-pointer hover:border-peacefulBlue transition-colors">
+        <div 
+          className={`border rounded-lg p-4 cursor-pointer hover:border-peacefulBlue transition-colors ${consultationType === 'legal' ? 'border-peacefulBlue bg-peacefulBlue/5' : ''}`}
+          onClick={() => handleBoxClick('legal')}
+        >
           <div className="flex items-start space-x-3">
             <RadioGroupItem value="legal" id="legal" className="mt-1" />
             <div className="grid gap-1.5">
@@ -40,7 +51,10 @@ const ServiceSelectionStep = ({
           </div>
         </div>
         
-        <div className="border rounded-lg p-4 cursor-pointer hover:border-peacefulBlue transition-colors">
+        <div 
+          className={`border rounded-lg p-4 cursor-pointer hover:border-peacefulBlue transition-colors ${consultationType === 'therapy' ? 'border-peacefulBlue bg-peacefulBlue/5' : ''}`}
+          onClick={() => handleBoxClick('therapy')}
+        >
           <div className="flex items-start space-x-3">
             <RadioGroupItem value="therapy" id="therapy" className="mt-1" />
             <div className="grid gap-1.5">
@@ -50,7 +64,10 @@ const ServiceSelectionStep = ({
           </div>
         </div>
         
-        <div className="border rounded-lg p-4 cursor-pointer hover:border-peacefulBlue transition-colors">
+        <div 
+          className={`border rounded-lg p-4 cursor-pointer hover:border-peacefulBlue transition-colors ${consultationType === 'combined' ? 'border-peacefulBlue bg-peacefulBlue/5' : ''}`}
+          onClick={() => handleBoxClick('combined')}
+        >
           <div className="flex items-start space-x-3">
             <RadioGroupItem value="combined" id="combined" className="mt-1" />
             <div className="grid gap-1.5">
