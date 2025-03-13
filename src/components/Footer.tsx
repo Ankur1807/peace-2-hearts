@@ -131,6 +131,9 @@ const Footer = () => {
               We do not solicit, endorse, or guarantee consultant services. Users must seek independent professional advice. 
               Peace2Hearts is not responsible for errors, omissions, or outcomes based on platform content.
             </p>
+            <p className="mt-3 text-white font-medium">
+              We are not a medical service or suicide prevention helpline. If you are feeling suicidal, we would suggest you immediately call up a suicide prevention helpline or seek medical help.
+            </p>
           </div>
         </div>
         
