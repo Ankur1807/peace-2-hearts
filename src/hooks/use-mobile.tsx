@@ -1,53 +1,28 @@
 
-import * as React from "react"
+import { useState, useEffect } from "react";
 
-const MOBILE_BREAKPOINT = 768
+const MOBILE_BREAKPOINT = 768;
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean>(
-    typeof window !== 'undefined' ? window.innerWidth < MOBILE_BREAKPOINT : false
-  )
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < MOBILE_BREAKPOINT : false
+  );
 
-  React.useEffect(() => {
-    // Initial check
-    const checkMobile = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    checkMobile();
-    
-    // Handle resize events directly
-    const handleResize = () => checkMobile();
-    window.addEventListener('resize', handleResize, { passive: true });
-    
-    // Setup media query listener
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    
-    // Handle media query changes
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches)
-    }
-    
-    // Modern browsers
-    if (mql.addEventListener) {
-      mql.addEventListener("change", handleChange)
-    } 
-    // Legacy support
-    else if ('addListener' in mql) {
-      // @ts-ignore - for older browsers
-      mql.addListener(handleChange)
-    }
-    
-    // Cleanup
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+
+    const handleChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+
+    // Initial state sync with media query
+    setIsMobile(mql.matches);
+
+    // Listen for changes
+    mql.addEventListener("change", handleChange);
+
     return () => {
-      window.removeEventListener('resize', handleResize);
-      
-      if (mql.removeEventListener) {
-        mql.removeEventListener("change", handleChange)
-      } 
-      else if ('removeListener' in mql) {
-        // @ts-ignore - for older browsers
-        mql.removeListener(handleChange)
-      }
-    }
-  }, [])
+      mql.removeEventListener("change", handleChange);
+    };
+  }, []);
 
-  return isMobile
+  return isMobile;
 }
