@@ -4,10 +4,19 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { getConsultationTypeLabel, getConsultationPrice, getTimeSlotLabel } from '@/utils/consultationUtils';
 
+interface PersonalDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  message: string;
+}
+
 type ConfirmationStepProps = {
   consultationType: string;
   date: Date | undefined;
   timeSlot: string;
+  personalDetails: PersonalDetails;
   onPrevStep: () => void;
   onConfirm: () => void;
 };
@@ -16,6 +25,7 @@ const ConfirmationStep = ({
   consultationType,
   date,
   timeSlot,
+  personalDetails,
   onPrevStep,
   onConfirm
 }: ConfirmationStepProps) => {
@@ -29,6 +39,13 @@ const ConfirmationStep = ({
           <p className="font-medium">
             {getConsultationTypeLabel(consultationType)}
           </p>
+        </div>
+
+        <div>
+          <h3 className="text-gray-500 text-sm">Client</h3>
+          <p className="font-medium">{personalDetails.firstName} {personalDetails.lastName}</p>
+          <p className="text-sm">{personalDetails.email}</p>
+          <p className="text-sm">{personalDetails.phone}</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

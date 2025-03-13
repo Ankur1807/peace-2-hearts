@@ -1,5 +1,6 @@
 
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const formatCardNumber = (value: string) => {
   const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
@@ -55,9 +56,9 @@ export const getTimeSlotLabel = (timeSlot: string) => {
   }
 };
 
-export const checkAuthentication = (): boolean => {
-  const userData = localStorage.getItem("user");
-  return !!userData;
+export const checkAuthentication = async (): Promise<boolean> => {
+  const { data } = await supabase.auth.getSession();
+  return !!data.session;
 };
 
 export const redirectToSignIn = (navigate: (path: string) => void) => {
@@ -66,4 +67,17 @@ export const redirectToSignIn = (navigate: (path: string) => void) => {
     description: "Please sign in to continue booking your consultation.",
   });
   navigate("/sign-in");
+};
+
+export const storeBookingDetailsInLocalStorage = (details: any) => {
+  localStorage.setItem("bookingDetails", JSON.stringify(details));
+};
+
+export const getBookingDetailsFromLocalStorage = () => {
+  const details = localStorage.getItem("bookingDetails");
+  return details ? JSON.parse(details) : null;
+};
+
+export const clearBookingDetailsFromLocalStorage = () => {
+  localStorage.removeItem("bookingDetails");
 };

@@ -11,11 +11,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+interface PersonalDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  message: string;
+}
+
 type PersonalDetailsStepProps = {
   date: Date | undefined;
   setDate: (date: Date | undefined) => void;
   timeSlot: string;
   setTimeSlot: (timeSlot: string) => void;
+  personalDetails: PersonalDetails;
+  onPersonalDetailsChange: (details: PersonalDetails) => void;
   onNextStep: () => void;
   onPrevStep: () => void;
 };
@@ -25,9 +35,29 @@ const PersonalDetailsStep = ({
   setDate,
   timeSlot,
   setTimeSlot,
+  personalDetails,
+  onPersonalDetailsChange,
   onNextStep,
   onPrevStep
 }: PersonalDetailsStepProps) => {
+  const handleChange = (field: keyof PersonalDetails, value: string) => {
+    onPersonalDetailsChange({
+      ...personalDetails,
+      [field]: value
+    });
+  };
+
+  const isFormValid = () => {
+    return (
+      personalDetails.firstName.trim() !== '' &&
+      personalDetails.lastName.trim() !== '' &&
+      personalDetails.email.trim() !== '' &&
+      personalDetails.phone.trim() !== '' &&
+      date !== undefined &&
+      timeSlot !== ''
+    );
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-lora font-semibold mb-6">Personal Details</h2>
@@ -35,23 +65,45 @@ const PersonalDetailsStep = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="first-name">First Name</Label>
-          <Input id="first-name" required />
+          <Input 
+            id="first-name" 
+            value={personalDetails.firstName}
+            onChange={(e) => handleChange('firstName', e.target.value)}
+            required 
+          />
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="last-name">Last Name</Label>
-          <Input id="last-name" required />
+          <Input 
+            id="last-name" 
+            value={personalDetails.lastName}
+            onChange={(e) => handleChange('lastName', e.target.value)}
+            required 
+          />
         </div>
       </div>
       
       <div className="space-y-2">
         <Label htmlFor="email">Email Address</Label>
-        <Input id="email" type="email" required />
+        <Input 
+          id="email" 
+          type="email" 
+          value={personalDetails.email}
+          onChange={(e) => handleChange('email', e.target.value)}
+          required 
+        />
       </div>
       
       <div className="space-y-2">
         <Label htmlFor="phone">Phone Number</Label>
-        <Input id="phone" type="tel" required />
+        <Input 
+          id="phone" 
+          type="tel" 
+          value={personalDetails.phone}
+          onChange={(e) => handleChange('phone', e.target.value)}
+          required 
+        />
       </div>
       
       <div className="space-y-2">
@@ -109,6 +161,8 @@ const PersonalDetailsStep = ({
           id="message" 
           placeholder="Please provide a brief overview of your situation to help us prepare for your consultation."
           rows={4}
+          value={personalDetails.message}
+          onChange={(e) => handleChange('message', e.target.value)}
         />
       </div>
       
@@ -120,6 +174,7 @@ const PersonalDetailsStep = ({
           type="button" 
           onClick={onNextStep}
           className="bg-peacefulBlue hover:bg-peacefulBlue/90"
+          disabled={!isFormValid()}
         >
           Continue
         </Button>

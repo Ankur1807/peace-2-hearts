@@ -11,7 +11,20 @@ import PersonalDetailsStep from '@/components/consultation/PersonalDetailsStep';
 import PaymentStep from '@/components/consultation/PaymentStep';
 import ConfirmationStep from '@/components/consultation/ConfirmationStep';
 import SuccessView from '@/components/consultation/SuccessView';
-import { checkAuthentication, redirectToSignIn } from '@/utils/consultationUtils';
+import { 
+  checkAuthentication, 
+  storeBookingDetailsInLocalStorage,
+  getBookingDetailsFromLocalStorage,
+  clearBookingDetailsFromLocalStorage
+} from '@/utils/consultationUtils';
+
+interface PersonalDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  message: string;
+}
 
 const BookConsultation = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -21,12 +34,38 @@ const BookConsultation = () => {
   const [submitted, setSubmitted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [personalDetails, setPersonalDetails] = useState<PersonalDetails>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
     // Check if user is logged in
-    setIsAuthenticated(checkAuthentication());
+    const checkAuth = async () => {
+      const authenticated = await checkAuthentication();
+      setIsAuthenticated(authenticated);
+    };
+    
+    checkAuth();
+    
+    // Check if there are stored booking details (e.g., from returning after sign-in)
+    const storedDetails = getBookingDetailsFromLocalStorage();
+    if (storedDetails) {
+      setConsultationType(storedDetails.consultationType || '');
+      setDate(storedDetails.date ? new Date(storedDetails.date) : undefined);
+      setTimeSlot(storedDetails.timeSlot || '');
+      setStep(storedDetails.step || 1);
+      if (storedDetails.personalDetails) {
+        setPersonalDetails(storedDetails.personalDetails);
+      }
+      // Clear the stored details after retrieving them
+      clearBookingDetailsFromLocalStorage();
+    }
   }, []);
 
   const steps = [
@@ -37,16 +76,17 @@ const BookConsultation = () => {
   ];
 
   const handleNextStep = () => {
-    if (step === 2 && !isAuthenticated) {
-      // If user is not authenticated, redirect to sign in before payment
-      redirectToSignIn(navigate);
-      return;
-    }
+    // Store current progress in case user needs to sign in later
+    storeBookingDetailsInLocalStorage({
+      consultationType,
+      date: date?.toISOString(),
+      timeSlot,
+      step: step + 1,
+      personalDetails
+    });
     
-    if (step < 4) {
-      setStep(step + 1);
-      window.scrollTo(0, 0);
-    }
+    setStep(step + 1);
+    window.scrollTo(0, 0);
   };
 
   const handlePrevStep = () => {
@@ -54,6 +94,10 @@ const BookConsultation = () => {
       setStep(step - 1);
       window.scrollTo(0, 0);
     }
+  };
+
+  const handlePersonalDetailsChange = (details: PersonalDetails) => {
+    setPersonalDetails(details);
   };
 
   const handleProcessPayment = (e: React.FormEvent) => {
@@ -119,6 +163,8 @@ const BookConsultation = () => {
                   setDate={setDate}
                   timeSlot={timeSlot}
                   setTimeSlot={setTimeSlot}
+                  personalDetails={personalDetails}
+                  onPersonalDetailsChange={handlePersonalDetailsChange}
                   onNextStep={handleNextStep}
                   onPrevStep={handlePrevStep}
                 />
@@ -139,6 +185,7 @@ const BookConsultation = () => {
                   consultationType={consultationType}
                   date={date}
                   timeSlot={timeSlot}
+                  personalDetails={personalDetails}
                   onPrevStep={handlePrevStep}
                   onConfirm={handleConfirmBooking}
                 />
