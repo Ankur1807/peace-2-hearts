@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -40,28 +39,39 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-white shadow-sm py-4 sticky top-0 z-50 w-full">
-      <div className="container mx-auto flex justify-between items-center">
+    <nav className="bg-gradient-to-r from-vibrantPurple/10 to-peacefulBlue/10 shadow-sm py-4 sticky top-0 z-50 w-full relative overflow-hidden">
+      {/* Wavey lines background for header */}
+      <svg className="absolute inset-0 w-full h-full z-0" preserveAspectRatio="none" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 80C240 100 480 40 720 40C960 40 1200 100 1440 90V120H0V80Z" fill="url(#header-wave1)" fillOpacity="0.2"/>
+        <path d="M0 50C240 30 480 80 720 70C960 60 1200 30 1440 40V120H0V50Z" fill="url(#header-wave2)" fillOpacity="0.15"/>
+        <defs>
+          <linearGradient id="header-wave1" x1="0" y1="0" x2="1440" y2="0" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#8B5CF6"/>
+            <stop offset="1" stopColor="#0EA5E9"/>
+          </linearGradient>
+          <linearGradient id="header-wave2" x1="0" y1="0" x2="1440" y2="0" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#F97316"/>
+            <stop offset="1" stopColor="#D946EF"/>
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <div className="container mx-auto flex justify-between items-center relative z-10">
         <Link to="/" className="flex items-center gap-2">
           <svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8">
-            {/* Outer circle with gradient */}
             <circle cx="60" cy="60" r="56" fill="url(#circleGradient)" stroke="#8B5CF6" strokeWidth="4" />
             
-            {/* Peace symbol with vibrant colors */}
             <path d="M60 15 L60 105" stroke="#0EA5E9" strokeWidth="5" strokeLinecap="round" />
             <path d="M60 60 L25 95" stroke="#F97316" strokeWidth="5" strokeLinecap="round" />
             <path d="M60 60 L95 95" stroke="#8B5CF6" strokeWidth="5" strokeLinecap="round" />
             
-            {/* Heart shape at the top with gradient */}
             <path d="M42 35 A12 12 0 0 1 60 28 A12 12 0 0 1 78 35 A12 12 0 0 1 78 53 Q78 65 60 78 Q42 65 42 53 A12 12 0 0 1 42 35Z" fill="url(#heartGradient)" />
             
-            {/* Small sparkles around the heart */}
             <circle cx="35" cy="30" r="3" fill="#F9A8D4" />
             <circle cx="85" cy="30" r="3" fill="#93C5FD" />
             <circle cx="45" cy="75" r="3" fill="#FDE68A" />
             <circle cx="75" cy="75" r="3" fill="#86EFAC" />
             
-            {/* Gradient definitions */}
             <defs>
               <linearGradient id="circleGradient" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#C4B5FD" />
@@ -76,7 +86,6 @@ const Navigation = () => {
           <span className="font-lora text-2xl font-semibold text-gray-800">Peace2Hearts</span>
         </Link>
         
-        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
           <Link to="/" className="text-gray-700 hover:text-purple-600 transition-colors">Home</Link>
           <Link to="/about" className="text-gray-700 hover:text-purple-600 transition-colors">About Us</Link>
@@ -127,7 +136,6 @@ const Navigation = () => {
           )}
         </div>
         
-        {/* Mobile Menu Button */}
         <button 
           className="md:hidden text-gray-700"
           onClick={toggleMenu}
@@ -137,7 +145,6 @@ const Navigation = () => {
         </button>
       </div>
       
-      {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-md z-40 animate-fade-in">
           <div className="container mx-auto py-4 flex flex-col gap-4">

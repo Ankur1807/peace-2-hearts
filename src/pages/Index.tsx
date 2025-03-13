@@ -4,9 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import SideWaves from '@/components/SideWaves';
+
 const HomePage = () => {
   return <>
       <Navigation />
+      <SideWaves />
       
       {/* Hero Section */}
       <section className="relative min-h-[600px] flex items-center wave-pattern py-16">
