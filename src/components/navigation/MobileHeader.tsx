@@ -43,12 +43,9 @@ const MobileHeader = ({ isLoggedIn, userName, onSignOut }: MobileHeaderProps) =>
   };
 
   return (
-    <>
+    <div className="mobile-header fixed top-0 left-0 w-full z-50">
       {/* Fixed header bar */}
       <MobileHeaderBar toggleMenu={toggleMenu} isMenuOpen={isMenuOpen} />
-      
-      {/* Add a spacer to push content below the fixed header */}
-      <div className="h-16"></div>
       
       {/* Mobile menu overlay */}
       {isMenuOpen && (
@@ -66,7 +63,10 @@ const MobileHeader = ({ isLoggedIn, userName, onSignOut }: MobileHeaderProps) =>
         onSignOut={onSignOut}
         onMenuItemClick={handleMenuItemClick}
       />
-    </>
+      
+      {/* Add a spacer to push page content below the fixed header */}
+      <div className="h-16"></div>
+    </div>
   );
 };
 

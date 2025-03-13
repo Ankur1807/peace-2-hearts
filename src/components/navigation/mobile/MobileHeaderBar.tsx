@@ -9,7 +9,7 @@ interface MobileHeaderBarProps {
 
 const MobileHeaderBar = ({ toggleMenu, isMenuOpen }: MobileHeaderBarProps) => {
   return (
-    <div className="fixed top-0 left-0 right-0 h-16 flex items-center justify-between px-4 bg-vibrantPurple shadow-md z-50">
+    <div className="w-full h-16 flex items-center justify-between px-4 bg-vibrantPurple shadow-md" style={{ position: 'relative', zIndex: 100 }}>
       {/* Logo with high contrast */}
       <Link to="/" className="flex items-center">
         <span className="font-lora text-xl font-bold text-white" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.3)' }}>

@@ -39,17 +39,15 @@ const Navigation = () => {
     };
   }, []);
 
-  // Scroll to top when route changes, but only if not triggered by logo click
+  // Scroll to top when route changes
   useEffect(() => {
-    // We need to scroll to top when navigating to a new page
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [location.pathname]);
 
-  // Calculate opacity based on scroll position (0 to 200px scroll range)
+  // Calculate opacity based on scroll position
   const getHeaderOpacity = () => {
-    // Start with partial transparency and become fully opaque by 200px scroll
     const scrollThreshold = 200;
-    const initialOpacity = 0.8; // Initial opacity at top (80%)
+    const initialOpacity = 0.8;
     const opacityChange = (Math.min(scrollPosition, scrollThreshold) / scrollThreshold) * (1 - initialOpacity);
     return initialOpacity + opacityChange;
   };
@@ -60,8 +58,9 @@ const Navigation = () => {
     navigate('/sign-in');
   };
 
-  // Use completely different header for mobile
+  // The key difference: render different markup based on device type
   if (isMobile) {
+    console.log("Rendering mobile header");
     return (
       <MobileHeader
         isLoggedIn={isLoggedIn}
