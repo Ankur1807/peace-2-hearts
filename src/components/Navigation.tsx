@@ -12,6 +12,7 @@ const Navigation = () => {
   const [userName, setUserName] = useState('');
   const [scrollPosition, setScrollPosition] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -33,6 +34,12 @@ const Navigation = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  // Scroll to top when route changes, but only if not triggered by logo click
+  useEffect(() => {
+    // We need to scroll to top when navigating to a new page
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [location.pathname]);
 
   // Calculate opacity based on scroll position (0 to 200px scroll range)
   const getHeaderOpacity = () => {

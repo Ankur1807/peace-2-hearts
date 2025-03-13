@@ -3,7 +3,15 @@ import { Link } from "react-router-dom";
 
 const Logo = () => {
   return (
-    <Link to="/" className="flex items-center gap-2">
+    <Link to="/" className="flex items-center gap-2" onClick={(e) => {
+      // Prevent default if we're already on the homepage to avoid double navigation
+      if (window.location.pathname === '/') {
+        e.preventDefault();
+        
+        // Scroll to top with a smooth animation
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }}>
       <svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8">
         <circle cx="60" cy="60" r="56" fill="url(#circleGradient)" stroke="#FFFFFF" strokeWidth="4" />
         
@@ -29,7 +37,7 @@ const Logo = () => {
           </linearGradient>
         </defs>
       </svg>
-      <span className="font-lora text-2xl font-semibold text-white drop-shadow-sm">Peace2Hearts</span>
+      <span className="font-lora text-2xl font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">Peace2Hearts</span>
     </Link>
   );
 };

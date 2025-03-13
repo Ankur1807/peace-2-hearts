@@ -41,6 +41,8 @@ const MobileHeader = ({ isLoggedIn, userName, onSignOut }: MobileHeaderProps) =>
   
   const handleMenuItemClick = () => {
     setIsMenuOpen(false);
+    // Scroll to top with a smooth animation when navigating
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const menuVariants = {
@@ -73,8 +75,8 @@ const MobileHeader = ({ isLoggedIn, userName, onSignOut }: MobileHeaderProps) =>
     <>
       <header className="bg-vibrantPurple/90 backdrop-blur-sm sticky top-0 z-50 shadow-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          {/* Add a wrapper for the logo with background to improve visibility */}
-          <div className="py-1 px-2 rounded-md bg-white/10 backdrop-blur-sm">
+          {/* Add a wrapper for the logo with enhanced background to improve visibility */}
+          <div className="py-1 px-2 rounded-md bg-white/15 backdrop-blur-sm shadow-sm">
             <Logo />
           </div>
           
