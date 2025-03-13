@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
 import Resources from "./pages/Resources";
+import News from "./pages/News";
 import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
 import MentalHealthService from "./pages/services/MentalHealthService";
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/services/divorce" element={<DivorceService />} />
           <Route path="/services/custody" element={<CustodyService />} />
           <Route path="/resources" element={<Resources />} />
+          <Route path="/news" element={<News />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/book-consultation" element={<BookConsultation />} />

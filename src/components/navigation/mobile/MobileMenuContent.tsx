@@ -1,8 +1,10 @@
 
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Info, Briefcase, BookText, Phone, User } from 'lucide-react';
+import { Home, Info, Briefcase, BookText, Newspaper, Phone, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState } from 'react';
 
 interface MobileMenuContentProps {
   isOpen: boolean;
@@ -19,6 +21,8 @@ const MobileMenuContent = ({
   onSignOut, 
   onMenuItemClick 
 }: MobileMenuContentProps) => {
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  
   const menuVariants = {
     closed: { 
       y: "-100%",
@@ -92,14 +96,50 @@ const MobileMenuContent = ({
           </motion.div>
           
           <motion.div variants={itemVariants}>
-            <Link 
-              to="/resources" 
-              className="flex items-center gap-3 text-white text-lg py-2"
-              onClick={onMenuItemClick}
+            <Collapsible
+              open={isResourcesOpen}
+              onOpenChange={setIsResourcesOpen}
+              className="w-full"
             >
-              <BookText className="h-5 w-5" />
-              Resources
-            </Link>
+              <CollapsibleTrigger className="flex items-center justify-between w-full text-white text-lg py-2">
+                <div className="flex items-center gap-3">
+                  <BookText className="h-5 w-5" />
+                  Resources
+                </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={`h-4 w-4 transition-transform ${isResourcesOpen ? 'rotate-180' : ''}`}
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pl-8 space-y-4 mt-2">
+                <Link 
+                  to="/resources" 
+                  className="flex items-center gap-3 text-white text-base py-2"
+                  onClick={onMenuItemClick}
+                >
+                  <BookText className="h-4 w-4" />
+                  Articles & Guides
+                </Link>
+                <Link 
+                  to="/news" 
+                  className="flex items-center gap-3 text-white text-base py-2"
+                  onClick={onMenuItemClick}
+                >
+                  <Newspaper className="h-4 w-4" />
+                  Latest News
+                </Link>
+              </CollapsibleContent>
+            </Collapsible>
           </motion.div>
           
           <motion.div variants={itemVariants}>
