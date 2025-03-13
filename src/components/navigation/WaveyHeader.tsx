@@ -2,7 +2,7 @@
 const WaveyHeader = () => {
   return (
     <svg 
-      className="absolute inset-0 w-full h-full z-0 pointer-events-none" 
+      className="absolute inset-0 w-full h-full z-10 pointer-events-none" 
       preserveAspectRatio="none" 
       viewBox="0 0 1440 120" 
       fill="none" 

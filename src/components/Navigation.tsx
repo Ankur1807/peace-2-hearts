@@ -72,7 +72,7 @@ const Navigation = () => {
       {/* Wavey lines background for header */}
       <WaveyHeader />
 
-      <div className="container mx-auto flex justify-between items-center relative z-30">
+      <div className="container mx-auto flex justify-between items-center relative z-50">
         <Logo />
         
         {!isMobile && (

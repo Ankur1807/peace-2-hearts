@@ -15,11 +15,12 @@ interface MobileMenuProps {
 const MobileMenu = ({ isLoggedIn, userName, isMenuOpen, onSignOut, onMenuToggle }: MobileMenuProps) => {
   return (
     <div 
-      className={`fixed top-[72px] left-0 right-0 z-50 ${isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
+      className={`fixed top-0 left-0 right-0 z-60 ${isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
+      style={{ marginTop: '72px' }}
     >
       {/* Custom overlay */}
       <div 
-        className={`fixed inset-0 bg-black/10 backdrop-blur-[2px] transition-opacity duration-300 z-40 ${
+        className={`fixed inset-0 bg-black/10 backdrop-blur-[2px] transition-opacity duration-300 z-60 ${
           isMenuOpen ? 'opacity-100' : 'opacity-0'
         }`} 
         onClick={onMenuToggle}
@@ -27,7 +28,7 @@ const MobileMenu = ({ isLoggedIn, userName, isMenuOpen, onSignOut, onMenuToggle 
       
       {/* Custom drawer that slides from top */}
       <div
-        className={`bg-vibrantPurple/50 backdrop-blur-md border-none rounded-b-xl transition-transform duration-300 ease-in-out z-50 ${
+        className={`bg-vibrantPurple/50 backdrop-blur-md border-none rounded-b-xl transition-transform duration-300 ease-in-out z-70 ${
           isMenuOpen ? 'translate-y-0' : '-translate-y-full'
         }`}
         style={{
