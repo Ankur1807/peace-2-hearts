@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import MobileHeaderBar from './mobile/MobileHeaderBar';
-import MobileHeaderWave from './mobile/MobileHeaderWave';
 import MobileMenuOverlay from './mobile/MobileMenuOverlay';
 import MobileMenuContent from './mobile/MobileMenuContent';
 
@@ -47,14 +46,11 @@ const MobileHeader = ({ isLoggedIn, userName, onSignOut }: MobileHeaderProps) =>
 
   return (
     <>
-      <header className="bg-vibrantPurple sticky top-0 z-50 shadow-md">
+      <header className="sticky top-0 z-50 shadow-md">
         <MobileHeaderBar 
           toggleMenu={toggleMenu} 
           isMenuOpen={isMenuOpen} 
         />
-        
-        {/* Decorative wave at bottom of header */}
-        <MobileHeaderWave />
       </header>
       
       {/* Mobile menu overlay */}

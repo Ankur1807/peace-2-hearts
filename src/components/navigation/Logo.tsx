@@ -37,7 +37,7 @@ const Logo = () => {
           </linearGradient>
         </defs>
       </svg>
-      <span className="font-lora text-xl font-bold text-white drop-shadow-sm">Peace2Hearts</span>
+      <span className="font-lora text-xl font-bold text-white drop-shadow-md">Peace2Hearts</span>
     </Link>
   );
 };
