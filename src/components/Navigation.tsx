@@ -43,58 +43,59 @@ const Navigation = () => {
     <nav className="bg-white shadow-sm py-4 sticky top-0 z-50 w-full">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2">
-          {isHomePage ? (
-            // SVG Logo with inline styles for both homepage and inner pages
-            <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7">
-              {/* Outer circle */}
-              <circle cx="50" cy="50" r="48" stroke="#6DAEDB" strokeWidth="4" />
-              
-              {/* Peace symbol */}
-              <path d="M50 10 L50 90" stroke="#6DAEDB" strokeWidth="4" strokeLinecap="round" />
-              <path d="M50 50 L20 80" stroke="#F7CAC9" strokeWidth="4" strokeLinecap="round" />
-              <path d="M50 50 L80 80" stroke="#7E69AB" strokeWidth="4" strokeLinecap="round" />
-              
-              {/* Heart shape at the top */}
-              <path d="M35 30 A10 10 0 0 1 50 25 A10 10 0 0 1 65 30 A10 10 0 0 1 65 45 Q65 55 50 65 Q35 55 35 45 A10 10 0 0 1 35 30Z" fill="#F7CAC9" />
-            </svg>
-          ) : (
-            // Same SVG for inner pages
-            <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7">
-              {/* Outer circle */}
-              <circle cx="50" cy="50" r="48" stroke="#6DAEDB" strokeWidth="4" />
-              
-              {/* Peace symbol */}
-              <path d="M50 10 L50 90" stroke="#6DAEDB" strokeWidth="4" strokeLinecap="round" />
-              <path d="M50 50 L20 80" stroke="#F7CAC9" strokeWidth="4" strokeLinecap="round" />
-              <path d="M50 50 L80 80" stroke="#7E69AB" strokeWidth="4" strokeLinecap="round" />
-              
-              {/* Heart shape at the top */}
-              <path d="M35 30 A10 10 0 0 1 50 25 A10 10 0 0 1 65 30 A10 10 0 0 1 65 45 Q65 55 50 65 Q35 55 35 45 A10 10 0 0 1 35 30Z" fill="#F7CAC9" />
-            </svg>
-          )}
+          <svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8">
+            {/* Outer circle with gradient */}
+            <circle cx="60" cy="60" r="56" fill="url(#circleGradient)" stroke="#8B5CF6" strokeWidth="4" />
+            
+            {/* Peace symbol with vibrant colors */}
+            <path d="M60 15 L60 105" stroke="#0EA5E9" strokeWidth="5" strokeLinecap="round" />
+            <path d="M60 60 L25 95" stroke="#F97316" strokeWidth="5" strokeLinecap="round" />
+            <path d="M60 60 L95 95" stroke="#8B5CF6" strokeWidth="5" strokeLinecap="round" />
+            
+            {/* Heart shape at the top with gradient */}
+            <path d="M42 35 A12 12 0 0 1 60 28 A12 12 0 0 1 78 35 A12 12 0 0 1 78 53 Q78 65 60 78 Q42 65 42 53 A12 12 0 0 1 42 35Z" fill="url(#heartGradient)" />
+            
+            {/* Small sparkles around the heart */}
+            <circle cx="35" cy="30" r="3" fill="#F9A8D4" />
+            <circle cx="85" cy="30" r="3" fill="#93C5FD" />
+            <circle cx="45" cy="75" r="3" fill="#FDE68A" />
+            <circle cx="75" cy="75" r="3" fill="#86EFAC" />
+            
+            {/* Gradient definitions */}
+            <defs>
+              <linearGradient id="circleGradient" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#C4B5FD" />
+                <stop offset="100%" stopColor="#E0E7FF" />
+              </linearGradient>
+              <linearGradient id="heartGradient" x1="42" y1="28" x2="78" y2="78" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#F9A8D4" />
+                <stop offset="100%" stopColor="#D946EF" />
+              </linearGradient>
+            </defs>
+          </svg>
           <span className="font-lora text-2xl font-semibold text-gray-800">Peace2Hearts</span>
         </Link>
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
-          <Link to="/" className="text-gray-700 hover:text-peacefulBlue transition-colors">Home</Link>
-          <Link to="/about" className="text-gray-700 hover:text-peacefulBlue transition-colors">About Us</Link>
-          <Link to="/services" className="text-gray-700 hover:text-peacefulBlue transition-colors">Services</Link>
-          <Link to="/resources" className="text-gray-700 hover:text-peacefulBlue transition-colors">Resources</Link>
-          <Link to="/contact" className="text-gray-700 hover:text-peacefulBlue transition-colors">Contact</Link>
+          <Link to="/" className="text-gray-700 hover:text-purple-600 transition-colors">Home</Link>
+          <Link to="/about" className="text-gray-700 hover:text-purple-600 transition-colors">About Us</Link>
+          <Link to="/services" className="text-gray-700 hover:text-purple-600 transition-colors">Services</Link>
+          <Link to="/resources" className="text-gray-700 hover:text-purple-600 transition-colors">Resources</Link>
+          <Link to="/contact" className="text-gray-700 hover:text-purple-600 transition-colors">Contact</Link>
           
           {isLoggedIn ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-peacefulBlue text-white">
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-600 text-white">
                     {userName.charAt(0).toUpperCase()}
                   </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <div className="flex items-center gap-2 p-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-peacefulBlue">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600">
                     <span className="text-sm font-medium text-white">{userName.charAt(0).toUpperCase()}</span>
                   </div>
                   <div className="flex flex-col space-y-0.5">
@@ -116,9 +117,9 @@ const Navigation = () => {
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-4">
-              <Link to="/sign-in" className="text-gray-700 hover:text-peacefulBlue transition-colors">Sign In</Link>
+              <Link to="/sign-in" className="text-gray-700 hover:text-purple-600 transition-colors">Sign In</Link>
               <Link to="/book-consultation">
-                <Button className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white rounded-full px-6">
+                <Button className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white rounded-full px-6">
                   Book Consultation
                 </Button>
               </Link>
@@ -140,34 +141,34 @@ const Navigation = () => {
       {isMenuOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-md z-40 animate-fade-in">
           <div className="container mx-auto py-4 flex flex-col gap-4">
-            <Link to="/" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Home</Link>
-            <Link to="/about" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>About Us</Link>
-            <Link to="/services" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Services</Link>
-            <Link to="/resources" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Resources</Link>
-            <Link to="/contact" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Contact</Link>
+            <Link to="/" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Home</Link>
+            <Link to="/about" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>About Us</Link>
+            <Link to="/services" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Services</Link>
+            <Link to="/resources" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Resources</Link>
+            <Link to="/contact" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Contact</Link>
             
             {isLoggedIn ? (
               <>
                 <div className="flex items-center gap-2 py-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-peacefulBlue">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600">
                     <span className="text-sm font-medium text-white">{userName.charAt(0).toUpperCase()}</span>
                   </div>
                   <span className="font-medium">{userName}</span>
                 </div>
-                <Link to="/dashboard" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Dashboard</Link>
+                <Link to="/dashboard" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Dashboard</Link>
                 <Button variant="outline" className="mt-2" onClick={() => { handleSignOut(); toggleMenu(); }}>
                   Sign Out
                 </Button>
               </>
             ) : (
               <>
-                <Link to="/sign-in" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Sign In</Link>
-                <Link to="/sign-up" className="text-gray-700 hover:text-peacefulBlue transition-colors py-2" onClick={toggleMenu}>Sign Up</Link>
+                <Link to="/sign-in" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Sign In</Link>
+                <Link to="/sign-up" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Sign Up</Link>
               </>
             )}
             
             <Link to="/book-consultation" onClick={toggleMenu}>
-              <Button className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white rounded-full mt-2">
+              <Button className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white rounded-full mt-2">
                 Book Consultation
               </Button>
             </Link>

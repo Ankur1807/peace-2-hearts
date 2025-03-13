@@ -63,10 +63,15 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Peace2Hearts custom colors
-				peacefulBlue: '#6DAEDB',
-				warmPeach: '#F7CAC9',
-				softGray: '#F5F5F5'
+				// Peace2Hearts colorful palette based on the new logo
+				peacefulBlue: '#0EA5E9',  // Blue from the peace symbol
+				vibrantPurple: '#8B5CF6',  // Purple from the peace symbol
+				brightOrange: '#F97316',   // Orange from the peace symbol
+				softPink: '#F9A8D4',      // Pink from the heart gradient
+				vividPink: '#D946EF',     // Pink from the heart gradient
+				lightBlue: '#93C5FD',     // Blue from the sparkles
+				paleYellow: '#FDE68A',    // Yellow from the sparkles
+				softGreen: '#86EFAC'      // Green from the sparkles
 			},
 			fontFamily: {
 				lora: ['Lora', 'serif'],
@@ -116,8 +121,10 @@ export default {
 				'wave': 'wave 3s ease-in-out infinite'
 			},
 			backgroundImage: {
-				'gradient-wave': 'linear-gradient(90deg, hsla(201, 54%, 64%, 0.4) 0%, hsla(201, 54%, 64%, 0.1) 100%)',
-				'gradient-peach': 'linear-gradient(90deg, hsla(2, 78%, 88%, 0.4) 0%, hsla(2, 78%, 88%, 0.1) 100%)'
+				'gradient-wave': 'linear-gradient(90deg, #8B5CF6 0%, #0EA5E9 100%)',
+				'gradient-peach': 'linear-gradient(90deg, #F9A8D4 0%, #D946EF 100%)',
+				'gradient-sunset': 'linear-gradient(90deg, #F97316 0%, #D946EF 100%)',
+				'gradient-ocean': 'linear-gradient(90deg, #0EA5E9 0%, #86EFAC 100%)'
 			}
 		}
 	},

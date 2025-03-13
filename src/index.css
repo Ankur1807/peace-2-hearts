@@ -14,10 +14,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 201 54% 64%;
+    --primary: 265 84% 65%;  /* Vibrant Purple */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 2 78% 88%;
+    --secondary: 326 73% 75%;  /* Soft Pink */
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
@@ -85,8 +85,26 @@
     @apply absolute w-full h-full top-0 left-0 bg-gradient-peach opacity-20 pointer-events-none z-0;
   }
   
+  .sunset-pattern {
+    @apply relative overflow-hidden;
+  }
+  
+  .sunset-pattern::before {
+    content: "";
+    @apply absolute w-full h-full top-0 left-0 bg-gradient-sunset opacity-20 pointer-events-none z-0;
+  }
+  
+  .ocean-pattern {
+    @apply relative overflow-hidden;
+  }
+  
+  .ocean-pattern::before {
+    content: "";
+    @apply absolute w-full h-full top-0 left-0 bg-gradient-ocean opacity-20 pointer-events-none z-0;
+  }
+  
   .hero-btn {
-    @apply rounded-full px-6 py-3 text-white bg-peacefulBlue hover:bg-opacity-90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1;
+    @apply rounded-full px-6 py-3 text-white bg-gradient-to-r from-vibrantPurple to-vividPink hover:from-vibrantPurple/90 hover:to-vividPink/90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1;
   }
 
   .section-title {
@@ -99,5 +117,13 @@
   
   .testimonial-card {
     @apply bg-white rounded-xl shadow-sm p-6 border border-gray-100;
+  }
+  
+  .colorful-border {
+    @apply border-l-4 border-gradient-to-b from-vibrantPurple via-peacefulBlue to-brightOrange pl-4;
+  }
+  
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-vibrantPurple to-vividPink;
   }
 }

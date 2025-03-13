@@ -1,3 +1,54 @@
 
-/* Reset App.css since we're using Tailwind */
-/* Any additional global styles can go here */
+/* Custom styling for Peace2Hearts */
+.btn-gradient {
+  @apply bg-gradient-to-r from-vibrantPurple to-vividPink text-white;
+}
+
+.btn-gradient-secondary {
+  @apply bg-gradient-to-r from-peacefulBlue to-softGreen text-white;
+}
+
+.btn-gradient-warm {
+  @apply bg-gradient-to-r from-brightOrange to-softPink text-white;
+}
+
+/* Colorful separators */
+.colorful-separator {
+  height: 3px;
+  background: linear-gradient(to right, #8B5CF6, #0EA5E9, #F97316, #F9A8D4);
+  border-radius: 3px;
+}
+
+/* Splash effect */
+.color-splash {
+  position: relative;
+  overflow: hidden;
+}
+
+.color-splash::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(249, 168, 212, 0.15) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Colorful icon styling */
+.icon-purple {
+  color: #8B5CF6;
+}
+
+.icon-pink {
+  color: #D946EF;
+}
+
+.icon-blue {
+  color: #0EA5E9;
+}
+
+.icon-orange {
+  color: #F97316;
+}
