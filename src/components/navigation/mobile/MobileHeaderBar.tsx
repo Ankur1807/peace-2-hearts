@@ -9,12 +9,12 @@ interface MobileHeaderBarProps {
 const MobileHeaderBar = ({ toggleMenu, isMenuOpen }: MobileHeaderBarProps) => {
   return (
     <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-      {/* Add a wrapper for the logo with enhanced background to improve visibility */}
-      <div className="py-1 px-2 rounded-md bg-white/15 backdrop-blur-sm shadow-sm">
+      {/* Improved logo container with better contrast background */}
+      <div className="py-1 px-2 rounded-md bg-white/30 backdrop-blur-sm shadow-md">
         <Logo />
       </div>
       
-      {/* Use the MobileMenuButton component */}
+      {/* Menu button */}
       <button
         className="text-white p-1 focus:outline-none"
         onClick={toggleMenu}
