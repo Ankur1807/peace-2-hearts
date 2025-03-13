@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
@@ -17,6 +17,8 @@ const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
   const [scrollPosition, setScrollPosition] = useState(0);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -55,6 +57,26 @@ const Navigation = () => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
+  // Handle clicks outside the menu to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMenuOpen &&
+        mobileMenuRef.current && 
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
   // Calculate opacity based on scroll position (0 to 200px scroll range)
   const getHeaderOpacity = () => {
     // Start with partial transparency and become fully opaque by 200px scroll
@@ -76,14 +98,26 @@ const Navigation = () => {
 
   // Prevent body scroll when menu is open
   useEffect(() => {
+    const preventTouchMove = (e: TouchEvent) => {
+      if (isMenuOpen) {
+        e.preventDefault();
+      }
+    };
+
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.style.height = '100%';
+      document.addEventListener('touchmove', preventTouchMove, { passive: false });
     } else {
       document.body.style.overflow = '';
+      document.body.style.height = '';
+      document.removeEventListener('touchmove', preventTouchMove);
     }
     
     return () => {
       document.body.style.overflow = '';
+      document.body.style.height = '';
+      document.removeEventListener('touchmove', preventTouchMove);
     };
   }, [isMenuOpen]);
 
@@ -96,7 +130,13 @@ const Navigation = () => {
       }}
     >
       {/* Wavey lines background for header */}
-      <svg className="absolute inset-0 w-full h-full z-0 pointer-events-none" preserveAspectRatio="none" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg 
+        className="absolute inset-0 w-full h-full z-0 pointer-events-none" 
+        preserveAspectRatio="none" 
+        viewBox="0 0 1440 120" 
+        fill="none" 
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <path d="M0 80C240 100 480 40 720 40C960 40 1200 100 1440 90V120H0V80Z" fill="url(#header-wave1)" fillOpacity="0.3"/>
         <path d="M0 50C240 30 480 80 720 70C960 60 1200 30 1440 40V120H0V50Z" fill="url(#header-wave2)" fillOpacity="0.2"/>
         <defs>
@@ -192,9 +232,11 @@ const Navigation = () => {
         </div>
         
         <button 
-          className="md:hidden text-white z-50"
+          ref={menuButtonRef}
+          className="md:hidden text-white relative z-50"
           onClick={toggleMenu}
           aria-label="Toggle menu"
+          style={{ touchAction: 'manipulation' }}
         >
           {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
@@ -202,13 +244,14 @@ const Navigation = () => {
       
       {/* Mobile menu - fixed with higher z-index */}
       <div 
-        className={`md:hidden fixed inset-0 bg-vibrantPurple/95 backdrop-blur-md shadow-md transition-all duration-300 z-40 ${
+        ref={mobileMenuRef}
+        className={`fixed inset-0 bg-vibrantPurple/95 backdrop-blur-md shadow-md transition-all duration-300 ease-in-out z-40 ${
           isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
         style={{ 
           top: '72px',
           height: 'calc(100vh - 72px)',
-          touchAction: isMenuOpen ? 'none' : 'auto'
+          touchAction: isMenuOpen ? 'manipulation' : 'auto'
         }}
       >
         <div className="container mx-auto py-4 flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
