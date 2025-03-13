@@ -2,12 +2,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import UserMenu from "./UserMenu";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerOverlay,
-  DrawerPortal,
-} from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MobileMenuProps {
@@ -25,7 +19,7 @@ const MobileMenu = ({ isLoggedIn, userName, isMenuOpen, onSignOut, onMenuToggle 
     >
       {/* Custom overlay */}
       <div 
-        className={`fixed inset-0 bg-black/10 backdrop-blur-[2px] transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/10 backdrop-blur-[2px] transition-opacity duration-300 z-40 ${
           isMenuOpen ? 'opacity-100' : 'opacity-0'
         }`} 
         onClick={onMenuToggle}
@@ -33,11 +27,12 @@ const MobileMenu = ({ isLoggedIn, userName, isMenuOpen, onSignOut, onMenuToggle 
       
       {/* Custom drawer that slides from top */}
       <div
-        className={`bg-vibrantPurple/50 backdrop-blur-md border-none rounded-b-xl transition-transform duration-300 ease-in-out ${
+        className={`bg-vibrantPurple/50 backdrop-blur-md border-none rounded-b-xl transition-transform duration-300 ease-in-out z-50 ${
           isMenuOpen ? 'translate-y-0' : '-translate-y-full'
         }`}
         style={{
           maxHeight: '70vh',
+          position: 'relative',
         }}
       >
         <ScrollArea className="h-full max-h-[calc(70vh-16px)]">
