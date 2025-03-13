@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu,
@@ -16,6 +16,8 @@ const Navigation = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
   useEffect(() => {
     // Check if user is logged in
@@ -41,19 +43,28 @@ const Navigation = () => {
     <nav className="bg-white shadow-sm py-4 sticky top-0 z-50">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2">
-          {/* New Peace2Hearts Logo with 4 colors */}
-          <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7">
-            {/* Outer circle */}
-            <circle cx="50" cy="50" r="48" stroke="#6DAEDB" strokeWidth="4" />
-            
-            {/* Peace symbol */}
-            <path d="M50 10 L50 90" stroke="#6DAEDB" strokeWidth="4" strokeLinecap="round" />
-            <path d="M50 50 L20 80" stroke="#F7CAC9" strokeWidth="4" strokeLinecap="round" />
-            <path d="M50 50 L80 80" stroke="#7E69AB" strokeWidth="4" strokeLinecap="round" />
-            
-            {/* Heart shape at the top */}
-            <path d="M35 30 A10 10 0 0 1 50 25 A10 10 0 0 1 65 30 A10 10 0 0 1 65 45 Q65 55 50 65 Q35 55 35 45 A10 10 0 0 1 35 30Z" fill="#F7CAC9" />
-          </svg>
+          {isHomePage ? (
+            // PNG/JPEG Logo for homepage
+            <img 
+              src="/logo.png" 
+              alt="Peace2Hearts Logo" 
+              className="h-10 w-auto" 
+            />
+          ) : (
+            // SVG Logo for inner pages
+            <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7">
+              {/* Outer circle */}
+              <circle cx="50" cy="50" r="48" stroke="#6DAEDB" strokeWidth="4" />
+              
+              {/* Peace symbol */}
+              <path d="M50 10 L50 90" stroke="#6DAEDB" strokeWidth="4" strokeLinecap="round" />
+              <path d="M50 50 L20 80" stroke="#F7CAC9" strokeWidth="4" strokeLinecap="round" />
+              <path d="M50 50 L80 80" stroke="#7E69AB" strokeWidth="4" strokeLinecap="round" />
+              
+              {/* Heart shape at the top */}
+              <path d="M35 30 A10 10 0 0 1 50 25 A10 10 0 0 1 65 30 A10 10 0 0 1 65 45 Q65 55 50 65 Q35 55 35 45 A10 10 0 0 1 35 30Z" fill="#F7CAC9" />
+            </svg>
+          )}
           <span className="font-lora text-2xl font-semibold text-gray-800">Peace2Hearts</span>
         </Link>
         
