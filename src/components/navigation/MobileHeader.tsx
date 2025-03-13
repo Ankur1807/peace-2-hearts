@@ -71,9 +71,12 @@ const MobileHeader = ({ isLoggedIn, userName, onSignOut }: MobileHeaderProps) =>
 
   return (
     <>
-      <header className="bg-vibrantPurple sticky top-0 z-50 shadow-md">
+      <header className="bg-vibrantPurple/90 backdrop-blur-sm sticky top-0 z-50 shadow-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Logo />
+          {/* Add a wrapper for the logo with background to improve visibility */}
+          <div className="py-1 px-2 rounded-md bg-white/10 backdrop-blur-sm">
+            <Logo />
+          </div>
           
           <button
             className="text-white p-1 focus:outline-none"
