@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Menu, User, X } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,6 +18,7 @@ const Navigation = () => {
   const [userName, setUserName] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   const isHomePage = location.pathname === '/';
 
   useEffect(() => {
@@ -145,43 +148,42 @@ const Navigation = () => {
         </button>
       </div>
       
-      {isMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-md z-40 animate-fade-in">
-          <div className="container mx-auto py-4 flex flex-col gap-4">
-            <Link to="/" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Home</Link>
-            <Link to="/about" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>About Us</Link>
-            <Link to="/services" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Services</Link>
-            <Link to="/resources" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Resources</Link>
-            <Link to="/contact" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Contact</Link>
-            
-            {isLoggedIn ? (
-              <>
-                <div className="flex items-center gap-2 py-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600">
-                    <span className="text-sm font-medium text-white">{userName.charAt(0).toUpperCase()}</span>
-                  </div>
-                  <span className="font-medium">{userName}</span>
+      {/* Mobile menu - previously using isMenuOpen which was not updating correctly */}
+      <div className={`md:hidden fixed inset-x-0 top-16 bg-white shadow-md z-40 transition-all duration-300 ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+        <div className="container mx-auto py-4 flex flex-col gap-4">
+          <Link to="/" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Home</Link>
+          <Link to="/about" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>About Us</Link>
+          <Link to="/services" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Services</Link>
+          <Link to="/resources" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Resources</Link>
+          <Link to="/contact" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Contact</Link>
+          
+          {isLoggedIn ? (
+            <>
+              <div className="flex items-center gap-2 py-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600">
+                  <span className="text-sm font-medium text-white">{userName.charAt(0).toUpperCase()}</span>
                 </div>
-                <Link to="/dashboard" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Dashboard</Link>
-                <Button variant="outline" className="mt-2" onClick={() => { handleSignOut(); toggleMenu(); }}>
-                  Sign Out
-                </Button>
-              </>
-            ) : (
-              <>
-                <Link to="/sign-in" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Sign In</Link>
-                <Link to="/sign-up" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Sign Up</Link>
-              </>
-            )}
-            
-            <Link to="/book-consultation" onClick={toggleMenu}>
-              <Button className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white rounded-full mt-2">
-                Book Consultation
+                <span className="font-medium">{userName}</span>
+              </div>
+              <Link to="/dashboard" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Dashboard</Link>
+              <Button variant="outline" className="mt-2" onClick={() => { handleSignOut(); toggleMenu(); }}>
+                Sign Out
               </Button>
-            </Link>
-          </div>
+            </>
+          ) : (
+            <>
+              <Link to="/sign-in" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Sign In</Link>
+              <Link to="/sign-up" className="text-gray-700 hover:text-purple-600 transition-colors py-2" onClick={toggleMenu}>Sign Up</Link>
+            </>
+          )}
+          
+          <Link to="/book-consultation" onClick={toggleMenu}>
+            <Button className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white rounded-full mt-2">
+              Book Consultation
+            </Button>
+          </Link>
         </div>
-      )}
+      </div>
     </nav>
   );
 };
