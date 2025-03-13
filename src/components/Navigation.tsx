@@ -63,7 +63,7 @@ const Navigation = () => {
 
   return (
     <nav 
-      className="shadow-sm py-4 sticky top-0 z-40 w-full relative overflow-hidden transition-colors duration-300"
+      className="shadow-sm py-4 sticky top-0 z-[80] w-full relative overflow-hidden transition-colors duration-300"
       style={{
         backgroundColor: `rgba(139, 92, 246, ${getHeaderOpacity()})`,
         backdropFilter: 'blur(4px)'
@@ -72,7 +72,7 @@ const Navigation = () => {
       {/* Wavey lines background for header */}
       <WaveyHeader />
 
-      <div className="container mx-auto flex justify-between items-center relative z-50">
+      <div className="container mx-auto flex justify-between items-center relative z-[85]">
         <Logo />
         
         {!isMobile && (
@@ -85,7 +85,7 @@ const Navigation = () => {
         
         {isMobile && (
           <button 
-            className="text-white relative z-50"
+            className="text-white relative z-[85]"
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >

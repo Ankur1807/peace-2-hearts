@@ -1,5 +1,31 @@
 
+import { useIsMobile } from '@/hooks/use-mobile';
+
 const WaveyHeader = () => {
+  const isMobile = useIsMobile();
+  
+  if (isMobile) {
+    // Static wave for mobile devices
+    return (
+      <div 
+        className="absolute inset-0 w-full h-full z-10 pointer-events-none bg-vibrantPurple overflow-hidden"
+      >
+        <svg 
+          className="absolute bottom-0 w-full"
+          preserveAspectRatio="none" 
+          height="15"
+          viewBox="0 0 1440 40" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M0 20C240 35 480 5 720 15C960 25 1200 40 1440 30V40H0V20Z" fill="white" fillOpacity="0.15"/>
+          <path d="M0 10C240 0 480 25 720 20C960 15 1200 0 1440 5V40H0V10Z" fill="white" fillOpacity="0.1"/>
+        </svg>
+      </div>
+    );
+  }
+  
+  // Animated wave for desktop
   return (
     <svg 
       className="absolute inset-0 w-full h-full z-10 pointer-events-none" 
