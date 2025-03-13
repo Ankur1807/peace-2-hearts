@@ -55,10 +55,12 @@ const MobileHeader = ({ isLoggedIn, userName, onSignOut }: MobileHeaderProps) =>
       
       {/* Mobile menu overlay */}
       <AnimatePresence>
-        <MobileMenuOverlay 
-          isVisible={isMenuOpen} 
-          onClick={toggleMenu} 
-        />
+        {isMenuOpen && (
+          <MobileMenuOverlay 
+            isVisible={isMenuOpen} 
+            onClick={toggleMenu} 
+          />
+        )}
       </AnimatePresence>
       
       {/* Mobile navigation menu */}
