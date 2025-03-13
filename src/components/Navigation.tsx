@@ -19,9 +19,13 @@ const Navigation = () => {
     // Check if user is logged in
     const userData = localStorage.getItem("user");
     if (userData) {
-      const user = JSON.parse(userData);
-      setIsLoggedIn(true);
-      setUserName(user.name);
+      try {
+        const user = JSON.parse(userData);
+        setIsLoggedIn(true);
+        setUserName(user.name);
+      } catch (e) {
+        console.error("Error parsing user data:", e);
+      }
     }
 
     // Add scroll event listener
