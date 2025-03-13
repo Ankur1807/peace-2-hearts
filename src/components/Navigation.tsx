@@ -175,7 +175,7 @@ const Navigation = () => {
       </div>
       
       {/* Mobile menu */}
-      <div className={`md:hidden fixed inset-x-0 top-16 bg-vibrantPurple/95 backdrop-blur-md shadow-md z-40 transition-all duration-300 ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+      <div className={`md:hidden absolute inset-x-0 top-[72px] bg-vibrantPurple/95 backdrop-blur-md shadow-md z-40 transition-all duration-300 ${isMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
         <div className="container mx-auto py-4 flex flex-col gap-4">
           <Link to="/" className="text-white hover:text-white/80 transition-colors py-2" onClick={toggleMenu}>Home</Link>
           <Link to="/about" className="text-white hover:text-white/80 transition-colors py-2" onClick={toggleMenu}>About Us</Link>
