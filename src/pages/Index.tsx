@@ -1,3 +1,4 @@
+
 import { ArrowRight, Heart, Gavel, HeartPulse, Book, MessageSquare, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FractalButton } from '@/components/FractalButton';
@@ -6,8 +7,15 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import SideWaves from '@/components/SideWaves';
 import WaveBackground from '@/components/WaveBackground';
+import { SEO } from '@/components/SEO';
+
 const HomePage = () => {
   return <>
+      <SEO 
+        title="Relationship Wellness & Legal Support"
+        description="Expert mental health and legal support for individuals navigating relationship challenges. Find peace with or without love through our professional guidance services."
+        keywords="relationship counseling, divorce support, mental health, legal consultation, couples therapy, family law, relationship challenges"
+      />
       <Navigation />
       <SideWaves />
       <WaveBackground />

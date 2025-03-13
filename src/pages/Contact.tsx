@@ -5,6 +5,7 @@ import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
+import { SEO } from '@/components/SEO';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -46,6 +47,11 @@ const Contact = () => {
   
   return (
     <>
+      <SEO 
+        title="Contact Us"
+        description="Reach out to Peace2Hearts for relationship counseling, legal consultation, or general inquiries. Our team is here to help you find peace in your relationships."
+        keywords="contact Peace2Hearts, relationship counseling contact, legal consultation contact, relationship support"
+      />
       <Navigation />
       
       {/* Hero Section */}

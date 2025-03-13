@@ -11,6 +11,7 @@ import PersonalDetailsStep from '@/components/consultation/PersonalDetailsStep';
 import PaymentStep from '@/components/consultation/PaymentStep';
 import ConfirmationStep from '@/components/consultation/ConfirmationStep';
 import SuccessView from '@/components/consultation/SuccessView';
+import { SEO } from '@/components/SEO';
 import { 
   checkAuthentication, 
   storeBookingDetailsInLocalStorage,
@@ -124,6 +125,11 @@ const BookConsultation = () => {
   if (submitted) {
     return (
       <>
+        <SEO 
+          title="Consultation Confirmed"
+          description="Your consultation with Peace2Hearts has been successfully booked. We look forward to supporting you on your relationship journey."
+          keywords="book relationship counseling, legal consultation appointment, therapy session, mental health support"
+        />
         <Navigation />
         <main className="py-16 md:py-24">
           <div className="container mx-auto px-4 max-w-4xl">
@@ -137,6 +143,11 @@ const BookConsultation = () => {
 
   return (
     <>
+      <SEO 
+        title="Book a Consultation"
+        description="Schedule a consultation with our relationship counselors or legal experts. Take the first step towards peace and clarity in your relationship journey."
+        keywords="book relationship counseling, legal consultation appointment, therapy session, mental health support"
+      />
       <Navigation />
       <main className="py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-4xl">

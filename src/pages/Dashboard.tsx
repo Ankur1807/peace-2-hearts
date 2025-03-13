@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { SEO } from '@/components/SEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -60,6 +61,12 @@ const Dashboard = () => {
 
   return (
     <>
+      <SEO 
+        title="Dashboard"
+        description="Manage your consultations, documents, and messages with Peace2Hearts through your personalized dashboard."
+        keywords="client dashboard, manage appointments, relationship counseling, legal consultations"
+        ogType="website"
+      />
       <Navigation />
       <main className="py-12 md:py-16">
         <div className="container mx-auto px-4">

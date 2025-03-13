@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { SEO } from '@/components/SEO';
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -35,6 +36,11 @@ const SignUp = () => {
 
   return (
     <>
+      <SEO 
+        title="Sign Up"
+        description="Create your Peace2Hearts account to book consultations, access personalized resources, and begin your journey to relationship wellness."
+        keywords="sign up, create account, Peace2Hearts registration, relationship counseling services"
+      />
       <Navigation />
       <main className="py-16 md:py-20">
         <div className="container max-w-md mx-auto px-4">

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { SEO } from '@/components/SEO';
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -35,6 +36,11 @@ const SignIn = () => {
 
   return (
     <>
+      <SEO 
+        title="Sign In"
+        description="Sign in to your Peace2Hearts account to manage your consultations, access resources, and connect with our experts."
+        keywords="sign in, login, Peace2Hearts account, relationship counseling account"
+      />
       <Navigation />
       <main className="py-16 md:py-20">
         <div className="container max-w-md mx-auto px-4">

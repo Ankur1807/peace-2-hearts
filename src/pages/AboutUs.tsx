@@ -2,10 +2,16 @@
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Heart, Users, Shield, Sparkles } from 'lucide-react';
+import { SEO } from '@/components/SEO';
 
 const AboutUs = () => {
   return (
     <>
+      <SEO 
+        title="About Us"
+        description="Learn about Peace2Hearts and our mission to provide compassionate mental health support and expert legal guidance for relationship challenges."
+        keywords="relationship counseling team, mental health experts, legal consultants, relationship wellness, about Peace2Hearts"
+      />
       <Navigation />
       
       {/* Hero Section */}
