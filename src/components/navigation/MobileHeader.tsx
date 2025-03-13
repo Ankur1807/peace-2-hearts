@@ -47,7 +47,7 @@ const MobileHeader = ({ isLoggedIn, userName, onSignOut }: MobileHeaderProps) =>
 
   return (
     <>
-      <header className="bg-vibrantPurple/90 backdrop-blur-sm sticky top-0 z-50 shadow-md">
+      <header className="bg-vibrantPurple sticky top-0 z-50 shadow-md">
         <MobileHeaderBar 
           toggleMenu={toggleMenu} 
           isMenuOpen={isMenuOpen} 

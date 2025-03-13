@@ -1,6 +1,6 @@
 
-import Logo from '../Logo';
 import { Menu, X } from 'lucide-react';
+import Logo from '../Logo';
 
 interface MobileHeaderBarProps {
   toggleMenu: () => void;
@@ -10,21 +10,21 @@ interface MobileHeaderBarProps {
 const MobileHeaderBar = ({ toggleMenu, isMenuOpen }: MobileHeaderBarProps) => {
   return (
     <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-      {/* Logo container with strong visibility */}
-      <div className="py-2 px-3 rounded-md bg-white/80 backdrop-blur-sm shadow-lg">
+      {/* Logo container with solid white background for maximum visibility */}
+      <div className="py-2 px-4 rounded-md bg-white shadow-xl">
         <Logo />
       </div>
       
-      {/* Menu button with improved visibility */}
+      {/* Menu button with solid background and larger touch target */}
       <button
-        className="text-white p-2 bg-vibrantPurple/90 rounded-md shadow-md hover:bg-vibrantPurple focus:outline-none"
+        className="text-white p-3 bg-white rounded-md shadow-xl hover:bg-white/90 focus:outline-none"
         onClick={toggleMenu}
         aria-label="Toggle menu"
       >
         {isMenuOpen ? (
-          <X className="h-6 w-6" />
+          <X className="h-7 w-7 text-vibrantPurple" />
         ) : (
-          <Menu className="h-6 w-6" />
+          <Menu className="h-7 w-7 text-vibrantPurple" />
         )}
       </button>
     </div>
