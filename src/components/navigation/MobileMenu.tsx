@@ -22,15 +22,17 @@ const MobileMenu = ({ isLoggedIn, userName, isMenuOpen, onSignOut, onMenuToggle 
   return (
     <Drawer open={isMenuOpen} onOpenChange={onMenuToggle}>
       <DrawerPortal>
-        <DrawerOverlay className="bg-black/20 backdrop-blur-sm" />
+        <DrawerOverlay className="bg-black/10 backdrop-blur-[2px]" />
         <DrawerContent 
-          className="max-h-[70vh] bg-vibrantPurple/80 backdrop-blur-md border-none rounded-b-xl"
-          // Override the default styling to position from top
+          className="max-h-[70vh] bg-vibrantPurple/50 backdrop-blur-md border-none rounded-b-xl"
+          // Override the default drawer styling to position from top
           style={{
             top: '72px',
             bottom: 'auto',
             height: 'auto',
-            maxHeight: '70vh'
+            maxHeight: '70vh',
+            transform: isMenuOpen ? 'translateY(0)' : 'translateY(-100%)',
+            transition: 'transform 0.3s ease-in-out'
           }}
         >
           <ScrollArea className="h-full max-h-[calc(70vh-16px)]">
