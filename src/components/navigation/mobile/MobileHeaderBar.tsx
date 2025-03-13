@@ -9,8 +9,8 @@ interface MobileHeaderBarProps {
 const MobileHeaderBar = ({ toggleMenu, isMenuOpen }: MobileHeaderBarProps) => {
   return (
     <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-      {/* Improved logo container with better contrast background */}
-      <div className="py-1 px-2 rounded-md bg-white/30 backdrop-blur-sm shadow-md">
+      {/* Enhanced logo container with stronger contrast background */}
+      <div className="py-2 px-3 rounded-md bg-white/50 backdrop-blur-sm shadow-lg">
         <Logo />
       </div>
       
