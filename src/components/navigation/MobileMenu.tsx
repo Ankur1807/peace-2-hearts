@@ -1,5 +1,5 @@
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import UserMenu from "./UserMenu";
@@ -15,6 +15,19 @@ interface MobileMenuProps {
 const MobileMenu = ({ isLoggedIn, userName, isMenuOpen, onSignOut, onMenuToggle }: MobileMenuProps) => {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
+  // Prevent scrolling of the body when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
+
   return (
     <div 
       ref={mobileMenuRef}
@@ -23,17 +36,15 @@ const MobileMenu = ({ isLoggedIn, userName, isMenuOpen, onSignOut, onMenuToggle 
       }`}
       style={{ 
         top: '72px',
-        height: 'calc(100vh - 72px)',
-        touchAction: isMenuOpen ? 'none' : 'auto'
+        height: 'calc(100vh - 72px)'
       }}
-      onClick={(e) => e.stopPropagation()}
     >
       <div className="container mx-auto py-4 flex flex-col gap-4">
-        <Link to="/" className="text-white hover:text-white/80 transition-colors py-2" onClick={onMenuToggle}>Home</Link>
-        <Link to="/about" className="text-white hover:text-white/80 transition-colors py-2" onClick={onMenuToggle}>About Us</Link>
-        <Link to="/services" className="text-white hover:text-white/80 transition-colors py-2" onClick={onMenuToggle}>Services</Link>
-        <Link to="/resources" className="text-white hover:text-white/80 transition-colors py-2" onClick={onMenuToggle}>Resources</Link>
-        <Link to="/contact" className="text-white hover:text-white/80 transition-colors py-2" onClick={onMenuToggle}>Contact</Link>
+        <Link to="/" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>Home</Link>
+        <Link to="/about" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>About Us</Link>
+        <Link to="/services" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>Services</Link>
+        <Link to="/resources" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>Resources</Link>
+        <Link to="/contact" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>Contact</Link>
         
         <UserMenu 
           isLoggedIn={isLoggedIn} 

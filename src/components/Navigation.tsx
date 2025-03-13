@@ -34,16 +34,8 @@ const Navigation = () => {
     };
     window.addEventListener('scroll', handleScroll);
     
-    // Close menu when route changes
-    const closeMenu = () => {
-      setIsMenuOpen(false);
-    };
-    
-    window.addEventListener('popstate', closeMenu);
-    
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('popstate', closeMenu);
     };
   }, []);
 
@@ -52,15 +44,13 @@ const Navigation = () => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  // Handle clicks outside the menu to close it
+  // Handle clicks outside to close the menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         isMenuOpen &&
         menuButtonRef.current &&
-        !menuButtonRef.current.contains(event.target as Node) &&
-        navRef.current &&
-        navRef.current.contains(event.target as Node)
+        !menuButtonRef.current.contains(event.target as Node)
       ) {
         setIsMenuOpen(false);
       }
@@ -72,32 +62,6 @@ const Navigation = () => {
     };
   }, [isMenuOpen]);
 
-  // Prevent body scroll when menu is open
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.top = `-${scrollPosition}px`;
-    } else {
-      const scrollY = document.body.style.top;
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
-      }
-    }
-    
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-    };
-  }, [isMenuOpen, scrollPosition]);
-
   // Calculate opacity based on scroll position (0 to 200px scroll range)
   const getHeaderOpacity = () => {
     // Start with partial transparency and become fully opaque by 200px scroll
@@ -107,8 +71,7 @@ const Navigation = () => {
     return initialOpacity + opacityChange;
   };
 
-  const toggleMenu = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
@@ -133,21 +96,24 @@ const Navigation = () => {
       <div className="container mx-auto flex justify-between items-center relative z-40">
         <Logo />
         
-        <DesktopMenu 
-          isLoggedIn={isLoggedIn} 
-          userName={userName} 
-          onSignOut={handleSignOut} 
-        />
+        {!isMobile && (
+          <DesktopMenu 
+            isLoggedIn={isLoggedIn} 
+            userName={userName} 
+            onSignOut={handleSignOut} 
+          />
+        )}
         
-        <button 
-          ref={menuButtonRef}
-          className="md:hidden text-white relative z-50"
-          onClick={toggleMenu}
-          aria-label="Toggle menu"
-          style={{ touchAction: 'manipulation' }}
-        >
-          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        {isMobile && (
+          <button 
+            ref={menuButtonRef}
+            className="text-white relative z-50"
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        )}
       </div>
       
       {/* Mobile menu */}
@@ -156,7 +122,7 @@ const Navigation = () => {
         userName={userName}
         isMenuOpen={isMenuOpen}
         onSignOut={handleSignOut}
-        onMenuToggle={() => setIsMenuOpen(false)}
+        onMenuToggle={toggleMenu}
       />
     </nav>
   );

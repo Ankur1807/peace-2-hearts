@@ -4,23 +4,32 @@ import { useState, useEffect } from "react";
 const MOBILE_BREAKPOINT = 768;
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" ? window.innerWidth < MOBILE_BREAKPOINT : false
-  );
+  // Set initial state based on window width if available
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.innerWidth < MOBILE_BREAKPOINT;
+  });
 
   useEffect(() => {
+    // Function to check if viewport is mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+
+    // Run on mount to ensure correct initial state
+    checkMobile();
+
+    // Set up media query listener
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-
-    const handleChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-
-    // Initial state sync with media query
-    setIsMobile(mql.matches);
-
-    // Listen for changes
-    mql.addEventListener("change", handleChange);
+    const handleMediaQueryChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    
+    // Also listen for resize events for more responsive behavior
+    window.addEventListener('resize', checkMobile);
+    mql.addEventListener("change", handleMediaQueryChange);
 
     return () => {
-      mql.removeEventListener("change", handleChange);
+      window.removeEventListener('resize', checkMobile);
+      mql.removeEventListener("change", handleMediaQueryChange);
     };
   }, []);
 
