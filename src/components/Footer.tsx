@@ -1,10 +1,7 @@
-
 import { Link } from 'react-router-dom';
 import { Heart, Mail, Phone, MapPin } from 'lucide-react';
-
 const Footer = () => {
-  return (
-    <footer className="bg-gray-100 pt-12 pb-6">
+  return <footer className="bg-gray-100 pt-12 pb-6">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
@@ -61,11 +58,12 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-peacefulBlue mt-0.5" />
-                <span className="text-gray-600">123 Peace Street, Harmony City, CA 12345</span>
+                <span className="text-gray-600">Delhi, India</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-peacefulBlue" />
-                <span className="text-gray-600">(123) 456-7890</span>
+                <span className="text-gray-600">7428564364
+              </span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-peacefulBlue" />
@@ -81,8 +79,6 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
