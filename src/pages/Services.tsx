@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, HeartPulse, Gavel, Users, MessageSquare, Calendar } from 'lucide-react';
@@ -16,7 +15,7 @@ const Services = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-lora font-bold text-gray-800 mb-6">Our Services</h1>
             <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-              Comprehensive support for your relationship journey, combining mental health expertise and legal guidance.
+              Comprehensive support for your relationship journey, combining mental health expertise and legal guidance with a focus on divorce prevention.
             </p>
           </div>
         </div>
