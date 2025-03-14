@@ -26,6 +26,26 @@ const AboutUs = () => {
         </div>
       </section>
       
+      {/* About Peace2Hearts Description */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-peacefulBlue/5 rounded-xl p-6 md:p-8">
+              <h2 className="text-2xl md:text-3xl font-lora font-semibold mb-4 text-gray-800">About Peace2Hearts</h2>
+              <p className="text-gray-600 mb-4">
+                Peace2Hearts is India's first and only portal dedicated to relationships, marriages, and divorce. We aim to be a one-stop destination for everything related to love life and marriages in India.
+              </p>
+              <p className="text-gray-600 mb-4">
+                With over 10 lakh dowry-related deaths per year (NCRB data), marriages are breaking apart at an increasing pace in India. Our mission is to provide guidance, legal and psychological assistance, and the right information needed to navigate love life and marriage smoothly.
+              </p>
+              <p className="text-gray-600">
+                Founded by Ankur Bhardwaj, Peace2Hearts works with experienced therapists and legal professionals to offer comprehensive support for every stage of relationships—from new love to post-divorce recovery.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
       {/* Mission & Vision Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
