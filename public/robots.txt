@@ -1,5 +1,16 @@
 
+# Peace2Hearts robots.txt
+
 User-agent: *
 Allow: /
 
+# Block access to admin and private areas
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /user/
+Disallow: /sign-in
+Disallow: /sign-up
+
+# Sitemaps
 Sitemap: https://peace2hearts.com/sitemap.xml
+

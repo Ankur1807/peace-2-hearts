@@ -8,9 +8,27 @@ import Footer from '@/components/Footer';
 import SideWaves from '@/components/SideWaves';
 import WaveBackground from '@/components/WaveBackground';
 import { SEO } from '@/components/SEO';
+import { OrganizationSchema } from '@/components/StructuredData';
+
 const HomePage = () => {
-  return <>
-      <SEO title="Relationship Wellness & Legal Support" description="Expert mental health and legal support for individuals navigating relationship challenges. Find peace with or without love through our professional guidance services." keywords="relationship counseling, divorce support, mental health, legal consultation, couples therapy, family law, relationship challenges" />
+  // Organization social media links for schema
+  const socialLinks = [
+    "https://facebook.com/peace2hearts",
+    "https://twitter.com/peace2hearts",
+    "https://instagram.com/peace2hearts",
+    "https://linkedin.com/company/peace2hearts"
+  ];
+
+  return (
+    <>
+      <SEO 
+        title="Relationship Wellness & Legal Support" 
+        description="Expert mental health and legal support for individuals navigating relationship challenges. Find peace with or without love through our professional guidance services." 
+        keywords="relationship counseling, divorce support, mental health, legal consultation, couples therapy, family law, relationship challenges, India, Delhi"
+        canonicalUrl="/"
+        language="en"
+      />
+      <OrganizationSchema sameAs={socialLinks} />
       <Navigation />
       <SideWaves />
       <WaveBackground />
@@ -278,6 +296,8 @@ const HomePage = () => {
       </section>
       
       <Footer />
-    </>;
+    </>
+  );
 };
+
 export default HomePage;
