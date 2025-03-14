@@ -1,5 +1,5 @@
 
-import { ArrowRight, Heart, Gavel, HeartPulse, Book, MessageSquare, Calendar } from 'lucide-react';
+import { ArrowRight, Heart, Gavel, HeartPulse, Book, MessageSquare, Calendar, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FractalButton } from '@/components/FractalButton';
 import { Link } from 'react-router-dom';
@@ -22,9 +22,9 @@ const HomePage = () => {
   return (
     <>
       <SEO 
-        title="Relationship Wellness & Legal Support" 
-        description="Expert mental health and legal support for individuals navigating relationship challenges. Find peace with or without love through our professional guidance services." 
-        keywords="relationship counseling, divorce support, mental health, legal consultation, couples therapy, family law, relationship challenges, India, Delhi"
+        title="Relationship Wellness & Divorce Prevention" 
+        description="Expert prevention-focused mental health and legal support for relationships. Our unique approach helps couples strengthen bonds and navigate challenges before they lead to divorce." 
+        keywords="divorce prevention, relationship counseling, marriage guidance, couples therapy, family law, relationship challenges, proactive relationship care, India, Delhi"
         canonicalUrl="/"
         language="en"
       />
@@ -37,15 +37,51 @@ const HomePage = () => {
       <section className="relative min-h-[600px] flex items-center wave-pattern py-16">
         <div className="container mx-auto px-4 z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-lora font-bold text-gray-800 mb-6 leading-tight text-center lg:text-6xl">Helping you find peace, with or without love</h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto text-center">India's first integrated platform offering comprehensive solutions to relationship challenges through mental health support and legal expertise.</p>
+            <h1 className="text-4xl md:text-5xl font-lora font-bold text-gray-800 mb-6 leading-tight text-center lg:text-6xl">Preventing divorce, preserving relationships</h1>
+            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto text-center">India's first integrated platform offering preventive solutions to relationship challenges through proactive mental health support and legal expertise.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <FractalButton asChild fractalType="primary" pulseEffect={true} className="hero-btn rounded-full px-6 py-3">
-                <Link to="/book-consultation">Book a Consultation</Link>
+                <Link to="/book-consultation">Prevent Relationship Breakdown</Link>
               </FractalButton>
               <FractalButton asChild fractalType="outline" className="rounded-full px-6 py-3 border-peacefulBlue text-peacefulBlue">
-                <Link to="/services">Explore Our Services</Link>
+                <Link to="/services">Explore Preventive Services</Link>
               </FractalButton>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Prevention Focus Section - NEW */}
+      <section className="py-16 bg-warmPeach/10">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="section-title">Why Prevention Matters</h2>
+            <p className="text-gray-600">Our prevention-first approach helps couples address issues before they lead to separation or divorce.</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center">
+              <div className="bg-peacefulBlue/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <ShieldCheck className="h-8 w-8 text-peacefulBlue" />
+              </div>
+              <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">Early Intervention</h3>
+              <p className="text-gray-600">Addressing relationship issues early prevents them from becoming insurmountable problems that lead to divorce.</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center">
+              <div className="bg-peacefulBlue/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <Heart className="h-8 w-8 text-peacefulBlue" />
+              </div>
+              <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">Relationship Strengthening</h3>
+              <p className="text-gray-600">Building communication skills and emotional bonds creates resilience against future challenges.</p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center">
+              <div className="bg-peacefulBlue/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="h-8 w-8 text-peacefulBlue" />
+              </div>
+              <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">Proactive Support</h3>
+              <p className="text-gray-600">Our dual approach of mental health and legal guidance creates a complete safety net for your relationship.</p>
             </div>
           </div>
         </div>
@@ -55,8 +91,8 @@ const HomePage = () => {
       <section className="py-16 bg-softGray">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="section-title">Our Services</h2>
-            <p className="text-gray-600">We provide comprehensive support to help you navigate life's relationship challenges.</p>
+            <h2 className="section-title">Our Prevention-Focused Services</h2>
+            <p className="text-gray-600">We provide comprehensive support to help prevent relationship breakdown and divorce.</p>
           </div>
           
           <div className="grid md:grid-cols-2 gap-8">
@@ -67,19 +103,19 @@ const HomePage = () => {
                 </div>
                 <h3 className="text-2xl font-lora font-semibold text-gray-800">Mental Health Support</h3>
               </div>
-              <p className="text-gray-600 mb-4">Our experienced therapists provide compassionate support to help you navigate emotional challenges, heal from past traumas, and build healthier relationships.</p>
+              <p className="text-gray-600 mb-4">Our preventive approach helps couples identify and address emotional challenges before they threaten your relationship's foundation.</p>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2 text-gray-700">
                   <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-                  Individual therapy sessions
+                  Early intervention therapy
                 </li>
                 <li className="flex items-center gap-2 text-gray-700">
                   <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-                  Relationship counseling
+                  Preventive relationship counseling
                 </li>
                 <li className="flex items-center gap-2 text-gray-700">
                   <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-                  Trauma recovery support
+                  Communication skills building
                 </li>
               </ul>
               <Button asChild variant="link" className="text-peacefulBlue hover:text-peacefulBlue/90 p-0 gap-1 font-medium">
@@ -94,21 +130,21 @@ const HomePage = () => {
                 <div className="p-3 rounded-full bg-peacefulBlue/10 mr-4">
                   <Gavel className="h-8 w-8 text-peacefulBlue" />
                 </div>
-                <h3 className="text-2xl font-lora font-semibold text-gray-800">Legal Support</h3>
+                <h3 className="text-2xl font-lora font-semibold text-gray-800">Preventive Legal Support</h3>
               </div>
-              <p className="text-gray-600 mb-4">Our legal experts provide guidance on all aspects of relationship law, from pre-marital agreements to divorce proceedings and custody arrangements.</p>
+              <p className="text-gray-600 mb-4">Our legal experts help you understand rights and responsibilities, creating clarity that prevents misunderstandings that often lead to divorce.</p>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center gap-2 text-gray-700">
                   <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-                  Pre-marital legal advice
+                  Preventive legal planning
                 </li>
                 <li className="flex items-center gap-2 text-gray-700">
                   <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-                  Divorce consultation and guidance
+                  Relationship agreements
                 </li>
                 <li className="flex items-center gap-2 text-gray-700">
                   <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-                  Child custody support
+                  Conflict resolution guidance
                 </li>
               </ul>
               <Button asChild variant="link" className="text-peacefulBlue hover:text-peacefulBlue/90 p-0 gap-1 font-medium">
@@ -161,8 +197,8 @@ const HomePage = () => {
       <section className="py-16 bg-softGray">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="section-title">Featured Resources</h2>
-            <p className="text-gray-600">Explore our collection of articles, guides, and tools to help you navigate relationship challenges.</p>
+            <h2 className="section-title">Divorce Prevention Resources</h2>
+            <p className="text-gray-600">Explore our collection of articles, guides, and tools to help strengthen your relationship and prevent divorce.</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -170,12 +206,12 @@ const HomePage = () => {
               <div className="h-48 bg-peacefulBlue/20"></div>
               <div className="p-6">
                 <div className="mb-3">
-                  <span className="text-xs font-medium bg-peacefulBlue/10 text-peacefulBlue rounded-full py-1 px-2">Mental Health</span>
+                  <span className="text-xs font-medium bg-peacefulBlue/10 text-peacefulBlue rounded-full py-1 px-2">Prevention</span>
                 </div>
-                <h3 className="text-xl font-lora font-semibold text-gray-800 mb-2 group-hover:text-peacefulBlue transition-colors">Coping with Breakups: A Guide to Emotional Healing</h3>
-                <p className="text-gray-600 mb-4">Learn effective strategies to process grief, rebuild confidence, and move forward after a relationship ends.</p>
+                <h3 className="text-xl font-lora font-semibold text-gray-800 mb-2 group-hover:text-peacefulBlue transition-colors">5 Warning Signs Your Relationship Needs Attention Before It's Too Late</h3>
+                <p className="text-gray-600 mb-4">Learn to identify early indicators of relationship distress and take preventive action before considering divorce.</p>
                 <Button asChild variant="link" className="text-peacefulBlue hover:text-peacefulBlue/90 p-0 gap-1 font-medium">
-                  <Link to="/resources/coping-with-breakups">
+                  <Link to="/resources/relationship-warning-signs">
                     Read More <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -186,12 +222,12 @@ const HomePage = () => {
               <div className="h-48 bg-warmPeach/20"></div>
               <div className="p-6">
                 <div className="mb-3">
-                  <span className="text-xs font-medium bg-peacefulBlue/10 text-peacefulBlue rounded-full py-1 px-2">Legal Insights</span>
+                  <span className="text-xs font-medium bg-peacefulBlue/10 text-peacefulBlue rounded-full py-1 px-2">Legal Prevention</span>
                 </div>
-                <h3 className="text-xl font-lora font-semibold text-gray-800 mb-2 group-hover:text-peacefulBlue transition-colors">Understanding Divorce Laws: What You Need to Know</h3>
-                <p className="text-gray-600 mb-4">A comprehensive guide to divorce proceedings, property division, and protecting your interests during separation.</p>
+                <h3 className="text-xl font-lora font-semibold text-gray-800 mb-2 group-hover:text-peacefulBlue transition-colors">Preventive Legal Agreements That Strengthen Marriages</h3>
+                <p className="text-gray-600 mb-4">How clear legal frameworks can actually prevent misunderstandings and conflicts that often lead to divorce.</p>
                 <Button asChild variant="link" className="text-peacefulBlue hover:text-peacefulBlue/90 p-0 gap-1 font-medium">
-                  <Link to="/resources/divorce-laws">
+                  <Link to="/resources/preventive-legal-agreements">
                     Read More <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -202,12 +238,12 @@ const HomePage = () => {
               <div className="h-48 bg-peacefulBlue/10"></div>
               <div className="p-6">
                 <div className="mb-3">
-                  <span className="text-xs font-medium bg-peacefulBlue/10 text-peacefulBlue rounded-full py-1 px-2">Self-Help</span>
+                  <span className="text-xs font-medium bg-peacefulBlue/10 text-peacefulBlue rounded-full py-1 px-2">Communication</span>
                 </div>
-                <h3 className="text-xl font-lora font-semibold text-gray-800 mb-2 group-hover:text-peacefulBlue transition-colors">Finding Yourself After Divorce: A Journey of Rediscovery</h3>
-                <p className="text-gray-600 mb-4">Practical advice for rebuilding your identity, setting new goals, and embracing a fulfilling life after divorce.</p>
+                <h3 className="text-xl font-lora font-semibold text-gray-800 mb-2 group-hover:text-peacefulBlue transition-colors">Communication Techniques That Prevent Divorce</h3>
+                <p className="text-gray-600 mb-4">Master these proven communication strategies to resolve conflicts and strengthen your bond before problems escalate.</p>
                 <Button asChild variant="link" className="text-peacefulBlue hover:text-peacefulBlue/90 p-0 gap-1 font-medium">
-                  <Link to="/resources/finding-yourself">
+                  <Link to="/resources/preventive-communication">
                     Read More <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -217,7 +253,7 @@ const HomePage = () => {
           
           <div className="mt-12 text-center">
             <Button asChild variant="outline" className="rounded-full px-6 py-3 border-peacefulBlue text-peacefulBlue hover:bg-peacefulBlue/5">
-              <Link to="/resources">View All Resources</Link>
+              <Link to="/resources">View All Prevention Resources</Link>
             </Button>
           </div>
         </div>
@@ -227,8 +263,8 @@ const HomePage = () => {
       <section className="py-16 peach-pattern">
         <div className="container mx-auto px-4 z-10 relative">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="section-title">Client Stories</h2>
-            <p className="text-gray-600">Read about how Peace2Hearts has helped others navigate their relationship challenges.</p>
+            <h2 className="section-title">Prevention Success Stories</h2>
+            <p className="text-gray-600">Read about how Peace2Hearts has helped couples prevent divorce and strengthen their relationships.</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -236,12 +272,12 @@ const HomePage = () => {
               <div className="mb-4">
                 {[1, 2, 3, 4, 5].map(star => <span key={star} className="text-yellow-400">★</span>)}
               </div>
-              <p className="text-gray-600 mb-4 italic">"The combined legal and emotional support I received during my divorce was invaluable. Peace2Hearts guided me through every step of the process with compassion and expertise."</p>
+              <p className="text-gray-600 mb-4 italic">"We were heading toward divorce when we found Peace2Hearts. Their preventive approach helped us identify the root causes of our issues and rebuild our relationship stronger than ever."</p>
               <div className="flex items-center">
                 <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
                 <div>
-                  <h4 className="font-medium text-gray-800">Sarah L.</h4>
-                  <p className="text-sm text-gray-500">Divorce Client</p>
+                  <h4 className="font-medium text-gray-800">Priya & Rahul</h4>
+                  <p className="text-sm text-gray-500">Prevention Success</p>
                 </div>
               </div>
             </div>
@@ -250,12 +286,12 @@ const HomePage = () => {
               <div className="mb-4">
                 {[1, 2, 3, 4, 5].map(star => <span key={star} className="text-yellow-400">★</span>)}
               </div>
-              <p className="text-gray-600 mb-4 italic">"When my partner and I were struggling, the relationship counseling at Peace2Hearts helped us develop better communication skills and rebuild our trust. We're now stronger than ever."</p>
+              <p className="text-gray-600 mb-4 italic">"The early intervention therapy at Peace2Hearts helped us address communication issues before they became serious. Their prevention-focused approach saved our marriage."</p>
               <div className="flex items-center">
                 <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
                 <div>
                   <h4 className="font-medium text-gray-800">Michael & David</h4>
-                  <p className="text-sm text-gray-500">Relationship Counseling</p>
+                  <p className="text-sm text-gray-500">Relationship Strengthening</p>
                 </div>
               </div>
             </div>
@@ -264,12 +300,12 @@ const HomePage = () => {
               <div className="mb-4">
                 {[1, 2, 3, 4, 5].map(star => <span key={star} className="text-yellow-400">★</span>)}
               </div>
-              <p className="text-gray-600 mb-4 italic">"The custody guidance provided by Peace2Hearts was clear, practical, and centered on my child's wellbeing. Their approach helped reduce conflict and find solutions that worked for everyone."</p>
+              <p className="text-gray-600 mb-4 italic">"The preventive legal guidance helped us establish clear expectations and agreements. This clarity removed tensions that were pushing us toward separation."</p>
               <div className="flex items-center">
                 <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
                 <div>
-                  <h4 className="font-medium text-gray-800">Jennifer R.</h4>
-                  <p className="text-sm text-gray-500">Custody Client</p>
+                  <h4 className="font-medium text-gray-800">Aisha & Vikram</h4>
+                  <p className="text-sm text-gray-500">Prevention Client</p>
                 </div>
               </div>
             </div>
@@ -281,14 +317,14 @@ const HomePage = () => {
       <section className="py-16 bg-peacefulBlue text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-lora font-semibold mb-4">Ready to Take the First Step?</h2>
-            <p className="text-lg mb-8 text-white/90">Our team of mental health and legal experts is here to support you through your relationship journey.</p>
+            <h2 className="text-3xl md:text-4xl font-lora font-semibold mb-4">Prevent Divorce, Preserve Your Relationship</h2>
+            <p className="text-lg mb-8 text-white/90">Take proactive steps today with our prevention-focused team of mental health and legal experts.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <FractalButton asChild fractalType="primary" pulseEffect={true} className="bg-white text-peacefulBlue hover:bg-white/90 rounded-full px-6 py-3">
-                <Link to="/book-consultation">Book a Consultation</Link>
+                <Link to="/book-consultation">Schedule Prevention Session</Link>
               </FractalButton>
               <FractalButton asChild fractalType="outline" className="border-white text-peacefulBlue hover:bg-white/10 rounded-full px-6 py-3">
-                <Link to="/contact">Contact Us</Link>
+                <Link to="/contact">Learn About Prevention</Link>
               </FractalButton>
             </div>
           </div>

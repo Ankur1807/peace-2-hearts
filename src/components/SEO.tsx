@@ -19,7 +19,7 @@ export const SEO = ({
   canonicalUrl,
   ogImage = "/og-image.png",
   ogType = "website",
-  keywords,
+  keywords = "divorce prevention, relationship counseling, couples therapy, legal support, marriage guidance",
   language = "en",
   author = "Peace2Hearts",
   structuredData,

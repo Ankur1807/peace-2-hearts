@@ -22,8 +22,20 @@ interface PageBreadcrumbsProps {
 }
 
 export const PageBreadcrumbs = ({ items }: PageBreadcrumbsProps) => {
+  // Add "Divorce Prevention" as a key part of the breadcrumb path for relevant service pages
+  const enhancedItems = items.map(item => {
+    if (item.path.includes('/services/') || item.path.includes('/resources/')) {
+      return {
+        ...item,
+        label: item.label.includes('Prevention') ? item.label : 
+               (item.current ? `${item.label} - Divorce Prevention` : item.label)
+      };
+    }
+    return item;
+  });
+  
   // Convert breadcrumb items to schema format for structured data
-  const schemaItems = items.map(item => ({
+  const schemaItems = enhancedItems.map(item => ({
     name: item.label,
     url: `https://peace2hearts.com${item.path}`
   }));
@@ -40,7 +52,7 @@ export const PageBreadcrumbs = ({ items }: PageBreadcrumbsProps) => {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           
-          {items.map((item, index) => (
+          {enhancedItems.map((item, index) => (
             <React.Fragment key={item.path}>
               {item.current ? (
                 <BreadcrumbItem>
