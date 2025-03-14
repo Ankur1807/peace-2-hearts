@@ -97,18 +97,7 @@ const AboutUs = () => {
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl font-lora font-semibold mb-6 text-gray-800 text-center">Our Story</h2>
             <div className="bg-white p-8 rounded-xl shadow-sm">
-              <p className="text-gray-600 mb-4">
-                Peace2Hearts was founded in 2018 by Dr. Elena Rodriguez, a clinical psychologist, and Michael Chen, a family law attorney, who both witnessed the profound impact that relationship challenges had on their clients' mental health and legal well-being.
-              </p>
-              <p className="text-gray-600 mb-4">
-                Through their respective practices, they observed a consistent pattern: clients navigating relationship difficulties needed both emotional support and legal guidance, yet these services were typically provided in isolation from each other.
-              </p>
-              <p className="text-gray-600 mb-4">
-                Recognizing this gap, Elena and Michael envisioned a comprehensive approach that would address both the emotional and legal aspects of relationship transitions. They brought together a team of compassionate mental health professionals and experienced family law attorneys to create Peace2Hearts.
-              </p>
-              <p className="text-gray-600">
-                Today, Peace2Hearts continues to grow, guided by the founding vision of providing holistic support to individuals and families during some of life's most challenging transitions. Our integrated approach has helped thousands of clients find clarity, healing, and a path forward—with or without their partners.
-              </p>
+              {/* The "Our Story" content has been removed as requested */}
             </div>
           </div>
         </div>
