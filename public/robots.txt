@@ -11,12 +11,6 @@ Disallow: /user/
 Disallow: /sign-in
 Disallow: /sign-up
 
-# Key divorce prevention content pages
-Allow: /services/mental-health
-Allow: /services/legal-support
-Allow: /resources/relationship-warning-signs
-Allow: /resources/preventive-legal-agreements
-Allow: /resources/preventive-communication
-
 # Sitemaps
 Sitemap: https://peace2hearts.com/sitemap.xml
+
