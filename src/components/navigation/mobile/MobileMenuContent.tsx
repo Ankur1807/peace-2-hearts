@@ -9,52 +9,19 @@ import { signOut } from '@/utils/authUtils';
 
 interface MobileMenuContentProps {
   isOpen: boolean;
+  isLoggedIn: boolean;
+  userName: string;
+  onSignOut: () => void;
   onMenuItemClick: () => void;
 }
 
-const MobileMenuContent = ({ isOpen, onMenuItemClick }: MobileMenuContentProps) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("");
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsLoggedIn(!!data.session);
-      
-      if (data.session) {
-        const { data: userData } = await supabase.auth.getUser();
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', userData.user?.id)
-          .single();
-          
-        setUserName(profileData?.full_name || userData.user?.email?.split('@')[0] || "User");
-      }
-    };
-    
-    checkAuth();
-    
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setIsLoggedIn(!!session);
-      
-      if (session) {
-        const { data: userData } = await supabase.auth.getUser();
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', userData.user?.id)
-          .single();
-          
-        setUserName(profileData?.full_name || userData.user?.email?.split('@')[0] || "User");
-      }
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+const MobileMenuContent = ({ 
+  isOpen, 
+  isLoggedIn, 
+  userName, 
+  onSignOut, 
+  onMenuItemClick 
+}: MobileMenuContentProps) => {
   
   const menuVariants = {
     closed: { 
