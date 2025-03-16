@@ -91,6 +91,46 @@ const AboutUs = () => {
         </div>
       </section>
       
+      {/* Team Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="section-title">Our Expert Team</h2>
+            <p className="text-gray-600">Meet the dedicated professionals who provide compassionate support and expert guidance.</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="w-48 h-48 bg-gray-200 rounded-full mx-auto mb-4"></div>
+              <h3 className="text-xl font-lora font-semibold text-gray-800">Dr. Elena Rodriguez</h3>
+              <p className="text-peacefulBlue font-medium mb-2">Founder, Clinical Psychologist</p>
+              <p className="text-gray-600 text-sm">Specializing in relationship trauma and emotional healing.</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-48 h-48 bg-gray-200 rounded-full mx-auto mb-4"></div>
+              <h3 className="text-xl font-lora font-semibold text-gray-800">Michael Chen, Esq.</h3>
+              <p className="text-peacefulBlue font-medium mb-2">Founder, Family Law Attorney</p>
+              <p className="text-gray-600 text-sm">Expert in divorce proceedings and custody arrangements.</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-48 h-48 bg-gray-200 rounded-full mx-auto mb-4"></div>
+              <h3 className="text-xl font-lora font-semibold text-gray-800">Dr. Sarah Johnson</h3>
+              <p className="text-peacefulBlue font-medium mb-2">Relationship Therapist</p>
+              <p className="text-gray-600 text-sm">Specializing in couples counseling and communication skills.</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-48 h-48 bg-gray-200 rounded-full mx-auto mb-4"></div>
+              <h3 className="text-xl font-lora font-semibold text-gray-800">James Wilson, Esq.</h3>
+              <p className="text-peacefulBlue font-medium mb-2">Family Law Attorney</p>
+              <p className="text-gray-600 text-sm">Expert in mediation and collaborative divorce processes.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
       <Footer />
     </>
   );
