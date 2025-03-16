@@ -16,17 +16,19 @@ const Logo = () => {
         {/* Circular background with gradient */}
         <circle cx="60" cy="60" r="56" fill="url(#circleGradient)" stroke="#FFFFFF" strokeWidth="4" />
         
-        {/* Hand outline in white */}
-        <path d="M35 70 C35 50 45 40 60 40 C75 40 85 55 85 70 L75 95 C70 100 50 100 45 95 L35 70 Z" 
-              stroke="#FFFFFF" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Stylized "P" */}
+        <path d="M35 40 L35 80" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" />
+        <path d="M35 40 C35 40 55 40 60 40 C70 40 75 47 75 55 C75 63 70 70 60 70 C55 70 35 70 35 70" 
+              stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
         
-        {/* Thumb of the hand */}
-        <path d="M35 70 C30 65 30 55 35 50" 
-              stroke="#FFFFFF" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Stylized "2" with gradient fill */}
+        <path d="M50 50 C50 50 55 45 60 45 C65 45 70 50 70 55 C70 70 45 75 45 85 C45 87 47 87 50 87 L70 87" 
+              stroke="#FFFFFF" strokeWidth="0" fill="url(#heartGradient)" />
         
-        {/* Heart in the hand with gradient */}
-        <path d="M50 60 A10 10 0 0 1 60 50 A10 10 0 0 1 70 60 A10 10 0 0 1 70 75 Q70 85 60 90 Q50 85 50 75 A10 10 0 0 1 50 60Z" 
-              fill="url(#heartGradient)" />
+        {/* Stylized "H" */}
+        <path d="M85 40 L85 80" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" />
+        <path d="M85 60 L65 60" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" />
+        <path d="M65 40 L65 80" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" />
         
         {/* Small decorative elements */}
         <circle cx="35" cy="30" r="3" fill="#F9A8D4" />
@@ -40,7 +42,7 @@ const Logo = () => {
             <stop offset="0%" stopColor="#C4B5FD" />
             <stop offset="100%" stopColor="#E0E7FF" />
           </linearGradient>
-          <linearGradient id="heartGradient" x1="50" y1="50" x2="70" y2="90" gradientUnits="userSpaceOnUse">
+          <linearGradient id="heartGradient" x1="45" y1="45" x2="70" y2="87" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#F9A8D4" />
             <stop offset="100%" stopColor="#D946EF" />
           </linearGradient>
