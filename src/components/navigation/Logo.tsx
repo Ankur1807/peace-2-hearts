@@ -16,25 +16,28 @@ const Logo = () => {
         {/* Circular background with gradient */}
         <circle cx="60" cy="60" r="56" fill="url(#circleGradient)" stroke="#FFFFFF" strokeWidth="4" />
         
-        {/* Stylized "P" */}
-        <path d="M35 40 L35 80" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" />
-        <path d="M35 40 C35 40 55 40 60 40 C70 40 75 47 75 55 C75 63 70 70 60 70 C55 70 35 70 35 70" 
-              stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        
-        {/* Stylized "2" with gradient fill */}
-        <path d="M50 50 C50 50 55 45 60 45 C65 45 70 50 70 55 C70 70 45 75 45 85 C45 87 47 87 50 87 L70 87" 
-              stroke="#FFFFFF" strokeWidth="0" fill="url(#heartGradient)" />
-        
-        {/* Stylized "H" */}
-        <path d="M85 40 L85 80" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" />
-        <path d="M85 60 L65 60" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" />
-        <path d="M65 40 L65 80" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" />
+        {/* Connected P2H letters */}
+        <g transform="translate(25, 35)">
+          {/* P Letter */}
+          <path d="M0 0 L0 50" stroke="#FFFFFF" strokeWidth="8" strokeLinecap="round" />
+          <path d="M0 0 C0 0 20 0 25 0 C35 0 40 7 40 15 C40 23 35 30 25 30 C20 30 0 30 0 30" 
+                stroke="#FFFFFF" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          
+          {/* 2 with gradient fill - connected to P */}
+          <path d="M32 15 C40 15 45 20 45 25 C45 35 30 40 20 45 C20 45 20 50 25 50 L45 50" 
+                stroke="none" fill="url(#heartGradient)" />
+          
+          {/* H Letter - connected to 2 */}
+          <path d="M50 0 L50 50" stroke="#FFFFFF" strokeWidth="8" strokeLinecap="round" />
+          <path d="M50 25 L70 25" stroke="#FFFFFF" strokeWidth="8" strokeLinecap="round" />
+          <path d="M70 0 L70 50" stroke="#FFFFFF" strokeWidth="8" strokeLinecap="round" />
+        </g>
         
         {/* Small decorative elements */}
-        <circle cx="35" cy="30" r="3" fill="#F9A8D4" />
-        <circle cx="85" cy="30" r="3" fill="#93C5FD" />
-        <circle cx="45" cy="85" r="3" fill="#FDE68A" />
-        <circle cx="75" cy="85" r="3" fill="#86EFAC" />
+        <circle cx="30" cy="25" r="3" fill="#F9A8D4" />
+        <circle cx="90" cy="25" r="3" fill="#93C5FD" />
+        <circle cx="35" cy="95" r="3" fill="#FDE68A" />
+        <circle cx="85" cy="95" r="3" fill="#86EFAC" />
         
         {/* Gradients definition */}
         <defs>
@@ -42,7 +45,7 @@ const Logo = () => {
             <stop offset="0%" stopColor="#C4B5FD" />
             <stop offset="100%" stopColor="#E0E7FF" />
           </linearGradient>
-          <linearGradient id="heartGradient" x1="45" y1="45" x2="70" y2="87" gradientUnits="userSpaceOnUse">
+          <linearGradient id="heartGradient" x1="20" y1="15" x2="45" y2="50" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#F9A8D4" />
             <stop offset="100%" stopColor="#D946EF" />
           </linearGradient>
