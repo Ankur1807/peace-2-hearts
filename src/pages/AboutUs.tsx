@@ -91,18 +91,6 @@ const AboutUs = () => {
         </div>
       </section>
       
-      {/* Story Section */}
-      <section className="py-16 bg-softGray">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-lora font-semibold mb-6 text-gray-800 text-center">Our Story</h2>
-            <div className="bg-white p-8 rounded-xl shadow-sm">
-              {/* The "Our Story" content has been removed as requested */}
-            </div>
-          </div>
-        </div>
-      </section>
-      
       {/* Team Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
