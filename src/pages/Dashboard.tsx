@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
@@ -9,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarIcon, Clock, FileText, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
+import { getUserProfile, signOut } from "@/utils/authUtils";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Appointment {
   id: string;
@@ -18,44 +20,94 @@ interface Appointment {
   status: "upcoming" | "completed" | "cancelled";
 }
 
+interface UserProfile {
+  id: string;
+  full_name: string;
+  email: string;
+  phone_number?: string;
+}
+
 const Dashboard = () => {
-  const [user, setUser] = useState<{ name: string, email: string } | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is logged in
-    const userData = localStorage.getItem("user");
-    if (!userData) {
+    const fetchUserData = async () => {
+      setIsLoading(true);
+      
+      try {
+        const userProfile = await getUserProfile();
+        
+        if (!userProfile) {
+          navigate("/sign-in");
+          return;
+        }
+        
+        setUser(userProfile as UserProfile);
+        
+        // For now, we'll keep using mock appointment data
+        // Later, this would be replaced with a real fetch from Supabase
+        setAppointments([
+          {
+            id: "1",
+            date: new Date(new Date().getTime() + 86400000 * 3), // 3 days from now
+            service: "Mental Health Consultation",
+            specialist: "Dr. Sarah Johnson",
+            status: "upcoming",
+          },
+          {
+            id: "2",
+            date: new Date(new Date().getTime() - 86400000 * 7), // 7 days ago
+            service: "Legal Consultation",
+            specialist: "Atty. Michael Chen",
+            status: "completed",
+          },
+        ]);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load user data",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [navigate, toast]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
       navigate("/sign-in");
-      return;
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
     }
-
-    setUser(JSON.parse(userData));
-
-    // Mock appointments data
-    setAppointments([
-      {
-        id: "1",
-        date: new Date(new Date().getTime() + 86400000 * 3), // 3 days from now
-        service: "Mental Health Consultation",
-        specialist: "Dr. Sarah Johnson",
-        status: "upcoming",
-      },
-      {
-        id: "2",
-        date: new Date(new Date().getTime() - 86400000 * 7), // 7 days ago
-        service: "Legal Consultation",
-        specialist: "Atty. Michael Chen",
-        status: "completed",
-      },
-    ]);
-  }, [navigate]);
-
-  const handleSignOut = () => {
-    localStorage.removeItem("user");
-    navigate("/sign-in");
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <Navigation />
+        <main className="py-12 md:py-16">
+          <div className="container mx-auto px-4">
+            <p className="text-center">Loading...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   if (!user) return null;
 
@@ -72,7 +124,7 @@ const Dashboard = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between mb-8 gap-4">
             <div>
-              <h1 className="text-3xl font-lora font-semibold">Welcome, {user.name}</h1>
+              <h1 className="text-3xl font-lora font-semibold">Welcome, {user.full_name}</h1>
               <p className="text-gray-600">{user.email}</p>
             </div>
             <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>

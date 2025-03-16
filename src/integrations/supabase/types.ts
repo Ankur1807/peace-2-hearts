@@ -9,7 +9,194 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      consultants: {
+        Row: {
+          created_at: string
+          hourly_rate: number
+          id: string
+          is_available: boolean
+          profile_id: string
+          specialization: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hourly_rate: number
+          id?: string
+          is_available?: boolean
+          profile_id: string
+          specialization: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hourly_rate?: number
+          id?: string
+          is_available?: boolean
+          profile_id?: string
+          specialization?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultants_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultation_notes: {
+        Row: {
+          consultation_id: string
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          consultation_id: string
+          content: string
+          created_at?: string
+          created_by: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          consultation_id?: string
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultation_notes_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "consultations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultations: {
+        Row: {
+          consultant_id: string
+          consultation_type: string
+          created_at: string
+          date: string
+          id: string
+          message: string | null
+          status: string
+          time_slot: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consultant_id: string
+          consultation_type: string
+          created_at?: string
+          date: string
+          id?: string
+          message?: string | null
+          status?: string
+          time_slot: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consultant_id?: string
+          consultation_type?: string
+          created_at?: string
+          date?: string
+          id?: string
+          message?: string | null
+          status?: string
+          time_slot?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultations_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "consultants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          consultation_id: string
+          created_at: string
+          currency: string
+          id: string
+          payment_method: string | null
+          payment_status: string
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          consultation_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          payment_method?: string | null
+          payment_status?: string
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          consultation_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          payment_method?: string | null
+          payment_status?: string
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "consultations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          phone_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          phone_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone_number?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

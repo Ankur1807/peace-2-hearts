@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { SEO } from '@/components/SEO';
+import { supabase } from "@/integrations/supabase/client";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -18,20 +19,41 @@ const SignUp = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Mock registration for demonstration
-    setTimeout(() => {
-      localStorage.setItem("user", JSON.stringify({ email, name }));
-      setIsLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+          },
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: "Account created",
-        description: "Welcome to Peace2Hearts",
+        description: "Welcome to Peace2Hearts! Please check your email to verify your account.",
       });
+
+      // Note: In development, you might want to disable email verification in Supabase
       navigate("/dashboard");
-    }, 1500);
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Please check your information and try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -84,7 +106,9 @@ const SignUp = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    minLength={6}
                   />
+                  <p className="text-xs text-gray-500">Password must be at least 6 characters</p>
                 </div>
                 <div className="text-sm text-gray-500">
                   By signing up, you agree to our{" "}

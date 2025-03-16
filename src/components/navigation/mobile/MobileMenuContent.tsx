@@ -3,23 +3,59 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Home, Info, Briefcase, BookText, Phone, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from "@/integrations/supabase/client";
+import { signOut } from '@/utils/authUtils';
 
 interface MobileMenuContentProps {
   isOpen: boolean;
-  isLoggedIn: boolean;
-  userName: string;
-  onSignOut: () => void;
   onMenuItemClick: () => void;
 }
 
-const MobileMenuContent = ({ 
-  isOpen, 
-  isLoggedIn, 
-  userName, 
-  onSignOut, 
-  onMenuItemClick 
-}: MobileMenuContentProps) => {
+const MobileMenuContent = ({ isOpen, onMenuItemClick }: MobileMenuContentProps) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsLoggedIn(!!data.session);
+      
+      if (data.session) {
+        const { data: userData } = await supabase.auth.getUser();
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', userData.user?.id)
+          .single();
+          
+        setUserName(profileData?.full_name || userData.user?.email?.split('@')[0] || "User");
+      }
+    };
+    
+    checkAuth();
+    
+    // Listen for auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setIsLoggedIn(!!session);
+      
+      if (session) {
+        const { data: userData } = await supabase.auth.getUser();
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', userData.user?.id)
+          .single();
+          
+        setUserName(profileData?.full_name || userData.user?.email?.split('@')[0] || "User");
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+  
   const menuVariants = {
     closed: { 
       y: "-100%",
@@ -44,6 +80,11 @@ const MobileMenuContent = ({
   const itemVariants = {
     closed: { opacity: 0, y: -20 },
     open: { opacity: 1, y: 0 }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    onMenuItemClick();
   };
 
   return (
@@ -140,10 +181,7 @@ const MobileMenuContent = ({
               <Button 
                 variant="outline" 
                 className="mt-2 w-full border-white text-white hover:bg-white/10" 
-                onClick={() => { 
-                  onSignOut(); 
-                  onMenuItemClick(); 
-                }}
+                onClick={handleSignOut}
               >
                 Sign Out
               </Button>

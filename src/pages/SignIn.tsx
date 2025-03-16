@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { SEO } from '@/components/SEO';
+import { supabase } from "@/integrations/supabase/client";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -18,20 +19,35 @@ const SignIn = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Mock authentication for demonstration
-    setTimeout(() => {
-      localStorage.setItem("user", JSON.stringify({ email, name: email.split('@')[0] }));
-      setIsLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: "Sign in successful",
         description: "Welcome back to Peace2Hearts",
       });
+      
       navigate("/dashboard");
-    }, 1500);
+    } catch (error: any) {
+      toast({
+        title: "Sign in failed",
+        description: error.message || "Please check your credentials and try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
