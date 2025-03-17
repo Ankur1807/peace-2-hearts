@@ -35,3 +35,24 @@ export const getUserProfile = async () => {
     email: userData.user.email
   };
 };
+
+export const updateUserProfile = async (updates: { full_name?: string; phone_number?: string }) => {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    throw new Error("User not authenticated");
+  }
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', userData.user.id)
+    .select()
+    .single();
+    
+  if (error) {
+    console.error('Error updating user profile:', error);
+    throw error;
+  }
+  
+  return data;
+};

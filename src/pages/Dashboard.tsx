@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
@@ -8,9 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarIcon, Clock, FileText, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
-import { getUserProfile, signOut } from "@/utils/authUtils";
-import { supabase } from "@/integrations/supabase/client";
+import { getUserProfile, signOut, updateUserProfile } from "@/utils/authUtils";
+import { fetchUserConsultations } from "@/utils/consultationUtils";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Appointment {
   id: string;
@@ -22,15 +25,19 @@ interface Appointment {
 
 interface UserProfile {
   id: string;
-  full_name: string;
+  full_name: string | null;
   email: string;
-  phone_number?: string;
+  phone_number?: string | null;
 }
 
 const Dashboard = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -47,25 +54,12 @@ const Dashboard = () => {
         }
         
         setUser(userProfile as UserProfile);
+        setEditName(userProfile.full_name || "");
+        setEditPhone(userProfile.phone_number || "");
         
-        // For now, we'll keep using mock appointment data
-        // Later, this would be replaced with a real fetch from Supabase
-        setAppointments([
-          {
-            id: "1",
-            date: new Date(new Date().getTime() + 86400000 * 3), // 3 days from now
-            service: "Mental Health Consultation",
-            specialist: "Dr. Sarah Johnson",
-            status: "upcoming",
-          },
-          {
-            id: "2",
-            date: new Date(new Date().getTime() - 86400000 * 7), // 7 days ago
-            service: "Legal Consultation",
-            specialist: "Atty. Michael Chen",
-            status: "completed",
-          },
-        ]);
+        // Fetch actual consultations from Supabase
+        const userAppointments = await fetchUserConsultations();
+        setAppointments(userAppointments);
       } catch (error) {
         console.error("Error fetching user data:", error);
         toast({
@@ -92,6 +86,40 @@ const Dashboard = () => {
         description: "Failed to sign out",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    
+    setIsSaving(true);
+    try {
+      await updateUserProfile({
+        full_name: editName,
+        phone_number: editPhone
+      });
+      
+      setUser({
+        ...user,
+        full_name: editName,
+        phone_number: editPhone
+      });
+      
+      setIsEditing(false);
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been updated successfully."
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -123,10 +151,58 @@ const Dashboard = () => {
       <main className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between mb-8 gap-4">
-            <div>
-              <h1 className="text-3xl font-lora font-semibold">Welcome, {user.full_name}</h1>
-              <p className="text-gray-600">{user.email}</p>
-            </div>
+            {isEditing ? (
+              <div className="space-y-4 w-full md:w-1/2">
+                <h1 className="text-3xl font-lora font-semibold">Edit Profile</h1>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input 
+                    id="fullName" 
+                    value={editName} 
+                    onChange={(e) => setEditName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Input 
+                    id="phoneNumber" 
+                    value={editPhone} 
+                    onChange={(e) => setEditPhone(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleSaveProfile} 
+                    className="bg-peacefulBlue hover:bg-peacefulBlue/90"
+                    disabled={isSaving}
+                  >
+                    {isSaving ? "Saving..." : "Save Changes"}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsEditing(false)}
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <h1 className="text-3xl font-lora font-semibold">Welcome, {user.full_name || "User"}</h1>
+                <p className="text-gray-600">{user.email}</p>
+                {user.phone_number && (
+                  <p className="text-gray-600">{user.phone_number}</p>
+                )}
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsEditing(true)}
+                  className="mt-2"
+                >
+                  Edit Profile
+                </Button>
+              </div>
+            )}
             <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>
           </div>
 
@@ -210,6 +286,7 @@ const Dashboard = () => {
                   <CardDescription>View and download your documents.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* In a future update, these would be fetched from Supabase storage */}
                   <div className="flex items-center p-3 border rounded-md">
                     <FileText className="h-5 w-5 mr-3 text-gray-500" />
                     <div>
@@ -238,6 +315,7 @@ const Dashboard = () => {
                   <CardDescription>Recent messages from your specialists.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* In a future update, these would be fetched from Supabase */}
                   <div className="flex items-start p-3 border rounded-md">
                     <MessageSquare className="h-5 w-5 mr-3 mt-1 text-gray-500" />
                     <div>

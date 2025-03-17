@@ -16,8 +16,10 @@ import {
   checkAuthentication, 
   storeBookingDetailsInLocalStorage,
   getBookingDetailsFromLocalStorage,
-  clearBookingDetailsFromLocalStorage
+  clearBookingDetailsFromLocalStorage,
+  saveConsultation
 } from '@/utils/consultationUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PersonalDetails {
   firstName: string;
@@ -50,6 +52,23 @@ const BookConsultation = () => {
     const checkAuth = async () => {
       const authenticated = await checkAuthentication();
       setIsAuthenticated(authenticated);
+      
+      // If not authenticated and at step 3 or higher, redirect to sign in
+      if (!authenticated && step > 2) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to continue booking your consultation.",
+        });
+        // Store current booking details
+        storeBookingDetailsInLocalStorage({
+          consultationType,
+          date: date?.toISOString(),
+          timeSlot,
+          step,
+          personalDetails
+        });
+        navigate("/sign-in");
+      }
     };
     
     checkAuth();
@@ -67,7 +86,7 @@ const BookConsultation = () => {
       // Clear the stored details after retrieving them
       clearBookingDetailsFromLocalStorage();
     }
-  }, []);
+  }, [step, navigate, consultationType, date, timeSlot, personalDetails, toast]);
 
   const steps = [
     { number: 1, label: "Service" },
@@ -77,14 +96,25 @@ const BookConsultation = () => {
   ];
 
   const handleNextStep = () => {
-    // Store current progress in case user needs to sign in later
-    storeBookingDetailsInLocalStorage({
-      consultationType,
-      date: date?.toISOString(),
-      timeSlot,
-      step: step + 1,
-      personalDetails
-    });
+    // If moving to payment step, ensure user is authenticated
+    if (step === 2 && !isAuthenticated) {
+      // Store current booking details
+      storeBookingDetailsInLocalStorage({
+        consultationType,
+        date: date?.toISOString(),
+        timeSlot,
+        step: 3, // Set to next step so they come back here
+        personalDetails
+      });
+      
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to continue booking your consultation.",
+      });
+      
+      navigate("/sign-in");
+      return;
+    }
     
     setStep(step + 1);
     window.scrollTo(0, 0);
@@ -101,25 +131,83 @@ const BookConsultation = () => {
     setPersonalDetails(details);
   };
 
-  const handleProcessPayment = (e: React.FormEvent) => {
+  const handleProcessPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     
-    // Mock payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      // First check if the user is authenticated
+      const { data: session } = await supabase.auth.getSession();
+      
+      if (!session.session) {
+        // Save details and redirect to sign in
+        storeBookingDetailsInLocalStorage({
+          consultationType,
+          date: date?.toISOString(),
+          timeSlot,
+          step: 3,
+          personalDetails
+        });
+        
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to complete your booking.",
+        });
+        
+        navigate("/sign-in");
+        return;
+      }
+      
+      // Mock payment processing
+      // In a real application, this would integrate with a payment gateway
+      setTimeout(() => {
+        toast({
+          title: "Payment Successful",
+          description: "Your payment has been processed successfully.",
+        });
+        setStep(4);
+        window.scrollTo(0, 0);
+        setIsProcessing(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Payment processing error:", error);
       toast({
-        title: "Payment Successful",
-        description: "Your payment has been processed successfully.",
+        title: "Payment Failed",
+        description: "There was an error processing your payment. Please try again.",
+        variant: "destructive"
       });
-      setStep(4);
-      window.scrollTo(0, 0);
-    }, 2000);
+      setIsProcessing(false);
+    }
   };
 
-  const handleConfirmBooking = () => {
-    setSubmitted(true);
-    window.scrollTo(0, 0);
+  const handleConfirmBooking = async () => {
+    try {
+      // Save the consultation to Supabase
+      const consultation = await saveConsultation(
+        consultationType,
+        date,
+        timeSlot,
+        personalDetails
+      );
+      
+      if (consultation) {
+        setSubmitted(true);
+        window.scrollTo(0, 0);
+        
+        toast({
+          title: "Booking Confirmed",
+          description: "Your consultation has been successfully booked.",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error confirming booking:", error);
+      
+      toast({
+        title: "Booking Failed",
+        description: error.message || "There was an error confirming your booking. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (submitted) {

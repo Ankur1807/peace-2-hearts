@@ -54,29 +54,140 @@ export const saveConsultation = async (
     throw new Error("User not authenticated");
   }
 
-  // In a real app, you'd first get or create a consultant
-  // For now, we'll use a mock consultant ID
-  const consultantId = "mock-consultant-id";
+  // Get or create a consultant with the appropriate specialization
+  const { data: consultants, error: consultantError } = await supabase
+    .from('consultants')
+    .select('id')
+    .eq('specialization', consultationType)
+    .eq('is_available', true)
+    .limit(1);
 
-  const { data, error } = await supabase
+  if (consultantError) {
+    console.error("Error fetching consultants:", consultantError);
+    throw consultantError;
+  }
+
+  let consultantId;
+  if (consultants && consultants.length > 0) {
+    consultantId = consultants[0].id;
+  } else {
+    // For demo purposes, create a mock consultant if none exists
+    const { data: mockConsultant, error: createError } = await supabase
+      .from('consultants')
+      .insert({
+        specialization: consultationType,
+        hourly_rate: 2500, // Default rate in INR
+        profile_id: userData.user.id, // Using user's ID as a placeholder
+        is_available: true
+      })
+      .select()
+      .single();
+
+    if (createError) {
+      console.error("Error creating consultant:", createError);
+      throw createError;
+    }
+    
+    consultantId = mockConsultant.id;
+  }
+
+  // Save the consultation
+  const { data: consultation, error: consultationError } = await supabase
     .from('consultations')
     .insert({
       user_id: userData.user.id,
-      consultant_id: consultantId, // This would be a real consultant ID in production
+      consultant_id: consultantId,
       consultation_type: consultationType,
       date: date.toISOString(),
       time_slot: timeSlot,
-      message: personalDetails.message
+      message: personalDetails.message,
+      status: 'scheduled'
     })
     .select()
     .single();
 
+  if (consultationError) {
+    console.error("Error saving consultation:", consultationError);
+    throw consultationError;
+  }
+
+  // Update user profile with name and phone if not already set
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userData.user.id)
+    .single();
+
+  if (!profileError && profile) {
+    // Only update if needed
+    if (!profile.full_name || !profile.phone_number) {
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          full_name: profile.full_name || `${personalDetails.firstName} ${personalDetails.lastName}`,
+          phone_number: profile.phone_number || personalDetails.phone
+        })
+        .eq('id', userData.user.id);
+
+      if (updateError) {
+        console.error("Error updating profile:", updateError);
+        // Non-critical error, we can continue
+      }
+    }
+  }
+
+  return consultation;
+};
+
+// Function to fetch user's consultations
+export const fetchUserConsultations = async () => {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    throw new Error("User not authenticated");
+  }
+
+  const { data, error } = await supabase
+    .from('consultations')
+    .select(`
+      id,
+      consultation_type,
+      date,
+      time_slot,
+      status,
+      message,
+      consultant_id,
+      consultants (
+        specialization,
+        hourly_rate,
+        profile_id,
+        profiles (
+          full_name
+        )
+      )
+    `)
+    .eq('user_id', userData.user.id)
+    .order('date', { ascending: false });
+
   if (error) {
-    console.error("Error saving consultation:", error);
+    console.error("Error fetching consultations:", error);
     throw error;
   }
 
-  return data;
+  return data.map(consultation => ({
+    id: consultation.id,
+    date: new Date(consultation.date),
+    service: getConsultationTypeLabel(consultation.consultation_type),
+    specialist: consultation.consultants?.profiles?.full_name || "Specialist",
+    status: mapStatusToUI(consultation.status)
+  }));
+};
+
+// Helper function to map database status to UI status
+const mapStatusToUI = (status: string): "upcoming" | "completed" | "cancelled" => {
+  if (status === 'scheduled' || status === 'confirmed') return 'upcoming';
+  if (status === 'completed') return 'completed';
+  if (status === 'cancelled') return 'cancelled';
+  return 'upcoming'; // Default case
 };
 
 // Add consultation type display helper
