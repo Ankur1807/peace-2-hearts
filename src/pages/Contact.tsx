@@ -6,6 +6,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -16,6 +17,7 @@ const Contact = () => {
     subject: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -25,24 +27,53 @@ const Contact = () => {
     }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would send the form data to a server
-    console.log('Form submitted:', formData);
+    setIsSubmitting(true);
     
-    toast({
-      title: "Message Sent",
-      description: "Thank you for contacting us. We'll get back to you soon.",
-    });
-    
-    // Reset the form
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: ''
-    });
+    try {
+      // Save submission to Supabase
+      const { error: dbError } = await supabase
+        .from('contact_submissions')
+        .insert([formData]);
+      
+      if (dbError) {
+        throw new Error(`Database error: ${dbError.message}`);
+      }
+      
+      // Send email notification
+      const response = await supabase.functions.invoke('send-contact-email', {
+        body: formData,
+      });
+      
+      if (response.error) {
+        console.error('Email notification failed:', response.error);
+        // We'll still consider the submission successful even if email fails
+      }
+      
+      toast({
+        title: "Message Sent",
+        description: "Thank you for contacting us. We'll get back to you soon.",
+      });
+      
+      // Reset the form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast({
+        title: "Submission Error",
+        description: "There was a problem sending your message. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -112,6 +143,7 @@ const Contact = () => {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-peacefulBlue/50"
+                    disabled={isSubmitting}
                   />
                 </div>
                 
@@ -125,6 +157,7 @@ const Contact = () => {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-peacefulBlue/50"
+                    disabled={isSubmitting}
                   />
                 </div>
                 
@@ -137,6 +170,7 @@ const Contact = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-peacefulBlue/50"
+                    disabled={isSubmitting}
                   />
                 </div>
                 
@@ -149,6 +183,7 @@ const Contact = () => {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-peacefulBlue/50"
+                    disabled={isSubmitting}
                   >
                     <option value="">Select a subject</option>
                     <option value="Mental Health Services">Mental Health Services</option>
@@ -168,11 +203,16 @@ const Contact = () => {
                     required
                     rows={5}
                     className="w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-peacefulBlue/50"
+                    disabled={isSubmitting}
                   ></textarea>
                 </div>
                 
-                <Button type="submit" className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white w-full">
-                  Send Message
+                <Button 
+                  type="submit" 
+                  className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </div>
