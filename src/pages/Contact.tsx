@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
 import { supabase } from "@/integrations/supabase/client";
+import { Input } from '@/components/ui/input';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -32,29 +33,40 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
+      console.log("Submitting form data:", formData);
+      
       // Save submission to Supabase
       const { error: dbError } = await supabase
         .from('contact_submissions')
         .insert([formData]);
       
       if (dbError) {
+        console.error('Database error:', dbError);
         throw new Error(`Database error: ${dbError.message}`);
       }
       
+      console.log("Database submission successful");
+      
       // Send email notification
-      const response = await supabase.functions.invoke('send-contact-email', {
+      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-contact-email', {
         body: formData,
       });
       
-      if (response.error) {
-        console.error('Email notification failed:', response.error);
-        // We'll still consider the submission successful even if email fails
-      }
+      console.log("Email function response:", emailData);
       
-      toast({
-        title: "Message Sent",
-        description: "Thank you for contacting us. We'll get back to you soon.",
-      });
+      if (emailError) {
+        console.error('Email notification failed:', emailError);
+        // We'll still consider the submission successful even if email fails
+        toast({
+          title: "Message Saved",
+          description: "Your message was saved in our system, but there was an issue sending email notifications. Our team will still review your message.",
+        });
+      } else {
+        toast({
+          title: "Message Sent",
+          description: "Thank you for contacting us. We'll get back to you soon.",
+        });
+      }
       
       // Reset the form
       setFormData({
@@ -135,7 +147,7 @@ const Contact = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                  <input
+                  <Input
                     type="text"
                     id="name"
                     name="name"
@@ -149,7 +161,7 @@ const Contact = () => {
                 
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
+                  <Input
                     type="email"
                     id="email"
                     name="email"
@@ -163,7 +175,7 @@ const Contact = () => {
                 
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone (optional)</label>
-                  <input
+                  <Input
                     type="tel"
                     id="phone"
                     name="phone"

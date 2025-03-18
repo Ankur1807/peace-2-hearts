@@ -23,9 +23,25 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log("Contact form submission received");
+    
     // Get the contact form data from the request
     const formData: ContactFormData = await req.json();
     const { name, email, phone, subject, message } = formData;
+    
+    console.log(`Form data: ${JSON.stringify({ name, email, subject })}`);
+
+    // Get email credentials from environment variables
+    const contactEmail = Deno.env.get("contact@peace2hearts.com");
+    const contactEmailPassword = Deno.env.get("P2H");
+    const adminEmail = Deno.env.get("ADMIN_EMAIL") || "admin@peace2hearts.com";
+    
+    console.log(`Using email: ${contactEmail}`);
+
+    if (!contactEmail || !contactEmailPassword) {
+      console.error("Missing email credentials");
+      throw new Error("Email credentials are not configured properly");
+    }
 
     // Set up nodemailer with Google Workspace credentials
     const transporter = createTransport({
@@ -33,8 +49,8 @@ const handler = async (req: Request): Promise<Response> => {
       port: 587,
       secure: false, // Use TLS
       auth: {
-        user: Deno.env.get("CONTACT_EMAIL"),
-        pass: Deno.env.get("CONTACT_EMAIL_PASSWORD"),
+        user: contactEmail,
+        pass: contactEmailPassword,
       },
     });
 
@@ -61,17 +77,19 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     // Send email to admin
+    console.log("Sending email to admin");
     await transporter.sendMail({
-      from: `"Peace2Hearts Contact" <${Deno.env.get("CONTACT_EMAIL")}>`,
-      to: Deno.env.get("ADMIN_EMAIL"),
+      from: `"Peace2Hearts Contact" <${contactEmail}>`,
+      to: adminEmail,
       subject: `New Contact Form: ${subject}`,
       html: adminEmailContent,
       replyTo: email,
     });
 
     // Send confirmation email to user
+    console.log("Sending confirmation email to user");
     await transporter.sendMail({
-      from: `"Peace2Hearts" <${Deno.env.get("CONTACT_EMAIL")}>`,
+      from: `"Peace2Hearts" <${contactEmail}>`,
       to: email,
       subject: "We've received your message - Peace2Hearts",
       html: userEmailContent,
