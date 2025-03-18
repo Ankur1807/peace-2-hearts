@@ -41,10 +41,7 @@ import CustodyService from "./pages/services/CustodyService";
 import BookConsultation from "./pages/BookConsultation";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
-import JoinAsConsultant from "./pages/JoinAsConsultant";
 import Dashboard from "./pages/Dashboard";
-import ConsultantApplicationSuccess from "./pages/ConsultantApplicationSuccess";
-import ConsultantProfileTemplate from "./components/consultant/ConsultantProfileTemplate";
 
 const queryClient = new QueryClient();
 
@@ -71,7 +68,7 @@ const App = () => (
             <Route path="/services/mental-health/family-therapy" element={<FamilyTherapy />} />
             <Route path="/services/mental-health/premarital-counselling" element={<PremaritalCounselling />} />
             <Route path="/services/mental-health/couples-counselling" element={<CouplesCounselling />} />
-            <Route path="/services/mental-health/sexualhealth" element={<SexualHealthCounselling />} />
+            <Route path="/services/mental-health/sexual-health-counselling" element={<SexualHealthCounselling />} />
             
             {/* Legal Sub-Services */}
             <Route path="/services/legal-support/pre-marriage" element={<PreMarriageLegal />} />
@@ -93,10 +90,7 @@ const App = () => (
             <Route path="/book-consultation" element={<BookConsultation />} />
             <Route path="/sign-in" element={<SignIn />} />
             <Route path="/sign-up" element={<SignUp />} />
-            <Route path="/join-as-consultant" element={<JoinAsConsultant />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/consultant-application-success" element={<ConsultantApplicationSuccess />} />
-            <Route path="/consultants/:consultantId" element={<ConsultantProfileTemplate />} />
             
             {/* Catch-all route for 404 */}
             <Route path="*" element={<NotFound />} />

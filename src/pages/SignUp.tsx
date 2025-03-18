@@ -1,63 +1,56 @@
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { SEO } from "@/components/SEO";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { SEO } from '@/components/SEO';
 import { supabase } from "@/integrations/supabase/client";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [agreeToTerms, setAgreeToTerms] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!agreeToTerms) {
-      setError("You must agree to the Terms of Service and Privacy Policy to sign up.");
-      return;
-    }
-
-    setError(null);
     setIsLoading(true);
 
     try {
-      // Register the user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            name: fullName,
+            name: name,
           },
         },
       });
 
-      if (authError) throw authError;
-
-      if (!authData.user) {
-        throw new Error("Failed to create user");
+      if (error) {
+        throw error;
       }
 
-      // Regular user flow
       toast({
-        title: "Account created!",
-        description: "Your account has been successfully created. You can now sign in.",
+        title: "Account created",
+        description: "Welcome to Peace2Hearts! Please check your email to verify your account.",
       });
-      navigate("/sign-in");
+
+      // Note: In development, you might want to disable email verification in Supabase
+      navigate("/dashboard");
     } catch (error: any) {
-      setError(error.message || "An unexpected error occurred");
-      console.error("Sign up error:", error);
+      toast({
+        title: "Registration failed",
+        description: error.message || "Please check your information and try again",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -66,107 +59,85 @@ const SignUp = () => {
   return (
     <>
       <SEO 
-        title="Sign Up - Peace2Hearts"
-        description="Create an account with Peace2Hearts to access mental health and legal support services."
+        title="Sign Up"
+        description="Create your Peace2Hearts account to book consultations, access personalized resources, and begin your journey to relationship wellness."
+        keywords="sign up, create account, Peace2Hearts registration, relationship counseling services"
       />
       <Navigation />
-      <main className="py-10 md:py-16">
-        <div className="container mx-auto px-4 max-w-md">
-          <h1 className="text-3xl font-bold mb-6 text-center">Create an Account</h1>
-          
-          <div className="mb-6">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div>
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+      <main className="py-16 md:py-20">
+        <div className="container max-w-md mx-auto px-4">
+          <Card>
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl font-lora text-center">Create an account</CardTitle>
+              <CardDescription className="text-center">
+                Join Peace2Hearts to manage your consultations
+              </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleSignUp}>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input 
+                    id="name" 
+                    type="text" 
+                    placeholder="John Doe" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     required
-                    placeholder="Your full name"
                   />
                 </div>
-                
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="hello@example.com" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    placeholder="Your email address"
                   />
                 </div>
-                
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    placeholder="••••••••" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    placeholder="Create a password"
                     minLength={6}
                   />
+                  <p className="text-xs text-gray-500">Password must be at least 6 characters</p>
                 </div>
-                
-                <div className="flex items-start space-x-2 mt-6">
-                  <Checkbox 
-                    id="terms" 
-                    checked={agreeToTerms} 
-                    onCheckedChange={(checked) => setAgreeToTerms(checked === true)}
-                  />
-                  <Label
-                    htmlFor="terms"
-                    className="text-sm"
-                  >
-                    I agree to the{" "}
-                    <Link to="/terms" className="text-purple-600 hover:underline">
-                      Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link to="/privacy" className="text-purple-600 hover:underline">
-                      Privacy Policy
-                    </Link>
-                  </Label>
+                <div className="text-sm text-gray-500">
+                  By signing up, you agree to our{" "}
+                  <Link to="/terms" className="text-peacefulBlue hover:underline">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link to="/privacy" className="text-peacefulBlue hover:underline">
+                    Privacy Policy
+                  </Link>
                 </div>
-                
-                {error && (
-                  <div className="bg-red-50 text-red-800 p-3 rounded-md text-sm">
-                    {error}
-                  </div>
-                )}
-                
-                <Button
-                  type="submit"
-                  className="w-full"
+              </CardContent>
+              <CardFooter className="flex flex-col gap-4">
+                <Button 
+                  type="submit" 
+                  className="w-full bg-peacefulBlue hover:bg-peacefulBlue/90"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Creating Account..." : "Sign Up"}
+                  {isLoading ? "Creating account..." : "Create account"}
                 </Button>
-              </form>
-            </div>
-          </div>
-          
-          <div className="flex flex-col space-y-4 text-center">
-            <p className="text-center text-gray-600">
-              Already have an account?{" "}
-              <Link to="/sign-in" className="text-purple-600 hover:underline">
-                Sign In
-              </Link>
-            </p>
-            
-            <div className="border-t border-gray-200 pt-4">
-              <p className="text-center text-gray-600 mb-2">Are you a mental health or legal professional?</p>
-              <Link to="/join-as-consultant" className="text-purple-600 hover:underline">
-                Apply to join our consultant network
-              </Link>
-            </div>
-          </div>
+                <div className="text-center text-sm">
+                  Already have an account?{" "}
+                  <Link to="/sign-in" className="text-peacefulBlue hover:underline">
+                    Sign in
+                  </Link>
+                </div>
+              </CardFooter>
+            </form>
+          </Card>
         </div>
       </main>
       <Footer />

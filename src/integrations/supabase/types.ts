@@ -11,41 +11,29 @@ export type Database = {
     Tables: {
       consultants: {
         Row: {
-          available_days: string[] | null
-          available_hours: string | null
-          bio: string | null
           created_at: string
           hourly_rate: number
           id: string
           is_available: boolean
           profile_id: string
-          qualifications: string | null
           specialization: string
           updated_at: string
         }
         Insert: {
-          available_days?: string[] | null
-          available_hours?: string | null
-          bio?: string | null
           created_at?: string
           hourly_rate: number
           id?: string
           is_available?: boolean
           profile_id: string
-          qualifications?: string | null
           specialization: string
           updated_at?: string
         }
         Update: {
-          available_days?: string[] | null
-          available_hours?: string | null
-          bio?: string | null
           created_at?: string
           hourly_rate?: number
           id?: string
           is_available?: boolean
           profile_id?: string
-          qualifications?: string | null
           specialization?: string
           updated_at?: string
         }
@@ -140,39 +128,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      contact_submissions: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          message: string
-          name: string
-          phone: string | null
-          status: string
-          subject: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          message: string
-          name: string
-          phone?: string | null
-          status?: string
-          subject: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          message?: string
-          name?: string
-          phone?: string | null
-          status?: string
-          subject?: string
-        }
-        Relationships: []
       }
       payments: {
         Row: {
