@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -40,6 +41,7 @@ import CustodyService from "./pages/services/CustodyService";
 import BookConsultation from "./pages/BookConsultation";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
+import JoinAsConsultant from "./pages/JoinAsConsultant";
 import Dashboard from "./pages/Dashboard";
 import ConsultantApplicationSuccess from "./pages/ConsultantApplicationSuccess";
 import ConsultantProfileTemplate from "./components/consultant/ConsultantProfileTemplate";
@@ -91,6 +93,7 @@ const App = () => (
             <Route path="/book-consultation" element={<BookConsultation />} />
             <Route path="/sign-in" element={<SignIn />} />
             <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/join-as-consultant" element={<JoinAsConsultant />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/consultant-application-success" element={<ConsultantApplicationSuccess />} />
             <Route path="/consultants/:consultantId" element={<ConsultantProfileTemplate />} />

@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import ConsultantFields from "@/components/consultant/ConsultantFields";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -18,18 +17,9 @@ const SignUp = () => {
   const [fullName, setFullName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isConsultant, setIsConsultant] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  // Consultant-specific state
-  const [specialization, setSpecialization] = useState("mental-health");
-  const [hourlyRate, setHourlyRate] = useState(2500);
-  const [bio, setBio] = useState("");
-  const [qualifications, setQualifications] = useState("");
-  const [availableDays, setAvailableDays] = useState<string[]>(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
-  const [availableHours, setAvailableHours] = useState("9:00-17:00");
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,36 +49,12 @@ const SignUp = () => {
         throw new Error("Failed to create user");
       }
 
-      // If they're signing up as a consultant, create consultant record
-      if (isConsultant) {
-        const { error: consultantError } = await supabase
-          .from("consultants")
-          .insert({
-            profile_id: authData.user.id,
-            specialization,
-            hourly_rate: hourlyRate,
-            bio,
-            qualifications,
-            available_days: availableDays,
-            available_hours: availableHours,
-            is_available: false, // Consultants start as unavailable until approved
-          });
-
-        if (consultantError) throw consultantError;
-
-        // Sign out the user after successful consultant application
-        await supabase.auth.signOut();
-
-        // Navigate to consultant application success page
-        navigate("/consultant-application-success");
-      } else {
-        // Regular user flow
-        toast({
-          title: "Account created!",
-          description: "Your account has been successfully created. You can now sign in.",
-        });
-        navigate("/sign-in");
-      }
+      // Regular user flow
+      toast({
+        title: "Account created!",
+        description: "Your account has been successfully created. You can now sign in.",
+      });
+      navigate("/sign-in");
     } catch (error: any) {
       setError(error.message || "An unexpected error occurred");
       console.error("Sign up error:", error);
@@ -148,40 +114,6 @@ const SignUp = () => {
                   />
                 </div>
                 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="isConsultant"
-                    checked={isConsultant}
-                    onCheckedChange={(checked) => setIsConsultant(checked === true)}
-                  />
-                  <Label
-                    htmlFor="isConsultant"
-                    className="text-sm cursor-pointer"
-                  >
-                    Join as a consultant
-                  </Label>
-                </div>
-
-                {isConsultant && (
-                  <div className="border-t border-gray-200 pt-4 mt-4">
-                    <h2 className="text-lg font-medium mb-4">Consultant Information</h2>
-                    <ConsultantFields
-                      specialization={specialization}
-                      setSpecialization={setSpecialization}
-                      hourlyRate={hourlyRate}
-                      setHourlyRate={setHourlyRate}
-                      bio={bio}
-                      setBio={setBio}
-                      qualifications={qualifications}
-                      setQualifications={setQualifications}
-                      availableDays={availableDays}
-                      setAvailableDays={setAvailableDays}
-                      availableHours={availableHours}
-                      setAvailableHours={setAvailableHours}
-                    />
-                  </div>
-                )}
-                
                 <div className="flex items-start space-x-2 mt-6">
                   <Checkbox 
                     id="terms" 
@@ -214,18 +146,27 @@ const SignUp = () => {
                   className="w-full"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Creating Account..." : isConsultant ? "Submit Application" : "Sign Up"}
+                  {isLoading ? "Creating Account..." : "Sign Up"}
                 </Button>
               </form>
             </div>
           </div>
           
-          <p className="text-center text-gray-600">
-            Already have an account?{" "}
-            <Link to="/sign-in" className="text-purple-600 hover:underline">
-              Sign In
-            </Link>
-          </p>
+          <div className="flex flex-col space-y-4 text-center">
+            <p className="text-center text-gray-600">
+              Already have an account?{" "}
+              <Link to="/sign-in" className="text-purple-600 hover:underline">
+                Sign In
+              </Link>
+            </p>
+            
+            <div className="border-t border-gray-200 pt-4">
+              <p className="text-center text-gray-600 mb-2">Are you a mental health or legal professional?</p>
+              <Link to="/join-as-consultant" className="text-purple-600 hover:underline">
+                Apply to join our consultant network
+              </Link>
+            </div>
+          </div>
         </div>
       </main>
       <Footer />
