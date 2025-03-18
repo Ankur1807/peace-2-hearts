@@ -48,7 +48,7 @@ const ConsultantProfileTemplate = () => {
             qualifications,
             available_days,
             available_hours,
-            profiles!inner(
+            profiles(
               id,
               full_name,
               email
@@ -60,17 +60,20 @@ const ConsultantProfileTemplate = () => {
         if (error) throw error;
         
         if (data) {
+          // Make sure we're safely handling the data
+          const profileData = data.profiles as { id: string; full_name: string | null; email: string | null };
+          
           setConsultant({
-            id: data.id,
-            full_name: data.profiles.full_name || 'Unnamed Consultant',
-            email: data.profiles.email || '',
-            specialization: data.specialization,
+            id: data.id || '',
+            full_name: profileData?.full_name || 'Unnamed Consultant',
+            email: profileData?.email || '',
+            specialization: data.specialization || '',
             bio: data.bio || 'No bio available',
             qualifications: data.qualifications || 'Not specified',
-            hourly_rate: data.hourly_rate,
+            hourly_rate: data.hourly_rate || 0,
             available_days: data.available_days || [],
             available_hours: data.available_hours || '9:00-17:00',
-            is_available: data.is_available,
+            is_available: data.is_available ?? false,
             avg_rating: 4.8, // Placeholder, would come from ratings table in a full implementation
             reviews_count: 12, // Placeholder, would come from reviews table in a full implementation
           });
