@@ -1,305 +1,231 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { SEO } from "@/components/SEO";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { SEO } from '@/components/SEO';
-import { supabase } from "@/integrations/supabase/client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import ConsultantFields from "@/components/consultant/ConsultantFields";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("user");
-  
-  // Consultant specific fields
-  const [specialization, setSpecialization] = useState("mental-health");
-  const [hourlyRate, setHourlyRate] = useState("");
-  const [availableDays, setAvailableDays] = useState<string[]>([]);
-  const [availableHours, setAvailableHours] = useState<string>("9:00-17:00");
-  const [bio, setBio] = useState("");
-  const [qualifications, setQualifications] = useState("");
-  
+  const [isConsultant, setIsConsultant] = useState(false);
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Consultant-specific state
+  const [specialization, setSpecialization] = useState("mental-health");
+  const [hourlyRate, setHourlyRate] = useState(2500);
+  const [bio, setBio] = useState("");
+  const [qualifications, setQualifications] = useState("");
+  const [availableDays, setAvailableDays] = useState<string[]>(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
+  const [availableHours, setAvailableHours] = useState("9:00-17:00");
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreeToTerms) {
+      setError("You must agree to the Terms of Service and Privacy Policy to sign up.");
+      return;
+    }
+
+    setError(null);
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // Register the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            name: name,
-            is_consultant: activeTab === "consultant",
-            specialization: activeTab === "consultant" ? specialization : null,
+            name: fullName,
           },
         },
       });
 
-      if (error) {
-        throw error;
+      if (authError) throw authError;
+
+      if (!authData.user) {
+        throw new Error("Failed to create user");
       }
 
-      // If signing up as a consultant, save consultant-specific information
-      if (activeTab === "consultant") {
-        const { data: profile } = await supabase.auth.getUser();
-        
-        if (profile?.user) {
-          const { error: consultantError } = await supabase
-            .from('consultants')
-            .insert({
-              profile_id: profile.user.id,
-              specialization: specialization,
-              hourly_rate: parseFloat(hourlyRate) || 0,
-              is_available: false, // Set to false initially until approved
-              bio: bio,
-              qualifications: qualifications,
-              available_days: availableDays,
-              available_hours: availableHours
-            });
-            
-          if (consultantError) {
-            console.error("Error saving consultant information:", consultantError);
-            toast({
-              title: "Registration partially completed",
-              description: "Your account was created but we couldn't save your consultant information. Please contact support.",
-              variant: "destructive",
-            });
-          }
-        }
+      // If they're signing up as a consultant, create consultant record
+      if (isConsultant) {
+        const { error: consultantError } = await supabase
+          .from("consultants")
+          .insert({
+            profile_id: authData.user.id,
+            specialization,
+            hourly_rate: hourlyRate,
+            bio,
+            qualifications,
+            available_days: availableDays,
+            available_hours: availableHours,
+            is_available: false, // Consultants start as unavailable until approved
+          });
+
+        if (consultantError) throw consultantError;
+
+        // Sign out the user after successful consultant application
+        await supabase.auth.signOut();
+
+        // Navigate to consultant application success page
+        navigate("/consultant-application-success");
+      } else {
+        // Regular user flow
+        toast({
+          title: "Account created!",
+          description: "Your account has been successfully created. You can now sign in.",
+        });
+        navigate("/sign-in");
       }
-
-      toast({
-        title: activeTab === "consultant" ? "Application received" : "Account created",
-        description: activeTab === "consultant" 
-          ? "Your application to become a consultant has been received. We'll contact you after reviewing your information."
-          : "Welcome to Peace2Hearts! Please check your email to verify your account.",
-      });
-
-      // Navigate to appropriate page
-      navigate(activeTab === "consultant" ? "/consultant-application-success" : "/dashboard");
     } catch (error: any) {
-      toast({
-        title: "Registration failed",
-        description: error.message || "Please check your information and try again",
-        variant: "destructive",
-      });
+      setError(error.message || "An unexpected error occurred");
+      console.error("Sign up error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleAvailableDayToggle = (day: string) => {
-    setAvailableDays(prevDays => 
-      prevDays.includes(day) 
-        ? prevDays.filter(d => d !== day) 
-        : [...prevDays, day]
-    );
-  };
-
   return (
     <>
       <SEO 
-        title="Sign Up"
-        description="Create your Peace2Hearts account to book consultations, access personalized resources, and begin your journey to relationship wellness."
-        keywords="sign up, create account, Peace2Hearts registration, relationship counseling services"
+        title="Sign Up - Peace2Hearts"
+        description="Create an account with Peace2Hearts to access mental health and legal support services."
       />
       <Navigation />
-      <main className="py-16 md:py-20">
-        <div className="container max-w-md mx-auto px-4">
-          <Card>
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl font-lora text-center">Create an account</CardTitle>
-              <CardDescription className="text-center">
-                Join Peace2Hearts to manage your consultations
-              </CardDescription>
-            </CardHeader>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="user">Register as User</TabsTrigger>
-                <TabsTrigger value="consultant">Join as Consultant</TabsTrigger>
-              </TabsList>
-              
-              <form onSubmit={handleSignUp}>
-                <CardContent className="space-y-4">
-                  {/* Common fields for both user types */}
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input 
-                      id="name" 
-                      type="text" 
-                      placeholder="John Doe" 
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
+      <main className="py-10 md:py-16">
+        <div className="container mx-auto px-4 max-w-md">
+          <h1 className="text-3xl font-bold mb-6 text-center">Create an Account</h1>
+          
+          <div className="mb-6">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div>
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                    placeholder="Your full name"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="Your email address"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="Create a password"
+                    minLength={6}
+                  />
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="isConsultant"
+                    checked={isConsultant}
+                    onCheckedChange={(checked) => setIsConsultant(checked === true)}
+                  />
+                  <Label
+                    htmlFor="isConsultant"
+                    className="text-sm cursor-pointer"
+                  >
+                    Join as a consultant
+                  </Label>
+                </div>
+
+                {isConsultant && (
+                  <div className="border-t border-gray-200 pt-4 mt-4">
+                    <h2 className="text-lg font-medium mb-4">Consultant Information</h2>
+                    <ConsultantFields
+                      specialization={specialization}
+                      setSpecialization={setSpecialization}
+                      hourlyRate={hourlyRate}
+                      setHourlyRate={setHourlyRate}
+                      bio={bio}
+                      setBio={setBio}
+                      qualifications={qualifications}
+                      setQualifications={setQualifications}
+                      availableDays={availableDays}
+                      setAvailableDays={setAvailableDays}
+                      availableHours={availableHours}
+                      setAvailableHours={setAvailableHours}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="hello@example.com" 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input 
-                      id="password" 
-                      type="password" 
-                      placeholder="••••••••" 
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
-                    <p className="text-xs text-gray-500">Password must be at least 6 characters</p>
-                  </div>
-                  
-                  {/* Consultant-specific fields */}
-                  <TabsContent value="consultant" className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="specialization">Specialization</Label>
-                      <Select 
-                        value={specialization} 
-                        onValueChange={setSpecialization}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your specialization" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="mental-health">Mental Health</SelectItem>
-                          <SelectItem value="legal-support">Legal Support</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="hourlyRate">Hourly Rate (INR)</Label>
-                      <Input 
-                        id="hourlyRate" 
-                        type="number" 
-                        placeholder="e.g. 1500" 
-                        value={hourlyRate}
-                        onChange={(e) => setHourlyRate(e.target.value)}
-                        required={activeTab === "consultant"}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Available Days</Label>
-                      <div className="grid grid-cols-4 gap-2">
-                        {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
-                          <div key={day} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`day-${day}`} 
-                              checked={availableDays.includes(day)}
-                              onCheckedChange={() => handleAvailableDayToggle(day)}
-                            />
-                            <label 
-                              htmlFor={`day-${day}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {day.substring(0, 3)}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="availableHours">Available Hours</Label>
-                      <Select 
-                        value={availableHours} 
-                        onValueChange={setAvailableHours}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your available hours" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="9:00-17:00">9:00 AM - 5:00 PM</SelectItem>
-                          <SelectItem value="10:00-18:00">10:00 AM - 6:00 PM</SelectItem>
-                          <SelectItem value="11:00-19:00">11:00 AM - 7:00 PM</SelectItem>
-                          <SelectItem value="12:00-20:00">12:00 PM - 8:00 PM</SelectItem>
-                          <SelectItem value="custom">Custom Hours</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="qualifications">Qualifications</Label>
-                      <Input 
-                        id="qualifications" 
-                        placeholder="Your professional qualifications" 
-                        value={qualifications}
-                        onChange={(e) => setQualifications(e.target.value)}
-                        required={activeTab === "consultant"}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="bio">Brief Bio</Label>
-                      <textarea 
-                        id="bio" 
-                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        placeholder="Tell us about yourself and your expertise" 
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        required={activeTab === "consultant"}
-                      />
-                    </div>
-                    
-                    <div className="text-sm text-amber-600">
-                      Note: Your application will be reviewed by our team. You'll be contacted once your application is approved.
-                    </div>
-                  </TabsContent>
-                  
-                  <div className="text-sm text-gray-500">
-                    By signing up, you agree to our{" "}
-                    <Link to="/terms" className="text-peacefulBlue hover:underline">
+                )}
+                
+                <div className="flex items-start space-x-2 mt-6">
+                  <Checkbox 
+                    id="terms" 
+                    checked={agreeToTerms} 
+                    onCheckedChange={(checked) => setAgreeToTerms(checked === true)}
+                  />
+                  <Label
+                    htmlFor="terms"
+                    className="text-sm"
+                  >
+                    I agree to the{" "}
+                    <Link to="/terms" className="text-purple-600 hover:underline">
                       Terms of Service
                     </Link>{" "}
                     and{" "}
-                    <Link to="/privacy" className="text-peacefulBlue hover:underline">
+                    <Link to="/privacy" className="text-purple-600 hover:underline">
                       Privacy Policy
                     </Link>
+                  </Label>
+                </div>
+                
+                {error && (
+                  <div className="bg-red-50 text-red-800 p-3 rounded-md text-sm">
+                    {error}
                   </div>
-                </CardContent>
-                <CardFooter className="flex flex-col gap-4">
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-peacefulBlue hover:bg-peacefulBlue/90"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Creating account..." : (activeTab === "consultant" ? "Submit Application" : "Create account")}
-                  </Button>
-                  <div className="text-center text-sm">
-                    Already have an account?{" "}
-                    <Link to="/sign-in" className="text-peacefulBlue hover:underline">
-                      Sign in
-                    </Link>
-                  </div>
-                </CardFooter>
+                )}
+                
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Creating Account..." : isConsultant ? "Submit Application" : "Sign Up"}
+                </Button>
               </form>
-            </Tabs>
-          </Card>
+            </div>
+          </div>
+          
+          <p className="text-center text-gray-600">
+            Already have an account?{" "}
+            <Link to="/sign-in" className="text-purple-600 hover:underline">
+              Sign In
+            </Link>
+          </p>
         </div>
       </main>
       <Footer />

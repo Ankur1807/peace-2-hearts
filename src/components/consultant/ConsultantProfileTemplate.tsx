@@ -34,6 +34,8 @@ const ConsultantProfileTemplate = () => {
 
   useEffect(() => {
     const fetchConsultantProfile = async () => {
+      if (!consultantId) return;
+      
       setIsLoading(true);
       try {
         // Get consultant data by joining profiles and consultants tables
@@ -234,7 +236,9 @@ const ConsultantProfileTemplate = () => {
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <p className="text-xl font-semibold text-center mb-2">₹{consultant.hourly_rate}/hour</p>
                     <Link to={`/book-consultation?consultant=${consultant.id}`}>
-                      <Button className="w-full">Book Consultation</Button>
+                      <Button className="w-full" disabled={!consultant.is_available}>
+                        {consultant.is_available ? "Book Consultation" : "Currently Unavailable"}
+                      </Button>
                     </Link>
                   </div>
                 </CardContent>
@@ -276,7 +280,9 @@ const ConsultantProfileTemplate = () => {
               )}
               
               <Link to={`/book-consultation?consultant=${consultant.id}`}>
-                <Button size="lg">Book a Consultation</Button>
+                <Button size="lg" disabled={!consultant.is_available}>
+                  {consultant.is_available ? "Book a Consultation" : "Currently Unavailable"}
+                </Button>
               </Link>
             </div>
           </div>
