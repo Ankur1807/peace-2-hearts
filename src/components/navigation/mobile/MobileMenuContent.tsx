@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from '@/utils/authUtils';
+import UserMenu from "@/components/navigation/UserMenu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 interface MobileMenuContentProps {
   isOpen: boolean;
