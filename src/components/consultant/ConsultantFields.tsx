@@ -3,7 +3,10 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface ConsultantFieldsProps {
   specialization: string;
@@ -60,102 +63,114 @@ const ConsultantFields: React.FC<ConsultantFieldsProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Label className="mb-2 block">Specialization</Label>
-        <div className="flex flex-col space-y-2">
-          <div className="flex items-center space-x-2">
-            <input
-              type="radio"
-              id="mental-health"
-              name="specialization"
-              value="mental-health"
-              checked={specialization === "mental-health"}
-              onChange={() => setSpecialization("mental-health")}
-              className="h-4 w-4 text-purple-600"
-            />
-            <Label htmlFor="mental-health" className="cursor-pointer">Mental Health</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <input
-              type="radio"
-              id="legal-support"
-              name="specialization"
-              value="legal-support"
-              checked={specialization === "legal-support"}
-              onChange={() => setSpecialization("legal-support")}
-              className="h-4 w-4 text-purple-600"
-            />
-            <Label htmlFor="legal-support" className="cursor-pointer">Legal Support</Label>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="hourlyRate" className="mb-2 block">Hourly Rate (₹)</Label>
-        <Input
-          type="number"
-          id="hourlyRate"
-          value={hourlyRate}
-          onChange={(e) => setHourlyRate(Number(e.target.value))}
-          placeholder="2000"
-          min="500"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="qualifications" className="mb-2 block">Professional Qualifications</Label>
-        <Input
-          id="qualifications"
-          value={qualifications}
-          onChange={(e) => setQualifications(e.target.value)}
-          placeholder="e.g., MA in Psychology, 5 years of experience"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="bio" className="mb-2 block">Professional Bio</Label>
-        <Textarea
-          id="bio"
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          placeholder="Tell us about your experience and expertise..."
-          rows={4}
-        />
-      </div>
-
-      <div>
-        <Label className="mb-2 block">Available Days</Label>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {daysOfWeek.map((day) => (
-            <div key={day.value} className="flex items-center space-x-2">
-              <Checkbox
-                id={`day-${day.value}`}
-                checked={availableDays.includes(day.value)}
-                onCheckedChange={() => handleDayToggle(day.value)}
-              />
-              <Label htmlFor={`day-${day.value}`} className="cursor-pointer">{day.label}</Label>
+    <Card className="shadow-sm">
+      <CardContent className="space-y-6 pt-6">
+        <div className="space-y-2">
+          <Label className="font-medium text-base">What's your specialization?</Label>
+          <RadioGroup
+            value={specialization}
+            onValueChange={setSpecialization}
+            className="flex flex-col space-y-2 mt-2"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="mental-health" id="mental-health" />
+              <Label htmlFor="mental-health" className="cursor-pointer">
+                Mental Health Professional
+              </Label>
             </div>
-          ))}
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="legal-support" id="legal-support" />
+              <Label htmlFor="legal-support" className="cursor-pointer">
+                Legal Advisor
+              </Label>
+            </div>
+          </RadioGroup>
         </div>
-      </div>
 
-      <div>
-        <Label htmlFor="availableHours" className="mb-2 block">Working Hours</Label>
-        <select
-          id="availableHours"
-          value={availableHours}
-          onChange={(e) => setAvailableHours(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-md"
-        >
-          {availableTimeSlots.map((slot) => (
-            <option key={slot.value} value={slot.value}>
-              {slot.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
+        <div className="space-y-2">
+          <Label htmlFor="hourlyRate" className="font-medium text-base">
+            What's your hourly rate? (₹)
+          </Label>
+          <Input
+            type="number"
+            id="hourlyRate"
+            value={hourlyRate}
+            onChange={(e) => setHourlyRate(Number(e.target.value))}
+            placeholder="2000"
+            min="500"
+            className="mt-1"
+          />
+          <p className="text-sm text-muted-foreground">Recommended range: ₹1500 - ₹5000 per hour</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="qualifications" className="font-medium text-base">
+            Professional Qualifications
+          </Label>
+          <Input
+            id="qualifications"
+            value={qualifications}
+            onChange={(e) => setQualifications(e.target.value)}
+            placeholder="e.g., MA in Psychology, 5 years of experience"
+            className="mt-1"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="bio" className="font-medium text-base">
+            Professional Bio
+          </Label>
+          <Textarea
+            id="bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder="Tell us about your experience and expertise..."
+            rows={4}
+            className="mt-1 resize-none"
+          />
+          <p className="text-sm text-muted-foreground">
+            Describe your expertise, approach, and what clients can expect from working with you
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="font-medium text-base">Available Days</Label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+            {daysOfWeek.map((day) => (
+              <div key={day.value} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`day-${day.value}`}
+                  checked={availableDays.includes(day.value)}
+                  onCheckedChange={() => handleDayToggle(day.value)}
+                  className="data-[state=checked]:bg-vibrantPurple data-[state=checked]:text-white"
+                />
+                <Label htmlFor={`day-${day.value}`} className="cursor-pointer">
+                  {day.label}
+                </Label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="availableHours" className="font-medium text-base">
+            Working Hours
+          </Label>
+          <Select value={availableHours} onValueChange={setAvailableHours}>
+            <SelectTrigger className="w-full mt-1">
+              <SelectValue placeholder="Select your working hours" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableTimeSlots.map((slot) => (
+                <SelectItem key={slot.value} value={slot.value}>
+                  {slot.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
