@@ -51,9 +51,6 @@ const UserMenu = ({ isLoggedIn, userName, onSignOut, isMobile = false, onItemCli
         <Link to="/sign-up" className="text-white hover:text-white/80 transition-colors py-2" onClick={onItemClick}>
           Sign Up
         </Link>
-        <Link to="/join-as-consultant" className="text-white hover:text-white/80 transition-colors py-2" onClick={onItemClick}>
-          Join as Consultant
-        </Link>
       </>
     );
   }
@@ -92,7 +89,6 @@ const UserMenu = ({ isLoggedIn, userName, onSignOut, isMobile = false, onItemCli
   ) : (
     <div className="flex items-center gap-4">
       <Link to="/sign-in" className="text-white hover:text-white/80 transition-colors">Sign In</Link>
-      <Link to="/join-as-consultant" className="text-white hover:text-white/80 transition-colors">Join as Consultant</Link>
       <Link to="/book-consultation">
         <Button className="bg-white hover:bg-white/90 text-purple-600 rounded-full px-6">
           Book Consultation
