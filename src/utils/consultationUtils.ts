@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface BookingDetails {
@@ -54,92 +53,92 @@ export const saveConsultation = async (
     throw new Error("User not authenticated");
   }
 
-  // Get or create a consultant with the appropriate specialization
-  const { data: consultants, error: consultantError } = await supabase
-    .from('consultants')
-    .select('id')
-    .eq('specialization', consultationType)
-    .eq('is_available', true)
-    .limit(1);
-
-  if (consultantError) {
-    console.error("Error fetching consultants:", consultantError);
-    throw consultantError;
-  }
-
-  let consultantId;
-  if (consultants && consultants.length > 0) {
-    consultantId = consultants[0].id;
-  } else {
-    // For demo purposes, create a mock consultant if none exists
-    const { data: mockConsultant, error: createError } = await supabase
+  try {
+    // Try to find a consultant with the appropriate specialization
+    const { data: consultants, error: consultantError } = await supabase
       .from('consultants')
+      .select('id')
+      .eq('specialization', consultationType)
+      .eq('is_available', true)
+      .limit(1);
+
+    if (consultantError) {
+      console.error("Error fetching consultants:", consultantError);
+      throw consultantError;
+    }
+
+    // If no consultant is found, we'll use a default system consultant ID
+    // This avoids RLS issues with creating consultants on the fly
+    let consultantId;
+    if (consultants && consultants.length > 0) {
+      consultantId = consultants[0].id;
+    } else {
+      // Get or create a default consultant using an edge function or API endpoint
+      // For now, we'll use a temporary approach - selecting any consultant
+      const { data: anyConsultant, error: anyConsultantError } = await supabase
+        .from('consultants')
+        .select('id')
+        .limit(1);
+        
+      if (anyConsultantError || !anyConsultant || anyConsultant.length === 0) {
+        throw new Error("No consultants available. Please contact support.");
+      }
+      
+      consultantId = anyConsultant[0].id;
+    }
+
+    // Save the consultation
+    const { data: consultation, error: consultationError } = await supabase
+      .from('consultations')
       .insert({
-        specialization: consultationType,
-        hourly_rate: 2500, // Default rate in INR
-        profile_id: userData.user.id, // Using user's ID as a placeholder
-        is_available: true
+        user_id: userData.user.id,
+        consultant_id: consultantId,
+        consultation_type: consultationType,
+        date: date.toISOString(),
+        time_slot: timeSlot,
+        message: personalDetails.message,
+        status: 'scheduled'
       })
       .select()
       .single();
 
-    if (createError) {
-      console.error("Error creating consultant:", createError);
-      throw createError;
+    if (consultationError) {
+      console.error("Error saving consultation:", consultationError);
+      throw consultationError;
     }
-    
-    consultantId = mockConsultant.id;
-  }
 
-  // Save the consultation
-  const { data: consultation, error: consultationError } = await supabase
-    .from('consultations')
-    .insert({
-      user_id: userData.user.id,
-      consultant_id: consultantId,
-      consultation_type: consultationType,
-      date: date.toISOString(),
-      time_slot: timeSlot,
-      message: personalDetails.message,
-      status: 'scheduled'
-    })
-    .select()
-    .single();
+    // Update user profile with name and phone if not already set
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userData.user.id)
+      .single();
 
-  if (consultationError) {
-    console.error("Error saving consultation:", consultationError);
-    throw consultationError;
-  }
+    if (!profileError && profile) {
+      // Only update if needed
+      if (!profile.full_name || !profile.phone_number) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            full_name: profile.full_name || `${personalDetails.firstName} ${personalDetails.lastName}`,
+            phone_number: profile.phone_number || personalDetails.phone
+          })
+          .eq('id', userData.user.id);
 
-  // Update user profile with name and phone if not already set
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userData.user.id)
-    .single();
-
-  if (!profileError && profile) {
-    // Only update if needed
-    if (!profile.full_name || !profile.phone_number) {
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          full_name: profile.full_name || `${personalDetails.firstName} ${personalDetails.lastName}`,
-          phone_number: profile.phone_number || personalDetails.phone
-        })
-        .eq('id', userData.user.id);
-
-      if (updateError) {
-        console.error("Error updating profile:", updateError);
-        // Non-critical error, we can continue
+        if (updateError) {
+          console.error("Error updating profile:", updateError);
+          // Non-critical error, we can continue
+        }
       }
     }
-  }
 
-  return consultation;
+    return consultation;
+  } catch (error) {
+    console.error("Error in saveConsultation:", error);
+    throw error;
+  }
 };
 
-// Function to fetch user's consultations
 export const fetchUserConsultations = async () => {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) {
@@ -182,7 +181,6 @@ export const fetchUserConsultations = async () => {
   }));
 };
 
-// Helper function to map database status to UI status
 const mapStatusToUI = (status: string): "upcoming" | "completed" | "cancelled" => {
   if (status === 'scheduled' || status === 'confirmed') return 'upcoming';
   if (status === 'completed') return 'completed';
@@ -190,7 +188,6 @@ const mapStatusToUI = (status: string): "upcoming" | "completed" | "cancelled" =
   return 'upcoming'; // Default case
 };
 
-// Add consultation type display helper
 export const getConsultationTypeLabel = (type: string): string => {
   const types: Record<string, string> = {
     'legal': 'Legal Consultation',
@@ -207,7 +204,6 @@ export const getConsultationTypeLabel = (type: string): string => {
   return types[type] || 'Consultation';
 };
 
-// Add price helper
 export const getConsultationPrice = (type: string): string => {
   const prices: Record<string, string> = {
     'legal': '₹2,500',
@@ -224,12 +220,10 @@ export const getConsultationPrice = (type: string): string => {
   return prices[type] || '₹2,000';
 };
 
-// Add time slot label formatter
 export const getTimeSlotLabel = (timeSlot: string): string => {
   return timeSlot.replace('-', ' - ');
 };
 
-// Credit card formatting helper
 export const formatCardNumber = (value: string): string => {
   const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
   const matches = v.match(/\d{4,16}/g);
@@ -247,7 +241,6 @@ export const formatCardNumber = (value: string): string => {
   }
 };
 
-// Expiry date formatting helper
 export const formatExpiryDate = (value: string): string => {
   const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
   
