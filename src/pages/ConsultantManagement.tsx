@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
@@ -18,13 +19,20 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import { Consultant, getConsultants, updateConsultantAvailability, createConsultant } from "@/utils/consultantApi";
+import { checkIsAdmin } from "@/utils/authUtils";
+import { useNavigate } from "react-router-dom";
 
 const ConsultantManagement = () => {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminChecking, setIsAdminChecking] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
+    name: "",
     specialization: "legal",
     hourly_rate: 1000,
     bio: "",
@@ -32,13 +40,39 @@ const ConsultantManagement = () => {
     available_days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
     available_hours: "9:00-17:00",
     is_available: true,
-    profile_id: "00000000-0000-0000-0000-000000000000"
+    profile_id: "00000000-0000-0000-0000-000000000000",
+    profile_picture: null as File | null
   });
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchConsultants();
-  }, []);
+    const checkAdminStatus = async () => {
+      try {
+        const adminStatus = await checkIsAdmin();
+        setIsAdmin(adminStatus);
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+        toast({
+          title: "Access Denied",
+          description: "You don't have permission to access this page.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsAdminChecking(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [toast]);
+
+  useEffect(() => {
+    if (!isAdminChecking && !isAdmin) {
+      navigate('/');
+    } else if (!isAdminChecking && isAdmin) {
+      fetchConsultants();
+    }
+  }, [isAdmin, isAdminChecking, navigate]);
 
   const fetchConsultants = async () => {
     try {
@@ -87,6 +121,15 @@ const ConsultantManagement = () => {
     });
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setFormData({
+        ...formData,
+        profile_picture: event.target.files[0]
+      });
+    }
+  };
+
   const handleSelectChange = (name: string, value: string) => {
     setFormData({
       ...formData,
@@ -114,6 +157,7 @@ const ConsultantManagement = () => {
       });
       
       setFormData({
+        name: "",
         specialization: "legal",
         hourly_rate: 1000,
         bio: "",
@@ -121,7 +165,8 @@ const ConsultantManagement = () => {
         available_days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
         available_hours: "9:00-17:00",
         is_available: true,
-        profile_id: "00000000-0000-0000-0000-000000000000"
+        profile_id: "00000000-0000-0000-0000-000000000000",
+        profile_picture: null
       });
     } catch (error) {
       toast({
@@ -131,6 +176,27 @@ const ConsultantManagement = () => {
       });
     }
   };
+
+  if (isAdminChecking) {
+    return (
+      <>
+        <SEO 
+          title="Loading - Peace2Hearts"
+          description="Loading consultant management..."
+        />
+        <Navigation />
+        <main className="py-16 md:py-24">
+          <div className="container mx-auto px-4 text-center">
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+            <p>Checking credentials...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -156,6 +222,29 @@ const ConsultantManagement = () => {
                   </DialogHeader>
                   
                   <form onSubmit={handleSubmit} className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Name</Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        placeholder="Consultant's full name"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="profile_picture">Profile Picture</Label>
+                      <Input
+                        id="profile_picture"
+                        name="profile_picture"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                      />
+                    </div>
+                    
                     <div className="space-y-2">
                       <Label htmlFor="specialization">Specialization</Label>
                       <Select
@@ -245,6 +334,7 @@ const ConsultantManagement = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Name</TableHead>
                     <TableHead>Specialization</TableHead>
                     <TableHead>Hourly Rate</TableHead>
                     <TableHead>Available Days</TableHead>
@@ -255,7 +345,8 @@ const ConsultantManagement = () => {
                 <TableBody>
                   {consultants.map((consultant) => (
                     <TableRow key={consultant.id}>
-                      <TableCell className="font-medium">{consultant.specialization}</TableCell>
+                      <TableCell className="font-medium">{consultant.name || "Unnamed"}</TableCell>
+                      <TableCell>{consultant.specialization}</TableCell>
                       <TableCell>₹{consultant.hourly_rate}</TableCell>
                       <TableCell>
                         {consultant.available_days?.join(", ") || "Not specified"}

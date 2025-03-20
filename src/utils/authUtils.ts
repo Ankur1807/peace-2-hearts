@@ -56,3 +56,40 @@ export const updateUserProfile = async (updates: { full_name?: string; phone_num
   
   return data;
 };
+
+// Admin authorization check
+export const checkIsAdmin = async (): Promise<boolean> => {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return false;
+    
+    // For now, we'll use a simple email-based check for admin status
+    // This should be replaced with a proper role-based system in production
+    const adminEmails = ['admin@peace2hearts.com', 'founder@peace2hearts.com'];
+    return adminEmails.includes(userData.user.email || '');
+    
+    // Alternative implementation using a roles table:
+    /*
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userData.user.id)
+      .eq('role', 'admin')
+      .single();
+      
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No row found, user is not an admin
+        return false;
+      }
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+    
+    return !!data;
+    */
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
+};

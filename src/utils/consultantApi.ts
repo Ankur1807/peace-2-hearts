@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface Consultant {
   id: string;
+  name?: string;
   specialization: string;
   is_available: boolean;
   hourly_rate: number;
@@ -11,6 +12,7 @@ export interface Consultant {
   available_hours?: string | null;
   bio?: string | null;
   qualifications?: string | null;
+  profile_picture_url?: string | null;
 }
 
 export const getConsultants = async (specialization?: string): Promise<Consultant[]> => {
@@ -37,11 +39,41 @@ export const getConsultants = async (specialization?: string): Promise<Consultan
   }
 };
 
-export const createConsultant = async (consultantData: Omit<Consultant, 'id'>): Promise<Consultant> => {
+export const createConsultant = async (
+  consultantData: Omit<Consultant, 'id'> & { profile_picture: File | null }
+): Promise<Consultant> => {
   try {
+    let profile_picture_url = null;
+    
+    // Upload profile picture if provided
+    if (consultantData.profile_picture) {
+      const fileName = `${Date.now()}_${consultantData.profile_picture.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('consultant_images')
+        .upload(fileName, consultantData.profile_picture);
+      
+      if (uploadError) {
+        console.error("Error uploading profile picture:", uploadError);
+        throw new Error("Unable to upload profile picture. Please try again later.");
+      }
+      
+      // Get public URL for the uploaded file
+      const { data: urlData } = supabase.storage
+        .from('consultant_images')
+        .getPublicUrl(fileName);
+        
+      profile_picture_url = urlData.publicUrl;
+    }
+    
+    // Remove the File object before inserting into database
+    const { profile_picture, ...dbConsultantData } = consultantData;
+    
     const { data, error } = await supabase
       .from('consultants')
-      .insert(consultantData)
+      .insert({
+        ...dbConsultantData,
+        profile_picture_url
+      })
       .select()
       .single();
     
