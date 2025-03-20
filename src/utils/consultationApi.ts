@@ -1,14 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { generateReferenceId } from "./referenceGenerator";
-
-export interface PersonalDetails {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  message: string;
-}
+import { PersonalDetails } from "./types";
 
 export const saveConsultation = async (
   consultationType: string,

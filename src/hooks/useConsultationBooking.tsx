@@ -1,9 +1,8 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  saveConsultation,
-  PersonalDetails
-} from '@/utils/consultationApi';
+import { saveConsultation } from '@/utils/consultationApi';
+import { PersonalDetails } from '@/utils/types';
 
 export function useConsultationBooking() {
   const [date, setDate] = useState<Date | undefined>(undefined);

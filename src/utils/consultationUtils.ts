@@ -5,4 +5,5 @@ export * from './bookingStorage';
 export * from './formatUtils';
 export * from './consultationLabels';
 export * from './referenceGenerator';
-export * from './consultationApi';
+// Import and re-export saveConsultation from consultationApi
+export { saveConsultation } from './consultationApi';
