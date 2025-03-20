@@ -46,7 +46,7 @@ const Dashboard = () => {
       setIsAuthenticated(authenticated);
       
       if (!authenticated) {
-        navigate("/signin");
+        navigate("/sign-in"); // Changed from "/signin" to "/sign-in" to match App.tsx route
         return;
       }
       
@@ -71,7 +71,7 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate("/signin");
+      navigate("/sign-in"); // Changed from "/signin" to "/sign-in" to match App.tsx route
       toast({
         title: "Signed out",
         description: "You have been successfully signed out."
