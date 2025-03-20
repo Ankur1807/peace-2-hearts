@@ -1,7 +1,13 @@
 
 import { Link } from "react-router-dom";
 
-const DesktopMenu = () => {
+interface DesktopMenuProps {
+  isLoggedIn?: boolean;
+  userName?: string;
+  onSignOut?: () => void;
+}
+
+const DesktopMenu = ({ isLoggedIn, userName, onSignOut }: DesktopMenuProps) => {
   return (
     <div className="hidden md:flex items-center space-x-8">
       <Link to="/" className="text-primary hover:text-peacefulBlue transition-colors">

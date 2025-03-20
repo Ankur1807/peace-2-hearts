@@ -6,9 +6,10 @@ import { X } from "lucide-react";
 interface MobileMenuContentProps {
   isOpen: boolean;
   onClose: () => void;
+  onMenuItemClick?: () => void; // Added this prop to handle menu item clicks
 }
 
-const MobileMenuContent = ({ isOpen, onClose }: MobileMenuContentProps) => {
+const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick }: MobileMenuContentProps) => {
   const links = [
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
@@ -43,6 +44,12 @@ const MobileMenuContent = ({ isOpen, onClose }: MobileMenuContentProps) => {
     },
   };
 
+  // Handle both onClose and onMenuItemClick when a link is clicked
+  const handleLinkClick = () => {
+    if (onMenuItemClick) onMenuItemClick();
+    onClose();
+  };
+
   return (
     <motion.div
       className="fixed inset-0 z-50 overflow-hidden"
@@ -71,7 +78,7 @@ const MobileMenuContent = ({ isOpen, onClose }: MobileMenuContentProps) => {
                 <Link
                   to={link.path}
                   className="text-xl font-medium block py-2"
-                  onClick={onClose}
+                  onClick={handleLinkClick}
                 >
                   {link.label}
                 </Link>
