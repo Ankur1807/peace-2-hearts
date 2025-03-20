@@ -6,10 +6,11 @@ import { X } from "lucide-react";
 interface MobileMenuContentProps {
   isOpen: boolean;
   onClose: () => void;
-  onMenuItemClick?: () => void; // Added this prop to handle menu item clicks
+  onMenuItemClick?: () => void;
+  isLoggedIn?: boolean;
 }
 
-const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick }: MobileMenuContentProps) => {
+const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick, isLoggedIn }: MobileMenuContentProps) => {
   const links = [
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
@@ -17,6 +18,11 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick }: MobileMenuConte
     { path: "/resources", label: "Resources" },
     { path: "/contact", label: "Contact" },
   ];
+
+  // Add dashboard link if user is logged in
+  if (isLoggedIn) {
+    links.push({ path: "/dashboard", label: "Dashboard" });
+  }
 
   const menuVariants = {
     open: { x: 0, opacity: 1 },

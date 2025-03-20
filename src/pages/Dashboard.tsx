@@ -11,11 +11,26 @@ import DocumentsTab from "@/components/dashboard/DocumentsTab";
 import UserProfile from "@/components/dashboard/UserProfile";
 import ConsultantsManagement from "@/components/dashboard/ConsultantsManagement";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { checkIsAdmin } from "@/utils/authUtils";
+import { useEffect } from "react";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("appointments");
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
   
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const adminStatus = await checkIsAdmin();
+      setIsAdmin(adminStatus);
+    };
+    
+    checkAdminStatus();
+  }, []);
+
   // Mock appointments data
   const mockAppointments = [
     {
@@ -66,6 +81,14 @@ const Dashboard = () => {
       <main className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <h1 className="section-title text-4xl md:text-5xl text-center mb-8">Your Dashboard</h1>
+          
+          {isAdmin && (
+            <div className="text-center mb-8">
+              <Button asChild className="bg-peacefulBlue hover:bg-peacefulBlue/90">
+                <Link to="/consultant-management">Manage Consultants</Link>
+              </Button>
+            </div>
+          )}
           
           <div className="flex flex-col md:flex-row gap-8">
             <div className="md:w-1/3 lg:w-1/4">

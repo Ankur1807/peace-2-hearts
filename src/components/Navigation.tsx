@@ -6,11 +6,23 @@ import Logo from './navigation/Logo';
 import DesktopMenu from './navigation/DesktopMenu';
 import WaveyHeader from './navigation/WaveyHeader';
 import MobileHeader from './navigation/MobileHeader';
+import { checkAuthentication } from '@/utils/authUtils';
 
 const Navigation = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    // Check authentication status
+    const checkAuth = async () => {
+      const authStatus = await checkAuthentication();
+      setIsLoggedIn(authStatus);
+    };
+    
+    checkAuth();
+  }, [location.pathname]);
 
   useEffect(() => {
     // Add scroll event listener
@@ -40,7 +52,7 @@ const Navigation = () => {
   // The key difference: render different markup based on device type
   if (isMobile) {
     return (
-      <MobileHeader isLoggedIn={false} userName="" onSignOut={() => {}} />
+      <MobileHeader isLoggedIn={isLoggedIn} userName="" onSignOut={() => {}} />
     );
   }
 
@@ -59,7 +71,7 @@ const Navigation = () => {
       <div className="container mx-auto flex justify-between items-center relative z-[60]">
         <Logo />
         
-        <DesktopMenu isLoggedIn={false} userName="" onSignOut={() => {}} />
+        <DesktopMenu isLoggedIn={isLoggedIn} userName="" onSignOut={() => {}} />
       </div>
     </nav>
   );

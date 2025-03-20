@@ -25,6 +25,11 @@ const DesktopMenu = ({ isLoggedIn, userName, onSignOut }: DesktopMenuProps) => {
       <Link to="/contact" className="text-white hover:text-white/80 transition-colors">
         Contact
       </Link>
+      {isLoggedIn && (
+        <Link to="/dashboard" className="text-white hover:text-white/80 transition-colors">
+          Dashboard
+        </Link>
+      )}
     </div>
   );
 };
