@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -10,19 +10,13 @@ import MessagesTab from "@/components/dashboard/MessagesTab";
 import DocumentsTab from "@/components/dashboard/DocumentsTab";
 import UserProfile from "@/components/dashboard/UserProfile";
 import ConsultantsManagement from "@/components/dashboard/ConsultantsManagement";
-import { checkAuthentication, getUserProfile, signOut } from "@/utils/authUtils";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("appointments");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Mock appointments data until we implement actual appointment fetching
+  // Mock appointments data
   const mockAppointments = [
     {
       id: "appt-1",
@@ -40,67 +34,27 @@ const Dashboard = () => {
     }
   ];
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const authenticated = await checkAuthentication();
-      setIsAuthenticated(authenticated);
-      
-      if (!authenticated) {
-        navigate("/sign-in"); // Changed from "/signin" to "/sign-in" to match App.tsx route
-        return;
-      }
-      
-      try {
-        const profile = await getUserProfile();
-        setUserProfile(profile);
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load your profile information",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    checkAuth();
-  }, [navigate, toast]);
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate("/sign-in"); // Changed from "/signin" to "/sign-in" to match App.tsx route
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out."
-      });
-    } catch (error) {
-      console.error("Error signing out:", error);
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive",
-      });
-    }
+  // Mock user data since we're not requiring authentication
+  const mockUserProfile = {
+    id: "demo-user",
+    full_name: "Demo User",
+    email: "demo@peace2hearts.com",
+    phone_number: "+1234567890"
   };
 
   const handleProfileUpdate = (updatedUser: any) => {
-    setUserProfile(updatedUser);
     toast({
       title: "Profile updated",
       description: "Your profile has been successfully updated."
     });
   };
 
-  if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-  }
-
-  if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
-  }
+  const handleSignOut = async () => {
+    toast({
+      title: "Sign out",
+      description: "This is a demo. No sign out functionality implemented."
+    });
+  };
 
   return (
     <>
@@ -116,7 +70,7 @@ const Dashboard = () => {
           <div className="flex flex-col md:flex-row gap-8">
             <div className="md:w-1/3 lg:w-1/4">
               <UserProfile 
-                user={userProfile}
+                user={mockUserProfile}
                 onSignOut={handleSignOut}
                 onProfileUpdate={handleProfileUpdate}
               />
