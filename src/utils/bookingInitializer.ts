@@ -1,0 +1,27 @@
+
+import { getBookingDetailsFromLocalStorage, clearBookingDetailsFromLocalStorage } from '@/utils/consultationUtils';
+import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
+
+export function initializeBookingFromStorage(bookingState: ConsultationBookingHook): void {
+  const {
+    setConsultationType,
+    setDate,
+    setTimeSlot,
+    setStep,
+    setPersonalDetails
+  } = bookingState;
+
+  // Check if there are stored booking details
+  const storedDetails = getBookingDetailsFromLocalStorage();
+  if (storedDetails) {
+    setConsultationType(storedDetails.consultationType || '');
+    setDate(storedDetails.date ? new Date(storedDetails.date) : undefined);
+    setTimeSlot(storedDetails.timeSlot || '');
+    setStep(storedDetails.step || 1);
+    if (storedDetails.personalDetails) {
+      setPersonalDetails(storedDetails.personalDetails);
+    }
+    // Clear the stored details after retrieving them
+    clearBookingDetailsFromLocalStorage();
+  }
+}
