@@ -4,7 +4,8 @@ import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 
 export function initializeBookingFromStorage(bookingState: ConsultationBookingHook): void {
   const {
-    setConsultationType,
+    setServiceCategory,
+    setSelectedServices,
     setDate,
     setTimeSlot,
     handlePersonalDetailsChange
@@ -13,7 +14,8 @@ export function initializeBookingFromStorage(bookingState: ConsultationBookingHo
   // Check if there are stored booking details
   const storedDetails = getBookingDetailsFromLocalStorage();
   if (storedDetails) {
-    setConsultationType(storedDetails.consultationType || '');
+    setServiceCategory(storedDetails.serviceCategory || 'mental-health');
+    setSelectedServices(storedDetails.selectedServices || []);
     setDate(storedDetails.date ? new Date(storedDetails.date) : undefined);
     setTimeSlot(storedDetails.timeSlot || '');
     if (storedDetails.personalDetails) {

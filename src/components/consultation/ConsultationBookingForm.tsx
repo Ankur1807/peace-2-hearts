@@ -1,29 +1,48 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, CheckSquare, Square } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface ConsultationBookingFormProps {
   bookingState: ConsultationBookingHook;
 }
 
+const mentalHealthServices = [
+  { id: 'mental-health-counselling', label: 'Mental Health Counselling' },
+  { id: 'family-therapy', label: 'Family Therapy' },
+  { id: 'premarital-counselling', label: 'Premarital Counselling' },
+  { id: 'couples-counselling', label: 'Couples Counselling' },
+  { id: 'sexual-health-counselling', label: 'Sexual Health Counselling' }
+];
+
+const legalServices = [
+  { id: 'pre-marriage-legal', label: 'Pre-marriage Legal Consultation' },
+  { id: 'mediation', label: 'Mediation Services' },
+  { id: 'divorce', label: 'Divorce Consultation' },
+  { id: 'custody', label: 'Child Custody Consultation' },
+  { id: 'maintenance', label: 'Maintenance Consultation' },
+  { id: 'general-legal', label: 'General Legal Consultation' }
+];
+
 const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ bookingState }) => {
   const {
     date, 
     setDate,
-    consultationType,
-    setConsultationType,
+    serviceCategory,
+    setServiceCategory,
+    selectedServices,
+    setSelectedServices,
     timeSlot,
     setTimeSlot,
     isProcessing,
@@ -32,8 +51,6 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     handleConfirmBooking
   } = bookingState;
 
-  const [serviceCategory, setServiceCategory] = React.useState("mental-health");
-
   const handlePersonalDetailsFieldChange = (field: string, value: string) => {
     handlePersonalDetailsChange({
       ...personalDetails,
@@ -41,9 +58,33 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     });
   };
 
+  const handleServiceSelection = (serviceId: string, checked: boolean) => {
+    if (checked) {
+      // For combined services, limit to 4 selections
+      if (serviceCategory === 'combined' && selectedServices.length >= 4 && !selectedServices.includes(serviceId)) {
+        return;
+      }
+      setSelectedServices(prev => [...prev, serviceId]);
+    } else {
+      setSelectedServices(prev => prev.filter(id => id !== serviceId));
+    }
+  };
+
+  // Reset selected services when category changes
+  useEffect(() => {
+    setSelectedServices([]);
+  }, [serviceCategory, setSelectedServices]);
+
+  // Determine which services to display based on selected category
+  const servicesToDisplay = serviceCategory === 'mental-health' 
+    ? mentalHealthServices 
+    : serviceCategory === 'legal' 
+      ? legalServices 
+      : [...mentalHealthServices, ...legalServices];
+
   const isFormValid = () => {
     return (
-      consultationType !== '' &&
+      selectedServices.length > 0 &&
       date !== undefined &&
       timeSlot !== '' &&
       personalDetails.firstName.trim() !== '' &&
@@ -69,40 +110,43 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
               <SelectValue placeholder="Select service category" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="combined">Combined Services</SelectItem>
               <SelectItem value="mental-health">Mental Health</SelectItem>
               <SelectItem value="legal">Legal Services</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
-        {/* Service Type Selection */}
-        <div className="space-y-2">
-          <Label htmlFor="consultation-type">Service Type</Label>
-          <Select value={consultationType} onValueChange={setConsultationType}>
-            <SelectTrigger id="consultation-type">
-              <SelectValue placeholder="Select service type" />
-            </SelectTrigger>
-            <SelectContent>
-              {serviceCategory === 'mental-health' ? (
-                <>
-                  <SelectItem value="mental-health-counselling">Mental Health Counselling</SelectItem>
-                  <SelectItem value="family-therapy">Family Therapy</SelectItem>
-                  <SelectItem value="premarital-counselling">Premarital Counselling</SelectItem>
-                  <SelectItem value="couples-counselling">Couples Counselling</SelectItem>
-                  <SelectItem value="sexual-health-counselling">Sexual Health Counselling</SelectItem>
-                </>
-              ) : (
-                <>
-                  <SelectItem value="pre-marriage-legal">Pre-marriage Legal Consultation</SelectItem>
-                  <SelectItem value="mediation">Mediation Services</SelectItem>
-                  <SelectItem value="divorce">Divorce Consultation</SelectItem>
-                  <SelectItem value="custody">Child Custody Consultation</SelectItem>
-                  <SelectItem value="maintenance">Maintenance Consultation</SelectItem>
-                  <SelectItem value="general-legal">General Legal Consultation</SelectItem>
-                </>
-              )}
-            </SelectContent>
-          </Select>
+        {/* Service Type Selection with Checkboxes */}
+        <div className="space-y-3">
+          <Label>Service Types {serviceCategory === 'combined' && <span className="text-xs text-muted-foreground">(Select up to 4)</span>}</Label>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {servicesToDisplay.map(service => (
+              <div key={service.id} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={service.id}
+                  checked={selectedServices.includes(service.id)}
+                  onCheckedChange={(checked) => handleServiceSelection(service.id, checked === true)}
+                  disabled={serviceCategory === 'combined' && selectedServices.length >= 4 && !selectedServices.includes(service.id)}
+                />
+                <label
+                  htmlFor={service.id}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {service.label}
+                </label>
+              </div>
+            ))}
+          </div>
+          
+          {selectedServices.length === 0 && (
+            <p className="text-sm text-muted-foreground">Please select at least one service</p>
+          )}
+          
+          {serviceCategory === 'combined' && selectedServices.length >= 4 && (
+            <p className="text-sm text-muted-foreground">Maximum 4 services can be selected</p>
+          )}
         </div>
         
         {/* Date Selection */}

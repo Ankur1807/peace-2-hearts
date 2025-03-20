@@ -1,10 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export interface BookingDetails {
-  consultationType: string;
+  serviceCategory: string;
+  selectedServices: string[];
   date?: string;
   timeSlot: string;
-  step: number;
   personalDetails?: {
     firstName: string;
     lastName: string;

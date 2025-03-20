@@ -15,7 +15,8 @@ interface PersonalDetails {
 
 export function useConsultationBooking() {
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [consultationType, setConsultationType] = useState('');
+  const [serviceCategory, setServiceCategory] = useState('mental-health');
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [timeSlot, setTimeSlot] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -36,22 +37,35 @@ export function useConsultationBooking() {
   const handleConfirmBooking = async () => {
     setIsProcessing(true);
     try {
-      // Save the consultation to Supabase
-      const result = await saveConsultation(
-        consultationType,
-        date,
-        timeSlot,
-        personalDetails
-      );
+      // For combined bookings, we'll create multiple consultations
+      if (selectedServices.length === 0) {
+        throw new Error("Please select at least one service");
+      }
+
+      let lastResult;
       
-      if (result) {
+      // Create a consultation for each selected service
+      for (const service of selectedServices) {
+        const result = await saveConsultation(
+          service,
+          date,
+          timeSlot,
+          personalDetails
+        );
+        
+        if (result) {
+          lastResult = result;
+        }
+      }
+      
+      if (lastResult) {
         setSubmitted(true);
-        setReferenceId(result.referenceId);
+        setReferenceId(lastResult.referenceId);
         window.scrollTo(0, 0);
         
         toast({
           title: "Booking Confirmed",
-          description: "Your consultation has been successfully booked.",
+          description: `Your consultation${selectedServices.length > 1 ? 's have' : ' has'} been successfully booked.`,
         });
       }
     } catch (error: any) {
@@ -70,8 +84,10 @@ export function useConsultationBooking() {
   return {
     date,
     setDate,
-    consultationType,
-    setConsultationType,
+    serviceCategory,
+    setServiceCategory,
+    selectedServices,
+    setSelectedServices,
     timeSlot,
     setTimeSlot,
     submitted,
