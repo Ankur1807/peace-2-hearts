@@ -14,7 +14,6 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick }: MobileMenuConte
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
     { path: "/services", label: "Services" },
-    { path: "/consultants", label: "Consultants" },
     { path: "/resources", label: "Resources" },
     { path: "/contact", label: "Contact" },
   ];

@@ -19,9 +19,6 @@ const DesktopMenu = ({ isLoggedIn, userName, onSignOut }: DesktopMenuProps) => {
       <Link to="/services" className="text-white hover:text-white/80 transition-colors">
         Services
       </Link>
-      <Link to="/consultants" className="text-white hover:text-white/80 transition-colors">
-        Consultants
-      </Link>
       <Link to="/resources" className="text-white hover:text-white/80 transition-colors">
         Resources
       </Link>
