@@ -47,10 +47,11 @@ export const saveConsultation = async (
         const { data: newConsultant, error: createError } = await supabase
           .from('consultants')
           .insert({
+            name: 'Default Consultant',
             specialization: 'general',
             is_available: true,
             hourly_rate: 1000,
-            profile_id: '00000000-0000-0000-0000-000000000000' // Placeholder ID
+            profile_id: crypto.randomUUID() // Generate a UUID instead of hardcoding
           })
           .select();
           

@@ -43,26 +43,34 @@ export const createConsultant = async (
   consultantData: Omit<Consultant, 'id'> & { profile_picture: File | null }
 ): Promise<Consultant> => {
   try {
+    // Check if the bucket exists before trying to upload
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketName = 'consultant_images';
+    
+    let bucketExists = buckets?.some(bucket => bucket.name === bucketName);
+    
+    if (!bucketExists) {
+      console.log("Creating bucket:", bucketName);
+      const { error: bucketError } = await supabase.storage.createBucket(bucketName, {
+        public: true
+      });
+      
+      if (bucketError) {
+        console.error("Error creating bucket:", bucketError);
+        throw new Error(`Unable to create storage bucket: ${bucketError.message}`);
+      }
+      bucketExists = true;
+    }
+    
     let profile_picture_url = null;
     
-    // Upload profile picture if provided
-    if (consultantData.profile_picture) {
+    // Upload profile picture if provided and bucket exists
+    if (consultantData.profile_picture && bucketExists) {
       const file = consultantData.profile_picture;
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       
       console.log("Attempting to upload file:", fileName);
-      
-      // Check if bucket exists and create if it doesn't
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const bucketName = 'consultant_images';
-      
-      if (!buckets || !buckets.find(bucket => bucket.name === bucketName)) {
-        console.log("Creating bucket:", bucketName);
-        await supabase.storage.createBucket(bucketName, {
-          public: true
-        });
-      }
       
       // Upload the file
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -86,16 +94,18 @@ export const createConsultant = async (
     // Remove the File object before inserting into database
     const { profile_picture, ...dbConsultantData } = consultantData;
     
+    // Generate a UUID for profile_id if not provided or is default
+    if (!dbConsultantData.profile_id || dbConsultantData.profile_id === "00000000-0000-0000-0000-000000000000") {
+      dbConsultantData.profile_id = crypto.randomUUID();
+    }
+    
+    // Log the data being sent to the database
     console.log("Inserting consultant data:", {
       ...dbConsultantData,
       profile_picture_url
     });
     
-    // Generate a UUID for profile_id if not provided
-    if (!dbConsultantData.profile_id || dbConsultantData.profile_id === "00000000-0000-0000-0000-000000000000") {
-      dbConsultantData.profile_id = crypto.randomUUID();
-    }
-    
+    // Create a new consultant record
     const { data, error } = await supabase
       .from('consultants')
       .insert({
@@ -108,6 +118,10 @@ export const createConsultant = async (
     if (error) {
       console.error("Error creating consultant:", error);
       throw new Error(`Unable to create consultant: ${error.message}`);
+    }
+    
+    if (!data) {
+      throw new Error("No data returned from consultant creation");
     }
     
     return data;

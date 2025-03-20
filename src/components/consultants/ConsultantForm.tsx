@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Consultant, createConsultant } from "@/utils/consultantApi";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ConsultantFormProps {
   onSuccess: (consultant: Consultant) => void;
@@ -28,6 +29,7 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
     profile_picture: null as File | null
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -56,8 +58,10 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setError(null);
     
     if (!formData.name.trim()) {
+      setError("Consultant name is required");
       toast({
         title: "Error",
         description: "Consultant name is required",
@@ -86,9 +90,11 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
       onSuccess(newConsultant);
     } catch (error) {
       console.error("Error adding consultant:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to add consultant";
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to add consultant",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -98,6 +104,12 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input
@@ -119,6 +131,7 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
           accept="image/*"
           onChange={handleFileChange}
         />
+        <p className="text-xs text-gray-500">Optional. Maximum size: 5MB</p>
       </div>
       
       <div className="space-y-2">
