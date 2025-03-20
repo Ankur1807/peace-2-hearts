@@ -1,5 +1,5 @@
 
-import { getBookingDetailsFromLocalStorage, clearBookingDetailsFromLocalStorage } from '@/utils/consultationUtils';
+import { getBookingDetailsFromLocalStorage, clearBookingDetailsFromLocalStorage } from '@/utils/bookingStorage';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 
 export function initializeBookingFromStorage(bookingState: ConsultationBookingHook): void {

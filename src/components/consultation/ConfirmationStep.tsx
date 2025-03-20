@@ -1,16 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { getConsultationTypeLabel, getConsultationPrice, getTimeSlotLabel } from '@/utils/consultationUtils';
-
-interface PersonalDetails {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  message: string;
-}
+import { getConsultationTypeLabel, getConsultationPrice, getTimeSlotLabel } from '@/utils/consultationLabels';
+import { PersonalDetails } from '@/utils/types';
 
 type ConfirmationStepProps = {
   consultationType: string;

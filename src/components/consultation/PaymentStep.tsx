@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { CreditCard, Shield } from 'lucide-react';
-import { getConsultationTypeLabel, getConsultationPrice, formatCardNumber, formatExpiryDate } from '@/utils/consultationUtils';
+import { getConsultationTypeLabel, getConsultationPrice } from '@/utils/consultationLabels';
+import { formatCardNumber, formatExpiryDate } from '@/utils/formatUtils';
 
 type PaymentStepProps = {
   consultationType: string;
