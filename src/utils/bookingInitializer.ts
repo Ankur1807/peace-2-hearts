@@ -7,7 +7,6 @@ export function initializeBookingFromStorage(bookingState: ConsultationBookingHo
     setConsultationType,
     setDate,
     setTimeSlot,
-    setStep,
     handlePersonalDetailsChange
   } = bookingState;
 
@@ -17,7 +16,6 @@ export function initializeBookingFromStorage(bookingState: ConsultationBookingHo
     setConsultationType(storedDetails.consultationType || '');
     setDate(storedDetails.date ? new Date(storedDetails.date) : undefined);
     setTimeSlot(storedDetails.timeSlot || '');
-    setStep(storedDetails.step || 1);
     if (storedDetails.personalDetails) {
       handlePersonalDetailsChange(storedDetails.personalDetails);
     }
