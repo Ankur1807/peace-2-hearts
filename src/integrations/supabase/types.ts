@@ -96,36 +96,48 @@ export type Database = {
       }
       consultations: {
         Row: {
+          client_email: string | null
+          client_name: string | null
+          client_phone: string | null
           consultant_id: string
           consultation_type: string
           created_at: string
           date: string
           id: string
           message: string | null
+          reference_id: string | null
           status: string
           time_slot: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
           consultant_id: string
           consultation_type: string
           created_at?: string
           date: string
           id?: string
           message?: string | null
+          reference_id?: string | null
           status?: string
           time_slot: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
           consultant_id?: string
           consultation_type?: string
           created_at?: string
           date?: string
           id?: string
           message?: string | null
+          reference_id?: string | null
           status?: string
           time_slot?: string
           updated_at?: string
