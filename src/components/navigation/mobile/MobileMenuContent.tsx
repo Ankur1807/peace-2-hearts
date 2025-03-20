@@ -1,44 +1,86 @@
 
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { motion } from "framer-motion";
+import { X } from "lucide-react";
 
 interface MobileMenuContentProps {
   isOpen: boolean;
-  onMenuItemClick: () => void;
+  onClose: () => void;
 }
 
-const MobileMenuContent = ({ isOpen, onMenuItemClick }: MobileMenuContentProps) => {
+const MobileMenuContent = ({ isOpen, onClose }: MobileMenuContentProps) => {
+  const links = [
+    { path: "/", label: "Home" },
+    { path: "/about", label: "About" },
+    { path: "/services", label: "Services" },
+    { path: "/consultants", label: "Consultants" },
+    { path: "/resources", label: "Resources" },
+    { path: "/contact", label: "Contact" },
+  ];
+
+  const menuVariants = {
+    open: { x: 0, opacity: 1 },
+    closed: { x: "100%", opacity: 0 },
+  };
+
+  const linkVariants = {
+    open: { y: 0, opacity: 1 },
+    closed: { y: 20, opacity: 0 },
+  };
+
+  const containerVariants = {
+    open: {
+      transition: {
+        staggerChildren: 0.07,
+        delayChildren: 0.2,
+      },
+    },
+    closed: {
+      transition: {
+        staggerChildren: 0.05,
+        staggerDirection: -1,
+      },
+    },
+  };
+
   return (
-    <div
-      className={`bg-vibrantPurple shadow-xl border-none rounded-b-xl transition-transform duration-300 ease-in-out z-[201] fixed inset-0 top-[64px] ${
-        isOpen ? 'translate-y-0' : '-translate-y-full'
-      }`}
-      style={{
-        maxHeight: 'calc(100vh - 64px)',
-        pointerEvents: isOpen ? 'auto' : 'none',
-      }}
+    <motion.div
+      className="fixed inset-0 z-50 overflow-hidden"
+      initial="closed"
+      animate={isOpen ? "open" : "closed"}
+      variants={menuVariants}
+      transition={{ type: "spring", stiffness: 400, damping: 40 }}
     >
-      <ScrollArea className="h-full max-h-[calc(100vh-64px)]">
-        <div className="container mx-auto py-4 flex flex-col gap-4">
-          <Link to="/" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuItemClick}>Home</Link>
-          <Link to="/about" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuItemClick}>About Us</Link>
-          <Link to="/services" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuItemClick}>Services</Link>
-          <Link to="/resources" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuItemClick}>Resources</Link>
-          <Link to="/contact" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuItemClick}>Contact</Link>
-          
-          <Link to="/book-consultation" className="text-white hover:text-white/80 transition-colors py-2" onClick={onMenuItemClick}>
-            Book Consultation
-          </Link>
-          
-          <Link to="/book-consultation" onClick={onMenuItemClick}>
-            <Button className="bg-white hover:bg-white/90 text-purple-600 rounded-full mt-2">
-              Book Consultation
-            </Button>
-          </Link>
+      <div className="absolute inset-0 bg-white">
+        <div className="flex justify-between items-center p-4 border-b">
+          <span className="text-xl font-bold">Menu</span>
+          <button
+            onClick={onClose}
+            className="rounded-full p-2 hover:bg-gray-100 transition-colors"
+          >
+            <X className="h-6 w-6" />
+          </button>
         </div>
-      </ScrollArea>
-    </div>
+        <motion.nav
+          className="mt-6 px-6"
+          variants={containerVariants}
+        >
+          <ul className="space-y-6">
+            {links.map((link) => (
+              <motion.li key={link.path} variants={linkVariants}>
+                <Link
+                  to={link.path}
+                  className="text-xl font-medium block py-2"
+                  onClick={onClose}
+                >
+                  {link.label}
+                </Link>
+              </motion.li>
+            ))}
+          </ul>
+        </motion.nav>
+      </div>
+    </motion.div>
   );
 };
 

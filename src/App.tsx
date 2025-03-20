@@ -42,6 +42,8 @@ import BookConsultation from "./pages/BookConsultation";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ConsultantManagement from "./pages/ConsultantManagement";
+import ConsultantListing from "./pages/ConsultantListing";
+import ConsultantDetail from "./pages/ConsultantDetail";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +84,10 @@ const App = () => (
             <Route path="/services/therapy" element={<TherapyService />} />
             <Route path="/services/divorce" element={<DivorceService />} />
             <Route path="/services/custody" element={<CustodyService />} />
+            
+            {/* Consultant Routes */}
+            <Route path="/consultants" element={<ConsultantListing />} />
+            <Route path="/consultants/:id" element={<ConsultantDetail />} />
             
             <Route path="/resources" element={<Resources />} />
             <Route path="/news" element={<News />} />
