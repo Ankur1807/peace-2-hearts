@@ -1,28 +1,18 @@
 
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Info, Briefcase, BookText, Phone, User } from 'lucide-react';
+import { Home, Info, Briefcase, BookText, Phone } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from 'react';
-import { supabase } from "@/integrations/supabase/client";
-import { signOut } from '@/utils/authUtils';
-import UserMenu from "@/components/navigation/UserMenu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 interface MobileMenuContentProps {
   isOpen: boolean;
-  isLoggedIn: boolean;
-  userName: string;
-  onSignOut: () => void;
   onMenuItemClick: () => void;
 }
 
 const MobileMenuContent = ({ 
   isOpen, 
-  isLoggedIn, 
-  userName, 
-  onSignOut, 
   onMenuItemClick 
 }: MobileMenuContentProps) => {
   
@@ -50,11 +40,6 @@ const MobileMenuContent = ({
   const itemVariants = {
     closed: { opacity: 0, y: -20 },
     open: { opacity: 1, y: 0 }
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    onMenuItemClick();
   };
 
   return (
@@ -125,56 +110,6 @@ const MobileMenuContent = ({
             </Link>
           </motion.div>
         </div>
-        
-        <motion.div 
-          variants={itemVariants}
-          className="pt-4 border-t border-white/20"
-        >
-          {isLoggedIn ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <span className="text-white font-medium">{userName.charAt(0)}</span>
-                </div>
-                <span className="text-white text-lg">{userName}</span>
-              </div>
-              
-              <Link 
-                to="/dashboard" 
-                className="flex items-center gap-3 text-white text-lg py-2"
-                onClick={onMenuItemClick}
-              >
-                <User className="h-5 w-5" />
-                Dashboard
-              </Link>
-              
-              <Button 
-                variant="outline" 
-                className="mt-2 w-full border-white text-white hover:bg-white/10" 
-                onClick={handleSignOut}
-              >
-                Sign Out
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <Link 
-                to="/sign-in" 
-                className="block text-white text-lg py-2"
-                onClick={onMenuItemClick}
-              >
-                Sign In
-              </Link>
-              <Link 
-                to="/sign-up" 
-                className="block text-white text-lg py-2"
-                onClick={onMenuItemClick}
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
-        </motion.div>
         
         <motion.div variants={itemVariants} className="mt-2">
           <Link to="/book-consultation" onClick={onMenuItemClick}>

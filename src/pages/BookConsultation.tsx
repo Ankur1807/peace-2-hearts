@@ -1,6 +1,5 @@
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card } from '@/components/ui/card';
@@ -13,13 +12,11 @@ import ConfirmationStep from '@/components/consultation/ConfirmationStep';
 import SuccessView from '@/components/consultation/SuccessView';
 import { SEO } from '@/components/SEO';
 import { 
-  checkAuthentication, 
   storeBookingDetailsInLocalStorage,
   getBookingDetailsFromLocalStorage,
   clearBookingDetailsFromLocalStorage,
   saveConsultation
 } from '@/utils/consultationUtils';
-import { supabase } from '@/integrations/supabase/client';
 
 interface PersonalDetails {
   firstName: string;
@@ -35,8 +32,8 @@ const BookConsultation = () => {
   const [consultationType, setConsultationType] = useState('');
   const [timeSlot, setTimeSlot] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [referenceId, setReferenceId] = useState<string | null>(null);
   const [personalDetails, setPersonalDetails] = useState<PersonalDetails>({
     firstName: '',
     lastName: '',
@@ -45,35 +42,9 @@ const BookConsultation = () => {
     message: ''
   });
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is logged in
-    const checkAuth = async () => {
-      const authenticated = await checkAuthentication();
-      setIsAuthenticated(authenticated);
-      
-      // If not authenticated and at step 3 or higher, redirect to sign in
-      if (!authenticated && step > 2) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to continue booking your consultation.",
-        });
-        // Store current booking details
-        storeBookingDetailsInLocalStorage({
-          consultationType,
-          date: date?.toISOString(),
-          timeSlot,
-          step,
-          personalDetails
-        });
-        navigate("/sign-in");
-      }
-    };
-    
-    checkAuth();
-    
-    // Check if there are stored booking details (e.g., from returning after sign-in)
+    // Check if there are stored booking details
     const storedDetails = getBookingDetailsFromLocalStorage();
     if (storedDetails) {
       setConsultationType(storedDetails.consultationType || '');
@@ -86,7 +57,7 @@ const BookConsultation = () => {
       // Clear the stored details after retrieving them
       clearBookingDetailsFromLocalStorage();
     }
-  }, [step, navigate, consultationType, date, timeSlot, personalDetails, toast]);
+  }, []);
 
   const steps = [
     { number: 1, label: "Service" },
@@ -96,28 +67,17 @@ const BookConsultation = () => {
   ];
 
   const handleNextStep = () => {
-    // If moving to payment step, ensure user is authenticated
-    if (step === 2 && !isAuthenticated) {
-      // Store current booking details
-      storeBookingDetailsInLocalStorage({
-        consultationType,
-        date: date?.toISOString(),
-        timeSlot,
-        step: 3, // Set to next step so they come back here
-        personalDetails
-      });
-      
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to continue booking your consultation.",
-      });
-      
-      navigate("/sign-in");
-      return;
-    }
-    
     setStep(step + 1);
     window.scrollTo(0, 0);
+    
+    // Store current booking details in case user refreshes
+    storeBookingDetailsInLocalStorage({
+      consultationType,
+      date: date?.toISOString(),
+      timeSlot,
+      step: step + 1,
+      personalDetails
+    });
   };
 
   const handlePrevStep = () => {
@@ -136,28 +96,6 @@ const BookConsultation = () => {
     setIsProcessing(true);
     
     try {
-      // First check if the user is authenticated
-      const { data: session } = await supabase.auth.getSession();
-      
-      if (!session.session) {
-        // Save details and redirect to sign in
-        storeBookingDetailsInLocalStorage({
-          consultationType,
-          date: date?.toISOString(),
-          timeSlot,
-          step: 3,
-          personalDetails
-        });
-        
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to complete your booking.",
-        });
-        
-        navigate("/sign-in");
-        return;
-      }
-      
       // Mock payment processing
       // In a real application, this would integrate with a payment gateway
       setTimeout(() => {
@@ -183,15 +121,16 @@ const BookConsultation = () => {
   const handleConfirmBooking = async () => {
     try {
       // Save the consultation to Supabase
-      const consultation = await saveConsultation(
+      const result = await saveConsultation(
         consultationType,
         date,
         timeSlot,
         personalDetails
       );
       
-      if (consultation) {
+      if (result) {
         setSubmitted(true);
+        setReferenceId(result.referenceId);
         window.scrollTo(0, 0);
         
         toast({
@@ -221,7 +160,7 @@ const BookConsultation = () => {
         <Navigation />
         <main className="py-16 md:py-24">
           <div className="container mx-auto px-4 max-w-4xl">
-            <SuccessView />
+            <SuccessView referenceId={referenceId} />
           </div>
         </main>
         <Footer />

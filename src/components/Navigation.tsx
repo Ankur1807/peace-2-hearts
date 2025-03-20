@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Logo from './navigation/Logo';
 import DesktopMenu from './navigation/DesktopMenu';
@@ -8,26 +8,11 @@ import WaveyHeader from './navigation/WaveyHeader';
 import MobileHeader from './navigation/MobileHeader';
 
 const Navigation = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('');
   const [scrollPosition, setScrollPosition] = useState(0);
-  const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Check if user is logged in
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        setIsLoggedIn(true);
-        setUserName(user.name);
-      } catch (e) {
-        console.error("Error parsing user data:", e);
-      }
-    }
-
     // Add scroll event listener
     const handleScroll = () => {
       setScrollPosition(window.scrollY);
@@ -52,21 +37,10 @@ const Navigation = () => {
     return initialOpacity + opacityChange;
   };
 
-  const handleSignOut = () => {
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    navigate('/sign-in');
-  };
-
   // The key difference: render different markup based on device type
   if (isMobile) {
-    console.log("Rendering mobile header");
     return (
-      <MobileHeader
-        isLoggedIn={isLoggedIn}
-        userName={userName}
-        onSignOut={handleSignOut}
-      />
+      <MobileHeader />
     );
   }
 
@@ -85,11 +59,7 @@ const Navigation = () => {
       <div className="container mx-auto flex justify-between items-center relative z-[60]">
         <Logo />
         
-        <DesktopMenu 
-          isLoggedIn={isLoggedIn} 
-          userName={userName} 
-          onSignOut={handleSignOut} 
-        />
+        <DesktopMenu />
       </div>
     </nav>
   );

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface BookingDetails {
@@ -13,11 +14,6 @@ export interface BookingDetails {
     message: string;
   };
 }
-
-export const checkAuthentication = async () => {
-  const { data } = await supabase.auth.getSession();
-  return !!data.session;
-};
 
 export const storeBookingDetailsInLocalStorage = (details: BookingDetails) => {
   localStorage.setItem('bookingDetails', JSON.stringify(details));
@@ -48,11 +44,6 @@ export const saveConsultation = async (
     throw new Error("Date is required");
   }
 
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) {
-    throw new Error("User not authenticated");
-  }
-
   try {
     // Try to find a consultant with the appropriate specialization
     const { data: consultants, error: consultantError } = await supabase
@@ -67,14 +58,12 @@ export const saveConsultation = async (
       throw consultantError;
     }
 
-    // If no consultant is found, we'll use a default system consultant ID
-    // This avoids RLS issues with creating consultants on the fly
+    // If no consultant is found, use any available consultant
     let consultantId;
     if (consultants && consultants.length > 0) {
       consultantId = consultants[0].id;
     } else {
-      // Get or create a default consultant using an edge function or API endpoint
-      // For now, we'll use a temporary approach - selecting any consultant
+      // Select any consultant
       const { data: anyConsultant, error: anyConsultantError } = await supabase
         .from('consultants')
         .select('id')
@@ -87,17 +76,23 @@ export const saveConsultation = async (
       consultantId = anyConsultant[0].id;
     }
 
-    // Save the consultation
+    // Create a reference ID for the consultation
+    const referenceId = generateReferenceId();
+
+    // Save the consultation without requiring user authentication
     const { data: consultation, error: consultationError } = await supabase
       .from('consultations')
       .insert({
-        user_id: userData.user.id,
+        reference_id: referenceId,
         consultant_id: consultantId,
         consultation_type: consultationType,
         date: date.toISOString(),
         time_slot: timeSlot,
         message: personalDetails.message,
-        status: 'scheduled'
+        status: 'scheduled',
+        client_email: personalDetails.email,
+        client_phone: personalDetails.phone,
+        client_name: `${personalDetails.firstName} ${personalDetails.lastName}`
       })
       .select()
       .single();
@@ -107,85 +102,11 @@ export const saveConsultation = async (
       throw consultationError;
     }
 
-    // Update user profile with name and phone if not already set
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userData.user.id)
-      .single();
-
-    if (!profileError && profile) {
-      // Only update if needed
-      if (!profile.full_name || !profile.phone_number) {
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({
-            full_name: profile.full_name || `${personalDetails.firstName} ${personalDetails.lastName}`,
-            phone_number: profile.phone_number || personalDetails.phone
-          })
-          .eq('id', userData.user.id);
-
-        if (updateError) {
-          console.error("Error updating profile:", updateError);
-          // Non-critical error, we can continue
-        }
-      }
-    }
-
-    return consultation;
+    return { ...consultation, referenceId };
   } catch (error) {
     console.error("Error in saveConsultation:", error);
     throw error;
   }
-};
-
-export const fetchUserConsultations = async () => {
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) {
-    throw new Error("User not authenticated");
-  }
-
-  const { data, error } = await supabase
-    .from('consultations')
-    .select(`
-      id,
-      consultation_type,
-      date,
-      time_slot,
-      status,
-      message,
-      consultant_id,
-      consultants (
-        specialization,
-        hourly_rate,
-        profile_id,
-        profiles (
-          full_name
-        )
-      )
-    `)
-    .eq('user_id', userData.user.id)
-    .order('date', { ascending: false });
-
-  if (error) {
-    console.error("Error fetching consultations:", error);
-    throw error;
-  }
-
-  return data.map(consultation => ({
-    id: consultation.id,
-    date: new Date(consultation.date),
-    service: getConsultationTypeLabel(consultation.consultation_type),
-    specialist: consultation.consultants?.profiles?.full_name || "Specialist",
-    status: mapStatusToUI(consultation.status)
-  }));
-};
-
-const mapStatusToUI = (status: string): "upcoming" | "completed" | "cancelled" => {
-  if (status === 'scheduled' || status === 'confirmed') return 'upcoming';
-  if (status === 'completed') return 'completed';
-  if (status === 'cancelled') return 'cancelled';
-  return 'upcoming'; // Default case
 };
 
 export const getConsultationTypeLabel = (type: string): string => {
@@ -249,4 +170,12 @@ export const formatExpiryDate = (value: string): string => {
   }
   
   return v;
+};
+
+// Generate a unique reference ID for consultations
+const generateReferenceId = (): string => {
+  const prefix = 'P2H';
+  const timestamp = Date.now().toString().slice(-6);
+  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  return `${prefix}-${timestamp}-${random}`;
 };
