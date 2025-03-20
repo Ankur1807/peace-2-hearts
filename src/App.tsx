@@ -41,7 +41,7 @@ import CustodyService from "./pages/services/CustodyService";
 import BookConsultation from "./pages/BookConsultation";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
-import Dashboard from "./pages/Dashboard";
+import ConsultantManagement from "./pages/ConsultantManagement";
 
 const queryClient = new QueryClient();
 
@@ -90,7 +90,7 @@ const App = () => (
             <Route path="/book-consultation" element={<BookConsultation />} />
             <Route path="/sign-in" element={<SignIn />} />
             <Route path="/sign-up" element={<SignUp />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/consultant-management" element={<ConsultantManagement />} />
             
             {/* Catch-all route for 404 */}
             <Route path="*" element={<NotFound />} />

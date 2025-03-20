@@ -17,8 +17,8 @@ const UserMenu = ({ isMobile = false, onItemClick }: UserMenuProps) => {
         <Link to="/book-consultation" className="text-white hover:text-white/80 transition-colors py-2" onClick={onItemClick}>
           Book Consultation
         </Link>
-        <Link to="/dashboard" className="text-white hover:text-white/80 transition-colors py-2" onClick={onItemClick}>
-          Dashboard
+        <Link to="/consultant-management" className="text-white hover:text-white/80 transition-colors py-2" onClick={onItemClick}>
+          Manage Consultants
         </Link>
       </>
     );
@@ -26,9 +26,9 @@ const UserMenu = ({ isMobile = false, onItemClick }: UserMenuProps) => {
 
   return (
     <div className="flex items-center gap-4">
-      <Link to="/dashboard">
+      <Link to="/consultant-management">
         <Button variant="outline" className="text-white border-white hover:bg-white/10">
-          Dashboard
+          Manage Consultants
         </Button>
       </Link>
       <Link to="/book-consultation">
