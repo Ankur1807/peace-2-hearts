@@ -24,9 +24,10 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
     available_days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
     available_hours: "9:00-17:00",
     is_available: true,
-    profile_id: "00000000-0000-0000-0000-000000000000",
+    profile_id: crypto.randomUUID(), // Generate a random UUID
     profile_picture: null as File | null
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -56,11 +57,24 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
+    if (!formData.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Consultant name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
     try {
       const consultantData = {
         ...formData,
         hourly_rate: Number(formData.hourly_rate)
       };
+      
+      console.log("Submitting consultant data:", consultantData);
       
       const newConsultant = await createConsultant(consultantData);
       
@@ -71,11 +85,14 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
       
       onSuccess(newConsultant);
     } catch (error) {
+      console.error("Error adding consultant:", error);
       toast({
         title: "Error",
-        description: "Failed to add consultant",
+        description: error instanceof Error ? error.message : "Failed to add consultant",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -171,10 +188,21 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
       </div>
       
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel} className="mr-2">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel} 
+          className="mr-2"
+          disabled={isSubmitting}
+        >
           Cancel
         </Button>
-        <Button type="submit">Add Consultant</Button>
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Adding..." : "Add Consultant"}
+        </Button>
       </DialogFooter>
     </form>
   );

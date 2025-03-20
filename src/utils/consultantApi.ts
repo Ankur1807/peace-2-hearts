@@ -47,26 +47,54 @@ export const createConsultant = async (
     
     // Upload profile picture if provided
     if (consultantData.profile_picture) {
-      const fileName = `${Date.now()}_${consultantData.profile_picture.name}`;
+      const file = consultantData.profile_picture;
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      
+      console.log("Attempting to upload file:", fileName);
+      
+      // Check if bucket exists and create if it doesn't
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketName = 'consultant_images';
+      
+      if (!buckets || !buckets.find(bucket => bucket.name === bucketName)) {
+        console.log("Creating bucket:", bucketName);
+        await supabase.storage.createBucket(bucketName, {
+          public: true
+        });
+      }
+      
+      // Upload the file
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('consultant_images')
-        .upload(fileName, consultantData.profile_picture);
+        .from(bucketName)
+        .upload(fileName, file);
       
       if (uploadError) {
         console.error("Error uploading profile picture:", uploadError);
-        throw new Error("Unable to upload profile picture. Please try again later.");
+        // Continue without image rather than failing completely
+      } else if (uploadData) {
+        // Get public URL for the uploaded file
+        const { data: urlData } = supabase.storage
+          .from(bucketName)
+          .getPublicUrl(fileName);
+          
+        profile_picture_url = urlData.publicUrl;
+        console.log("File uploaded successfully. URL:", profile_picture_url);
       }
-      
-      // Get public URL for the uploaded file
-      const { data: urlData } = supabase.storage
-        .from('consultant_images')
-        .getPublicUrl(fileName);
-        
-      profile_picture_url = urlData.publicUrl;
     }
     
     // Remove the File object before inserting into database
     const { profile_picture, ...dbConsultantData } = consultantData;
+    
+    console.log("Inserting consultant data:", {
+      ...dbConsultantData,
+      profile_picture_url
+    });
+    
+    // Generate a UUID for profile_id if not provided
+    if (!dbConsultantData.profile_id || dbConsultantData.profile_id === "00000000-0000-0000-0000-000000000000") {
+      dbConsultantData.profile_id = crypto.randomUUID();
+    }
     
     const { data, error } = await supabase
       .from('consultants')
@@ -79,7 +107,7 @@ export const createConsultant = async (
     
     if (error) {
       console.error("Error creating consultant:", error);
-      throw new Error("Unable to create consultant. Please try again later.");
+      throw new Error(`Unable to create consultant: ${error.message}`);
     }
     
     return data;
