@@ -58,12 +58,12 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick }: MobileMenuConte
       variants={menuVariants}
       transition={{ type: "spring", stiffness: 400, damping: 40 }}
     >
-      <div className="absolute inset-0 bg-white">
-        <div className="flex justify-between items-center p-4 border-b">
-          <span className="text-xl font-bold">Menu</span>
+      <div className="absolute inset-0 bg-vibrantPurple">
+        <div className="flex justify-between items-center p-4 border-b border-white/20">
+          <span className="text-xl font-bold text-white">Menu</span>
           <button
             onClick={onClose}
-            className="rounded-full p-2 hover:bg-gray-100 transition-colors"
+            className="rounded-full p-2 hover:bg-white/10 transition-colors text-white"
           >
             <X className="h-6 w-6" />
           </button>
@@ -77,7 +77,7 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick }: MobileMenuConte
               <motion.li key={link.path} variants={linkVariants}>
                 <Link
                   to={link.path}
-                  className="text-xl font-medium block py-2"
+                  className="text-xl font-medium block py-2 text-white hover:text-white/80 transition-colors"
                   onClick={handleLinkClick}
                 >
                   {link.label}
