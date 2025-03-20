@@ -42,13 +42,7 @@ const MobileMenu = ({ isLoggedIn, userName, isMenuOpen, onSignOut, onMenuToggle 
             <Link to="/resources" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>Resources</Link>
             <Link to="/contact" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>Contact</Link>
             
-            <UserMenu 
-              isLoggedIn={isLoggedIn} 
-              userName={userName} 
-              onSignOut={onSignOut} 
-              isMobile={true} 
-              onItemClick={onMenuToggle}
-            />
+            <UserMenu isMobile={true} onItemClick={onMenuToggle} />
             
             <Link to="/book-consultation" onClick={onMenuToggle}>
               <Button className="bg-white hover:bg-white/90 text-purple-600 rounded-full mt-2">

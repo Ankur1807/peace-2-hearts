@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface BookingDetails {
@@ -89,10 +88,11 @@ export const saveConsultation = async (
         time_slot: timeSlot,
         message: personalDetails.message,
         status: 'scheduled',
-        client_email: personalDetails.email,
-        client_phone: personalDetails.phone,
+        user_id: 'guest', // Using a placeholder value for non-authenticated users
+        reference_id: referenceId,
         client_name: `${personalDetails.firstName} ${personalDetails.lastName}`,
-        reference_id: referenceId
+        client_email: personalDetails.email,
+        client_phone: personalDetails.phone
       })
       .select()
       .single();
@@ -200,7 +200,6 @@ export const formatExpiryDate = (value: string): string => {
   return v;
 };
 
-// Generate a unique reference ID for consultations
 const generateReferenceId = (): string => {
   const prefix = 'P2H';
   const timestamp = Date.now().toString().slice(-6);

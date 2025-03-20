@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 interface UserMenuProps {
+  isLoggedIn?: boolean;
+  userName?: string;
+  onSignOut?: () => void;
   isMobile?: boolean;
   onItemClick?: () => void;
 }

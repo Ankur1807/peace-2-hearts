@@ -40,7 +40,7 @@ const Navigation = () => {
   // The key difference: render different markup based on device type
   if (isMobile) {
     return (
-      <MobileHeader />
+      <MobileHeader isLoggedIn={false} userName="" onSignOut={() => {}} />
     );
   }
 
@@ -59,7 +59,7 @@ const Navigation = () => {
       <div className="container mx-auto flex justify-between items-center relative z-[60]">
         <Logo />
         
-        <DesktopMenu />
+        <DesktopMenu isLoggedIn={false} userName="" onSignOut={() => {}} />
       </div>
     </nav>
   );

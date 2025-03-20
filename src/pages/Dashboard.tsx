@@ -5,7 +5,6 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from '@/components/SEO';
 import { getUserProfile, signOut } from "@/utils/authUtils";
-import { fetchUserConsultations } from "@/utils/consultationUtils";
 import { useToast } from "@/hooks/use-toast";
 import UserProfile from "@/components/dashboard/UserProfile";
 import DashboardTabs from "@/components/dashboard/DashboardTabs";
@@ -47,9 +46,8 @@ const Dashboard = () => {
         
         setUser(userProfile as UserProfile);
         
-        // Fetch actual consultations from Supabase
-        const userAppointments = await fetchUserConsultations();
-        setAppointments(userAppointments);
+        // Since we're removing the dashboard functionality, just use empty appointments
+        setAppointments([]);
       } catch (error) {
         console.error("Error fetching user data:", error);
         toast({

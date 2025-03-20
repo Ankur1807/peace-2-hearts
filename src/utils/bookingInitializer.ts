@@ -8,7 +8,7 @@ export function initializeBookingFromStorage(bookingState: ConsultationBookingHo
     setDate,
     setTimeSlot,
     setStep,
-    setPersonalDetails
+    handlePersonalDetailsChange
   } = bookingState;
 
   // Check if there are stored booking details
@@ -19,7 +19,7 @@ export function initializeBookingFromStorage(bookingState: ConsultationBookingHo
     setTimeSlot(storedDetails.timeSlot || '');
     setStep(storedDetails.step || 1);
     if (storedDetails.personalDetails) {
-      setPersonalDetails(storedDetails.personalDetails);
+      handlePersonalDetailsChange(storedDetails.personalDetails);
     }
     // Clear the stored details after retrieving them
     clearBookingDetailsFromLocalStorage();

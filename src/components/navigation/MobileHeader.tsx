@@ -58,9 +58,6 @@ const MobileHeader = ({ isLoggedIn, userName, onSignOut }: MobileHeaderProps) =>
       {/* Mobile navigation menu */}
       <MobileMenuContent 
         isOpen={isMenuOpen}
-        isLoggedIn={isLoggedIn}
-        userName={userName}
-        onSignOut={onSignOut}
         onMenuItemClick={handleMenuItemClick}
       />
       
