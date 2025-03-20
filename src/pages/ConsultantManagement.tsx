@@ -7,24 +7,19 @@ import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Consultant, getConsultants } from "@/utils/consultantApi";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
 import ConsultantForm from "@/components/consultants/ConsultantForm";
 import ConsultantList from "@/components/consultants/ConsultantList";
 import ConsultantLoader from "@/components/consultants/ConsultantLoader";
-import { Link } from "react-router-dom";
 
 const ConsultantManagement = () => {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { isAdmin, isAdminChecking } = useAdminAuth();
 
   useEffect(() => {
-    if (!isAdminChecking && isAdmin) {
-      fetchConsultants();
-    }
-  }, [isAdmin, isAdminChecking]);
+    fetchConsultants();
+  }, []);
 
   const fetchConsultants = async () => {
     try {
@@ -55,7 +50,7 @@ const ConsultantManagement = () => {
     );
   };
 
-  if (isAdminChecking) {
+  if (loading) {
     return <ConsultantLoader />;
   }
 
@@ -70,41 +65,31 @@ const ConsultantManagement = () => {
         <div className="container mx-auto px-4">
           <h1 className="section-title text-4xl md:text-5xl text-center mb-8">Consultant Management</h1>
           
-          {!isAdmin ? (
-            <div className="text-center py-12">
-              <h2 className="text-2xl mb-4">Access Denied</h2>
-              <p className="mb-6">You don't have permission to access this page.</p>
-              <Button asChild>
-                <Link to="/dashboard">Go to Dashboard</Link>
-              </Button>
+          <div className="space-y-6 max-w-5xl mx-auto">
+            <div className="flex justify-between items-center">
+              <p className="text-gray-600">Add and manage consultants available on the platform.</p>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="default">Add Consultant</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Add New Consultant</DialogTitle>
+                  </DialogHeader>
+                  <ConsultantForm 
+                    onSuccess={handleConsultantAdded}
+                    onCancel={() => setIsDialogOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
-          ) : (
-            <div className="space-y-6 max-w-5xl mx-auto">
-              <div className="flex justify-between items-center">
-                <p className="text-gray-600">Add and manage consultants available on the platform.</p>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="default">Add Consultant</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Add New Consultant</DialogTitle>
-                    </DialogHeader>
-                    <ConsultantForm 
-                      onSuccess={handleConsultantAdded}
-                      onCancel={() => setIsDialogOpen(false)}
-                    />
-                  </DialogContent>
-                </Dialog>
-              </div>
-              
-              <ConsultantList 
-                consultants={consultants}
-                onConsultantUpdated={handleConsultantUpdated}
-                loading={loading}
-              />
-            </div>
-          )}
+            
+            <ConsultantList 
+              consultants={consultants}
+              onConsultantUpdated={handleConsultantUpdated}
+              loading={loading}
+            />
+          </div>
         </div>
       </main>
       <Footer />
