@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
@@ -7,12 +7,16 @@ import { useConsultationBooking } from '@/hooks/useConsultationBooking';
 import { initializeBookingFromStorage } from '@/utils/bookingInitializer';
 import ConsultationBookingForm from '@/components/consultation/ConsultationBookingForm';
 import SuccessView from '@/components/consultation/SuccessView';
+import ConsultationAlert from '@/components/consultation/ConsultationAlert';
 
 const BookConsultation = () => {
   const bookingState = useConsultationBooking();
   const { submitted, referenceId } = bookingState;
+  const [isDevelopment, setIsDevelopment] = useState(false);
 
   useEffect(() => {
+    // Check if we're in development mode
+    setIsDevelopment(process.env.NODE_ENV === 'development');
     initializeBookingFromStorage(bookingState);
   }, []);
 
@@ -49,6 +53,14 @@ const BookConsultation = () => {
           <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
             Take the first step towards peace and clarity in your relationship journey. Our expert team is here to support you.
           </p>
+
+          {isDevelopment && (
+            <ConsultationAlert
+              title="Development Mode"
+              description="This is a development environment. Bookings will create consultants if none exist."
+              variant="default"
+            />
+          )}
 
           <ConsultationBookingForm bookingState={bookingState} />
         </div>

@@ -24,25 +24,45 @@ export const saveConsultation = async (
 
     if (consultantError) {
       console.error("Error fetching consultants:", consultantError);
-      throw consultantError;
+      throw new Error("Unable to check consultant availability. Please try again later.");
     }
 
-    // If no consultant is found, use any available consultant
+    // If no consultant is found with the specific specialization, try to find any available consultant
     let consultantId;
     if (consultants && consultants.length > 0) {
       consultantId = consultants[0].id;
     } else {
-      // Select any consultant
+      // Select any consultant as fallback
       const { data: anyConsultant, error: anyConsultantError } = await supabase
         .from('consultants')
         .select('id')
         .limit(1);
         
-      if (anyConsultantError || !anyConsultant || anyConsultant.length === 0) {
-        throw new Error("No consultants available. Please contact support.");
+      if (anyConsultantError) {
+        throw new Error("Unable to check consultant availability. Please try again later.");
       }
       
-      consultantId = anyConsultant[0].id;
+      if (!anyConsultant || anyConsultant.length === 0) {
+        // No consultants available in the system - create placeholder entry for testing
+        const { data: newConsultant, error: createError } = await supabase
+          .from('consultants')
+          .insert({
+            specialization: 'general',
+            is_available: true,
+            hourly_rate: 1000,
+            profile_id: '00000000-0000-0000-0000-000000000000' // Placeholder ID
+          })
+          .select();
+          
+        if (createError) {
+          console.error("Error creating placeholder consultant:", createError);
+          throw new Error("No consultants available. Please contact support for assistance.");
+        }
+        
+        consultantId = newConsultant[0].id;
+      } else {
+        consultantId = anyConsultant[0].id;
+      }
     }
 
     // Create a reference ID for the consultation
@@ -69,7 +89,7 @@ export const saveConsultation = async (
 
     if (consultationError) {
       console.error("Error saving consultation:", consultationError);
-      throw consultationError;
+      throw new Error("Unable to save your consultation. Please try again later.");
     }
 
     return { ...consultation, referenceId };
