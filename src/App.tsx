@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -45,66 +46,71 @@ import ConsultantManagement from "./pages/ConsultantManagement";
 import ConsultantListing from "./pages/ConsultantListing";
 import ConsultantDetail from "./pages/ConsultantDetail";
 
+// Create a new QueryClient instance
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <HelmetProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<AboutUs />} />
-            
-            {/* Main Services Route */}
-            <Route path="/services" element={<Services />} />
-            
-            {/* Main Service Category Pages */}
-            <Route path="/services/mental-health" element={<MentalHealthService />} />
-            <Route path="/services/legal-support" element={<LegalSupportService />} />
-            
-            {/* Mental Health Sub-Services */}
-            <Route path="/services/mental-health/counselling" element={<MentalHealthCounselling />} />
-            <Route path="/services/mental-health/family-therapy" element={<FamilyTherapy />} />
-            <Route path="/services/mental-health/premarital-counselling" element={<PremaritalCounselling />} />
-            <Route path="/services/mental-health/couples-counselling" element={<CouplesCounselling />} />
-            <Route path="/services/mental-health/sexual-health-counselling" element={<SexualHealthCounselling />} />
-            
-            {/* Legal Sub-Services */}
-            <Route path="/services/legal-support/pre-marriage" element={<PreMarriageLegal />} />
-            <Route path="/services/legal-support/mediation" element={<MediationServices />} />
-            <Route path="/services/legal-support/divorce" element={<DivorceConsultation />} />
-            <Route path="/services/legal-support/custody" element={<ChildCustodyConsultation />} />
-            <Route path="/services/legal-support/maintenance" element={<MaintenanceConsultation />} />
-            <Route path="/services/legal-support/general" element={<GeneralConsultation />} />
-            
-            {/* Legacy Service Pages - kept for backward compatibility */}
-            <Route path="/services/therapy" element={<TherapyService />} />
-            <Route path="/services/divorce" element={<DivorceService />} />
-            <Route path="/services/custody" element={<CustodyService />} />
-            
-            {/* Consultant Routes */}
-            <Route path="/consultants" element={<ConsultantListing />} />
-            <Route path="/consultants/:id" element={<ConsultantDetail />} />
-            
-            <Route path="/resources" element={<Resources />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/book-consultation" element={<BookConsultation />} />
-            <Route path="/sign-in" element={<SignIn />} />
-            <Route path="/sign-up" element={<SignUp />} />
-            <Route path="/consultant-management" element={<ConsultantManagement />} />
-            
-            {/* Catch-all route for 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </HelmetProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <HelmetProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/about" element={<AboutUs />} />
+                
+                {/* Main Services Route */}
+                <Route path="/services" element={<Services />} />
+                
+                {/* Main Service Category Pages */}
+                <Route path="/services/mental-health" element={<MentalHealthService />} />
+                <Route path="/services/legal-support" element={<LegalSupportService />} />
+                
+                {/* Mental Health Sub-Services */}
+                <Route path="/services/mental-health/counselling" element={<MentalHealthCounselling />} />
+                <Route path="/services/mental-health/family-therapy" element={<FamilyTherapy />} />
+                <Route path="/services/mental-health/premarital-counselling" element={<PremaritalCounselling />} />
+                <Route path="/services/mental-health/couples-counselling" element={<CouplesCounselling />} />
+                <Route path="/services/mental-health/sexual-health-counselling" element={<SexualHealthCounselling />} />
+                
+                {/* Legal Sub-Services */}
+                <Route path="/services/legal-support/pre-marriage" element={<PreMarriageLegal />} />
+                <Route path="/services/legal-support/mediation" element={<MediationServices />} />
+                <Route path="/services/legal-support/divorce" element={<DivorceConsultation />} />
+                <Route path="/services/legal-support/custody" element={<ChildCustodyConsultation />} />
+                <Route path="/services/legal-support/maintenance" element={<MaintenanceConsultation />} />
+                <Route path="/services/legal-support/general" element={<GeneralConsultation />} />
+                
+                {/* Legacy Service Pages - kept for backward compatibility */}
+                <Route path="/services/therapy" element={<TherapyService />} />
+                <Route path="/services/divorce" element={<DivorceService />} />
+                <Route path="/services/custody" element={<CustodyService />} />
+                
+                {/* Consultant Routes */}
+                <Route path="/consultants" element={<ConsultantListing />} />
+                <Route path="/consultants/:id" element={<ConsultantDetail />} />
+                
+                <Route path="/resources" element={<Resources />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/book-consultation" element={<BookConsultation />} />
+                <Route path="/sign-in" element={<SignIn />} />
+                <Route path="/sign-up" element={<SignUp />} />
+                <Route path="/consultant-management" element={<ConsultantManagement />} />
+                
+                {/* Catch-all route for 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </HelmetProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
+};
 
 export default App;
