@@ -13,6 +13,13 @@ export const saveConsultation = async (
     throw new Error("Date is required");
   }
 
+  console.log("saveConsultation called with:", { 
+    consultationType, 
+    date: date.toISOString(), 
+    timeSlot, 
+    personalDetails 
+  });
+
   try {
     // Try to find a consultant with the appropriate specialization
     const { data: consultants, error: consultantError } = await supabase
@@ -27,11 +34,14 @@ export const saveConsultation = async (
       throw new Error("Unable to check consultant availability. Please try again later.");
     }
 
+    console.log("Consultants query result:", consultants);
+
     // If no consultant is found with the specific specialization, try to find any available consultant
     let consultantId;
     if (consultants && consultants.length > 0) {
       consultantId = consultants[0].id;
     } else {
+      console.log("No specific consultant found, looking for any consultant");
       // Select any consultant as fallback
       const { data: anyConsultant, error: anyConsultantError } = await supabase
         .from('consultants')
@@ -39,10 +49,14 @@ export const saveConsultation = async (
         .limit(1);
         
       if (anyConsultantError) {
+        console.error("Error fetching any consultant:", anyConsultantError);
         throw new Error("Unable to check consultant availability. Please try again later.");
       }
       
+      console.log("Any consultant query result:", anyConsultant);
+      
       if (!anyConsultant || anyConsultant.length === 0) {
+        console.log("No consultants found, creating placeholder");
         // No consultants available in the system - create placeholder entry for testing
         const { data: newConsultant, error: createError } = await supabase
           .from('consultants')
@@ -60,39 +74,48 @@ export const saveConsultation = async (
           throw new Error("No consultants available. Please contact support for assistance.");
         }
         
+        console.log("Created new consultant:", newConsultant);
         consultantId = newConsultant[0].id;
       } else {
         consultantId = anyConsultant[0].id;
       }
     }
 
+    console.log("Selected consultant ID:", consultantId);
+
     // Create a reference ID for the consultation
     const referenceId = generateReferenceId();
+    console.log("Generated reference ID:", referenceId);
 
     // Save the consultation without requiring user authentication
+    const consultationData = {
+      consultant_id: consultantId,
+      consultation_type: consultationType,
+      date: date.toISOString(),
+      time_slot: timeSlot,
+      message: personalDetails.message,
+      status: 'scheduled',
+      user_id: 'guest', // Using a placeholder value for non-authenticated users
+      reference_id: referenceId,
+      client_name: `${personalDetails.firstName} ${personalDetails.lastName}`,
+      client_email: personalDetails.email,
+      client_phone: personalDetails.phone
+    };
+    
+    console.log("Saving consultation with data:", consultationData);
+
     const { data: consultation, error: consultationError } = await supabase
       .from('consultations')
-      .insert({
-        consultant_id: consultantId,
-        consultation_type: consultationType,
-        date: date.toISOString(),
-        time_slot: timeSlot,
-        message: personalDetails.message,
-        status: 'scheduled',
-        user_id: 'guest', // Using a placeholder value for non-authenticated users
-        reference_id: referenceId,
-        client_name: `${personalDetails.firstName} ${personalDetails.lastName}`,
-        client_email: personalDetails.email,
-        client_phone: personalDetails.phone
-      })
+      .insert(consultationData)
       .select()
       .single();
 
     if (consultationError) {
       console.error("Error saving consultation:", consultationError);
-      throw new Error("Unable to save your consultation. Please try again later.");
+      throw new Error(`Unable to save your consultation: ${consultationError.message}`);
     }
 
+    console.log("Consultation saved successfully:", consultation);
     return { ...consultation, referenceId };
   } catch (error) {
     console.error("Error in saveConsultation:", error);

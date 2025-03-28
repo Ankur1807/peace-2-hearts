@@ -16,6 +16,7 @@ export interface Consultant {
 }
 
 export const getConsultants = async (specialization?: string): Promise<Consultant[]> => {
+  console.log("getConsultants called with specialization:", specialization);
   try {
     let query = supabase
       .from('consultants')
@@ -32,6 +33,7 @@ export const getConsultants = async (specialization?: string): Promise<Consultan
       throw new Error("Unable to fetch consultants. Please try again later.");
     }
     
+    console.log(`Retrieved ${data?.length || 0} consultants:`, data);
     return data || [];
   } catch (error) {
     console.error("Error in getConsultants:", error);
@@ -42,15 +44,27 @@ export const getConsultants = async (specialization?: string): Promise<Consultan
 export const createConsultant = async (
   consultantData: Omit<Consultant, 'id'> & { profile_picture: File | null }
 ): Promise<Consultant> => {
+  console.log("createConsultant called with data:", { 
+    ...consultantData, 
+    profile_picture: consultantData.profile_picture ? 
+      `${consultantData.profile_picture.name} (${consultantData.profile_picture.size} bytes)` : null 
+  });
   try {
     // Check if the bucket exists before trying to upload
-    const { data: buckets } = await supabase.storage.listBuckets();
+    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+    
+    if (bucketsError) {
+      console.error("Error listing buckets:", bucketsError);
+    }
+    
+    console.log("Available buckets:", buckets);
+    
     const bucketName = 'consultant_images';
     
     let bucketExists = buckets?.some(bucket => bucket.name === bucketName);
     
     if (!bucketExists) {
-      console.log("Creating bucket:", bucketName);
+      console.log("Bucket does not exist, creating bucket:", bucketName);
       const { error: bucketError } = await supabase.storage.createBucket(bucketName, {
         public: true
       });
@@ -59,7 +73,10 @@ export const createConsultant = async (
         console.error("Error creating bucket:", bucketError);
         throw new Error(`Unable to create storage bucket: ${bucketError.message}`);
       }
+      console.log("Bucket created successfully");
       bucketExists = true;
+    } else {
+      console.log("Bucket already exists:", bucketName);
     }
     
     let profile_picture_url = null;
@@ -97,6 +114,7 @@ export const createConsultant = async (
     // Generate a UUID for profile_id if not provided or is default
     if (!dbConsultantData.profile_id || dbConsultantData.profile_id === "00000000-0000-0000-0000-000000000000") {
       dbConsultantData.profile_id = crypto.randomUUID();
+      console.log("Generated new profile_id:", dbConsultantData.profile_id);
     }
     
     // Log the data being sent to the database
@@ -124,6 +142,7 @@ export const createConsultant = async (
       throw new Error("No data returned from consultant creation");
     }
     
+    console.log("Consultant created successfully:", data);
     return data;
   } catch (error) {
     console.error("Error in createConsultant:", error);
@@ -135,6 +154,7 @@ export const updateConsultantAvailability = async (
   consultantId: string, 
   isAvailable: boolean
 ): Promise<void> => {
+  console.log("updateConsultantAvailability called with:", { consultantId, isAvailable });
   try {
     const { error } = await supabase
       .from('consultants')
@@ -145,6 +165,8 @@ export const updateConsultantAvailability = async (
       console.error("Error updating consultant availability:", error);
       throw new Error("Unable to update consultant availability. Please try again later.");
     }
+    
+    console.log("Consultant availability updated successfully");
   } catch (error) {
     console.error("Error in updateConsultantAvailability:", error);
     throw error;
@@ -152,6 +174,7 @@ export const updateConsultantAvailability = async (
 };
 
 export const getConsultantById = async (consultantId: string): Promise<Consultant | null> => {
+  console.log("getConsultantById called with ID:", consultantId);
   try {
     const { data, error } = await supabase
       .from('consultants')
@@ -164,6 +187,7 @@ export const getConsultantById = async (consultantId: string): Promise<Consultan
       throw new Error("Unable to fetch consultant details. Please try again later.");
     }
     
+    console.log("Retrieved consultant:", data);
     return data;
   } catch (error) {
     console.error("Error in getConsultantById:", error);
