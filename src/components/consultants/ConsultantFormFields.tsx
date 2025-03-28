@@ -23,19 +23,6 @@ const ConsultantFormFields = ({
   return (
     <>
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={onInputChange}
-          placeholder="Consultant's full name"
-          required
-          disabled={isSubmitting}
-        />
-      </div>
-
-      <div className="space-y-2">
         <Label htmlFor="profile_picture">Profile Picture</Label>
         <Input
           id="profile_picture"

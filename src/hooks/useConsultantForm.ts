@@ -9,7 +9,6 @@ interface UseConsultantFormProps {
 }
 
 export interface ConsultantFormData {
-  name: string;
   specialization: string;
   hourly_rate: number;
   bio: string;
@@ -22,7 +21,6 @@ export interface ConsultantFormData {
 
 export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProps) => {
   const [formData, setFormData] = useState<ConsultantFormData>({
-    name: "",
     specialization: "legal",
     hourly_rate: 1000,
     bio: "",
@@ -63,16 +61,6 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
-    
-    if (!formData.name.trim()) {
-      setError("Consultant name is required");
-      toast({
-        title: "Error",
-        description: "Consultant name is required",
-        variant: "destructive",
-      });
-      return;
-    }
     
     setIsSubmitting(true);
     
