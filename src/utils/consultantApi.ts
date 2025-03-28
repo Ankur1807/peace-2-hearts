@@ -56,6 +56,19 @@ export const createConsultant = async (
       consultantData.profile_id = crypto.randomUUID();
       console.log("Generated new profile_id:", consultantData.profile_id);
     }
+
+    // First, create a profile entry for the consultant
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: consultantData.profile_id,
+        full_name: consultantData.name
+      });
+
+    if (profileError) {
+      console.error("Error creating profile:", profileError);
+      throw new Error(`Unable to create profile: ${profileError.message}`);
+    }
     
     let profile_picture_url = null;
     
