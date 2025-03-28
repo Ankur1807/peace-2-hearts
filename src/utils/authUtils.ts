@@ -102,7 +102,7 @@ export const ensureStorageBucketExists = async () => {
   try {
     const { error } = await supabase.storage.getBucket('consultant_profile_pictures');
     
-    if (error && error.message.includes('does not exist')) {
+    if (error && (error.message.includes('not found') || error.status === 400)) {
       console.log("Bucket does not exist, creating it");
       const { error: createError } = await supabase.storage.createBucket('consultant_profile_pictures', {
         public: true

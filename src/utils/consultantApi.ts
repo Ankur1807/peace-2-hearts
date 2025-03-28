@@ -51,41 +51,25 @@ export const createConsultant = async (
   });
   
   try {
-    // First check if we need to create a consultant_profile
-    let profileId = consultantData.profile_id;
+    // Generate a new profile_id if one wasn't provided
+    const profileId = consultantData.profile_id || crypto.randomUUID();
+    console.log("Using profile_id:", profileId);
     
-    // If no valid profile_id was provided, generate a new one
-    if (!profileId || profileId === "00000000-0000-0000-0000-000000000000") {
-      profileId = crypto.randomUUID();
-      console.log("Generated new profile_id:", profileId);
-    }
-    
-    // First ensure the consultant_profile exists
-    console.log("Creating or checking consultant profile with ID:", profileId);
-    const { data: existingProfile } = await supabase
+    // First ALWAYS create or update the consultant_profile record
+    console.log("Creating consultant profile with ID:", profileId);
+    const { error: profileError } = await supabase
       .from('consultant_profiles')
-      .select('id')
-      .eq('id', profileId)
-      .single();
+      .upsert({
+        id: profileId,
+        full_name: consultantData.name || 'Unnamed Consultant'
+      });
       
-    if (!existingProfile) {
-      // Create the profile if it doesn't exist
-      const { error: insertProfileError } = await supabase
-        .from('consultant_profiles')
-        .insert({
-          id: profileId,
-          full_name: consultantData.name || 'Unnamed Consultant'
-        });
-        
-      if (insertProfileError) {
-        console.error("Error creating consultant profile:", insertProfileError);
-        throw new Error(`Unable to create consultant profile: ${insertProfileError.message}`);
-      }
-      
-      console.log("Consultant profile created successfully with ID:", profileId);
-    } else {
-      console.log("Consultant profile already exists with ID:", profileId);
+    if (profileError) {
+      console.error("Error creating consultant profile:", profileError);
+      throw new Error(`Unable to create consultant profile: ${profileError.message}`);
     }
+    
+    console.log("Consultant profile created/updated successfully with ID:", profileId);
     
     let profile_picture_url = null;
     
@@ -100,20 +84,28 @@ export const createConsultant = async (
       
       // Ensure the storage bucket exists
       try {
-        const { data: bucketData, error: bucketError } = await supabase.storage.getBucket('consultant_profile_pictures');
+        console.log("Checking if storage bucket exists");
+        const { error: bucketError } = await supabase.storage.getBucket('consultant_profile_pictures');
         
-        if (bucketError && bucketError.message.includes('does not exist')) {
-          console.log("Bucket does not exist, creating it");
-          const { error: createBucketError } = await supabase.storage.createBucket('consultant_profile_pictures', {
-            public: true
-          });
-          
-          if (createBucketError) {
-            console.error("Error creating bucket:", createBucketError);
-            // Continue without the profile picture
+        if (bucketError) {
+          console.log("Bucket error response:", bucketError);
+          if (bucketError.message.includes('not found') || bucketError.status === 400) {
+            console.log("Bucket does not exist, creating it");
+            const { error: createBucketError } = await supabase.storage.createBucket('consultant_profile_pictures', {
+              public: true
+            });
+            
+            if (createBucketError) {
+              console.error("Error creating bucket:", createBucketError);
+              // Continue without the profile picture
+            } else {
+              console.log("Bucket created successfully");
+            }
           } else {
-            console.log("Bucket created successfully");
+            console.error("Unexpected error checking bucket:", bucketError);
           }
+        } else {
+          console.log("Bucket already exists");
         }
       } catch (bucketError) {
         console.error("Error checking/creating bucket:", bucketError);
@@ -134,7 +126,7 @@ export const createConsultant = async (
         console.log("Profile picture uploaded successfully:", uploadData);
         
         // Get the public URL for the uploaded file
-        const { data: publicUrlData } = supabase.storage
+        const publicUrlData = supabase.storage
           .from('consultant_profile_pictures')
           .getPublicUrl(filePath);
         
@@ -146,7 +138,7 @@ export const createConsultant = async (
     // Remove the File object before inserting into database
     const { profile_picture, ...dbConsultantData } = consultantData;
     
-    // Make sure to use the confirmed profileId
+    // Always use the profileId we created or checked above
     dbConsultantData.profile_id = profileId;
     
     // Log the data being sent to the database
