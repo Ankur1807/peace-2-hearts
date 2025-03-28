@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export const checkAuthentication = async () => {
@@ -112,11 +113,9 @@ export const ensureStorageBucketExists = async () => {
         return false;
       }
       
-      // Set public bucket policy
-      const { error: policyError } = await supabase.storage.from('consultant_profile_pictures').getPublicUrl('test');
-      if (policyError) {
-        console.error("Error setting bucket policy:", policyError);
-      }
+      // Set public bucket policy - no need to check for error as getPublicUrl doesn't return error
+      const publicUrlData = supabase.storage.from('consultant_profile_pictures').getPublicUrl('test');
+      console.log("Public URL test:", publicUrlData);
       
       console.log("Bucket created successfully");
       return true;
