@@ -12,6 +12,9 @@ import { useToast } from "@/hooks/use-toast";
 import { SEO } from '@/components/SEO';
 import { supabase } from "@/integrations/supabase/client";
 
+const ADMIN_EMAIL = "ankurb@peace2hearts.com";
+const ADMIN_PASSWORD = "adminP2H@30";
+
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,6 +25,21 @@ const SignIn = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    // Check if admin credentials
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      // Set admin authentication in localStorage
+      localStorage.setItem('p2h_admin_authenticated', 'true');
+      
+      toast({
+        title: "Admin sign in successful",
+        description: "Welcome to the consultant management"
+      });
+      
+      navigate("/add-consultant");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
