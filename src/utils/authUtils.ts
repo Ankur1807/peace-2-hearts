@@ -97,25 +97,38 @@ export const checkIsAdmin = async (): Promise<boolean> => {
  * Creates a storage bucket if it doesn't exist
  */
 export const ensureStorageBucketExists = async () => {
+  console.log("Ensuring storage bucket exists for consultant profile pictures");
   try {
-    // Check if the bucket exists
-    const { data: buckets } = await supabase.storage.listBuckets();
-    const bucketExists = buckets?.some(bucket => bucket.name === 'consultant_profile_pictures');
+    const { error } = await supabase.storage.getBucket('consultant_profile_pictures');
     
-    if (!bucketExists) {
-      // Create the bucket if it doesn't exist
-      const { error } = await supabase.storage.createBucket('consultant_profile_pictures', {
-        public: true, // Make the bucket public so images are accessible
-        fileSizeLimit: 5242880, // 5MB limit
+    if (error && error.message.includes('does not exist')) {
+      console.log("Bucket does not exist, creating it");
+      const { error: createError } = await supabase.storage.createBucket('consultant_profile_pictures', {
+        public: true
       });
       
-      if (error) {
-        console.error('Error creating storage bucket:', error);
-      } else {
-        console.log('Storage bucket created successfully');
+      if (createError) {
+        console.error("Error creating bucket:", createError);
+        return false;
       }
+      
+      // Set public bucket policy
+      const { error: policyError } = await supabase.storage.from('consultant_profile_pictures').getPublicUrl('test');
+      if (policyError) {
+        console.error("Error setting bucket policy:", policyError);
+      }
+      
+      console.log("Bucket created successfully");
+      return true;
+    } else if (error) {
+      console.error("Error checking bucket:", error);
+      return false;
     }
+    
+    console.log("Bucket already exists");
+    return true;
   } catch (error) {
-    console.error('Error ensuring storage bucket exists:', error);
+    console.error("Error in ensureStorageBucketExists:", error);
+    return false;
   }
 };

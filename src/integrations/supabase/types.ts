@@ -89,41 +89,6 @@ export type Database = {
           },
         ]
       }
-      consultation_notes: {
-        Row: {
-          consultation_id: string
-          content: string
-          created_at: string
-          created_by: string
-          id: string
-          updated_at: string
-        }
-        Insert: {
-          consultation_id: string
-          content: string
-          created_at?: string
-          created_by: string
-          id?: string
-          updated_at?: string
-        }
-        Update: {
-          consultation_id?: string
-          content?: string
-          created_at?: string
-          created_by?: string
-          id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "consultation_notes_consultation_id_fkey"
-            columns: ["consultation_id"]
-            isOneToOne: false
-            referencedRelation: "consultations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       consultations: {
         Row: {
           client_email: string | null
@@ -185,39 +150,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      contact_submissions: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          message: string
-          name: string
-          phone: string | null
-          status: string
-          subject: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          message: string
-          name: string
-          phone?: string | null
-          status?: string
-          subject: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          message?: string
-          name?: string
-          phone?: string | null
-          status?: string
-          subject?: string
-        }
-        Relationships: []
       }
       payments: {
         Row: {
