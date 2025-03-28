@@ -24,7 +24,7 @@ export interface ConsultantFormData {
 export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProps) => {
   const [formData, setFormData] = useState<ConsultantFormData>({
     name: "",
-    specialization: "legal",
+    specialization: "legal", // Default to legal expert
     hourly_rate: 1000,
     bio: "",
     qualifications: "",

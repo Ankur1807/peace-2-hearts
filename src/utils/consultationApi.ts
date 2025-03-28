@@ -22,10 +22,17 @@ export const saveConsultation = async (
 
   try {
     // Try to find a consultant with the appropriate specialization
+    // Map consultation type to either "legal" or "mental_health" for consultant search
+    let consultantSpecialization = consultationType.includes("legal") || 
+                                  consultationType.includes("divorce") || 
+                                  consultationType.includes("custody") || 
+                                  consultationType.includes("mediation") ? 
+                                  "legal" : "mental_health";
+    
     const { data: consultants, error: consultantError } = await supabase
       .from('consultants')
       .select('id')
-      .eq('specialization', consultationType)
+      .eq('specialization', consultantSpecialization)
       .eq('is_available', true)
       .limit(1);
 

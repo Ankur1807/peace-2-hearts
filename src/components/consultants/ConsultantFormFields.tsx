@@ -60,12 +60,8 @@ const ConsultantFormFields = ({
             <SelectValue placeholder="Select specialization" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="legal">Legal</SelectItem>
-            <SelectItem value="mental_health">Mental Health</SelectItem>
-            <SelectItem value="family_therapy">Family Therapy</SelectItem>
-            <SelectItem value="mediation">Mediation</SelectItem>
-            <SelectItem value="divorce">Divorce</SelectItem>
-            <SelectItem value="custody">Child Custody</SelectItem>
+            <SelectItem value="legal">Legal Expert</SelectItem>
+            <SelectItem value="mental_health">Mental Health Expert</SelectItem>
           </SelectContent>
         </Select>
       </div>
