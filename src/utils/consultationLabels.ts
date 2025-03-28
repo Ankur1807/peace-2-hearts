@@ -18,7 +18,9 @@ export const getConsultationTypeLabel = (type: string): string => {
     'pre-marriage-legal': 'Pre-marriage Legal Consultation',
     'mediation': 'Mediation Services',
     'maintenance': 'Maintenance Consultation',
-    'general-legal': 'General Legal Consultation'
+    'general-legal': 'General Legal Consultation',
+    'divorce-prevention': 'Divorce Prevention Package',
+    'pre-marriage-clarity': 'Pre-Marriage Clarity Package'
   };
   
   return types[type] || 'Consultation';
@@ -43,7 +45,9 @@ export const getConsultationPrice = (type: string): string => {
     'pre-marriage-legal': '₹2,500',
     'mediation': '₹2,800',
     'maintenance': '₹3,000',
-    'general-legal': '₹2,500'
+    'general-legal': '₹2,500',
+    'divorce-prevention': '₹10,000',
+    'pre-marriage-clarity': '₹7,500'
   };
   
   return prices[type] || '₹2,000';

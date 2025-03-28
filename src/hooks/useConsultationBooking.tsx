@@ -6,7 +6,7 @@ import { PersonalDetails } from '@/utils/types';
 
 export function useConsultationBooking() {
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [serviceCategory, setServiceCategory] = useState('mental-health');
+  const [serviceCategory, setServiceCategory] = useState('holistic');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [timeSlot, setTimeSlot] = useState('');
   const [submitted, setSubmitted] = useState(false);

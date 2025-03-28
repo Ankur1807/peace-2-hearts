@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface ConsultationBookingFormProps {
   bookingState: ConsultationBookingHook;
@@ -33,6 +34,21 @@ const legalServices = [
   { id: 'custody', label: 'Child Custody Consultation' },
   { id: 'maintenance', label: 'Maintenance Consultation' },
   { id: 'general-legal', label: 'General Legal Consultation' }
+];
+
+const holisticPackages = [
+  { 
+    id: 'divorce-prevention', 
+    label: 'Divorce Prevention Package', 
+    description: '4 sessions (2 therapy + 1 mediation + 1 legal)',
+    services: ['couples-counselling', 'mental-health-counselling', 'mediation', 'general-legal']
+  },
+  { 
+    id: 'pre-marriage-clarity', 
+    label: 'Pre-Marriage Clarity Package', 
+    description: '3 sessions (1 legal + 2 mental health)',
+    services: ['pre-marriage-legal', 'premarital-counselling', 'mental-health-counselling'] 
+  }
 ];
 
 const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ bookingState }) => {
@@ -60,7 +76,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
 
   const handleServiceSelection = (serviceId: string, checked: boolean) => {
     if (checked) {
-      if (serviceCategory === 'combined' && selectedServices.length >= 4 && !selectedServices.includes(serviceId)) {
+      if (serviceCategory === 'holistic' && selectedServices.length >= 4 && !selectedServices.includes(serviceId)) {
         return;
       }
       setSelectedServices(prev => [...prev, serviceId]);
@@ -69,15 +85,76 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   };
 
+  const handlePackageSelection = (packageId: string) => {
+    const selectedPackage = holisticPackages.find(pkg => pkg.id === packageId);
+    if (selectedPackage) {
+      setSelectedServices(selectedPackage.services);
+    }
+  };
+
   useEffect(() => {
     setSelectedServices([]);
   }, [serviceCategory, setSelectedServices]);
 
-  const servicesToDisplay = serviceCategory === 'mental-health' 
-    ? mentalHealthServices 
-    : serviceCategory === 'legal' 
-      ? legalServices 
-      : [...mentalHealthServices, ...legalServices];
+  let serviceSelectionComponent;
+  
+  if (serviceCategory === 'holistic') {
+    serviceSelectionComponent = (
+      <div className="space-y-3">
+        <Label>Package Selection</Label>
+        <RadioGroup 
+          onValueChange={handlePackageSelection} 
+          className="space-y-3"
+        >
+          {holisticPackages.map(pkg => (
+            <div key={pkg.id} className="flex items-start space-x-2">
+              <RadioGroupItem value={pkg.id} id={pkg.id} />
+              <div className="grid gap-1">
+                <label
+                  htmlFor={pkg.id}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {pkg.label}
+                </label>
+                <p className="text-xs text-muted-foreground">{pkg.description}</p>
+              </div>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
+    );
+  } else {
+    const servicesToDisplay = serviceCategory === 'mental-health' 
+      ? mentalHealthServices 
+      : legalServices;
+      
+    serviceSelectionComponent = (
+      <div className="space-y-3">
+        <Label>Service Types</Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {servicesToDisplay.map(service => (
+            <div key={service.id} className="flex items-center space-x-2">
+              <Checkbox 
+                id={service.id}
+                checked={selectedServices.includes(service.id)}
+                onCheckedChange={(checked) => handleServiceSelection(service.id, checked === true)}
+              />
+              <label
+                htmlFor={service.id}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {service.label}
+              </label>
+            </div>
+          ))}
+        </div>
+        
+        {selectedServices.length === 0 && (
+          <p className="text-sm text-muted-foreground">Please select at least one service</p>
+        )}
+      </div>
+    );
+  }
 
   const isFormValid = () => {
     return (
@@ -106,43 +183,14 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
               <SelectValue placeholder="Select service category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="combined">Combined Services</SelectItem>
+              <SelectItem value="holistic">Holistic Solutions</SelectItem>
               <SelectItem value="mental-health">Mental Health</SelectItem>
               <SelectItem value="legal">Legal Services</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
-        <div className="space-y-3">
-          <Label>Service Types {serviceCategory === 'combined' && <span className="text-xs text-muted-foreground">(Select up to 4)</span>}</Label>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {servicesToDisplay.map(service => (
-              <div key={service.id} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={service.id}
-                  checked={selectedServices.includes(service.id)}
-                  onCheckedChange={(checked) => handleServiceSelection(service.id, checked === true)}
-                  disabled={serviceCategory === 'combined' && selectedServices.length >= 4 && !selectedServices.includes(service.id)}
-                />
-                <label
-                  htmlFor={service.id}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {service.label}
-                </label>
-              </div>
-            ))}
-          </div>
-          
-          {selectedServices.length === 0 && (
-            <p className="text-sm text-muted-foreground">Please select at least one service</p>
-          )}
-          
-          {serviceCategory === 'combined' && selectedServices.length >= 4 && (
-            <p className="text-sm text-muted-foreground">Maximum 4 services can be selected</p>
-          )}
-        </div>
+        {serviceSelectionComponent}
         
         <div className="space-y-2">
           <Label>Preferred Date</Label>
