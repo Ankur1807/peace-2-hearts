@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Consultant {
@@ -57,10 +56,10 @@ export const createConsultant = async (
       console.log("Generated new profile_id:", consultantData.profile_id);
     }
 
-    // First, create a profile entry for the consultant with more error details
-    console.log("Creating profile with ID:", consultantData.profile_id, "and name:", consultantData.name);
+    // First, create an entry in the consultant_profiles table
+    console.log("Creating consultant profile with ID:", consultantData.profile_id, "and name:", consultantData.name);
     const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
+      .from('consultant_profiles')
       .insert({
         id: consultantData.profile_id,
         full_name: consultantData.name
@@ -68,22 +67,22 @@ export const createConsultant = async (
       .select();
 
     if (profileError) {
-      console.error("Error creating profile:", profileError);
+      console.error("Error creating consultant profile:", profileError);
       
       // Check if the profile already exists
       const { data: existingProfile } = await supabase
-        .from('profiles')
+        .from('consultant_profiles')
         .select('id')
         .eq('id', consultantData.profile_id)
         .single();
         
       if (!existingProfile) {
-        throw new Error(`Unable to create profile: ${profileError.message}`);
+        throw new Error(`Unable to create consultant profile: ${profileError.message}`);
       } else {
-        console.log("Profile already exists, continuing with consultant creation");
+        console.log("Consultant profile already exists, continuing with consultant creation");
       }
     } else {
-      console.log("Profile created successfully:", profileData);
+      console.log("Consultant profile created successfully:", profileData);
     }
     
     let profile_picture_url = null;
