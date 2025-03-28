@@ -6,6 +6,7 @@ import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 import ServiceCategorySelector from './ServiceCategorySelector';
 import ServiceSelectionOptions from './ServiceSelectionOptions';
 import DateTimePicker from './DateTimePicker';
+import TimeframeSelector from './TimeframeSelector';
 import PersonalDetailsFields from './PersonalDetailsFields';
 
 interface ConsultationBookingFormProps {
@@ -22,6 +23,8 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     setSelectedServices,
     timeSlot,
     setTimeSlot,
+    timeframe,
+    setTimeframe,
     isProcessing,
     personalDetails,
     handlePersonalDetailsChange,
@@ -58,15 +61,26 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
   }, [serviceCategory, setSelectedServices]);
 
   const isFormValid = () => {
-    return (
-      selectedServices.length > 0 &&
-      date !== undefined &&
-      timeSlot !== '' &&
-      personalDetails.firstName.trim() !== '' &&
-      personalDetails.lastName.trim() !== '' &&
-      personalDetails.email.trim() !== '' &&
-      personalDetails.phone.trim() !== ''
-    );
+    if (serviceCategory === 'holistic') {
+      return (
+        selectedServices.length > 0 &&
+        timeframe !== '' &&
+        personalDetails.firstName.trim() !== '' &&
+        personalDetails.lastName.trim() !== '' &&
+        personalDetails.email.trim() !== '' &&
+        personalDetails.phone.trim() !== ''
+      );
+    } else {
+      return (
+        selectedServices.length > 0 &&
+        date !== undefined &&
+        timeSlot !== '' &&
+        personalDetails.firstName.trim() !== '' &&
+        personalDetails.lastName.trim() !== '' &&
+        personalDetails.email.trim() !== '' &&
+        personalDetails.phone.trim() !== ''
+      );
+    }
   };
 
   // These holisticPackages need to be defined here as well for handlePackageSelection
@@ -105,12 +119,19 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
           handlePackageSelection={handlePackageSelection}
         />
         
-        <DateTimePicker 
-          date={date}
-          setDate={setDate}
-          timeSlot={timeSlot}
-          setTimeSlot={setTimeSlot}
-        />
+        {serviceCategory === 'holistic' ? (
+          <TimeframeSelector
+            timeframe={timeframe}
+            setTimeframe={setTimeframe}
+          />
+        ) : (
+          <DateTimePicker 
+            date={date}
+            setDate={setDate}
+            timeSlot={timeSlot}
+            setTimeSlot={setTimeSlot}
+          />
+        )}
         
         <PersonalDetailsFields 
           personalDetails={personalDetails}

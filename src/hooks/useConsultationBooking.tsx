@@ -9,6 +9,7 @@ export function useConsultationBooking() {
   const [serviceCategory, setServiceCategory] = useState('holistic');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [timeSlot, setTimeSlot] = useState('');
+  const [timeframe, setTimeframe] = useState('1-2-weeks');
   const [submitted, setSubmitted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [referenceId, setReferenceId] = useState<string | null>(null);
@@ -41,6 +42,7 @@ export function useConsultationBooking() {
       console.log("Starting booking process for services:", selectedServices);
       console.log("Using date:", date);
       console.log("Using time slot:", timeSlot);
+      console.log("Using timeframe:", timeframe);
       console.log("Using personal details:", personalDetails);
 
       let lastResult;
@@ -50,8 +52,8 @@ export function useConsultationBooking() {
         console.log(`Creating consultation for service: ${service}`);
         const result = await saveConsultation(
           service,
-          date,
-          timeSlot,
+          serviceCategory === 'holistic' ? undefined : date,
+          serviceCategory === 'holistic' ? timeframe : timeSlot,
           personalDetails
         );
         
@@ -95,6 +97,8 @@ export function useConsultationBooking() {
     setSelectedServices,
     timeSlot,
     setTimeSlot,
+    timeframe,
+    setTimeframe,
     submitted,
     isProcessing,
     referenceId,

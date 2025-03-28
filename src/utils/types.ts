@@ -4,6 +4,7 @@ export interface BookingDetails {
   selectedServices: string[];
   date?: string;
   timeSlot: string;
+  timeframe?: string;
   personalDetails?: {
     firstName: string;
     lastName: string;

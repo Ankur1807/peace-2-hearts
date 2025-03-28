@@ -6,17 +6,20 @@ import { PersonalDetails } from "./types";
 export const saveConsultation = async (
   consultationType: string,
   date: Date | undefined,
-  timeSlot: string,
+  timeSlotOrTimeframe: string,
   personalDetails: PersonalDetails
 ) => {
-  if (!date) {
-    throw new Error("Date is required");
+  // For holistic packages, we use timeframe instead of specific date
+  const isTimeframe = ['1-2-weeks', '2-4-weeks', '4-weeks-plus'].includes(timeSlotOrTimeframe);
+  
+  if (!date && !isTimeframe) {
+    throw new Error("Date or timeframe is required");
   }
 
   console.log("saveConsultation called with:", { 
     consultationType, 
-    date: date.toISOString(), 
-    timeSlot, 
+    date: date?.toISOString() || 'Using timeframe instead', 
+    timeSlotOrTimeframe, 
     personalDetails 
   });
 
@@ -91,8 +94,9 @@ export const saveConsultation = async (
     const consultationData = {
       consultant_id: consultantId,
       consultation_type: consultationType,
-      date: date.toISOString(),
-      time_slot: timeSlot,
+      date: date ? date.toISOString() : null,
+      time_slot: isTimeframe ? null : timeSlotOrTimeframe,
+      timeframe: isTimeframe ? timeSlotOrTimeframe : null,
       message: personalDetails.message,
       status: 'scheduled',
       user_id: 'guest', // Using a placeholder value for non-authenticated users
