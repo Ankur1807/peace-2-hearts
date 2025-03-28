@@ -1,18 +1,16 @@
 
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Consultant, getConsultants } from "@/utils/consultantApi";
 import DashboardLoader from "./DashboardLoader";
-import ConsultantForm from "@/components/consultants/ConsultantForm";
 import ConsultantList from "@/components/consultants/ConsultantList";
 import AdminAuth from "@/components/consultants/AdminAuth";
 
 const ConsultantsManagement = () => {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
 
@@ -42,11 +40,6 @@ const ConsultantsManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleConsultantAdded = (newConsultant: Consultant) => {
-    setConsultants([...consultants, newConsultant]);
-    setIsDialogOpen(false);
   };
 
   const handleConsultantUpdated = (updatedConsultant: Consultant) => {
@@ -88,20 +81,9 @@ const ConsultantsManagement = () => {
           >
             Sign Out
           </Button>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="default">Add Consultant</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add New Consultant</DialogTitle>
-              </DialogHeader>
-              <ConsultantForm 
-                onSuccess={handleConsultantAdded}
-                onCancel={() => setIsDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
+          <Button variant="default" asChild>
+            <Link to="/add-consultant">Add Consultant</Link>
+          </Button>
         </div>
       </div>
       

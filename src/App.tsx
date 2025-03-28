@@ -43,6 +43,7 @@ import BookConsultation from "./pages/BookConsultation";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ConsultantManagement from "./pages/ConsultantManagement";
+import AddConsultant from "./pages/AddConsultant";
 import ConsultantListing from "./pages/ConsultantListing";
 import ConsultantDetail from "./pages/ConsultantDetail";
 
@@ -92,6 +93,7 @@ const App = () => {
                 {/* Consultant Routes */}
                 <Route path="/consultants" element={<ConsultantListing />} />
                 <Route path="/consultants/:id" element={<ConsultantDetail />} />
+                <Route path="/add-consultant" element={<AddConsultant />} />
                 
                 <Route path="/resources" element={<Resources />} />
                 <Route path="/news" element={<News />} />

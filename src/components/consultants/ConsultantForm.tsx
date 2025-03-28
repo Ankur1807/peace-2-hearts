@@ -1,7 +1,6 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
 import { Consultant } from "@/utils/consultantApi";
 import { useConsultantForm } from "@/hooks/useConsultantForm";
 import ConsultantFormFields from "./ConsultantFormFields";
@@ -23,7 +22,7 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
   } = useConsultantForm({ onSuccess, onCancel });
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 py-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -38,12 +37,11 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
         onSelectChange={handleSelectChange}
       />
       
-      <DialogFooter>
+      <div className="flex justify-end space-x-4 pt-4">
         <Button 
           type="button" 
           variant="outline" 
           onClick={onCancel} 
-          className="mr-2"
           disabled={isSubmitting}
         >
           Cancel
@@ -54,7 +52,7 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
         >
           {isSubmitting ? "Adding..." : "Add Consultant"}
         </Button>
-      </DialogFooter>
+      </div>
     </form>
   );
 };
