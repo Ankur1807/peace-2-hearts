@@ -9,7 +9,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Consultant, updateConsultantAvailability } from "@/utils/consultantApi";
+import { Consultant, updateConsultantAvailability } from "@/utils/consultants";
 import { useToast } from "@/hooks/use-toast";
 
 interface ConsultantListProps {

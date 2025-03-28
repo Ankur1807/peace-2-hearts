@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Consultant, createConsultant } from "@/utils/consultantApi";
+import { Consultant, createConsultant } from "@/utils/consultants";
 
 interface UseConsultantFormProps {
   onSuccess: (consultant: Consultant) => void;

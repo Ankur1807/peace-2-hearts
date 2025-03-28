@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Consultant, getConsultants } from "@/utils/consultantApi";
+import { Consultant, getConsultants } from "@/utils/consultants";
 import DashboardLoader from "./DashboardLoader";
 import ConsultantList from "@/components/consultants/ConsultantList";
 import AdminAuth from "@/components/consultants/AdminAuth";

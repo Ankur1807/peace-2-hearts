@@ -6,7 +6,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import { Consultant, getConsultants } from "@/utils/consultantApi";
+import { Consultant, getConsultants } from "@/utils/consultants";
 import ConsultantList from "@/components/consultants/ConsultantList";
 import ConsultantLoader from "@/components/consultants/ConsultantLoader";
 import AdminAuth from "@/components/consultants/AdminAuth";

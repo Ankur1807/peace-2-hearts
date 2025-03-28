@@ -94,40 +94,4 @@ export const checkIsAdmin = async (): Promise<boolean> => {
   }
 };
 
-/**
- * Creates a storage bucket if it doesn't exist
- */
-export const ensureStorageBucketExists = async () => {
-  console.log("Ensuring storage bucket exists for consultant profile pictures");
-  try {
-    const { error } = await supabase.storage.getBucket('consultant_profile_pictures');
-    
-    if (error && (error.message.includes('not found') || error.status === 400)) {
-      console.log("Bucket does not exist, creating it");
-      const { error: createError } = await supabase.storage.createBucket('consultant_profile_pictures', {
-        public: true
-      });
-      
-      if (createError) {
-        console.error("Error creating bucket:", createError);
-        return false;
-      }
-      
-      // Set public bucket policy - no need to check for error as getPublicUrl doesn't return error
-      const publicUrlData = supabase.storage.from('consultant_profile_pictures').getPublicUrl('test');
-      console.log("Public URL test:", publicUrlData);
-      
-      console.log("Bucket created successfully");
-      return true;
-    } else if (error) {
-      console.error("Error checking bucket:", error);
-      return false;
-    }
-    
-    console.log("Bucket already exists");
-    return true;
-  } catch (error) {
-    console.error("Error in ensureStorageBucketExists:", error);
-    return false;
-  }
-};
+// Note: ensureStorageBucketExists has been moved to src/utils/consultants/storageBucket.ts
