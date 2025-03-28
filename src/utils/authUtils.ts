@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export const checkAuthentication = async () => {
@@ -91,5 +90,32 @@ export const checkIsAdmin = async (): Promise<boolean> => {
   } catch (error) {
     console.error('Error checking admin status:', error);
     return false;
+  }
+};
+
+/**
+ * Creates a storage bucket if it doesn't exist
+ */
+export const ensureStorageBucketExists = async () => {
+  try {
+    // Check if the bucket exists
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some(bucket => bucket.name === 'consultant_profile_pictures');
+    
+    if (!bucketExists) {
+      // Create the bucket if it doesn't exist
+      const { error } = await supabase.storage.createBucket('consultant_profile_pictures', {
+        public: true, // Make the bucket public so images are accessible
+        fileSizeLimit: 5242880, // 5MB limit
+      });
+      
+      if (error) {
+        console.error('Error creating storage bucket:', error);
+      } else {
+        console.log('Storage bucket created successfully');
+      }
+    }
+  } catch (error) {
+    console.error('Error ensuring storage bucket exists:', error);
   }
 };

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SEO } from "@/components/SEO";
@@ -9,6 +8,7 @@ import ConsultantForm from "@/components/consultants/ConsultantForm";
 import { Consultant } from "@/utils/consultantApi";
 import AdminAuth from "@/components/consultants/AdminAuth";
 import { useToast } from "@/hooks/use-toast";
+import { ensureStorageBucketExists } from "@/utils/authUtils";
 
 const AddConsultant = () => {
   const navigate = useNavigate();
@@ -37,6 +37,9 @@ const AddConsultant = () => {
     }
     
     setIsAuthenticated(isAuthValid);
+    
+    // Ensure the storage bucket exists for consultant profile pictures
+    ensureStorageBucketExists();
   }, [toast]);
 
   const handleSuccess = (consultant: Consultant) => {
