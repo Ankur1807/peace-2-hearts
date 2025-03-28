@@ -15,9 +15,11 @@ export type Database = {
           available_hours: string | null
           bio: string | null
           created_at: string
+          experience: number | null
           hourly_rate: number
           id: string
           is_available: boolean
+          name: string | null
           profile_id: string
           qualifications: string | null
           specialization: string
@@ -28,9 +30,11 @@ export type Database = {
           available_hours?: string | null
           bio?: string | null
           created_at?: string
+          experience?: number | null
           hourly_rate: number
           id?: string
           is_available?: boolean
+          name?: string | null
           profile_id: string
           qualifications?: string | null
           specialization: string
@@ -41,9 +45,11 @@ export type Database = {
           available_hours?: string | null
           bio?: string | null
           created_at?: string
+          experience?: number | null
           hourly_rate?: number
           id?: string
           is_available?: boolean
+          name?: string | null
           profile_id?: string
           qualifications?: string | null
           specialization?: string
@@ -102,12 +108,13 @@ export type Database = {
           consultant_id: string
           consultation_type: string
           created_at: string
-          date: string
+          date: string | null
           id: string
           message: string | null
           reference_id: string | null
           status: string
           time_slot: string
+          timeframe: string | null
           updated_at: string
           user_id: string
         }
@@ -118,12 +125,13 @@ export type Database = {
           consultant_id: string
           consultation_type: string
           created_at?: string
-          date: string
+          date?: string | null
           id?: string
           message?: string | null
           reference_id?: string | null
           status?: string
           time_slot: string
+          timeframe?: string | null
           updated_at?: string
           user_id: string
         }
@@ -134,12 +142,13 @@ export type Database = {
           consultant_id?: string
           consultation_type?: string
           created_at?: string
-          date?: string
+          date?: string | null
           id?: string
           message?: string | null
           reference_id?: string | null
           status?: string
           time_slot?: string
+          timeframe?: string | null
           updated_at?: string
           user_id?: string
         }

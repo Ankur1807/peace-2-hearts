@@ -12,14 +12,11 @@ export const saveConsultation = async (
   // For holistic packages, we use timeframe instead of specific date
   const isTimeframe = ['1-2-weeks', '2-4-weeks', '4-weeks-plus'].includes(timeSlotOrTimeframe);
   
-  if (!date && !isTimeframe) {
-    throw new Error("Date or timeframe is required");
-  }
-
   console.log("saveConsultation called with:", { 
     consultationType, 
     date: date?.toISOString() || 'Using timeframe instead', 
     timeSlotOrTimeframe, 
+    isTimeframe,
     personalDetails 
   });
 
