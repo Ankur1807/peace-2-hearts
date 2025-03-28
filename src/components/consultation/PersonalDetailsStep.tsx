@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -141,13 +142,21 @@ const PersonalDetailsStep = ({
             <SelectValue placeholder="Select a time" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="7-am">7:00 AM</SelectItem>
+            <SelectItem value="8-am">8:00 AM</SelectItem>
             <SelectItem value="9-am">9:00 AM</SelectItem>
             <SelectItem value="10-am">10:00 AM</SelectItem>
             <SelectItem value="11-am">11:00 AM</SelectItem>
+            <SelectItem value="12-pm">12:00 PM</SelectItem>
             <SelectItem value="1-pm">1:00 PM</SelectItem>
             <SelectItem value="2-pm">2:00 PM</SelectItem>
             <SelectItem value="3-pm">3:00 PM</SelectItem>
             <SelectItem value="4-pm">4:00 PM</SelectItem>
+            <SelectItem value="5-pm">5:00 PM</SelectItem>
+            <SelectItem value="6-pm">6:00 PM</SelectItem>
+            <SelectItem value="7-pm">7:00 PM</SelectItem>
+            <SelectItem value="8-pm">8:00 PM</SelectItem>
+            <SelectItem value="9-pm">9:00 PM</SelectItem>
           </SelectContent>
         </Select>
       </div>
