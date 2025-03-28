@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -128,9 +127,7 @@ const PersonalDetailsStep = ({
               onSelect={setDate}
               initialFocus
               disabled={(date) => 
-                date < new Date(new Date().setHours(0, 0, 0, 0)) ||
-                date.getDay() === 0 ||
-                date.getDay() === 6
+                date < new Date(new Date().setHours(0, 0, 0, 0))
               }
             />
           </PopoverContent>

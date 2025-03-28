@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -60,7 +59,6 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
 
   const handleServiceSelection = (serviceId: string, checked: boolean) => {
     if (checked) {
-      // For combined services, limit to 4 selections
       if (serviceCategory === 'combined' && selectedServices.length >= 4 && !selectedServices.includes(serviceId)) {
         return;
       }
@@ -70,12 +68,10 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   };
 
-  // Reset selected services when category changes
   useEffect(() => {
     setSelectedServices([]);
   }, [serviceCategory, setSelectedServices]);
 
-  // Determine which services to display based on selected category
   const servicesToDisplay = serviceCategory === 'mental-health' 
     ? mentalHealthServices 
     : serviceCategory === 'legal' 
@@ -102,7 +98,6 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
         e.preventDefault();
         handleConfirmBooking();
       }} className="space-y-6">
-        {/* Service Category Selection */}
         <div className="space-y-2">
           <Label htmlFor="service-category">Service Category</Label>
           <Select value={serviceCategory} onValueChange={setServiceCategory}>
@@ -117,7 +112,6 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
           </Select>
         </div>
         
-        {/* Service Type Selection with Checkboxes */}
         <div className="space-y-3">
           <Label>Service Types {serviceCategory === 'combined' && <span className="text-xs text-muted-foreground">(Select up to 4)</span>}</Label>
           
@@ -149,7 +143,6 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
           )}
         </div>
         
-        {/* Date Selection */}
         <div className="space-y-2">
           <Label>Preferred Date</Label>
           <Popover>
@@ -173,16 +166,13 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
                 initialFocus
                 className="pointer-events-auto"
                 disabled={(date) => 
-                  date < new Date(new Date().setHours(0, 0, 0, 0)) ||
-                  date.getDay() === 0 ||
-                  date.getDay() === 6
+                  date < new Date(new Date().setHours(0, 0, 0, 0))
                 }
               />
             </PopoverContent>
           </Popover>
         </div>
         
-        {/* Time Selection */}
         <div className="space-y-2">
           <Label htmlFor="time">Preferred Time</Label>
           <Select value={timeSlot} onValueChange={setTimeSlot}>
@@ -201,7 +191,6 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
           </Select>
         </div>
         
-        {/* Personal Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="first-name">First Name</Label>
