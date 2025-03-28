@@ -23,6 +23,19 @@ const ConsultantFormFields = ({
   return (
     <>
       <div className="space-y-2">
+        <Label htmlFor="name">Name</Label>
+        <Input
+          id="name"
+          name="name"
+          value={formData.name}
+          onChange={onInputChange}
+          placeholder="Consultant's name"
+          disabled={isSubmitting}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="profile_picture">Profile Picture</Label>
         <Input
           id="profile_picture"
@@ -57,6 +70,19 @@ const ConsultantFormFields = ({
         </Select>
       </div>
       
+      <div className="space-y-2">
+        <Label htmlFor="experience">Experience (years)</Label>
+        <Input
+          id="experience"
+          name="experience"
+          type="number"
+          value={formData.experience}
+          onChange={onInputChange}
+          min={0}
+          disabled={isSubmitting}
+        />
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="hourly_rate">Hourly Rate (₹)</Label>
         <Input

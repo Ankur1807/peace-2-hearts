@@ -69,7 +69,9 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
       <TableHeader>
         <TableRow>
           <TableHead>ID</TableHead>
+          <TableHead>Name</TableHead>
           <TableHead>Specialization</TableHead>
+          <TableHead>Experience</TableHead>
           <TableHead>Hourly Rate</TableHead>
           <TableHead>Available Days</TableHead>
           <TableHead>Available</TableHead>
@@ -79,7 +81,9 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
         {consultants.map((consultant) => (
           <TableRow key={consultant.id}>
             <TableCell className="font-medium">{consultant.id.substring(0, 8)}...</TableCell>
+            <TableCell>{consultant.name || "Unnamed"}</TableCell>
             <TableCell>{consultant.specialization}</TableCell>
+            <TableCell>{consultant.experience || 0} years</TableCell>
             <TableCell>₹{consultant.hourly_rate}</TableCell>
             <TableCell>
               {consultant.available_days?.join(", ") || "Not specified"}

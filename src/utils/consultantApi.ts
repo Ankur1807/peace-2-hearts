@@ -11,6 +11,8 @@ export interface Consultant {
   bio?: string | null;
   qualifications?: string | null;
   profile_picture_url?: string | null;
+  name?: string | null;
+  experience?: number | null;
 }
 
 export const getConsultants = async (specialization?: string): Promise<Consultant[]> => {

@@ -9,6 +9,7 @@ interface UseConsultantFormProps {
 }
 
 export interface ConsultantFormData {
+  name: string;
   specialization: string;
   hourly_rate: number;
   bio: string;
@@ -17,10 +18,12 @@ export interface ConsultantFormData {
   is_available: boolean;
   profile_id: string;
   profile_picture: File | null;
+  experience: number;
 }
 
 export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProps) => {
   const [formData, setFormData] = useState<ConsultantFormData>({
+    name: "",
     specialization: "legal",
     hourly_rate: 1000,
     bio: "",
@@ -28,7 +31,8 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
     available_days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
     is_available: true,
     profile_id: crypto.randomUUID(), // Generate a random UUID
-    profile_picture: null
+    profile_picture: null,
+    experience: 0
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +42,7 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
     const { name, value } = event.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: name === "experience" || name === "hourly_rate" ? Number(value) : value
     });
   };
 
@@ -67,7 +71,8 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
     try {
       const consultantData = {
         ...formData,
-        hourly_rate: Number(formData.hourly_rate)
+        hourly_rate: Number(formData.hourly_rate),
+        experience: Number(formData.experience)
       };
       
       console.log("Submitting consultant data:", consultantData);
