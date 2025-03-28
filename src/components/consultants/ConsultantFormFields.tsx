@@ -106,18 +106,6 @@ const ConsultantFormFields = ({
           disabled={isSubmitting}
         />
       </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="available_hours">Available Hours</Label>
-        <Input
-          id="available_hours"
-          name="available_hours"
-          value={formData.available_hours}
-          onChange={onInputChange}
-          placeholder="e.g., 9:00-17:00"
-          disabled={isSubmitting}
-        />
-      </div>
     </>
   );
 };

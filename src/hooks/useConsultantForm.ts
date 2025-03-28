@@ -15,7 +15,6 @@ export interface ConsultantFormData {
   bio: string;
   qualifications: string;
   available_days: string[];
-  available_hours: string;
   is_available: boolean;
   profile_id: string;
   profile_picture: File | null;
@@ -29,7 +28,6 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
     bio: "",
     qualifications: "",
     available_days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-    available_hours: "9:00-17:00",
     is_available: true,
     profile_id: crypto.randomUUID(), // Generate a random UUID
     profile_picture: null
