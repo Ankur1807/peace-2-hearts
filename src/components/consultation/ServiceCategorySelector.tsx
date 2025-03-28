@@ -21,7 +21,7 @@ const ServiceCategorySelector: React.FC<ServiceCategorySelectorProps> = ({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="holistic">Holistic Solutions</SelectItem>
-          <SelectItem value="mental-health">Mental Health</SelectItem>
+          <SelectItem value="mental-health">Mental Health Services</SelectItem>
           <SelectItem value="legal">Legal Services</SelectItem>
         </SelectContent>
       </Select>
