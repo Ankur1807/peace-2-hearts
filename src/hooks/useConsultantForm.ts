@@ -1,0 +1,121 @@
+
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Consultant, createConsultant } from "@/utils/consultantApi";
+
+interface UseConsultantFormProps {
+  onSuccess: (consultant: Consultant) => void;
+  onCancel: () => void;
+}
+
+export interface ConsultantFormData {
+  name: string;
+  specialization: string;
+  hourly_rate: number;
+  bio: string;
+  qualifications: string;
+  available_days: string[];
+  available_hours: string;
+  is_available: boolean;
+  profile_id: string;
+  profile_picture: File | null;
+}
+
+export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProps) => {
+  const [formData, setFormData] = useState<ConsultantFormData>({
+    name: "",
+    specialization: "legal",
+    hourly_rate: 1000,
+    bio: "",
+    qualifications: "",
+    available_days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    available_hours: "9:00-17:00",
+    is_available: true,
+    profile_id: crypto.randomUUID(), // Generate a random UUID
+    profile_picture: null
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = event.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setFormData({
+        ...formData,
+        profile_picture: event.target.files[0]
+      });
+    }
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    
+    if (!formData.name.trim()) {
+      setError("Consultant name is required");
+      toast({
+        title: "Error",
+        description: "Consultant name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const consultantData = {
+        ...formData,
+        hourly_rate: Number(formData.hourly_rate)
+      };
+      
+      console.log("Submitting consultant data:", consultantData);
+      
+      const newConsultant = await createConsultant(consultantData);
+      
+      toast({
+        title: "Success",
+        description: "Consultant added successfully",
+      });
+      
+      onSuccess(newConsultant);
+    } catch (error) {
+      console.error("Error adding consultant:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to add consultant";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return {
+    formData,
+    isSubmitting,
+    error,
+    handleInputChange,
+    handleFileChange,
+    handleSelectChange,
+    handleSubmit,
+    onCancel
+  };
+};

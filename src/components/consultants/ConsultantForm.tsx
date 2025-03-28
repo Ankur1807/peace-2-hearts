@@ -1,14 +1,10 @@
 
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DialogFooter } from "@/components/ui/dialog";
-import { Consultant, createConsultant } from "@/utils/consultantApi";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { DialogFooter } from "@/components/ui/dialog";
+import { Consultant } from "@/utils/consultantApi";
+import { useConsultantForm } from "@/hooks/useConsultantForm";
+import ConsultantFormFields from "./ConsultantFormFields";
 
 interface ConsultantFormProps {
   onSuccess: (consultant: Consultant) => void;
@@ -16,91 +12,15 @@ interface ConsultantFormProps {
 }
 
 const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    specialization: "legal",
-    hourly_rate: 1000,
-    bio: "",
-    qualifications: "",
-    available_days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-    available_hours: "9:00-17:00",
-    is_available: true,
-    profile_id: crypto.randomUUID(), // Generate a random UUID
-    profile_picture: null as File | null
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = event.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setFormData({
-        ...formData,
-        profile_picture: event.target.files[0]
-      });
-    }
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError(null);
-    
-    if (!formData.name.trim()) {
-      setError("Consultant name is required");
-      toast({
-        title: "Error",
-        description: "Consultant name is required",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
-    try {
-      const consultantData = {
-        ...formData,
-        hourly_rate: Number(formData.hourly_rate)
-      };
-      
-      console.log("Submitting consultant data:", consultantData);
-      
-      const newConsultant = await createConsultant(consultantData);
-      
-      toast({
-        title: "Success",
-        description: "Consultant added successfully",
-      });
-      
-      onSuccess(newConsultant);
-    } catch (error) {
-      console.error("Error adding consultant:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to add consultant";
-      setError(errorMessage);
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    formData,
+    isSubmitting,
+    error,
+    handleInputChange,
+    handleFileChange,
+    handleSelectChange,
+    handleSubmit,
+  } = useConsultantForm({ onSuccess, onCancel });
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-4">
@@ -110,96 +30,13 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
         </Alert>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-          placeholder="Consultant's full name"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="profile_picture">Profile Picture</Label>
-        <Input
-          id="profile_picture"
-          name="profile_picture"
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          disabled={true} // Disable the file input
-        />
-        <p className="text-xs text-gray-500">Profile pictures are currently disabled.</p>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="specialization">Specialization</Label>
-        <Select
-          name="specialization"
-          value={formData.specialization}
-          onValueChange={(value) => handleSelectChange("specialization", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select specialization" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="legal">Legal</SelectItem>
-            <SelectItem value="mental_health">Mental Health</SelectItem>
-            <SelectItem value="family_therapy">Family Therapy</SelectItem>
-            <SelectItem value="mediation">Mediation</SelectItem>
-            <SelectItem value="divorce">Divorce</SelectItem>
-            <SelectItem value="custody">Child Custody</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="hourly_rate">Hourly Rate (₹)</Label>
-        <Input
-          id="hourly_rate"
-          name="hourly_rate"
-          type="number"
-          value={formData.hourly_rate}
-          onChange={handleInputChange}
-          min={0}
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="bio">Bio</Label>
-        <Textarea
-          id="bio"
-          name="bio"
-          value={formData.bio}
-          onChange={handleInputChange}
-          placeholder="Consultant's biographical information"
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="qualifications">Qualifications</Label>
-        <Textarea
-          id="qualifications"
-          name="qualifications"
-          value={formData.qualifications}
-          onChange={handleInputChange}
-          placeholder="Consultant's qualifications and credentials"
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="available_hours">Available Hours</Label>
-        <Input
-          id="available_hours"
-          name="available_hours"
-          value={formData.available_hours}
-          onChange={handleInputChange}
-          placeholder="e.g., 9:00-17:00"
-        />
-      </div>
+      <ConsultantFormFields
+        formData={formData}
+        isSubmitting={isSubmitting}
+        onInputChange={handleInputChange}
+        onFileChange={handleFileChange}
+        onSelectChange={handleSelectChange}
+      />
       
       <DialogFooter>
         <Button 
