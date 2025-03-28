@@ -66,6 +66,20 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
     event.preventDefault();
     setError(null);
     
+    // Ensure admin is still authenticated
+    const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
+    const authTime = parseInt(localStorage.getItem('p2h_admin_auth_time') || '0', 10);
+    const isAuthValid = adminAuthenticated && (Date.now() - authTime < 60 * 60 * 1000);
+    
+    if (!isAuthValid) {
+      toast({
+        title: "Session expired",
+        description: "Your session has expired. Please sign in again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {

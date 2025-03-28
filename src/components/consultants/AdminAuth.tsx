@@ -25,6 +25,7 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
       // Set a session marker in localStorage
       localStorage.setItem('p2h_admin_authenticated', 'true');
+      localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
       onAuthenticated();
     } else {
       setError("Invalid email or password");

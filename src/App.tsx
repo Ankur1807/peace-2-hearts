@@ -45,6 +45,7 @@ import SignUp from "./pages/SignUp";
 import AddConsultant from "./pages/AddConsultant";
 import ConsultantListing from "./pages/ConsultantListing";
 import ConsultantDetail from "./pages/ConsultantDetail";
+import Dashboard from "./pages/Dashboard";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -101,6 +102,7 @@ const App = () => {
                 <Route path="/book-consultation" element={<BookConsultation />} />
                 <Route path="/sign-in" element={<SignIn />} />
                 <Route path="/sign-up" element={<SignUp />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 
                 {/* Catch-all route for 404 */}
                 <Route path="*" element={<NotFound />} />
