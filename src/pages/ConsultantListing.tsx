@@ -39,14 +39,8 @@ const ConsultantListing = () => {
   }, [toast]);
 
   // Generate consultant initials for avatar fallback
-  const getInitials = (name: string) => {
-    if (!name) return "CN";
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
+  const getInitials = () => {
+    return "CN"; // Default consultant initials
   };
 
   // Format specialization for display
@@ -91,13 +85,13 @@ const ConsultantListing = () => {
                     <div className="flex items-center gap-4">
                       <Avatar className="h-12 w-12 border-2 border-white bg-primary/5">
                         {consultant.profile_picture_url ? (
-                          <AvatarImage src={consultant.profile_picture_url} alt={consultant.name || 'Consultant'} />
+                          <AvatarImage src={consultant.profile_picture_url} alt="Consultant" />
                         ) : (
-                          <AvatarFallback>{getInitials(consultant.name || '')}</AvatarFallback>
+                          <AvatarFallback>{getInitials()}</AvatarFallback>
                         )}
                       </Avatar>
                       <div>
-                        <CardTitle className="text-xl">{consultant.name || "Unnamed Consultant"}</CardTitle>
+                        <CardTitle className="text-xl">Consultant</CardTitle>
                         <CardDescription>
                           <Badge variant="outline" className="mt-1">
                             {formatSpecialization(consultant.specialization)}

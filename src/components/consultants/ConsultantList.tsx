@@ -68,24 +68,22 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
+          <TableHead>ID</TableHead>
           <TableHead>Specialization</TableHead>
           <TableHead>Hourly Rate</TableHead>
           <TableHead>Available Days</TableHead>
-          <TableHead>Available Hours</TableHead>
           <TableHead>Available</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {consultants.map((consultant) => (
           <TableRow key={consultant.id}>
-            <TableCell className="font-medium">{consultant.name || "Unnamed"}</TableCell>
+            <TableCell className="font-medium">{consultant.id.substring(0, 8)}...</TableCell>
             <TableCell>{consultant.specialization}</TableCell>
             <TableCell>₹{consultant.hourly_rate}</TableCell>
             <TableCell>
               {consultant.available_days?.join(", ") || "Not specified"}
             </TableCell>
-            <TableCell>{consultant.available_hours || "Not specified"}</TableCell>
             <TableCell>
               <Switch 
                 checked={consultant.is_available} 

@@ -10,7 +10,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock, MapPin } from "lucide-react";
+import { CalendarDays, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ConsultantDetail = () => {
@@ -85,21 +85,15 @@ const ConsultantDetail = () => {
   }
 
   // Generate consultant initials for avatar fallback
-  const getInitials = (name: string) => {
-    if (!name) return "CN";
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
+  const getInitials = () => {
+    return "CN"; // Default consultant initials
   };
 
   return (
     <>
       <SEO 
-        title={`${consultant.name || 'Consultant'} - Peace2Hearts`}
-        description={`Learn about ${consultant.name || 'our consultant'} specializing in ${consultant.specialization} at Peace2Hearts.`}
+        title={`Consultant - Peace2Hearts`}
+        description={`Learn about our consultant specializing in ${consultant.specialization} at Peace2Hearts.`}
       />
       <Navigation />
       <main className="py-16 md:py-24">
@@ -111,13 +105,13 @@ const ConsultantDetail = () => {
                 <div className="flex flex-col sm:flex-row gap-6 -mt-12">
                   <Avatar className="h-24 w-24 border-4 border-white bg-white">
                     {consultant.profile_picture_url ? (
-                      <AvatarImage src={consultant.profile_picture_url} alt={consultant.name || 'Consultant'} />
+                      <AvatarImage src={consultant.profile_picture_url} alt="Consultant" />
                     ) : (
-                      <AvatarFallback className="text-2xl">{getInitials(consultant.name || '')}</AvatarFallback>
+                      <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
                     )}
                   </Avatar>
                   <div className="pt-12 sm:pt-0">
-                    <h1 className="text-3xl font-bold mb-2">{consultant.name || "Unnamed Consultant"}</h1>
+                    <h1 className="text-3xl font-bold mb-2">Consultant Profile</h1>
                     <div className="flex flex-wrap gap-2 mb-3">
                       <Badge variant="secondary" className="capitalize">{consultant.specialization.replace('_', ' ')}</Badge>
                       {consultant.is_available ? (
@@ -129,7 +123,7 @@ const ConsultantDetail = () => {
                     <p className="text-gray-600 mb-4">
                       {consultant.bio || "No bio information available."}
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-gray-500" />
                         <span>Virtual Consultations</span>
@@ -137,10 +131,6 @@ const ConsultantDetail = () => {
                       <div className="flex items-center gap-2">
                         <CalendarDays className="h-4 w-4 text-gray-500" />
                         <span>{consultant.available_days?.join(", ") || "Flexible schedule"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-gray-500" />
-                        <span>{consultant.available_hours || "By appointment"}</span>
                       </div>
                     </div>
                   </div>
@@ -184,11 +174,6 @@ const ConsultantDetail = () => {
                     <div>
                       <p className="text-sm text-gray-500">Available Days</p>
                       <p>{consultant.available_days?.join(", ") || "Contact for availability"}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-gray-500">Typical Hours</p>
-                      <p>{consultant.available_hours || "By appointment"}</p>
                     </div>
                     
                     <Link to="/book-consultation" className="block mt-6">
