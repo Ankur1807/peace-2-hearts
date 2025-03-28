@@ -10,15 +10,25 @@ import { Consultant, getConsultants } from "@/utils/consultantApi";
 import ConsultantForm from "@/components/consultants/ConsultantForm";
 import ConsultantList from "@/components/consultants/ConsultantList";
 import ConsultantLoader from "@/components/consultants/ConsultantLoader";
+import AdminAuth from "@/components/consultants/AdminAuth";
 
 const ConsultantManagement = () => {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchConsultants();
+    // Check if admin is already authenticated
+    const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
+    setIsAuthenticated(adminAuthenticated);
+    
+    if (adminAuthenticated) {
+      fetchConsultants();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const fetchConsultants = async () => {
@@ -50,8 +60,32 @@ const ConsultantManagement = () => {
     );
   };
 
+  const handleAuthenticated = () => {
+    setIsAuthenticated(true);
+    fetchConsultants();
+  };
+
   if (loading) {
     return <ConsultantLoader />;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <>
+        <SEO 
+          title="Admin Authentication - Peace2Hearts"
+          description="Admin authentication for Peace2Hearts platform."
+        />
+        <Navigation />
+        <main className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <h1 className="section-title text-4xl md:text-5xl text-center mb-8">Admin Authentication</h1>
+            <AdminAuth onAuthenticated={handleAuthenticated} />
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
   }
 
   return (
@@ -68,20 +102,31 @@ const ConsultantManagement = () => {
           <div className="space-y-6 max-w-5xl mx-auto">
             <div className="flex justify-between items-center">
               <p className="text-gray-600">Add and manage consultants available on the platform.</p>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="default">Add Consultant</Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Add New Consultant</DialogTitle>
-                  </DialogHeader>
-                  <ConsultantForm 
-                    onSuccess={handleConsultantAdded}
-                    onCancel={() => setIsDialogOpen(false)}
-                  />
-                </DialogContent>
-              </Dialog>
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    localStorage.removeItem('p2h_admin_authenticated');
+                    setIsAuthenticated(false);
+                  }}
+                >
+                  Sign Out
+                </Button>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="default">Add Consultant</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Add New Consultant</DialogTitle>
+                    </DialogHeader>
+                    <ConsultantForm 
+                      onSuccess={handleConsultantAdded}
+                      onCancel={() => setIsDialogOpen(false)}
+                    />
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
             
             <ConsultantList 

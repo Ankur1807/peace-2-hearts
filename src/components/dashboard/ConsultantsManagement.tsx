@@ -7,15 +7,25 @@ import { Consultant, getConsultants } from "@/utils/consultantApi";
 import DashboardLoader from "./DashboardLoader";
 import ConsultantForm from "@/components/consultants/ConsultantForm";
 import ConsultantList from "@/components/consultants/ConsultantList";
+import AdminAuth from "@/components/consultants/AdminAuth";
 
 const ConsultantsManagement = () => {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchConsultants();
+    // Check if admin is already authenticated
+    const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
+    setIsAuthenticated(adminAuthenticated);
+    
+    if (adminAuthenticated) {
+      fetchConsultants();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const fetchConsultants = async () => {
@@ -47,28 +57,52 @@ const ConsultantsManagement = () => {
     );
   };
 
+  const handleAuthenticated = () => {
+    setIsAuthenticated(true);
+    fetchConsultants();
+  };
+
   if (loading) {
     return <DashboardLoader />;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="p-4">
+        <AdminAuth onAuthenticated={handleAuthenticated} />
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Manage Consultants</h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="default">Add Consultant</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add New Consultant</DialogTitle>
-            </DialogHeader>
-            <ConsultantForm 
-              onSuccess={handleConsultantAdded}
-              onCancel={() => setIsDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              localStorage.removeItem('p2h_admin_authenticated');
+              setIsAuthenticated(false);
+            }}
+          >
+            Sign Out
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="default">Add Consultant</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add New Consultant</DialogTitle>
+              </DialogHeader>
+              <ConsultantForm 
+                onSuccess={handleConsultantAdded}
+                onCancel={() => setIsDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
       
       <ConsultantList 
