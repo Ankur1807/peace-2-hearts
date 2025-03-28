@@ -130,8 +130,9 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
           type="file"
           accept="image/*"
           onChange={handleFileChange}
+          disabled={true} // Disable the file input
         />
-        <p className="text-xs text-gray-500">Optional. Maximum size: 5MB</p>
+        <p className="text-xs text-gray-500">Profile pictures are currently disabled.</p>
       </div>
       
       <div className="space-y-2">

@@ -49,86 +49,29 @@ export const createConsultant = async (
     profile_picture: consultantData.profile_picture ? 
       `${consultantData.profile_picture.name} (${consultantData.profile_picture.size} bytes)` : null 
   });
+  
   try {
-    // Check if the bucket exists before trying to upload
-    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+    // Remove the profile picture handling since we don't have bucket creation permissions
+    // We'll skip the image upload for now
     
-    if (bucketsError) {
-      console.error("Error listing buckets:", bucketsError);
-    }
-    
-    console.log("Available buckets:", buckets);
-    
-    const bucketName = 'consultant_images';
-    
-    let bucketExists = buckets?.some(bucket => bucket.name === bucketName);
-    
-    if (!bucketExists) {
-      console.log("Bucket does not exist, creating bucket:", bucketName);
-      const { error: bucketError } = await supabase.storage.createBucket(bucketName, {
-        public: true
-      });
-      
-      if (bucketError) {
-        console.error("Error creating bucket:", bucketError);
-        throw new Error(`Unable to create storage bucket: ${bucketError.message}`);
-      }
-      console.log("Bucket created successfully");
-      bucketExists = true;
-    } else {
-      console.log("Bucket already exists:", bucketName);
-    }
-    
-    let profile_picture_url = null;
-    
-    // Upload profile picture if provided and bucket exists
-    if (consultantData.profile_picture && bucketExists) {
-      const file = consultantData.profile_picture;
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      
-      console.log("Attempting to upload file:", fileName);
-      
-      // Upload the file
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from(bucketName)
-        .upload(fileName, file);
-      
-      if (uploadError) {
-        console.error("Error uploading profile picture:", uploadError);
-        // Continue without image rather than failing completely
-      } else if (uploadData) {
-        // Get public URL for the uploaded file
-        const { data: urlData } = supabase.storage
-          .from(bucketName)
-          .getPublicUrl(fileName);
-          
-        profile_picture_url = urlData.publicUrl;
-        console.log("File uploaded successfully. URL:", profile_picture_url);
-      }
+    // Generate a UUID for profile_id if not provided or is default
+    if (!consultantData.profile_id || consultantData.profile_id === "00000000-0000-0000-0000-000000000000") {
+      consultantData.profile_id = crypto.randomUUID();
+      console.log("Generated new profile_id:", consultantData.profile_id);
     }
     
     // Remove the File object before inserting into database
     const { profile_picture, ...dbConsultantData } = consultantData;
     
-    // Generate a UUID for profile_id if not provided or is default
-    if (!dbConsultantData.profile_id || dbConsultantData.profile_id === "00000000-0000-0000-0000-000000000000") {
-      dbConsultantData.profile_id = crypto.randomUUID();
-      console.log("Generated new profile_id:", dbConsultantData.profile_id);
-    }
-    
     // Log the data being sent to the database
-    console.log("Inserting consultant data:", {
-      ...dbConsultantData,
-      profile_picture_url
-    });
+    console.log("Inserting consultant data:", dbConsultantData);
     
     // Create a new consultant record
     const { data, error } = await supabase
       .from('consultants')
       .insert({
         ...dbConsultantData,
-        profile_picture_url
+        profile_picture_url: null // Set to null since we're not uploading images for now
       })
       .select()
       .single();
