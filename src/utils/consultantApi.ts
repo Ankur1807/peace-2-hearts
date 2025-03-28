@@ -51,27 +51,58 @@ export const createConsultant = async (
   });
   
   try {
-    // Remove the profile picture handling since we don't have bucket creation permissions
-    // We'll skip the image upload for now
-    
     // Generate a UUID for profile_id if not provided or is default
     if (!consultantData.profile_id || consultantData.profile_id === "00000000-0000-0000-0000-000000000000") {
       consultantData.profile_id = crypto.randomUUID();
       console.log("Generated new profile_id:", consultantData.profile_id);
     }
     
+    let profile_picture_url = null;
+    
+    // Upload profile picture if provided
+    if (consultantData.profile_picture) {
+      const file = consultantData.profile_picture;
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${consultantData.profile_id}.${fileExt}`;
+      const filePath = `${fileName}`;
+      
+      console.log("Uploading profile picture:", filePath);
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('consultant_profile_pictures')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+      
+      if (uploadError) {
+        console.error("Error uploading profile picture:", uploadError);
+        // Continue with consultant creation even if image upload fails
+      } else {
+        console.log("Profile picture uploaded successfully:", uploadData);
+        
+        // Get the public URL for the uploaded file
+        const { data: publicUrlData } = supabase.storage
+          .from('consultant_profile_pictures')
+          .getPublicUrl(filePath);
+        
+        profile_picture_url = publicUrlData.publicUrl;
+        console.log("Profile picture public URL:", profile_picture_url);
+      }
+    }
+    
     // Remove the File object before inserting into database
     const { profile_picture, ...dbConsultantData } = consultantData;
     
     // Log the data being sent to the database
-    console.log("Inserting consultant data:", dbConsultantData);
+    console.log("Inserting consultant data:", { ...dbConsultantData, profile_picture_url });
     
     // Create a new consultant record
     const { data, error } = await supabase
       .from('consultants')
       .insert({
         ...dbConsultantData,
-        profile_picture_url: null // Set to null since we're not uploading images for now
+        profile_picture_url
       })
       .select()
       .single();

@@ -43,9 +43,9 @@ const ConsultantFormFields = ({
           type="file"
           accept="image/*"
           onChange={onFileChange}
-          disabled={true} // Disable the file input
+          disabled={isSubmitting}
         />
-        <p className="text-xs text-gray-500">Profile pictures are currently disabled.</p>
+        <p className="text-xs text-gray-500">Upload a professional profile picture (optional).</p>
       </div>
       
       <div className="space-y-2">

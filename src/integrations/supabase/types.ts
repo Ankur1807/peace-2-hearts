@@ -21,6 +21,7 @@ export type Database = {
           is_available: boolean
           name: string | null
           profile_id: string
+          profile_picture_url: string | null
           qualifications: string | null
           specialization: string
           updated_at: string
@@ -36,6 +37,7 @@ export type Database = {
           is_available?: boolean
           name?: string | null
           profile_id: string
+          profile_picture_url?: string | null
           qualifications?: string | null
           specialization: string
           updated_at?: string
@@ -51,6 +53,7 @@ export type Database = {
           is_available?: boolean
           name?: string | null
           profile_id?: string
+          profile_picture_url?: string | null
           qualifications?: string | null
           specialization?: string
           updated_at?: string

@@ -8,6 +8,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Consultant, updateConsultantAvailability } from "@/utils/consultantApi";
 import { useToast } from "@/hooks/use-toast";
 
@@ -45,6 +46,17 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
     }
   };
 
+  // Generate consultant initials for avatar fallback
+  const getInitials = (name: string | null | undefined): string => {
+    if (!name) return "CN";
+    return name
+      .split(' ')
+      .map(part => part.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -68,7 +80,7 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>ID</TableHead>
+          <TableHead>Profile</TableHead>
           <TableHead>Name</TableHead>
           <TableHead>Specialization</TableHead>
           <TableHead>Experience</TableHead>
@@ -80,7 +92,15 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
       <TableBody>
         {consultants.map((consultant) => (
           <TableRow key={consultant.id}>
-            <TableCell className="font-medium">{consultant.id.substring(0, 8)}...</TableCell>
+            <TableCell>
+              <Avatar className="h-10 w-10">
+                {consultant.profile_picture_url ? (
+                  <AvatarImage src={consultant.profile_picture_url} alt={consultant.name || "Consultant"} />
+                ) : (
+                  <AvatarFallback>{getInitials(consultant.name)}</AvatarFallback>
+                )}
+              </Avatar>
+            </TableCell>
             <TableCell>{consultant.name || "Unnamed"}</TableCell>
             <TableCell>{consultant.specialization}</TableCell>
             <TableCell>{consultant.experience || 0} years</TableCell>
