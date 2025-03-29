@@ -7,28 +7,31 @@ import { supabase } from "@/integrations/supabase/client";
 export const ensureConsultantBucketExists = async (): Promise<boolean> => {
   console.log("Checking if storage bucket exists for consultant profile pictures");
   try {
-    const { error } = await supabase.storage.getBucket('consultant_profile_pictures');
+    const { data, error } = await supabase.storage.getBucket('consultant_profile_pictures');
     
-    if (error && (error.message?.includes('not found') || error.code === '404')) {
-      console.log("Bucket does not exist, creating it");
-      const { error: createError } = await supabase.storage.createBucket('consultant_profile_pictures', {
-        public: true
-      });
-      
-      if (createError) {
-        console.error("Error creating bucket:", createError);
+    if (error) {
+      // Check if the error message indicates the bucket doesn't exist
+      if (error.message?.includes('not found')) {
+        console.log("Bucket does not exist, creating it");
+        const { error: createError } = await supabase.storage.createBucket('consultant_profile_pictures', {
+          public: true
+        });
+        
+        if (createError) {
+          console.error("Error creating bucket:", createError);
+          return false;
+        }
+        
+        // Set public bucket policy
+        const { data } = supabase.storage.from('consultant_profile_pictures').getPublicUrl('test');
+        console.log("Public URL test:", data);
+        
+        console.log("Bucket created successfully");
+        return true;
+      } else {
+        console.error("Error checking bucket:", error);
         return false;
       }
-      
-      // Set public bucket policy
-      const { data } = supabase.storage.from('consultant_profile_pictures').getPublicUrl('test');
-      console.log("Public URL test:", data);
-      
-      console.log("Bucket created successfully");
-      return true;
-    } else if (error) {
-      console.error("Error checking bucket:", error);
-      return false;
     }
     
     console.log("Bucket already exists");

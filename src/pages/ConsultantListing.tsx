@@ -7,7 +7,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Consultant, getConsultants } from "@/utils/consultantApi";
+import { Consultant, getConsultants } from "@/utils/consultants";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 

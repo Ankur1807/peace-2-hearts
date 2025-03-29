@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Consultant, getConsultantById } from "@/utils/consultantApi";
+import { Consultant, getConsultantById } from "@/utils/consultants";
 import { SEO } from "@/components/SEO";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";

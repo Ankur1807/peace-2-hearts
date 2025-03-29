@@ -1,7 +1,7 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Consultant } from "@/utils/consultantApi";
+import { Consultant } from "@/utils/consultants/types";
 import { useConsultantForm } from "@/hooks/useConsultantForm";
 import ConsultantFormFields from "./ConsultantFormFields";
 
