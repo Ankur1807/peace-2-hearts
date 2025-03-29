@@ -12,7 +12,7 @@ export const upsertConsultantProfile = async (
   
   try {
     const { error } = await supabase
-      .from('profiles')
+      .from('consultant_profiles')
       .upsert({
         id: profileId,
         full_name: name || 'Unnamed Consultant'
