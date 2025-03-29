@@ -93,6 +93,9 @@ export const saveConsultation = async (
     // Create a reference ID for the consultation
     const referenceId = generateReferenceId();
     console.log("Generated reference ID:", referenceId);
+    
+    // Generate a random UUID for guest users instead of using the string "guest"
+    const guestUserId = crypto.randomUUID();
 
     // Save the consultation without requiring user authentication
     const consultationData = {
@@ -103,7 +106,7 @@ export const saveConsultation = async (
       timeframe: isTimeframe ? timeSlotOrTimeframe : null,
       message: personalDetails.message,
       status: 'scheduled',
-      user_id: 'guest', // Using a placeholder value for non-authenticated users
+      user_id: guestUserId, // Using a random UUID for guest users
       reference_id: referenceId,
       client_name: `${personalDetails.firstName} ${personalDetails.lastName}`,
       client_email: personalDetails.email,
