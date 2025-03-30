@@ -8,10 +8,11 @@ import { initializeBookingFromStorage } from '@/utils/bookingInitializer';
 import ConsultationBookingForm from '@/components/consultation/ConsultationBookingForm';
 import SuccessView from '@/components/consultation/SuccessView';
 import ConsultationAlert from '@/components/consultation/ConsultationAlert';
+import { Toaster } from '@/components/ui/toaster';
 
 const BookConsultation = () => {
   const bookingState = useConsultationBooking();
-  const { submitted, referenceId } = bookingState;
+  const { submitted, referenceId, bookingError } = bookingState;
   const [isDevelopment, setIsDevelopment] = useState(false);
 
   useEffect(() => {
@@ -35,6 +36,7 @@ const BookConsultation = () => {
           </div>
         </main>
         <Footer />
+        <Toaster />
       </>
     );
   }
@@ -54,11 +56,21 @@ const BookConsultation = () => {
             Take the first step towards peace and clarity in your relationship journey. Our expert team is here to support you.
           </p>
 
+          {bookingError && (
+            <ConsultationAlert
+              title="Booking Error"
+              description={bookingError}
+              variant="destructive"
+              className="mb-6"
+            />
+          )}
+
           {isDevelopment && (
             <ConsultationAlert
               title="Development Mode"
               description="This is a development environment. Bookings will create consultants if none exist."
               variant="default"
+              className="mb-6"
             />
           )}
 
@@ -66,6 +78,7 @@ const BookConsultation = () => {
         </div>
       </main>
       <Footer />
+      <Toaster />
     </>
   );
 };

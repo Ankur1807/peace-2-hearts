@@ -26,6 +26,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     timeframe,
     setTimeframe,
     isProcessing,
+    bookingError,
     personalDetails,
     handlePersonalDetailsChange,
     handleConfirmBooking
@@ -102,6 +103,12 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
   return (
     <Card className="p-6 md:p-8">
       <h2 className="text-2xl font-lora font-semibold mb-6">Book Your Consultation</h2>
+      
+      {bookingError && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md text-red-600">
+          <p className="font-medium">Error: {bookingError}</p>
+        </div>
+      )}
       
       <form onSubmit={(e) => {
         e.preventDefault();
