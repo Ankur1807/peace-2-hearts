@@ -17,7 +17,7 @@ export const SEO = ({
   title,
   description,
   canonicalUrl,
-  ogImage = "/og-image.png",
+  ogImage = "/lovable-uploads/aa1e4069-d5ee-4dda-9699-74f185ae43bf.png",
   ogType = "website",
   keywords,
   language = "en",

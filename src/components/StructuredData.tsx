@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
@@ -10,7 +9,7 @@ interface OrganizationSchemaProps {
 
 export const OrganizationSchema = ({
   url = "https://peace2hearts.com",
-  logo = "/logo.png",
+  logo = "/lovable-uploads/aa1e4069-d5ee-4dda-9699-74f185ae43bf.png",
   sameAs = []
 }: OrganizationSchemaProps) => {
   const organizationSchema = {

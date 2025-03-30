@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
@@ -28,37 +27,11 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <svg width="28" height="28" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Outer circle with gradient */}
-                <circle cx="60" cy="60" r="56" fill="url(#circleGradient)" stroke="#FFFFFF" strokeWidth="4" />
-                
-                {/* Peace symbol with vibrant colors */}
-                <path d="M60 15 L60 105" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" />
-                <path d="M60 60 L25 95" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" />
-                <path d="M60 60 L95 95" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" />
-                
-                {/* Heart shape at the top with gradient */}
-                <path d="M42 35 A12 12 0 0 1 60 28 A12 12 0 0 1 78 35 A12 12 0 0 1 78 53 Q78 65 60 78 Q42 65 42 53 A12 12 0 0 1 42 35Z" fill="url(#heartGradient)" />
-                
-                {/* Small sparkles around the heart */}
-                <circle cx="35" cy="30" r="3" fill="#F9A8D4" />
-                <circle cx="85" cy="30" r="3" fill="#93C5FD" />
-                <circle cx="45" cy="75" r="3" fill="#FDE68A" />
-                <circle cx="75" cy="75" r="3" fill="#86EFAC" />
-                
-                {/* Gradient definitions */}
-                <defs>
-                  <linearGradient id="circleGradient" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#C4B5FD" />
-                    <stop offset="100%" stopColor="#E0E7FF" />
-                  </linearGradient>
-                  <linearGradient id="heartGradient" x1="42" y1="28" x2="78" y2="78" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#F9A8D4" />
-                    <stop offset="100%" stopColor="#D946EF" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <span className="font-lora text-xl font-semibold text-white">Peace2Hearts</span>
+              <img 
+                src="/lovable-uploads/aa1e4069-d5ee-4dda-9699-74f185ae43bf.png" 
+                alt="Peace2Hearts Logo" 
+                className="h-10"
+              />
             </div>
             <p className="text-white/90 mb-4">
               Helping you find peace, with or without love.
@@ -123,7 +96,6 @@ const Footer = () => {
           </div>
         </div>
         
-        {/* Disclaimer */}
         <div className="border-t border-white/20 pt-6 mb-4">
           <div className="bg-white/10 rounded-lg p-4 text-white/80 text-xs text-center">
             <p>
