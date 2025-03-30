@@ -46,15 +46,21 @@ export const createConsultant = async (
   });
   
   try {
-    // Generate a new profile_id if one wasn't provided
-    const profileId = consultantData.profile_id || crypto.randomUUID();
-    console.log("Using profile_id:", profileId);
+    // First create the consultant_profile record
+    const { data: newProfile, error: profileError } = await supabase
+      .from('consultant_profiles')
+      .insert({
+        full_name: consultantData.name
+      })
+      .select();
     
-    // First create or update the consultant_profile record
-    const profileCreated = await upsertConsultantProfile(profileId, consultantData.name);
-    if (!profileCreated) {
+    if (profileError) {
+      console.error("Error creating consultant profile:", profileError);
       throw new Error("Failed to create consultant profile");
     }
+    
+    const profileId = newProfile[0].id;
+    console.log("Created profile with ID:", profileId);
     
     let profile_picture_url = null;
     
@@ -66,7 +72,7 @@ export const createConsultant = async (
     // Remove the File object before inserting into database
     const { profile_picture, ...dbConsultantData } = consultantData;
     
-    // Always use the profileId we created or checked above
+    // Always use the profileId we created above
     dbConsultantData.profile_id = profileId;
     
     // Log the data being sent to the database

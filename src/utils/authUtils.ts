@@ -67,31 +67,8 @@ export const checkIsAdmin = async (): Promise<boolean> => {
     // This should be replaced with a proper role-based system in production
     const adminEmails = ['admin@peace2hearts.com', 'founder@peace2hearts.com'];
     return adminEmails.includes(userData.user.email || '');
-    
-    // Alternative implementation using a roles table:
-    /*
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userData.user.id)
-      .eq('role', 'admin')
-      .single();
-      
-    if (error) {
-      if (error.code === 'PGRST116') {
-        // No row found, user is not an admin
-        return false;
-      }
-      console.error('Error checking admin status:', error);
-      return false;
-    }
-    
-    return !!data;
-    */
   } catch (error) {
     console.error('Error checking admin status:', error);
     return false;
   }
 };
-
-// Note: ensureStorageBucketExists has been moved to src/utils/consultants/storageBucket.ts

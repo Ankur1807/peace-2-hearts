@@ -64,15 +64,29 @@ export const saveConsultation = async (
       
       if (!anyConsultant || anyConsultant.length === 0) {
         console.log("No consultants found, creating placeholder");
+        
+        // First create a consultant profile
+        const { data: newProfile, error: profileError } = await supabase
+          .from('consultant_profiles')
+          .insert({
+            full_name: 'Default Consultant'
+          })
+          .select();
+          
+        if (profileError) {
+          console.error("Error creating consultant profile:", profileError);
+          throw new Error("No consultants available. Please contact support for assistance.");
+        }
+        
         // No consultants available in the system - create placeholder entry for testing
         const { data: newConsultant, error: createError } = await supabase
           .from('consultants')
           .insert({
             name: 'Default Consultant',
-            specialization: 'general',
+            specialization: consultantSpecialization,
             is_available: true,
             hourly_rate: 1000,
-            profile_id: crypto.randomUUID() // Generate a UUID instead of hardcoding
+            profile_id: newProfile[0].id
           })
           .select();
           
