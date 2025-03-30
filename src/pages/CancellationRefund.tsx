@@ -35,7 +35,7 @@ const CancellationRefund = () => {
             <p>To cancel or reschedule your consultation, please contact us via:</p>
             <ul className="list-disc pl-6 mt-2 mb-4">
               <li>Email: <a href="mailto:bookings@peace2hearts.com" className="text-peacefulBlue hover:underline">bookings@peace2hearts.com</a></li>
-              <li>Phone: +91 XXXX-XXXXXX (during business hours)</li>
+              <li>Phone: +91 7428564364 (during business hours)</li>
             </ul>
             <p>Please include your name, booking reference number, and scheduled consultation date/time.</p>
             

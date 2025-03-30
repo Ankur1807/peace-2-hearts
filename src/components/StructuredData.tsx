@@ -27,7 +27,7 @@ export const OrganizationSchema = ({
     },
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: "+917428564364",
+      telephone: "+91 7428564364",
       contactType: "customer service",
       email: "support@peace2hearts.com"
     },
