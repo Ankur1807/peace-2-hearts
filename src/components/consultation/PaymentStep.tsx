@@ -1,8 +1,11 @@
+
 import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CreditCard, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { getConsultationTypeLabel, getConsultationPrice } from '@/utils/consultationLabels';
 import { formatCardNumber, formatExpiryDate } from '@/utils/formatUtils';
 
@@ -25,6 +28,7 @@ const PaymentStep = ({
   const [cardName, setCardName] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -116,6 +120,35 @@ const PaymentStep = ({
           </div>
         </div>
         
+        <div className="flex items-center space-x-2 mt-4">
+          <Checkbox 
+            id="terms" 
+            checked={acceptTerms}
+            onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+          />
+          <label
+            htmlFor="terms"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            I agree to the{' '}
+            <Link to="/terms" target="_blank" className="text-peacefulBlue hover:underline">
+              Terms of Service
+            </Link>
+            ,{' '}
+            <Link to="/privacy-policy" target="_blank" className="text-peacefulBlue hover:underline">
+              Privacy Policy
+            </Link>
+            ,{' '}
+            <Link to="/cancellation-refund" target="_blank" className="text-peacefulBlue hover:underline">
+              Cancellation & Refund Policy
+            </Link>
+            , and{' '}
+            <Link to="/shipping-delivery" target="_blank" className="text-peacefulBlue hover:underline">
+              Shipping & Delivery Policy
+            </Link>
+          </label>
+        </div>
+        
         <div className="flex items-center p-4 bg-gray-50 rounded-lg">
           <Shield className="h-5 w-5 text-gray-500 mr-3" />
           <p className="text-sm text-gray-600">
@@ -131,7 +164,7 @@ const PaymentStep = ({
         <Button 
           type="submit" 
           className="bg-peacefulBlue hover:bg-peacefulBlue/90"
-          disabled={isProcessing}
+          disabled={isProcessing || !acceptTerms || !cardName || !cardNumber || !expiryDate || !cvv}
         >
           {isProcessing ? "Processing..." : "Complete Payment"}
         </Button>

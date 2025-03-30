@@ -14,6 +14,9 @@ import Resources from "./pages/Resources";
 import News from "./pages/News";
 import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import CancellationRefund from "./pages/CancellationRefund";
+import ShippingDelivery from "./pages/ShippingDelivery";
 
 // Main Service Pages
 import MentalHealthService from "./pages/services/MentalHealthService";
@@ -94,6 +97,11 @@ const App = () => {
                 <Route path="/consultants" element={<ConsultantListing />} />
                 <Route path="/consultants/:id" element={<ConsultantDetail />} />
                 <Route path="/add-consultant" element={<AddConsultant />} />
+                
+                {/* Policy Pages */}
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/cancellation-refund" element={<CancellationRefund />} />
+                <Route path="/shipping-delivery" element={<ShippingDelivery />} />
                 
                 <Route path="/resources" element={<Resources />} />
                 <Route path="/news" element={<News />} />
