@@ -42,6 +42,10 @@ import TherapyService from "./pages/services/TherapyService";
 import DivorceService from "./pages/services/DivorceService";
 import CustodyService from "./pages/services/CustodyService";
 
+// Contentful-powered pages
+import BlogPost from "./pages/contentful/BlogPost";
+import NewsArticle from "./pages/contentful/NewsArticle";
+
 import BookConsultation from "./pages/BookConsultation";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
@@ -92,6 +96,10 @@ const App = () => {
                 <Route path="/services/therapy" element={<TherapyService />} />
                 <Route path="/services/divorce" element={<DivorceService />} />
                 <Route path="/services/custody" element={<CustodyService />} />
+                
+                {/* Contentful-powered dynamic pages */}
+                <Route path="/resources/:slug" element={<BlogPost />} />
+                <Route path="/news/:slug" element={<NewsArticle />} />
                 
                 {/* Consultant Routes */}
                 <Route path="/consultants" element={<ConsultantListing />} />
