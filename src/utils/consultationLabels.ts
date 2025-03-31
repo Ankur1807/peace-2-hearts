@@ -1,76 +1,127 @@
 
-export const getConsultationTypeLabel = (type: string): string => {
-  const types: Record<string, string> = {
-    'legal': 'Legal Consultation',
-    'divorce': 'Divorce Consultation',
-    'custody': 'Child Custody Consultation',
-    'therapy': 'Therapy Session',
-    'counseling': 'Personal Counseling',
-    'couples': 'Couples Therapy',
-    'family': 'Family Therapy',
-    'premarital': 'Premarital Counseling',
-    'mental-health': 'Mental Health Consultation',
-    'mental-health-counselling': 'Mental Health Counselling',
-    'family-therapy': 'Family Therapy',
-    'premarital-counselling': 'Premarital Counselling',
-    'couples-counselling': 'Couples Counselling',
-    'sexual-health-counselling': 'Sexual Health Counselling',
-    'pre-marriage-legal': 'Pre-marriage Legal Consultation',
-    'mediation': 'Mediation Services',
-    'maintenance': 'Maintenance Consultation',
-    'general-legal': 'General Legal Consultation',
-    'divorce-prevention': 'Divorce Prevention Package',
-    'pre-marriage-clarity': 'Pre-Marriage Clarity Package'
-  };
-  
-  return types[type] || 'Consultation';
-};
+import { fetchServicePrice } from './pricingUtils';
 
-export const getConsultationPrice = (type: string): string => {
-  const prices: Record<string, string> = {
-    'legal': '₹2,500',
-    'divorce': '₹3,000',
-    'custody': '₹3,000',
-    'therapy': '₹2,000',
-    'counseling': '₹1,800',
-    'couples': '₹2,500',
-    'family': '₹2,800',
-    'premarital': '₹2,000',
-    'mental-health': '₹2,200',
-    'mental-health-counselling': '₹2,200',
-    'family-therapy': '₹2,800',
-    'premarital-counselling': '₹2,000',
-    'couples-counselling': '₹2,500',
-    'sexual-health-counselling': '₹2,200',
-    'pre-marriage-legal': '₹2,500',
-    'mediation': '₹2,800',
-    'maintenance': '₹3,000',
-    'general-legal': '₹2,500',
-    'divorce-prevention': '₹10,000',
-    'pre-marriage-clarity': '₹7,500'
-  };
-  
-  return prices[type] || '₹2,000';
-};
+export function getConsultationTypeLabel(consultationType: string): string {
+  switch (consultationType) {
+    case 'mental-health-counselling':
+      return 'Mental Health Counselling';
+    case 'family-therapy':
+      return 'Family Therapy';
+    case 'premarital-counselling':
+      return 'Premarital Counselling';
+    case 'couples-counselling':
+      return 'Couples Counselling';
+    case 'sexual-health-counselling':
+      return 'Sexual Health Counselling';
+    case 'pre-marriage-legal':
+      return 'Pre-Marriage Legal Consultation';
+    case 'mediation':
+      return 'Mediation Services';
+    case 'divorce':
+      return 'Divorce Consultation';
+    case 'custody':
+      return 'Child Custody Consultation';
+    case 'maintenance':
+      return 'Maintenance Consultation';
+    case 'general-legal':
+      return 'General Legal Consultation';
+    default:
+      return consultationType.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+}
 
-export const getTimeSlotLabel = (timeSlot: string): string => {
-  const timeSlotMap: Record<string, string> = {
-    '7-am': '7:00 AM',
-    '8-am': '8:00 AM',
-    '9-am': '9:00 AM',
-    '10-am': '10:00 AM',
-    '11-am': '11:00 AM',
-    '12-pm': '12:00 PM',
-    '1-pm': '1:00 PM',
-    '2-pm': '2:00 PM',
-    '3-pm': '3:00 PM',
-    '4-pm': '4:00 PM',
-    '5-pm': '5:00 PM',
-    '6-pm': '6:00 PM',
-    '7-pm': '7:00 PM',
-    '8-pm': '8:00 PM',
-    '9-pm': '9:00 PM'
+export function getConsultationPrice(consultationType: string): string {
+  // Fallback prices in case database lookup fails
+  const fallbackPrices: Record<string, number> = {
+    // Mental Health Services
+    'mental-health-counselling': 1500,
+    'family-therapy': 2000,
+    'premarital-counselling': 1800,
+    'couples-counselling': 2500,
+    'sexual-health-counselling': 2200,
+    
+    // Legal Services
+    'pre-marriage-legal': 2500,
+    'mediation': 3000,
+    'divorce': 3500,
+    'custody': 3000,
+    'maintenance': 2800,
+    'general-legal': 2000
   };
-  
-  return timeSlotMap[timeSlot] || timeSlot.replace('-', ' - ');
-};
+
+  // The price will be fetched from the database when needed
+  // This is just a placeholder, returning the fallback price for now
+  return `₹${fallbackPrices[consultationType] || 2000}`;
+}
+
+// This function will be used to get the price asynchronously from the database
+export async function getConsultationPriceAsync(consultationType: string, scenario: string = 'regular'): Promise<number> {
+  try {
+    const servicePrice = await fetchServicePrice(consultationType, scenario);
+    
+    if (servicePrice) {
+      return servicePrice.price;
+    } else {
+      // Fallback to hardcoded prices if database lookup fails
+      console.log(`No price found for ${consultationType}, using fallback price`);
+      const fallbackPrice = getConsultationPrice(consultationType);
+      return parseInt(fallbackPrice.replace('₹', ''));
+    }
+  } catch (error) {
+    console.error('Error fetching consultation price:', error);
+    const fallbackPrice = getConsultationPrice(consultationType);
+    return parseInt(fallbackPrice.replace('₹', ''));
+  }
+}
+
+export function getTimeSlotLabel(timeSlot: string): string {
+  switch (timeSlot) {
+    case '7-am':
+      return '7:00 AM';
+    case '8-am':
+      return '8:00 AM';
+    case '9-am':
+      return '9:00 AM';
+    case '10-am':
+      return '10:00 AM';
+    case '11-am':
+      return '11:00 AM';
+    case '12-pm':
+      return '12:00 PM';
+    case '1-pm':
+      return '1:00 PM';
+    case '2-pm':
+      return '2:00 PM';
+    case '3-pm':
+      return '3:00 PM';
+    case '4-pm':
+      return '4:00 PM';
+    case '5-pm':
+      return '5:00 PM';
+    case '6-pm':
+      return '6:00 PM';
+    case '7-pm':
+      return '7:00 PM';
+    case '8-pm':
+      return '8:00 PM';
+    case '9-pm':
+      return '9:00 PM';
+    default:
+      return timeSlot;
+  }
+}
+
+export function getTimeframeLabel(timeframe: string): string {
+  switch (timeframe) {
+    case '1-2-days':
+      return '1-2 Days';
+    case '3-5-days':
+      return '3-5 Days';
+    case '1-2-weeks':
+      return '1-2 Weeks';
+    case '2-4-weeks':
+      return 'More than 2 Weeks';
+    default:
+      return timeframe.replace(/-/g, ' ');
+  }
+}

@@ -53,6 +53,8 @@ import AddConsultant from "./pages/AddConsultant";
 import ConsultantListing from "./pages/ConsultantListing";
 import ConsultantDetail from "./pages/ConsultantDetail";
 import Dashboard from "./pages/Dashboard";
+import ConsultantManagement from "./pages/ConsultantManagement";
+import AdminPricing from "./pages/AdminPricing";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -105,6 +107,10 @@ const App = () => {
                 <Route path="/consultants" element={<ConsultantListing />} />
                 <Route path="/consultants/:id" element={<ConsultantDetail />} />
                 <Route path="/add-consultant" element={<AddConsultant />} />
+                <Route path="/manage-consultants" element={<ConsultantManagement />} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin/pricing" element={<AdminPricing />} />
                 
                 {/* Policy Pages */}
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />

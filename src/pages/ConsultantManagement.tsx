@@ -10,24 +10,21 @@ import { Consultant, getConsultants } from "@/utils/consultants";
 import ConsultantList from "@/components/consultants/ConsultantList";
 import ConsultantLoader from "@/components/consultants/ConsultantLoader";
 import AdminAuth from "@/components/consultants/AdminAuth";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const ConsultantManagement = () => {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAdmin, isAdminChecking } = useAdminAuth();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if admin is already authenticated
-    const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
-    setIsAuthenticated(adminAuthenticated);
-    
-    if (adminAuthenticated) {
+    if (isAdmin) {
       fetchConsultants();
-    } else {
+    } else if (!isAdminChecking) {
       setLoading(false);
     }
-  }, []);
+  }, [isAdmin, isAdminChecking]);
 
   const fetchConsultants = async () => {
     try {
@@ -53,16 +50,11 @@ const ConsultantManagement = () => {
     );
   };
 
-  const handleAuthenticated = () => {
-    setIsAuthenticated(true);
-    fetchConsultants();
-  };
-
-  if (loading) {
+  if (isAdminChecking) {
     return <ConsultantLoader />;
   }
 
-  if (!isAuthenticated) {
+  if (!isAdmin) {
     return (
       <>
         <SEO 
@@ -73,7 +65,7 @@ const ConsultantManagement = () => {
         <main className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <h1 className="section-title text-4xl md:text-5xl text-center mb-8">Admin Authentication</h1>
-            <AdminAuth onAuthenticated={handleAuthenticated} />
+            <AdminAuth onAuthenticated={() => {}} />
           </div>
         </main>
         <Footer />
@@ -93,17 +85,20 @@ const ConsultantManagement = () => {
           <h1 className="section-title text-4xl md:text-5xl text-center mb-8">Consultant Management</h1>
           
           <div className="space-y-6 max-w-5xl mx-auto">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-gray-600">Add and manage consultants available on the platform.</p>
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap gap-2">
                 <Button 
                   variant="outline" 
                   onClick={() => {
                     localStorage.removeItem('p2h_admin_authenticated');
-                    setIsAuthenticated(false);
+                    window.location.href = '/';
                   }}
                 >
                   Sign Out
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/admin/pricing">Manage Pricing</Link>
                 </Button>
                 <Button variant="default" asChild>
                   <Link to="/add-consultant">Add Consultant</Link>
