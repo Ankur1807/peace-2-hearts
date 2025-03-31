@@ -10,7 +10,7 @@ Disallow: /dashboard/
 Disallow: /user/
 Disallow: /sign-in
 Disallow: /sign-up
+Disallow: /add-consultant
 
 # Sitemaps
 Sitemap: https://peace2hearts.com/sitemap.xml
-

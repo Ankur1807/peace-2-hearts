@@ -10,7 +10,8 @@ interface SEOProps {
   keywords?: string;
   language?: string;
   author?: string;
-  structuredData?: Record<string, any>;
+  structuredData?: Record<string, any>[];
+  breadcrumbs?: { name: string; url: string }[];
 }
 
 export const SEO = ({
@@ -23,11 +24,24 @@ export const SEO = ({
   language = "en",
   author = "Peace2Hearts",
   structuredData,
+  breadcrumbs,
 }: SEOProps) => {
   const siteTitle = "Peace2Hearts";
   const fullTitle = `${title} | ${siteTitle}`;
   const baseUrl = "https://peace2hearts.com";
   const fullCanonicalUrl = canonicalUrl ? `${baseUrl}${canonicalUrl}` : undefined;
+  
+  // Generate breadcrumb schema if breadcrumbs are provided
+  const breadcrumbSchema = breadcrumbs ? {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbs.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: item.url
+    }))
+  } : null;
   
   return (
     <Helmet>
@@ -56,10 +70,17 @@ export const SEO = ({
       <meta name="twitter:description" content={description} />
       {ogImage && <meta name="twitter:image" content={`${baseUrl}${ogImage}`} />}
 
-      {/* Structured Data */}
-      {structuredData && (
+      {/* Structured Data - Multiple schemas can be passed */}
+      {structuredData && structuredData.map((schema, index) => (
+        <script key={index} type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
+      ))}
+      
+      {/* Breadcrumb Schema */}
+      {breadcrumbSchema && (
         <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
+          {JSON.stringify(breadcrumbSchema)}
         </script>
       )}
     </Helmet>

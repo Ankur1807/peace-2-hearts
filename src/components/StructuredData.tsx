@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
@@ -71,6 +72,32 @@ export const ServiceSchema = ({ serviceType, serviceDescription, url }: ServiceS
   );
 };
 
+interface WebsiteSchemaProps {
+  url?: string;
+}
+
+export const WebsiteSchema = ({ url = "https://peace2hearts.com" }: WebsiteSchemaProps) => {
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Peace2Hearts",
+    url: url,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${url}/search?q={search_term_string}`,
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  return (
+    <Helmet>
+      <script type="application/ld+json">
+        {JSON.stringify(websiteSchema)}
+      </script>
+    </Helmet>
+  );
+};
+
 interface BreadcrumbSchemaProps {
   items: {
     name: string;
@@ -94,6 +121,36 @@ export const BreadcrumbSchema = ({ items }: BreadcrumbSchemaProps) => {
     <Helmet>
       <script type="application/ld+json">
         {JSON.stringify(breadcrumbSchema)}
+      </script>
+    </Helmet>
+  );
+};
+
+interface FAQSchemaProps {
+  questions: {
+    question: string;
+    answer: string;
+  }[];
+}
+
+export const FAQSchema = ({ questions }: FAQSchemaProps) => {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: questions.map(q => ({
+      "@type": "Question",
+      name: q.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: q.answer
+      }
+    }))
+  };
+
+  return (
+    <Helmet>
+      <script type="application/ld+json">
+        {JSON.stringify(faqSchema)}
       </script>
     </Helmet>
   );
