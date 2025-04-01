@@ -1,40 +1,49 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { checkIsAdmin } from "@/utils/authUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useAdminAuth = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAdminChecking, setIsAdminChecking] = useState(true);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
+        // First check if user is authenticated
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) {
+          setIsAdmin(false);
+          setIsAdminChecking(false);
+          return;
+        }
+        
+        // Then check if user is admin
         const adminStatus = await checkIsAdmin();
         setIsAdmin(adminStatus);
       } catch (error) {
         console.error("Error checking admin status:", error);
-        toast({
-          title: "Access Denied",
-          description: "You don't have permission to access this page.",
-          variant: "destructive",
-        });
+        setIsAdmin(false);
       } finally {
         setIsAdminChecking(false);
       }
     };
 
-    checkAdminStatus();
-  }, [toast]);
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      () => {
+        checkAdminStatus();
+      }
+    );
 
-  useEffect(() => {
-    if (!isAdminChecking && !isAdmin) {
-      navigate('/');
-    }
-  }, [isAdmin, isAdminChecking, navigate]);
+    checkAdminStatus();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [toast]);
 
   return { isAdmin, isAdminChecking };
 };
