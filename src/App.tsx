@@ -42,10 +42,6 @@ import TherapyService from "./pages/services/TherapyService";
 import DivorceService from "./pages/services/DivorceService";
 import CustodyService from "./pages/services/CustodyService";
 
-// Contentful-powered pages
-import BlogPost from "./pages/contentful/BlogPost";
-import NewsArticle from "./pages/contentful/NewsArticle";
-
 import BookConsultation from "./pages/BookConsultation";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
@@ -53,8 +49,6 @@ import AddConsultant from "./pages/AddConsultant";
 import ConsultantListing from "./pages/ConsultantListing";
 import ConsultantDetail from "./pages/ConsultantDetail";
 import Dashboard from "./pages/Dashboard";
-import ConsultantManagement from "./pages/ConsultantManagement";
-import AdminPricing from "./pages/AdminPricing";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -99,18 +93,10 @@ const App = () => {
                 <Route path="/services/divorce" element={<DivorceService />} />
                 <Route path="/services/custody" element={<CustodyService />} />
                 
-                {/* Contentful-powered dynamic pages */}
-                <Route path="/resources/:slug" element={<BlogPost />} />
-                <Route path="/news/:slug" element={<NewsArticle />} />
-                
                 {/* Consultant Routes */}
                 <Route path="/consultants" element={<ConsultantListing />} />
                 <Route path="/consultants/:id" element={<ConsultantDetail />} />
                 <Route path="/add-consultant" element={<AddConsultant />} />
-                <Route path="/manage-consultants" element={<ConsultantManagement />} />
-                
-                {/* Admin Routes */}
-                <Route path="/admin/pricing" element={<AdminPricing />} />
                 
                 {/* Policy Pages */}
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />

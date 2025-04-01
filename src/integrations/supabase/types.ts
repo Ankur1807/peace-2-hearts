@@ -151,96 +151,6 @@ export type Database = {
           },
         ]
       }
-      discount_codes: {
-        Row: {
-          applicable_services: string[] | null
-          code: string
-          created_at: string
-          description: string | null
-          discount_type: string
-          discount_value: number
-          expiry_date: string | null
-          id: string
-          is_active: boolean
-          max_discount_amount: number | null
-          min_purchase_amount: number | null
-          start_date: string | null
-          updated_at: string
-          usage_count: number | null
-          usage_limit: number | null
-        }
-        Insert: {
-          applicable_services?: string[] | null
-          code: string
-          created_at?: string
-          description?: string | null
-          discount_type: string
-          discount_value: number
-          expiry_date?: string | null
-          id?: string
-          is_active?: boolean
-          max_discount_amount?: number | null
-          min_purchase_amount?: number | null
-          start_date?: string | null
-          updated_at?: string
-          usage_count?: number | null
-          usage_limit?: number | null
-        }
-        Update: {
-          applicable_services?: string[] | null
-          code?: string
-          created_at?: string
-          description?: string | null
-          discount_type?: string
-          discount_value?: number
-          expiry_date?: string | null
-          id?: string
-          is_active?: boolean
-          max_discount_amount?: number | null
-          min_purchase_amount?: number | null
-          start_date?: string | null
-          updated_at?: string
-          usage_count?: number | null
-          usage_limit?: number | null
-        }
-        Relationships: []
-      }
-      package_pricing: {
-        Row: {
-          created_at: string
-          currency: string
-          id: string
-          is_active: boolean
-          package_id: string
-          package_name: string
-          price: number
-          services: string[]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          currency?: string
-          id?: string
-          is_active?: boolean
-          package_id: string
-          package_name: string
-          price: number
-          services: string[]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          currency?: string
-          id?: string
-          is_active?: boolean
-          package_id?: string
-          package_name?: string
-          price?: number
-          services?: string[]
-          updated_at?: string
-        }
-        Relationships: []
-      }
       payments: {
         Row: {
           amount: number
@@ -285,36 +195,6 @@ export type Database = {
           },
         ]
       }
-      pricing_history: {
-        Row: {
-          changed_by: string | null
-          created_at: string
-          entity_id: string
-          entity_type: string
-          id: string
-          new_price: number
-          old_price: number | null
-        }
-        Insert: {
-          changed_by?: string | null
-          created_at?: string
-          entity_id: string
-          entity_type: string
-          id?: string
-          new_price: number
-          old_price?: number | null
-        }
-        Update: {
-          changed_by?: string | null
-          created_at?: string
-          entity_id?: string
-          entity_type?: string
-          id?: string
-          new_price?: number
-          old_price?: number | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
@@ -339,56 +219,12 @@ export type Database = {
         }
         Relationships: []
       }
-      service_pricing: {
-        Row: {
-          category: string
-          created_at: string
-          currency: string
-          id: string
-          is_active: boolean
-          price: number
-          scenario: string
-          service_id: string
-          service_name: string
-          updated_at: string
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          currency?: string
-          id?: string
-          is_active?: boolean
-          price: number
-          scenario?: string
-          service_id: string
-          service_name: string
-          updated_at?: string
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          currency?: string
-          id?: string
-          is_active?: boolean
-          price?: number
-          scenario?: string
-          service_id?: string
-          service_name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      is_admin: {
-        Args: {
-          user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       app_role: "admin" | "user" | "consultant"
