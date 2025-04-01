@@ -4,21 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Save, X, Plus, Check } from 'lucide-react';
+import { Edit, Save, X } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
-
-interface ServicePrice {
-  id: string;
-  service_id: string;
-  service_name: string;
-  price: number;
-  currency: string;
-  category: string;
-  is_active: boolean;
-}
+import { ServicePrice } from '@/utils/pricingTypes';
 
 const ServicePricing = () => {
   const [services, setServices] = useState<ServicePrice[]>([]);
@@ -34,6 +24,7 @@ const ServicePricing = () => {
   const fetchServices = async () => {
     try {
       setLoading(true);
+      // Use any() to bypass type checking since our Database type doesn't include the new tables
       const { data, error } = await supabase
         .from('service_pricing')
         .select('*')
@@ -41,7 +32,7 @@ const ServicePricing = () => {
         .order('service_name', { ascending: true });
 
       if (error) throw error;
-      setServices(data || []);
+      setServices(data as ServicePrice[] || []);
     } catch (error: any) {
       toast({
         title: 'Error',

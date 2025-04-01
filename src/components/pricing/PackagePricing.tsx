@@ -6,18 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, Save, X, Plus } from 'lucide-react';
+import { Edit, Save, X } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
-
-interface PackagePrice {
-  id: string;
-  package_id: string;
-  package_name: string;
-  price: number;
-  currency: string;
-  services: string[];
-  is_active: boolean;
-}
+import { PackagePrice } from '@/utils/pricingTypes';
 
 const PackagePricing = () => {
   const [packages, setPackages] = useState<PackagePrice[]>([]);
@@ -39,7 +30,7 @@ const PackagePricing = () => {
         .order('package_name', { ascending: true });
 
       if (error) throw error;
-      setPackages(data || []);
+      setPackages(data as PackagePrice[] || []);
     } catch (error: any) {
       toast({
         title: 'Error',

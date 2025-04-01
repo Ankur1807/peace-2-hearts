@@ -48,7 +48,6 @@ const PricingManagement = () => {
       <SEO 
         title="Pricing Management - Peace2Hearts Admin"
         description="Manage service pricing, packages, and discount codes."
-        noIndex={true}
       />
       <Navigation />
       

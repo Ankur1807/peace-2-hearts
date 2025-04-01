@@ -5,17 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
-
-interface PriceChange {
-  id: string;
-  entity_id: string;
-  entity_type: string;
-  old_price: number | null;
-  new_price: number;
-  changed_by: string | null;
-  created_at: string;
-  entity_name?: string;
-}
+import { PriceChange } from '@/utils/pricingTypes';
 
 const PricingHistory = () => {
   const [history, setHistory] = useState<PriceChange[]>([]);
@@ -39,7 +29,7 @@ const PricingHistory = () => {
       if (historyError) throw historyError;
       
       // Enhance history data with entity names
-      const enhancedHistory = await Promise.all((historyData || []).map(async (record) => {
+      const enhancedHistory = await Promise.all((historyData || []).map(async (record: any) => {
         try {
           if (record.entity_type === 'service') {
             const { data: serviceData } = await supabase
@@ -77,7 +67,7 @@ const PricingHistory = () => {
         }
       }));
       
-      setHistory(enhancedHistory);
+      setHistory(enhancedHistory as PriceChange[]);
     } catch (error: any) {
       toast({
         title: 'Error',

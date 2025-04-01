@@ -12,7 +12,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 import { format } from 'date-fns';
-import { CalendarIcon, XCircle, Check, Plus } from 'lucide-react';
+import { CalendarIcon, Plus } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
@@ -23,29 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-
-interface DiscountCode {
-  id: string;
-  code: string;
-  discount_type: string;
-  discount_value: number;
-  description: string | null;
-  applicable_services: string[] | null;
-  min_purchase_amount: number | null;
-  max_discount_amount: number | null;
-  usage_limit: number | null;
-  usage_count: number | null;
-  start_date: string | null;
-  expiry_date: string | null;
-  is_active: boolean;
-  created_at: string;
-}
-
-interface ServiceOption {
-  service_id: string;
-  service_name: string;
-  category: string;
-}
+import { DiscountCode, ServiceOption } from '@/utils/pricingTypes';
 
 const DiscountCodes = () => {
   const [discounts, setDiscounts] = useState<DiscountCode[]>([]);
@@ -83,7 +61,7 @@ const DiscountCodes = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDiscounts(data || []);
+      setDiscounts(data as DiscountCode[] || []);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -104,7 +82,7 @@ const DiscountCodes = () => {
         .order('service_name', { ascending: true });
 
       if (error) throw error;
-      setServices(data || []);
+      setServices(data as ServiceOption[] || []);
     } catch (error: any) {
       toast({
         title: 'Error',
