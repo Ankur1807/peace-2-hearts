@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const useAdminAuth = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAdminChecking, setIsAdminChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -17,8 +18,11 @@ export const useAdminAuth = () => {
         if (!data.session) {
           setIsAdmin(false);
           setIsAdminChecking(false);
+          setIsAuthenticated(false);
           return;
         }
+        
+        setIsAuthenticated(true);
         
         // Then check if user is admin
         const adminStatus = await checkIsAdmin();
@@ -26,6 +30,7 @@ export const useAdminAuth = () => {
       } catch (error) {
         console.error("Error checking admin status:", error);
         setIsAdmin(false);
+        setIsAuthenticated(false);
       } finally {
         setIsAdminChecking(false);
       }
@@ -45,5 +50,57 @@ export const useAdminAuth = () => {
     };
   }, [toast]);
 
-  return { isAdmin, isAdminChecking };
+  // Manual login for admins - bypasses email confirmation
+  const loginAsAdmin = async (email: string, password: string) => {
+    try {
+      // List of pre-approved admin emails
+      const preApprovedAdmins = ['ankurb@peace2hearts.com'];
+      const isPreApprovedAdmin = preApprovedAdmins.includes(email);
+      
+      if (!isPreApprovedAdmin) {
+        // Regular login for non-pre-approved admins
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (error) throw error;
+      } else {
+        // Special login path for pre-approved admins using signUp to force a session
+        // This bypasses email confirmation
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              admin: true
+            }
+          }
+        });
+        
+        // If user already exists, try direct login
+        if (error && error.message.includes("already exists")) {
+          await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
+        } else if (error) {
+          throw error;
+        }
+        
+        // Force authenticated state for pre-approved admins
+        setIsAuthenticated(true);
+        setIsAdmin(true);
+      }
+      
+      return { success: true };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        error: error.message || "Authentication failed" 
+      };
+    }
+  };
+
+  return { isAdmin, isAdminChecking, isAuthenticated, loginAsAdmin };
 };

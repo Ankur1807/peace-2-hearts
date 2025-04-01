@@ -65,7 +65,11 @@ export const checkIsAdmin = async (): Promise<boolean> => {
     
     // For now, we'll use a simple email-based check for admin status
     // This should be replaced with a proper role-based system in production
-    const adminEmails = ['admin@peace2hearts.com', 'founder@peace2hearts.com'];
+    const adminEmails = [
+      'admin@peace2hearts.com', 
+      'founder@peace2hearts.com',
+      'ankurb@peace2hearts.com' // Added the user's email as an admin
+    ];
     return adminEmails.includes(userData.user.email || '');
   } catch (error) {
     console.error('Error checking admin status:', error);

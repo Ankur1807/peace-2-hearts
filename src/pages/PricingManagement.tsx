@@ -31,11 +31,10 @@ const loginSchema = z.object({
 });
 
 const PricingManagement = () => {
-  const { isAdmin, isAdminChecking } = useAdminAuth();
+  const { isAdmin, isAdminChecking, isAuthenticated, loginAsAdmin } = useAdminAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('services');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   
   // Setup form
@@ -46,34 +45,18 @@ const PricingManagement = () => {
       password: "",
     },
   });
-
-  // Check if user is already logged in
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        setIsAuthenticated(true);
-      }
-    };
-    
-    checkSession();
-  }, []);
   
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
       setIsLoggingIn(true);
       
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
+      const result = await loginAsAdmin(values.email, values.password);
       
-      if (error) {
-        throw error;
+      if (!result.success) {
+        throw new Error(result.error);
       }
       
-      setIsAuthenticated(true);
       toast({
         title: "Login successful",
         description: "Welcome to pricing management",
@@ -201,7 +184,6 @@ const PricingManagement = () => {
               variant="outline" 
               onClick={async () => {
                 await supabase.auth.signOut();
-                setIsAuthenticated(false);
                 toast({
                   title: "Signed out",
                   description: "You have been signed out"
