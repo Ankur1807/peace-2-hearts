@@ -15,7 +15,7 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick, isLoggedIn }: Mob
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
     { path: "/services", label: "Services" },
-    { path: "/resources", label: "Resources" },
+    // Resources link removed
     { path: "/contact", label: "Contact" },
   ];
 

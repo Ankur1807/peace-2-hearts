@@ -10,7 +10,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
-import Resources from "./pages/Resources";
+// import Resources from "./pages/Resources"; // Commented out Resources import
 import News from "./pages/News";
 import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
@@ -109,7 +109,9 @@ const App = () => {
                 <Route path="/cancellation-refund" element={<CancellationRefund />} />
                 <Route path="/shipping-delivery" element={<ShippingDelivery />} />
                 
-                <Route path="/resources" element={<Resources />} />
+                {/* Resources route commented out */}
+                {/* <Route path="/resources" element={<Resources />} /> */}
+                
                 <Route path="/news" element={<News />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/terms" element={<Terms />} />
