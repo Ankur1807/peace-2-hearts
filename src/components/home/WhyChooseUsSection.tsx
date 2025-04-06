@@ -1,5 +1,5 @@
 
-import { Heart, BookOpen, MessageSquare, Shield, Ring, Users } from 'lucide-react';
+import { Heart, BookOpen, MessageSquare, Shield, Bell, Users } from 'lucide-react';
 
 const WhyChooseUsSection = () => {
   return (
@@ -45,7 +45,7 @@ const WhyChooseUsSection = () => {
           
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
             <div className="bg-softGreen/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-              <Ring className="h-10 w-10 text-softGreen" />
+              <Bell className="h-10 w-10 text-softGreen" />
             </div>
             <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">Divorce Prevention Focus</h3>
             <p className="text-gray-600">We believe separation isn't always the only option. When there's a chance for repair, we'll help you explore it.</p>
