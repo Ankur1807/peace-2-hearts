@@ -14,8 +14,8 @@ const NewsTicker = () => {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [cursorVisible, setCursorVisible] = useState(true);
 
-  // Calculate typing/deleting speed (3 characters per second = 333ms per character)
-  const typingSpeed = 333; // milliseconds per character
+  // Calculate typing/deleting speed (4 characters per second = 250ms per character)
+  const typingSpeed = 250; // milliseconds per character
 
   useEffect(() => {
     // Toggle cursor blinking effect
