@@ -40,6 +40,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
   };
 
   const handleServiceSelection = (serviceId: string, checked: boolean) => {
+    console.log(`Service ${serviceId} selection changed to ${checked}`);
     if (checked) {
       // Check if we've hit the limit for holistic package selections
       if (serviceCategory === 'holistic' && selectedServices.length >= 4 && !selectedServices.includes(serviceId)) {
