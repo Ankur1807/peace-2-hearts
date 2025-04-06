@@ -103,14 +103,12 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
           
           return (
             <div key={service.id} className="flex items-center space-x-2">
-              <Checkbox 
+              <input
+                type="checkbox"
                 id={service.id}
                 checked={isChecked}
-                onCheckedChange={(checked) => {
-                  if (typeof checked === 'boolean') {
-                    handleServiceSelection(service.id, checked);
-                  }
-                }}
+                onChange={(e) => handleServiceSelection(service.id, e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 focus:ring-peacefulBlue"
               />
               <label
                 htmlFor={service.id}

@@ -6,7 +6,6 @@ import Logo from './navigation/Logo';
 import DesktopMenu from './navigation/DesktopMenu';
 import WaveyHeader from './navigation/WaveyHeader';
 import MobileHeader from './navigation/MobileHeader';
-import NewsTicker from './navigation/NewsTicker';
 import { checkAuthentication } from '@/utils/authUtils';
 
 const Navigation = () => {
@@ -71,11 +70,6 @@ const Navigation = () => {
 
       <div className="container mx-auto flex justify-between items-center relative z-[60]">
         <Logo />
-        
-        <div className="hidden md:block w-1/3">
-          <NewsTicker />
-        </div>
-        
         <DesktopMenu isLoggedIn={isLoggedIn} userName="" onSignOut={() => {}} />
       </div>
     </nav>
