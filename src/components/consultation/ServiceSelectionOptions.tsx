@@ -100,7 +100,11 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
               <Checkbox 
                 id={service.id}
                 checked={selectedServices.includes(service.id)}
-                onCheckedChange={(checked) => handleServiceSelection(service.id, checked === true)}
+                onCheckedChange={(checked) => {
+                  if (checked !== "indeterminate") {
+                    handleServiceSelection(service.id, checked === true);
+                  }
+                }}
               />
               <label
                 htmlFor={service.id}

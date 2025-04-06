@@ -41,13 +41,14 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
 
   const handleServiceSelection = (serviceId: string, checked: boolean) => {
     if (checked) {
+      // Check if we've hit the limit for holistic package selections
       if (serviceCategory === 'holistic' && selectedServices.length >= 4 && !selectedServices.includes(serviceId)) {
         return;
       }
-      // Fix: Don't use function form of setState, directly provide the new array
+      // Add the service to the selectedServices array
       setSelectedServices([...selectedServices, serviceId]);
     } else {
-      // Fix: Don't use function form of setState, directly provide the new array
+      // Remove the service from the selectedServices array
       setSelectedServices(selectedServices.filter(id => id !== serviceId));
     }
   };
@@ -60,6 +61,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
   };
 
   useEffect(() => {
+    // Reset selected services when the category changes
     setSelectedServices([]);
   }, [serviceCategory, setSelectedServices]);
 
@@ -86,7 +88,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   };
 
-  // These holisticPackages need to be defined here as well for handlePackageSelection
+  // Define holisticPackages here to make them available for handlePackageSelection
   const holisticPackages = [
     { 
       id: 'divorce-prevention', 
