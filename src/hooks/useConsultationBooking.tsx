@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { saveConsultation } from '@/utils/consultationApi';
 import { PersonalDetails } from '@/utils/types';
+import { supabase } from "@/integrations/supabase/client";
 
 export function useConsultationBooking() {
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -26,6 +27,31 @@ export function useConsultationBooking() {
   const handlePersonalDetailsChange = (details: PersonalDetails) => {
     console.log("Updating personal details:", details);
     setPersonalDetails(details);
+  };
+
+  const sendBookingConfirmationEmail = async (bookingDetails: any) => {
+    try {
+      console.log("Sending booking confirmation email:", bookingDetails);
+      const { data, error } = await supabase.functions.invoke('send-booking-confirmation', {
+        body: bookingDetails
+      });
+
+      if (error) {
+        console.error("Error sending booking confirmation:", error);
+        throw new Error(`Failed to send confirmation email: ${error.message || 'Unknown error'}`);
+      }
+
+      console.log("Confirmation email sent:", data);
+      return data;
+    } catch (error: any) {
+      console.error("Exception in sendBookingConfirmationEmail:", error);
+      // Don't throw here - we don't want to break the booking flow if email fails
+      toast({
+        title: "Email Notification",
+        description: "Your booking was successful, but there was an issue sending the confirmation email. Please check your spam folder or contact support.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleConfirmBooking = async () => {
@@ -65,8 +91,26 @@ export function useConsultationBooking() {
       
       if (lastResult) {
         console.log("All consultations created successfully. Last result:", lastResult);
-        setSubmitted(true);
         setReferenceId(lastResult.referenceId);
+
+        // Send confirmation email with booking details
+        const bookingDetails = {
+          referenceId: lastResult.referenceId,
+          clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
+          email: personalDetails.email,
+          phone: personalDetails.phone,
+          consultationType: selectedServices.length > 1 ? 'multiple' : selectedServices[0],
+          services: selectedServices,
+          date: serviceCategory === 'holistic' ? undefined : date,
+          timeSlot: serviceCategory === 'holistic' ? undefined : timeSlot,
+          timeframe: serviceCategory === 'holistic' ? timeframe : undefined,
+          message: personalDetails.message
+        };
+
+        // Send confirmation email
+        await sendBookingConfirmationEmail(bookingDetails);
+        
+        setSubmitted(true);
         window.scrollTo(0, 0);
         
         toast({

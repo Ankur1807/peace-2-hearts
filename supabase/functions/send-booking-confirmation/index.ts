@@ -36,6 +36,7 @@ const getConsultationTypeLabel = (type: string): string => {
     'pre-marriage-legal': 'Pre-Marriage Legal Consultation',
     'sexual-health-counselling': 'Sexual Health Counselling',
     'family-therapy': 'Family Therapy',
+    'multiple': 'Multiple Services'
   };
   
   return labels[type] || type;
@@ -58,7 +59,28 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log("Received request to send booking confirmation");
+
+    if (!GMAIL_EMAIL || !GMAIL_APP_PASSWORD) {
+      console.error("Missing Gmail credentials");
+      return new Response(
+        JSON.stringify({ success: false, error: "Server configuration error - missing email credentials" }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
     const bookingDetails: BookingDetails = await req.json();
+    console.log("Booking details received:", JSON.stringify({
+      referenceId: bookingDetails.referenceId,
+      clientName: bookingDetails.clientName,
+      email: bookingDetails.email,
+      services: bookingDetails.services,
+      // Don't log sensitive information like phone number or full message
+    }));
+
     const {
       referenceId,
       clientName,
@@ -71,8 +93,6 @@ const handler = async (req: Request): Promise<Response> => {
       timeframe,
       message
     } = bookingDetails;
-
-    console.log("Received booking confirmation request:", { referenceId, clientName, email });
 
     const client = new SMTPClient({
       connection: {
@@ -92,8 +112,9 @@ const handler = async (req: Request): Promise<Response> => {
     ).join('');
 
     // Send confirmation email to the client
+    console.log(`Attempting to send confirmation email to client: ${email}`);
     await client.send({
-      from: "confirmation@peace2hearts.com",
+      from: `"Peace2Hearts" <${GMAIL_EMAIL}>`,
       to: email,
       subject: `Your Peace2Hearts Consultation Booking - Ref# ${referenceId}`,
       content: `
@@ -143,6 +164,7 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
               <div class="footer">
                 <p>Reference #: ${referenceId} | Peace2Hearts</p>
+                <p>This is an automated message, please do not reply directly to this email.</p>
               </div>
             </div>
           </body>
@@ -150,11 +172,13 @@ const handler = async (req: Request): Promise<Response> => {
       `,
       html: true,
     });
+    console.log(`Confirmation email sent to client: ${email}`);
 
     // Send notification email to admin
+    console.log("Attempting to send notification email to admin");
     await client.send({
-      from: "confirmation@peace2hearts.com",
-      to: "confirmation@peace2hearts.com",
+      from: `"Peace2Hearts Booking System" <${GMAIL_EMAIL}>`,
+      to: GMAIL_EMAIL, // Send to self/admin
       subject: `New Booking - Ref# ${referenceId}`,
       content: `
         <html>
@@ -199,6 +223,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
       html: true,
     });
+    console.log("Notification email sent to admin");
 
     await client.close();
 
@@ -212,7 +237,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error sending booking confirmation:", error);
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: error.message || "Unknown error occurred" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
