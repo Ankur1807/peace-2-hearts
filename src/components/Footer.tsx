@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
@@ -29,7 +28,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <img 
-                src="/lovable-uploads/aa1e4069-d5ee-4dda-9699-74f185ae43bf.png" 
+                src="/lovable-uploads/6a7e5248-cc34-4298-b6e9-3cfe585ec7d1.png" 
                 alt="Peace2Hearts Logo" 
                 className="h-10"
               />

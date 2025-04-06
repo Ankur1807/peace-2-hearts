@@ -13,7 +13,7 @@ const MobileHeaderBar = ({ toggleMenu, isMenuOpen }: MobileHeaderBarProps) => {
       {/* Logo */}
       <Link to="/" className="flex items-center gap-2">
         <img 
-          src="/lovable-uploads/aa1e4069-d5ee-4dda-9699-74f185ae43bf.png" 
+          src="/lovable-uploads/6a7e5248-cc34-4298-b6e9-3cfe585ec7d1.png" 
           alt="Peace2Hearts Logo" 
           className="h-8"
         />
