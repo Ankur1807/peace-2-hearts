@@ -18,13 +18,19 @@ const ServiceOption: React.FC<ServiceOptionProps> = ({
   isSelected,
   onClick
 }) => {
+  // Prevent default to avoid form submission
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onClick();
+  };
+
   return (
     <div 
       className={`border rounded-lg p-4 cursor-pointer hover:border-peacefulBlue transition-colors ${isSelected ? 'border-peacefulBlue bg-peacefulBlue/5' : ''}`}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <div className="flex items-start space-x-3">
-        <RadioGroupItem value={id} id={id} className="mt-1" />
+        <RadioGroupItem value={id} id={id} className="mt-1" checked={isSelected} />
         <div className="grid gap-1.5">
           <Label htmlFor={id} className="text-lg font-medium cursor-pointer">{title}</Label>
           <p className="text-gray-600">{description}</p>

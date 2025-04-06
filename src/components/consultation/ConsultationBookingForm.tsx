@@ -58,15 +58,22 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
   const handleServiceSelection = (serviceId: string, checked: boolean) => {
     console.log(`Service ${serviceId} selection changed to ${checked}`);
     
+    const newSelectedServices = [...selectedServices];
+    
     if (checked) {
       // Add service to selection if not already present
-      if (!selectedServices.includes(serviceId)) {
-        setSelectedServices([...selectedServices, serviceId]);
+      if (!newSelectedServices.includes(serviceId)) {
+        newSelectedServices.push(serviceId);
       }
     } else {
       // Remove service from selection
-      setSelectedServices(selectedServices.filter(id => id !== serviceId));
+      const index = newSelectedServices.indexOf(serviceId);
+      if (index !== -1) {
+        newSelectedServices.splice(index, 1);
+      }
     }
+    
+    setSelectedServices(newSelectedServices);
   };
 
   const handlePackageSelection = (packageId: string) => {

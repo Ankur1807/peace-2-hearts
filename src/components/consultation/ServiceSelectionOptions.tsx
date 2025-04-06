@@ -107,13 +107,15 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
                 id={service.id}
                 checked={isChecked}
                 onCheckedChange={(checked) => {
-                  handleServiceSelection(service.id, checked === true);
+                  if (checked !== "indeterminate") {
+                    handleServiceSelection(service.id, checked);
+                  }
                 }}
-                className="h-4 w-4"
               />
               <label
                 htmlFor={service.id}
                 className="text-sm font-medium leading-none cursor-pointer"
+                onClick={() => handleServiceSelection(service.id, !isChecked)}
               >
                 {service.label}
               </label>
