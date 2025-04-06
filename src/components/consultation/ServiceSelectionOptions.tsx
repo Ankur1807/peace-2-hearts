@@ -100,7 +100,6 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {servicesToDisplay.map(service => {
           const isChecked = selectedServices.includes(service.id);
-          console.log(`Rendering ${service.id}: isChecked=${isChecked}`);
           
           return (
             <div key={service.id} className="flex items-center space-x-2">
@@ -108,9 +107,7 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
                 id={service.id}
                 checked={isChecked}
                 onCheckedChange={(value) => {
-                  const isChecked = value === true;
-                  console.log(`Checkbox ${service.id} changed to ${isChecked}`);
-                  handleServiceSelection(service.id, isChecked);
+                  handleServiceSelection(service.id, value === true);
                 }}
               />
               <label
