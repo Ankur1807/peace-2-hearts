@@ -55,31 +55,23 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   ];
 
+  // Prevent state updates from happening too quickly
   const handleServiceSelection = (serviceId: string, checked: boolean) => {
     console.log(`Service ${serviceId} selection changed to ${checked}`);
     
-    const newSelectedServices = [...selectedServices];
-    
-    if (checked) {
-      // Add service to selection if not already present
-      if (!newSelectedServices.includes(serviceId)) {
-        newSelectedServices.push(serviceId);
-      }
-    } else {
-      // Remove service from selection
-      const index = newSelectedServices.indexOf(serviceId);
-      if (index !== -1) {
-        newSelectedServices.splice(index, 1);
-      }
-    }
-    
-    setSelectedServices(newSelectedServices);
+    // Create a separate copy to avoid direct state manipulation
+    const updatedServices = checked 
+      ? [...selectedServices, serviceId] 
+      : selectedServices.filter(id => id !== serviceId);
+      
+    console.log("Updated services:", updatedServices);
+    setSelectedServices(updatedServices);
   };
 
   const handlePackageSelection = (packageId: string) => {
     const selectedPackage = holisticPackages.find(pkg => pkg.id === packageId);
     if (selectedPackage) {
-      setSelectedServices([...selectedPackage.services]);
+      setSelectedServices(selectedPackage.services);
     }
   };
 

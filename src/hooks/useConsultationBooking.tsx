@@ -48,9 +48,12 @@ export function useConsultationBooking() {
   
   const setSelectedServices = (selectedServices: string[]) => {
     console.log("Setting selected services:", selectedServices);
-    // Create a new array to ensure state updates are recognized
-    const newServices = [...selectedServices];
-    setState(prev => ({ ...prev, selectedServices: newServices }));
+    setState(prev => {
+      if (JSON.stringify(prev.selectedServices) === JSON.stringify(selectedServices)) {
+        return prev; // No change needed
+      }
+      return { ...prev, selectedServices: [...selectedServices] };
+    });
   };
   
   const setTimeSlot = (timeSlot: string) => setState(prev => ({ ...prev, timeSlot }));

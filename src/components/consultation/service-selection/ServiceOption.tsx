@@ -18,11 +18,12 @@ const ServiceOption: React.FC<ServiceOptionProps> = ({
   isSelected,
   onClick
 }) => {
-  // Prevent default to avoid form submission
-  const handleClick = (e: React.MouseEvent) => {
+  // Use a memoized click handler to avoid re-renders
+  const handleClick = React.useCallback((e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     onClick();
-  };
+  }, [onClick]);
 
   return (
     <div 
