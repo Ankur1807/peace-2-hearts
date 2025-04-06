@@ -223,59 +223,7 @@ const HomePage = () => {
         </div>
       </section>
       
-      {/* Testimonials */}
-      <section className="py-16 peach-pattern">
-        <div className="container mx-auto px-4 z-10 relative">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="section-title">Client Stories</h2>
-            <p className="text-gray-600">Read about how Peace2Hearts has helped others navigate their relationship challenges.</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="testimonial-card">
-              <div className="mb-4">
-                {[1, 2, 3, 4, 5].map(star => <span key={star} className="text-yellow-400">★</span>)}
-              </div>
-              <p className="text-gray-600 mb-4 italic">"The combined legal and emotional support I received during my divorce was invaluable. Peace2Hearts guided me through every step of the process with compassion and expertise."</p>
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
-                <div>
-                  <h4 className="font-medium text-gray-800">Sarah L.</h4>
-                  <p className="text-sm text-gray-500">Divorce Client</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="testimonial-card">
-              <div className="mb-4">
-                {[1, 2, 3, 4, 5].map(star => <span key={star} className="text-yellow-400">★</span>)}
-              </div>
-              <p className="text-gray-600 mb-4 italic">"When my partner and I were struggling, the relationship counseling at Peace2Hearts helped us develop better communication skills and rebuild our trust. We're now stronger than ever."</p>
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
-                <div>
-                  <h4 className="font-medium text-gray-800">Michael & David</h4>
-                  <p className="text-sm text-gray-500">Relationship Counseling</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="testimonial-card">
-              <div className="mb-4">
-                {[1, 2, 3, 4, 5].map(star => <span key={star} className="text-yellow-400">★</span>)}
-              </div>
-              <p className="text-gray-600 mb-4 italic">"The custody guidance provided by Peace2Hearts was clear, practical, and centered on my child's wellbeing. Their approach helped reduce conflict and find solutions that worked for everyone."</p>
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
-                <div>
-                  <h4 className="font-medium text-gray-800">Jennifer R.</h4>
-                  <p className="text-sm text-gray-500">Custody Client</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Testimonials section removed */}
       
       {/* CTA Section */}
       <section className="py-16 bg-peacefulBlue text-white">
