@@ -47,7 +47,7 @@ const NewsTicker = () => {
           setCurrentPhraseIndex((currentPhraseIndex + 1) % typingPhrases.length);
         }
       }
-    }, typingSpeed);
+    }, 250); // 250ms for 4 characters per second
 
     return () => clearTimeout(timeout);
   }, [currentText, isDeleting, currentPhraseIndex]);
