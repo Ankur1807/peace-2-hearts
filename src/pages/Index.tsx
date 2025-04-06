@@ -22,8 +22,8 @@ const HomePage = () => {
   return (
     <>
       <SEO 
-        title="Relationship Wellness & Legal Support" 
-        description="Expert mental health and legal support for individuals navigating relationship challenges. Find peace with or without love through our professional guidance services." 
+        title="Supporting You Before, During & After Marriage" 
+        description="Focused on saving Indian marriages, we offer divorce prevention, psychological support, and legal help to manage complex relationship challenges." 
         keywords="relationship counseling, divorce support, mental health, legal consultation, couples therapy, family law, relationship challenges, India, Delhi"
         canonicalUrl="/"
         language="en"

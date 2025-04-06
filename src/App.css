@@ -53,6 +53,15 @@
   color: #F97316;
 }
 
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(90deg, #8B5CF6, #0EA5E9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
 /* Fractal Border Styles */
 .fractal-border {
   border-radius: 0.5rem;
