@@ -33,6 +33,7 @@ const Footer = () => {
                 alt="Peace2Hearts Logo" 
                 className="h-10"
               />
+              <span className="font-lora text-xl font-semibold text-white">Peace2Hearts</span>
             </div>
             <p className="text-white/90 mb-4">
               Helping you find peace, with or without love.
@@ -67,7 +68,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-white mt-0.5" />
-                <span className="text-white/90">Delhi, India</span>
+                <span className="text-white/90">134 N Block, Main Road, Mohan Nagar, Bhondsi, Gurgaon – 122102</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-white" />

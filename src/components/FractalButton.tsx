@@ -18,9 +18,10 @@ const FractalButton = React.forwardRef<HTMLButtonElement, FractalButtonProps>(
     const pulseClass = pulseEffect ? 'pulse-effect' : '';
     
     return (
-      <div className={cn("fractal-button-wrapper", pulseClass)}>
+      <div className={cn("fractal-button-wrapper relative", pulseClass)}>
+        <div className="fractal-noise absolute inset-0 z-0 opacity-30"></div>
         <Button
-          className={cn(className)}
+          className={cn("relative z-10", className)}
           variant={fractalVariant}
           ref={ref}
           {...props}

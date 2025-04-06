@@ -11,12 +11,13 @@ const MobileHeaderBar = ({ toggleMenu, isMenuOpen }: MobileHeaderBarProps) => {
   return (
     <div className="w-full h-16 flex items-center justify-between px-4 bg-vibrantPurple shadow-md" style={{ position: 'relative', zIndex: 100 }}>
       {/* Logo */}
-      <Link to="/" className="flex items-center">
+      <Link to="/" className="flex items-center gap-2">
         <img 
           src="/lovable-uploads/aa1e4069-d5ee-4dda-9699-74f185ae43bf.png" 
           alt="Peace2Hearts Logo" 
           className="h-8"
         />
+        <span className="font-lora text-lg font-semibold text-white">Peace2Hearts</span>
       </Link>
       
       {/* Menu button with clear visibility */}

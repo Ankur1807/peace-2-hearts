@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Logo = () => {
   return (
-    <Link to="/" className="flex items-center gap-2" onClick={(e) => {
+    <Link to="/" className="flex items-center gap-3" onClick={(e) => {
       // Prevent default if we're already on the homepage to avoid double navigation
       if (window.location.pathname === '/') {
         e.preventDefault();
@@ -17,6 +17,7 @@ const Logo = () => {
         alt="Peace2Hearts Logo" 
         className="h-10 md:h-12"
       />
+      <span className="font-lora text-lg md:text-xl font-semibold text-white">Peace2Hearts</span>
     </Link>
   );
 };
