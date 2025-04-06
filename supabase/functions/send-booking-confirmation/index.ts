@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { SMTPClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const GMAIL_EMAIL = Deno.env.get("GMAIL_EMAIL") || "";
 const GMAIL_APP_PASSWORD = Deno.env.get("GMAIL_APP_PASSWORD") || "";
@@ -94,16 +94,14 @@ const handler = async (req: Request): Promise<Response> => {
       message
     } = bookingDetails;
 
-    const client = new SMTPClient({
-      connection: {
-        hostname: "smtp.gmail.com",
-        port: 465,
-        tls: true,
-        auth: {
-          username: GMAIL_EMAIL,
-          password: GMAIL_APP_PASSWORD,
-        },
-      },
+    const client = new SmtpClient();
+
+    // Configure connection
+    await client.connectTLS({
+      hostname: "smtp.gmail.com",
+      port: 465,
+      username: GMAIL_EMAIL,
+      password: GMAIL_APP_PASSWORD,
     });
 
     // Format services for display
@@ -114,8 +112,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Send confirmation email to the client
     console.log(`Attempting to send confirmation email to client: ${email}`);
     await client.send({
-      from: `"Peace2Hearts" <${GMAIL_EMAIL}>`,
-      to: email,
+      from: `Peace2Hearts <${GMAIL_EMAIL}>`,
+      to: [email],
       subject: `Your Peace2Hearts Consultation Booking - Ref# ${referenceId}`,
       content: `
         <html>
@@ -177,8 +175,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Send notification email to admin
     console.log("Attempting to send notification email to admin");
     await client.send({
-      from: `"Peace2Hearts Booking System" <${GMAIL_EMAIL}>`,
-      to: GMAIL_EMAIL, // Send to self/admin
+      from: `Peace2Hearts Booking System <${GMAIL_EMAIL}>`,
+      to: [GMAIL_EMAIL], // Send to self/admin
       subject: `New Booking - Ref# ${referenceId}`,
       content: `
         <html>
