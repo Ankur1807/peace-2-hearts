@@ -39,8 +39,25 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     });
   };
 
+  // Define holisticPackages here to make them available for handlePackageSelection
+  const holisticPackages = [
+    { 
+      id: 'divorce-prevention', 
+      label: 'Divorce Prevention Package', 
+      description: '4 sessions (2 therapy + 1 mediation + 1 legal)',
+      services: ['couples-counselling', 'mental-health-counselling', 'mediation', 'general-legal']
+    },
+    { 
+      id: 'pre-marriage-clarity', 
+      label: 'Pre-Marriage Clarity Package', 
+      description: '3 sessions (1 legal + 2 mental health)',
+      services: ['pre-marriage-legal', 'premarital-counselling', 'mental-health-counselling'] 
+    }
+  ];
+
   const handleServiceSelection = (serviceId: string, checked: boolean) => {
     console.log(`Service ${serviceId} selection changed to ${checked}`);
+    
     if (checked) {
       // Check if we've hit the limit for holistic package selections
       if (serviceCategory === 'holistic' && selectedServices.length >= 4 && !selectedServices.includes(serviceId)) {
@@ -88,22 +105,6 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
       );
     }
   };
-
-  // Define holisticPackages here to make them available for handlePackageSelection
-  const holisticPackages = [
-    { 
-      id: 'divorce-prevention', 
-      label: 'Divorce Prevention Package', 
-      description: '4 sessions (2 therapy + 1 mediation + 1 legal)',
-      services: ['couples-counselling', 'mental-health-counselling', 'mediation', 'general-legal']
-    },
-    { 
-      id: 'pre-marriage-clarity', 
-      label: 'Pre-Marriage Clarity Package', 
-      description: '3 sessions (1 legal + 2 mental health)',
-      services: ['pre-marriage-legal', 'premarital-counselling', 'mental-health-counselling'] 
-    }
-  ];
 
   return (
     <Card className="p-6 md:p-8">

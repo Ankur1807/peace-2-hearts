@@ -61,6 +61,12 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
   handleServiceSelection,
   handlePackageSelection
 }) => {
+  // Handle checkbox change event
+  const handleCheckboxChange = (serviceId: string, checked: boolean) => {
+    console.log(`Checkbox change for ${serviceId}: ${checked}`);
+    handleServiceSelection(serviceId, checked);
+  };
+
   if (serviceCategory === 'holistic') {
     return (
       <div className="space-y-3">
@@ -101,7 +107,10 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
                 id={service.id}
                 checked={selectedServices.includes(service.id)}
                 onCheckedChange={(checked) => {
-                  handleServiceSelection(service.id, checked === true);
+                  // Only call the handler when we have a definite true/false value
+                  if (checked !== "indeterminate") {
+                    handleCheckboxChange(service.id, checked === true);
+                  }
                 }}
               />
               <label
