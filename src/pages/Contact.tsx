@@ -93,8 +93,8 @@ const Contact = () => {
                 <MapPin className="h-7 w-7 text-peacefulBlue" />
               </div>
               <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">Visit Us</h3>
-              <p className="text-gray-600 mb-2">123 Peace Street</p>
-              <p className="text-gray-600">Harmony City, CA 12345</p>
+              <p className="text-gray-600 mb-2">134 N Block, Main Road, Mohan Nagar,</p>
+              <p className="text-gray-600">Bhondsi, Gurgaon – 122102</p>
             </div>
           </div>
           
