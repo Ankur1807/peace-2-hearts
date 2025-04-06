@@ -59,15 +59,14 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     console.log(`Service ${serviceId} selection changed to ${checked}`);
     
     if (checked) {
-      // Check if we've hit the limit for holistic package selections
-      if (serviceCategory === 'holistic' && selectedServices.length >= 4 && !selectedServices.includes(serviceId)) {
-        return;
-      }
-      // Add the service to the selectedServices array
-      setSelectedServices([...selectedServices, serviceId]);
+      // Add service to selection
+      setSelectedServices(prev => {
+        if (prev.includes(serviceId)) return prev;
+        return [...prev, serviceId];
+      });
     } else {
-      // Remove the service from the selectedServices array
-      setSelectedServices(selectedServices.filter(id => id !== serviceId));
+      // Remove service from selection
+      setSelectedServices(prev => prev.filter(id => id !== serviceId));
     }
   };
 

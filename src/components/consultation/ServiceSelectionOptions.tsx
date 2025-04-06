@@ -61,12 +61,7 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
   handleServiceSelection,
   handlePackageSelection
 }) => {
-  // Handle checkbox change event
-  const handleCheckboxChange = (serviceId: string, checked: boolean) => {
-    console.log(`Checkbox change for ${serviceId}: ${checked}`);
-    handleServiceSelection(serviceId, checked);
-  };
-
+  // For holistic package selection
   if (serviceCategory === 'holistic') {
     return (
       <div className="space-y-3">
@@ -92,25 +87,30 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
         </RadioGroup>
       </div>
     );
-  } else {
-    const servicesToDisplay = serviceCategory === 'mental-health' 
-      ? mentalHealthServices 
-      : legalServices;
-      
-    return (
-      <div className="space-y-3">
-        <Label>Service Types</Label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {servicesToDisplay.map(service => (
+  } 
+  
+  // For individual service selection (mental-health or legal)
+  const servicesToDisplay = serviceCategory === 'mental-health' 
+    ? mentalHealthServices 
+    : legalServices;
+    
+  return (
+    <div className="space-y-3">
+      <Label>Service Types</Label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {servicesToDisplay.map(service => {
+          const isChecked = selectedServices.includes(service.id);
+          console.log(`Rendering ${service.id}: isChecked=${isChecked}`);
+          
+          return (
             <div key={service.id} className="flex items-center space-x-2">
               <Checkbox 
                 id={service.id}
-                checked={selectedServices.includes(service.id)}
-                onCheckedChange={(checked) => {
-                  // Only call the handler when we have a definite true/false value
-                  if (checked !== "indeterminate") {
-                    handleCheckboxChange(service.id, checked === true);
-                  }
+                checked={isChecked}
+                onCheckedChange={(value) => {
+                  const isChecked = value === true;
+                  console.log(`Checkbox ${service.id} changed to ${isChecked}`);
+                  handleServiceSelection(service.id, isChecked);
                 }}
               />
               <label
@@ -120,15 +120,15 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
                 {service.label}
               </label>
             </div>
-          ))}
-        </div>
-        
-        {selectedServices.length === 0 && (
-          <p className="text-sm text-muted-foreground">Please select at least one service</p>
-        )}
+          );
+        })}
       </div>
-    );
-  }
+      
+      {selectedServices.length === 0 && (
+        <p className="text-sm text-muted-foreground">Please select at least one service</p>
+      )}
+    </div>
+  );
 };
 
 export default ServiceSelectionOptions;
