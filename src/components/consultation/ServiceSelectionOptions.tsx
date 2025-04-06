@@ -107,13 +107,14 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
                 id={service.id}
                 checked={isChecked}
                 onCheckedChange={(checked) => {
-                  // Convert checked value to boolean
-                  handleServiceSelection(service.id, checked === true);
+                  if (typeof checked === 'boolean') {
+                    handleServiceSelection(service.id, checked);
+                  }
                 }}
               />
               <label
                 htmlFor={service.id}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium leading-none cursor-pointer"
               >
                 {service.label}
               </label>

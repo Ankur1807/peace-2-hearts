@@ -59,10 +59,10 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     console.log(`Service ${serviceId} selection changed to ${checked}`);
     
     if (checked) {
-      // Add service to selection - fixed type issue by directly creating a new array
+      // Add service to selection
       setSelectedServices([...selectedServices, serviceId]);
     } else {
-      // Remove service from selection - fixed type issue by directly filtering and returning a new array
+      // Remove service from selection
       setSelectedServices(selectedServices.filter(id => id !== serviceId));
     }
   };
