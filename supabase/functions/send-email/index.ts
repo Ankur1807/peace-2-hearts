@@ -223,10 +223,12 @@ function formatServiceName(serviceId: string): string {
     'family-therapy': 'Family Therapy',
     'premarital-counselling': 'Premarital Counseling',
     'couples-counselling': 'Couples Counseling',
+    'sexual-health-counselling': 'Sexual Health Counseling',
     'pre-marriage-legal': 'Pre-Marriage Legal Consultation',
     'mediation': 'Mediation Services',
     'divorce': 'Divorce Consultation',
     'custody': 'Child Custody Consultation',
+    'maintenance': 'Maintenance Consultation',
     'general-legal': 'General Legal Consultation'
   };
   
