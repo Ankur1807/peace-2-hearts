@@ -8,7 +8,6 @@ import { OrganizationSchema } from '@/components/StructuredData';
 import HeroSection from '@/components/home/HeroSection';
 import ServicesSection from '@/components/home/ServicesSection';
 import WhyChooseUsSection from '@/components/home/WhyChooseUsSection';
-import FeaturedResourcesSection from '@/components/home/FeaturedResourcesSection';
 import CTASection from '@/components/home/CTASection';
 
 const HomePage = () => {
@@ -37,7 +36,6 @@ const HomePage = () => {
       <HeroSection />
       <ServicesSection />
       <WhyChooseUsSection />
-      <FeaturedResourcesSection />
       <CTASection />
       
       <Footer />
