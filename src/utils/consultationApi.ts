@@ -141,6 +141,56 @@ export const saveConsultation = async (
     }
 
     console.log("Consultation saved successfully:", consultation);
+    
+    // Send booking confirmation email
+    try {
+      console.log("Sending booking confirmation email");
+      
+      // Prepare the services array for the booking confirmation
+      let services: string[];
+      if (consultationType === 'multiple') {
+        // For multiple services, we need to extract the actual services
+        services = consultationData.consultation_type.split(',');
+      } else {
+        services = [consultationType];
+      }
+      
+      const bookingEmailPayload = {
+        referenceId,
+        clientName: consultationData.client_name,
+        email: consultationData.client_email,
+        phone: consultationData.client_phone,
+        consultationType,
+        services,
+        date: consultationData.date ? new Date(consultationData.date) : undefined,
+        timeSlot: consultationData.time_slot,
+        timeframe: consultationData.timeframe,
+        message: consultationData.message
+      };
+      
+      console.log("Sending booking confirmation with payload:", JSON.stringify({
+        referenceId: bookingEmailPayload.referenceId,
+        clientName: bookingEmailPayload.clientName,
+        email: bookingEmailPayload.email,
+        consultationType: bookingEmailPayload.consultationType,
+        services: bookingEmailPayload.services
+      }));
+      
+      const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-booking-confirmation', {
+        body: bookingEmailPayload
+      });
+      
+      if (emailError) {
+        console.error("Error invoking send-booking-confirmation function:", emailError);
+        // Don't throw error here, as we want to return the booking even if email fails
+      } else {
+        console.log("Email confirmation response:", emailResponse);
+      }
+    } catch (emailError) {
+      console.error("Error sending booking confirmation email:", emailError);
+      // Don't throw error here, as we want to return the booking even if email fails
+    }
+
     return { ...consultation, referenceId };
   } catch (error) {
     console.error("Error in saveConsultation:", error);

@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
+// Get the credentials from environment variables
 const GMAIL_EMAIL = Deno.env.get("GMAIL_EMAIL") || "";
 const GMAIL_APP_PASSWORD = Deno.env.get("GMAIL_APP_PASSWORD") || "";
 
@@ -60,6 +61,8 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     console.log("Received request to send booking confirmation");
+    console.log("GMAIL_EMAIL available:", !!GMAIL_EMAIL);
+    console.log("GMAIL_APP_PASSWORD available:", !!GMAIL_APP_PASSWORD);
 
     if (!GMAIL_EMAIL || !GMAIL_APP_PASSWORD) {
       console.error("Missing Gmail credentials");
