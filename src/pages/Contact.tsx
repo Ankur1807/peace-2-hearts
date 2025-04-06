@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
@@ -6,7 +5,6 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
-import { supabase } from '@/integrations/supabase/client';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -32,20 +30,13 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      console.log('Sending contact form data:', formData);
+      console.log('Form data submitted:', formData);
       
-      const { data, error } = await supabase.functions.invoke('send-contact-confirmation', {
-        body: formData,
-      });
-      
-      if (error) {
-        throw new Error(error.message || 'Failed to send your message');
-      }
-      
-      console.log('Contact form submission successful:', data);
+      // Since we're removing Supabase edge functions, we'll just show a success message
+      // In a real implementation, you would integrate with a service like Resend here
       
       toast({
-        title: "Message Sent",
+        title: "Message Received",
         description: "Thank you for contacting us. We'll get back to you soon.",
       });
       
@@ -62,7 +53,7 @@ const Contact = () => {
       
       toast({
         title: "Message Failed",
-        description: error.message || "There was a problem sending your message. Please try again.",
+        description: "There was a problem sending your message. Please try again later.",
         variant: "destructive"
       });
     } finally {

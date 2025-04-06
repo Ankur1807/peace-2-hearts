@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { saveConsultation } from '@/utils/consultationApi';
 import { PersonalDetails } from '@/utils/types';
-import { supabase } from "@/integrations/supabase/client";
 
 // Types
 interface BookingState {
@@ -57,32 +56,6 @@ export function useConsultationBooking() {
   const handlePersonalDetailsChange = (details: PersonalDetails) => {
     console.log("Updating personal details:", details);
     setState(prev => ({ ...prev, personalDetails: details }));
-  };
-
-  // Send booking confirmation email
-  const sendBookingConfirmationEmail = async (bookingDetails: any) => {
-    try {
-      console.log("Sending booking confirmation email:", bookingDetails);
-      const { data, error } = await supabase.functions.invoke('send-booking-confirmation', {
-        body: bookingDetails
-      });
-
-      if (error) {
-        console.error("Error sending booking confirmation:", error);
-        throw new Error(`Failed to send confirmation email: ${error.message || 'Unknown error'}`);
-      }
-
-      console.log("Confirmation email sent:", data);
-      return data;
-    } catch (error: any) {
-      console.error("Exception in sendBookingConfirmationEmail:", error);
-      // Don't throw here - we don't want to break the booking flow if email fails
-      toast({
-        title: "Email Notification",
-        description: "Your booking was successful, but there was an issue sending the confirmation email. Please check your spam folder or contact support.",
-        variant: "destructive"
-      });
-    }
   };
 
   // Create booking details for email
@@ -152,9 +125,12 @@ export function useConsultationBooking() {
         console.log("All consultations created successfully. Last result:", lastResult);
         setReferenceId(lastResult.referenceId);
 
-        // Prepare and send booking confirmation email
+        // Create booking details (previously used for email)
         const bookingDetails = prepareBookingDetails(lastResult);
-        await sendBookingConfirmationEmail(bookingDetails);
+        console.log("Booking details created:", bookingDetails);
+        
+        // Since we're removing Supabase edge functions, we'll skip the email sending
+        // and just show a success message
         
         setSubmitted(true);
         window.scrollTo(0, 0);

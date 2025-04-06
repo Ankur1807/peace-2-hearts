@@ -1,5 +1,4 @@
 
-import { supabase } from "@/integrations/supabase/client";
 import { generateReferenceId } from "./referenceGenerator";
 import { PersonalDetails } from "./types";
 
@@ -21,176 +20,34 @@ export const saveConsultation = async (
   });
 
   try {
-    // Try to find a consultant with the appropriate specialization
-    // Map consultation type to either "legal" or "mental_health" for consultant search
-    let consultantSpecialization = consultationType.includes("legal") || 
-                                  consultationType.includes("divorce") || 
-                                  consultationType.includes("custody") || 
-                                  consultationType.includes("mediation") ? 
-                                  "legal" : "mental_health";
-    
-    const { data: consultants, error: consultantError } = await supabase
-      .from('consultants')
-      .select('id')
-      .eq('specialization', consultantSpecialization)
-      .eq('is_available', true)
-      .limit(1);
-
-    if (consultantError) {
-      console.error("Error fetching consultants:", consultantError);
-      throw new Error("Unable to check consultant availability. Please try again later.");
-    }
-
-    console.log("Consultants query result:", consultants);
-
-    // If no consultant is found with the specific specialization, try to find any available consultant
-    let consultantId;
-    if (consultants && consultants.length > 0) {
-      consultantId = consultants[0].id;
-    } else {
-      console.log("No specific consultant found, looking for any consultant");
-      // Select any consultant as fallback
-      const { data: anyConsultant, error: anyConsultantError } = await supabase
-        .from('consultants')
-        .select('id')
-        .limit(1);
-        
-      if (anyConsultantError) {
-        console.error("Error fetching any consultant:", anyConsultantError);
-        throw new Error("Unable to check consultant availability. Please try again later.");
-      }
-      
-      console.log("Any consultant query result:", anyConsultant);
-      
-      if (!anyConsultant || anyConsultant.length === 0) {
-        console.log("No consultants found, creating placeholder");
-        
-        // First create a consultant profile
-        const { data: newProfile, error: profileError } = await supabase
-          .from('consultant_profiles')
-          .insert({
-            full_name: 'Default Consultant'
-          })
-          .select();
-          
-        if (profileError) {
-          console.error("Error creating consultant profile:", profileError);
-          throw new Error("No consultants available. Please contact support for assistance.");
-        }
-        
-        // No consultants available in the system - create placeholder entry for testing
-        const { data: newConsultant, error: createError } = await supabase
-          .from('consultants')
-          .insert({
-            name: 'Default Consultant',
-            specialization: consultantSpecialization,
-            is_available: true,
-            hourly_rate: 1000,
-            profile_id: newProfile[0].id
-          })
-          .select();
-          
-        if (createError) {
-          console.error("Error creating placeholder consultant:", createError);
-          throw new Error("No consultants available. Please contact support for assistance.");
-        }
-        
-        console.log("Created new consultant:", newConsultant);
-        consultantId = newConsultant[0].id;
-      } else {
-        consultantId = anyConsultant[0].id;
-      }
-    }
-
-    console.log("Selected consultant ID:", consultantId);
-
     // Create a reference ID for the consultation
     const referenceId = generateReferenceId();
     console.log("Generated reference ID:", referenceId);
-    
-    // Generate a random UUID for guest users instead of using the string "guest"
-    const guestUserId = crypto.randomUUID();
 
-    // Save the consultation without requiring user authentication
-    const consultationData = {
-      consultant_id: consultantId,
-      consultation_type: consultationType,
+    // Since we're removing Supabase, we'll simulate saving the consultation
+    // In a real implementation, you would integrate with a database service here
+    
+    // Simulate a successful creation with a delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Create a mock consultation response
+    const consultation = {
+      id: crypto.randomUUID(),
+      consultationType,
       date: date ? date.toISOString() : null,
-      time_slot: isTimeframe ? null : timeSlotOrTimeframe,
+      timeSlot: isTimeframe ? null : timeSlotOrTimeframe,
       timeframe: isTimeframe ? timeSlotOrTimeframe : null,
-      message: personalDetails.message,
+      clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
+      clientEmail: personalDetails.email,
+      clientPhone: personalDetails.phone,
       status: 'scheduled',
-      user_id: guestUserId, // Using a random UUID for guest users
-      reference_id: referenceId,
-      client_name: `${personalDetails.firstName} ${personalDetails.lastName}`,
-      client_email: personalDetails.email,
-      client_phone: personalDetails.phone
+      createdAt: new Date().toISOString(),
+      message: personalDetails.message,
+      referenceId
     };
     
-    console.log("Saving consultation with data:", consultationData);
-
-    const { data: consultation, error: consultationError } = await supabase
-      .from('consultations')
-      .insert(consultationData)
-      .select()
-      .single();
-
-    if (consultationError) {
-      console.error("Error saving consultation:", consultationError);
-      throw new Error(`Unable to save your consultation: ${consultationError.message}`);
-    }
-
     console.log("Consultation saved successfully:", consultation);
     
-    // Send booking confirmation email
-    try {
-      console.log("Sending booking confirmation email");
-      
-      // Prepare the services array for the booking confirmation
-      let services: string[];
-      if (consultationType === 'multiple') {
-        // For multiple services, we need to extract the actual services
-        services = consultationData.consultation_type.split(',');
-      } else {
-        services = [consultationType];
-      }
-      
-      const bookingEmailPayload = {
-        referenceId,
-        clientName: consultationData.client_name,
-        email: consultationData.client_email,
-        phone: consultationData.client_phone,
-        consultationType,
-        services,
-        date: consultationData.date ? new Date(consultationData.date) : undefined,
-        timeSlot: consultationData.time_slot,
-        timeframe: consultationData.timeframe,
-        message: consultationData.message
-      };
-      
-      console.log("Sending booking confirmation with payload:", JSON.stringify({
-        referenceId: bookingEmailPayload.referenceId,
-        clientName: bookingEmailPayload.clientName,
-        email: bookingEmailPayload.email,
-        consultationType: bookingEmailPayload.consultationType,
-        services: bookingEmailPayload.services
-      }));
-      
-      const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-booking-confirmation', {
-        body: bookingEmailPayload
-      });
-      
-      if (emailError) {
-        console.error("Error invoking send-booking-confirmation function:", emailError);
-        // Don't throw error here, as we want to return the booking even if email fails
-      } else {
-        console.log("Email confirmation response:", emailResponse);
-      }
-    } catch (emailError) {
-      console.error("Error sending booking confirmation email:", emailError);
-      // Don't throw error here, as we want to return the booking even if email fails
-    }
-
     return { ...consultation, referenceId };
   } catch (error) {
     console.error("Error in saveConsultation:", error);

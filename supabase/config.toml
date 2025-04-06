@@ -61,10 +61,3 @@ backend = "postgres"
 [experimental]
 vault_enabled = true
 tracing_enabled = false
-
-[functions]
-[functions.send-contact-confirmation]
-verify_jwt = false
-[functions.send-booking-confirmation]
-verify_jwt = false
-
