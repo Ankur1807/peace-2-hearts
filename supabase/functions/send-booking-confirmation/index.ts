@@ -53,6 +53,197 @@ const formatDate = (date?: Date): string => {
   });
 };
 
+// Function to validate the booking details
+const validateBookingDetails = (bookingDetails: any): boolean => {
+  if (!bookingDetails.referenceId || !bookingDetails.clientName || !bookingDetails.email) {
+    return false;
+  }
+  if (!bookingDetails.services || !Array.isArray(bookingDetails.services) || bookingDetails.services.length === 0) {
+    return false;
+  }
+  return true;
+};
+
+// Function to create service list HTML
+const generateServicesListHtml = (services: string[]): string => {
+  return services
+    .map(service => `<li>${getConsultationTypeLabel(service)}</li>`)
+    .join('');
+};
+
+// Function to create client email HTML content
+const createClientEmailHtml = (bookingDetails: BookingDetails): string => {
+  const { 
+    referenceId, 
+    clientName, 
+    services, 
+    date, 
+    timeSlot, 
+    timeframe 
+  } = bookingDetails;
+  
+  const servicesList = generateServicesListHtml(services);
+  
+  return `
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #6A5ACD; padding: 20px; text-align: center; color: white; }
+          .content { padding: 20px; background-color: #f9f9f9; }
+          .booking-details { background-color: white; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
+          .important { color: #6A5ACD; font-weight: bold; }
+          .label { font-weight: bold; min-width: 120px; display: inline-block; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Booking Confirmation</h1>
+          </div>
+          <div class="content">
+            <p>Dear ${clientName},</p>
+            <p>Thank you for booking a consultation with Peace2Hearts. Your booking has been confirmed.</p>
+            
+            <div class="booking-details">
+              <p><span class="label">Reference ID:</span> ${referenceId}</p>
+              <p><span class="label">Services:</span></p>
+              <ul>
+                ${servicesList}
+              </ul>
+              ${date ? `<p><span class="label">Date:</span> ${formatDate(date)}</p>` : ''}
+              ${timeSlot ? `<p><span class="label">Time:</span> ${timeSlot}</p>` : ''}
+              ${timeframe ? `<p><span class="label">Timeframe:</span> ${timeframe.replace(/-/g, ' ')}</p>` : ''}
+            </div>
+            
+            <p>We look forward to supporting you on your journey. Here's what you need to know:</p>
+            <ul>
+              <li>Your consultation will be conducted via secure video call.</li>
+              <li>You'll receive connection details via email 24 hours before your appointment.</li>
+              <li>Please join the call 5 minutes before your scheduled time.</li>
+              <li>If you need to reschedule, please give at least 24 hours notice.</li>
+            </ul>
+            
+            <p>If you have any questions before your consultation, please reply to this email or call us.</p>
+            <p>Best regards,<br>The Peace2Hearts Team</p>
+          </div>
+          <div class="footer">
+            <p>Reference #: ${referenceId} | Peace2Hearts</p>
+            <p>This is an automated message, please do not reply directly to this email.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+};
+
+// Function to create admin email HTML content
+const createAdminEmailHtml = (bookingDetails: BookingDetails): string => {
+  const { 
+    referenceId, 
+    clientName, 
+    email, 
+    phone, 
+    services, 
+    date, 
+    timeSlot, 
+    timeframe, 
+    message 
+  } = bookingDetails;
+  
+  const servicesList = generateServicesListHtml(services);
+  
+  return `
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #6A5ACD; padding: 20px; text-align: center; color: white; }
+          .content { padding: 20px; background-color: #f9f9f9; }
+          .booking-details { background-color: white; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          .label { font-weight: bold; min-width: 150px; display: inline-block; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>New Booking Received</h1>
+          </div>
+          <div class="content">
+            <p>A new consultation has been booked:</p>
+            
+            <div class="booking-details">
+              <p><span class="label">Reference ID:</span> ${referenceId}</p>
+              <p><span class="label">Client:</span> ${clientName}</p>
+              <p><span class="label">Email:</span> ${email}</p>
+              ${phone ? `<p><span class="label">Phone:</span> ${phone}</p>` : ''}
+              <p><span class="label">Services:</span></p>
+              <ul>
+                ${servicesList}
+              </ul>
+              ${date ? `<p><span class="label">Date:</span> ${formatDate(date)}</p>` : ''}
+              ${timeSlot ? `<p><span class="label">Time:</span> ${timeSlot}</p>` : ''}
+              ${timeframe ? `<p><span class="label">Timeframe:</span> ${timeframe.replace(/-/g, ' ')}</p>` : ''}
+              ${message ? `<p><span class="label">Message:</span> ${message}</p>` : ''}
+            </div>
+            
+            <p>Please update the booking details in the system and assign an appropriate consultant.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+};
+
+// Function to configure and return SMTP client
+const configureSmtpClient = async (): Promise<SmtpClient> => {
+  const client = new SmtpClient();
+  
+  // Configure connection
+  await client.connectTLS({
+    hostname: "smtp.gmail.com",
+    port: 465,
+    username: GMAIL_EMAIL,
+    password: GMAIL_APP_PASSWORD,
+  });
+  
+  return client;
+};
+
+// Function to send email to client
+const sendClientEmail = async (client: SmtpClient, bookingDetails: BookingDetails): Promise<void> => {
+  console.log(`Attempting to send confirmation email to client: ${bookingDetails.email}`);
+  
+  await client.send({
+    from: `Peace2Hearts <${GMAIL_EMAIL}>`,
+    to: [bookingDetails.email],
+    subject: `Your Peace2Hearts Consultation Booking - Ref# ${bookingDetails.referenceId}`,
+    content: createClientEmailHtml(bookingDetails),
+    html: true,
+  });
+  
+  console.log(`Confirmation email sent to client: ${bookingDetails.email}`);
+};
+
+// Function to send email to admin
+const sendAdminEmail = async (client: SmtpClient, bookingDetails: BookingDetails): Promise<void> => {
+  console.log("Attempting to send notification email to admin");
+  
+  await client.send({
+    from: `Peace2Hearts Booking System <${GMAIL_EMAIL}>`,
+    to: [GMAIL_EMAIL], // Send to self/admin
+    subject: `New Booking - Ref# ${bookingDetails.referenceId}`,
+    content: createAdminEmailHtml(bookingDetails),
+    html: true,
+  });
+  
+  console.log("Notification email sent to admin");
+};
+
+// Main handler function
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -76,6 +267,8 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const bookingDetails: BookingDetails = await req.json();
+    
+    // Log relevant non-sensitive details
     console.log("Booking details received:", JSON.stringify({
       referenceId: bookingDetails.referenceId,
       clientName: bookingDetails.clientName,
@@ -84,157 +277,43 @@ const handler = async (req: Request): Promise<Response> => {
       // Don't log sensitive information like phone number or full message
     }));
 
-    const {
-      referenceId,
-      clientName,
-      email,
-      phone,
-      consultationType,
-      services,
-      date,
-      timeSlot,
-      timeframe,
-      message
-    } = bookingDetails;
+    // Validate booking details
+    if (!validateBookingDetails(bookingDetails)) {
+      console.error("Invalid booking details");
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid booking details" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
 
-    const client = new SmtpClient();
+    // Configure SMTP client
+    const client = await configureSmtpClient();
 
-    // Configure connection
-    await client.connectTLS({
-      hostname: "smtp.gmail.com",
-      port: 465,
-      username: GMAIL_EMAIL,
-      password: GMAIL_APP_PASSWORD,
-    });
-
-    // Format services for display
-    const servicesList = services.map(service => 
-      `<li>${getConsultationTypeLabel(service)}</li>`
-    ).join('');
-
-    // Send confirmation email to the client
-    console.log(`Attempting to send confirmation email to client: ${email}`);
-    await client.send({
-      from: `Peace2Hearts <${GMAIL_EMAIL}>`,
-      to: [email],
-      subject: `Your Peace2Hearts Consultation Booking - Ref# ${referenceId}`,
-      content: `
-        <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background-color: #6A5ACD; padding: 20px; text-align: center; color: white; }
-              .content { padding: 20px; background-color: #f9f9f9; }
-              .booking-details { background-color: white; padding: 15px; margin: 20px 0; border-radius: 5px; }
-              .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
-              .important { color: #6A5ACD; font-weight: bold; }
-              .label { font-weight: bold; min-width: 120px; display: inline-block; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>Booking Confirmation</h1>
-              </div>
-              <div class="content">
-                <p>Dear ${clientName},</p>
-                <p>Thank you for booking a consultation with Peace2Hearts. Your booking has been confirmed.</p>
-                
-                <div class="booking-details">
-                  <p><span class="label">Reference ID:</span> ${referenceId}</p>
-                  <p><span class="label">Services:</span></p>
-                  <ul>
-                    ${servicesList}
-                  </ul>
-                  ${date ? `<p><span class="label">Date:</span> ${formatDate(date)}</p>` : ''}
-                  ${timeSlot ? `<p><span class="label">Time:</span> ${timeSlot}</p>` : ''}
-                  ${timeframe ? `<p><span class="label">Timeframe:</span> ${timeframe.replace(/-/g, ' ')}</p>` : ''}
-                </div>
-                
-                <p>We look forward to supporting you on your journey. Here's what you need to know:</p>
-                <ul>
-                  <li>Your consultation will be conducted via secure video call.</li>
-                  <li>You'll receive connection details via email 24 hours before your appointment.</li>
-                  <li>Please join the call 5 minutes before your scheduled time.</li>
-                  <li>If you need to reschedule, please give at least 24 hours notice.</li>
-                </ul>
-                
-                <p>If you have any questions before your consultation, please reply to this email or call us.</p>
-                <p>Best regards,<br>The Peace2Hearts Team</p>
-              </div>
-              <div class="footer">
-                <p>Reference #: ${referenceId} | Peace2Hearts</p>
-                <p>This is an automated message, please do not reply directly to this email.</p>
-              </div>
-            </div>
-          </body>
-        </html>
-      `,
-      html: true,
-    });
-    console.log(`Confirmation email sent to client: ${email}`);
-
-    // Send notification email to admin
-    console.log("Attempting to send notification email to admin");
-    await client.send({
-      from: `Peace2Hearts Booking System <${GMAIL_EMAIL}>`,
-      to: [GMAIL_EMAIL], // Send to self/admin
-      subject: `New Booking - Ref# ${referenceId}`,
-      content: `
-        <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background-color: #6A5ACD; padding: 20px; text-align: center; color: white; }
-              .content { padding: 20px; background-color: #f9f9f9; }
-              .booking-details { background-color: white; padding: 15px; margin: 20px 0; border-radius: 5px; }
-              .label { font-weight: bold; min-width: 150px; display: inline-block; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>New Booking Received</h1>
-              </div>
-              <div class="content">
-                <p>A new consultation has been booked:</p>
-                
-                <div class="booking-details">
-                  <p><span class="label">Reference ID:</span> ${referenceId}</p>
-                  <p><span class="label">Client:</span> ${clientName}</p>
-                  <p><span class="label">Email:</span> ${email}</p>
-                  ${phone ? `<p><span class="label">Phone:</span> ${phone}</p>` : ''}
-                  <p><span class="label">Services:</span></p>
-                  <ul>
-                    ${servicesList}
-                  </ul>
-                  ${date ? `<p><span class="label">Date:</span> ${formatDate(date)}</p>` : ''}
-                  ${timeSlot ? `<p><span class="label">Time:</span> ${timeSlot}</p>` : ''}
-                  ${timeframe ? `<p><span class="label">Timeframe:</span> ${timeframe.replace(/-/g, ' ')}</p>` : ''}
-                  ${message ? `<p><span class="label">Message:</span> ${message}</p>` : ''}
-                </div>
-                
-                <p>Please update the booking details in the system and assign an appropriate consultant.</p>
-              </div>
-            </div>
-          </body>
-        </html>
-      `,
-      html: true,
-    });
-    console.log("Notification email sent to admin");
-
-    await client.close();
-
-    return new Response(
-      JSON.stringify({ success: true, message: "Booking confirmation sent" }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    try {
+      // Send emails
+      await sendClientEmail(client, bookingDetails);
+      await sendAdminEmail(client, bookingDetails);
+      
+      // Close the SMTP connection
+      await client.close();
+      
+      return new Response(
+        JSON.stringify({ success: true, message: "Booking confirmation sent" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    } catch (emailError: any) {
+      console.error("Error sending emails:", emailError);
+      // Close the connection if it's still open
+      try { await client.close(); } catch (closeError) { /* ignore close errors */ }
+      
+      throw emailError; // Re-throw to be caught by outer try/catch
+    }
   } catch (error: any) {
     console.error("Error sending booking confirmation:", error);
     return new Response(
