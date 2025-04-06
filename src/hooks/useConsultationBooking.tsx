@@ -5,30 +5,61 @@ import { saveConsultation } from '@/utils/consultationApi';
 import { PersonalDetails } from '@/utils/types';
 import { supabase } from "@/integrations/supabase/client";
 
+// Types
+interface BookingState {
+  date: Date | undefined;
+  serviceCategory: string;
+  selectedServices: string[];
+  timeSlot: string;
+  timeframe: string;
+  submitted: boolean;
+  isProcessing: boolean;
+  referenceId: string | null;
+  bookingError: string | null;
+  personalDetails: PersonalDetails;
+}
+
+// Hook for managing consultation booking state
 export function useConsultationBooking() {
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [serviceCategory, setServiceCategory] = useState('holistic');
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [timeSlot, setTimeSlot] = useState('');
-  const [timeframe, setTimeframe] = useState('1-2-weeks');
-  const [submitted, setSubmitted] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [referenceId, setReferenceId] = useState<string | null>(null);
-  const [bookingError, setBookingError] = useState<string | null>(null);
-  const [personalDetails, setPersonalDetails] = useState<PersonalDetails>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    message: ''
+  const [state, setState] = useState<BookingState>({
+    date: undefined,
+    serviceCategory: 'holistic',
+    selectedServices: [],
+    timeSlot: '',
+    timeframe: '1-2-weeks',
+    submitted: false,
+    isProcessing: false,
+    referenceId: null,
+    bookingError: null,
+    personalDetails: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      message: ''
+    }
   });
+  
   const { toast } = useToast();
 
+  // State setter functions
+  const setDate = (date: Date | undefined) => setState(prev => ({ ...prev, date }));
+  const setServiceCategory = (serviceCategory: string) => setState(prev => ({ ...prev, serviceCategory }));
+  const setSelectedServices = (selectedServices: string[]) => setState(prev => ({ ...prev, selectedServices }));
+  const setTimeSlot = (timeSlot: string) => setState(prev => ({ ...prev, timeSlot }));
+  const setTimeframe = (timeframe: string) => setState(prev => ({ ...prev, timeframe }));
+  const setSubmitted = (submitted: boolean) => setState(prev => ({ ...prev, submitted }));
+  const setIsProcessing = (isProcessing: boolean) => setState(prev => ({ ...prev, isProcessing }));
+  const setReferenceId = (referenceId: string | null) => setState(prev => ({ ...prev, referenceId }));
+  const setBookingError = (bookingError: string | null) => setState(prev => ({ ...prev, bookingError }));
+
+  // Handle personal details updates
   const handlePersonalDetailsChange = (details: PersonalDetails) => {
     console.log("Updating personal details:", details);
-    setPersonalDetails(details);
+    setState(prev => ({ ...prev, personalDetails: details }));
   };
 
+  // Send booking confirmation email
   const sendBookingConfirmationEmail = async (bookingDetails: any) => {
     try {
       console.log("Sending booking confirmation email:", bookingDetails);
@@ -54,60 +85,75 @@ export function useConsultationBooking() {
     }
   };
 
+  // Create booking details for email
+  const prepareBookingDetails = (lastResult: any) => {
+    const { personalDetails, selectedServices, serviceCategory, date, timeSlot, timeframe } = state;
+    
+    return {
+      referenceId: lastResult.referenceId,
+      clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
+      email: personalDetails.email,
+      phone: personalDetails.phone,
+      consultationType: selectedServices.length > 1 ? 'multiple' : selectedServices[0],
+      services: selectedServices,
+      date: serviceCategory === 'holistic' ? undefined : date,
+      timeSlot: serviceCategory === 'holistic' ? undefined : timeSlot,
+      timeframe: serviceCategory === 'holistic' ? timeframe : undefined,
+      message: personalDetails.message
+    };
+  };
+
+  // Process each service booking
+  const processServiceBookings = async () => {
+    const { selectedServices, serviceCategory, date, timeSlot, timeframe, personalDetails } = state;
+    let lastResult;
+    
+    for (const service of selectedServices) {
+      console.log(`Creating consultation for service: ${service}`);
+      const result = await saveConsultation(
+        service,
+        serviceCategory === 'holistic' ? undefined : date,
+        serviceCategory === 'holistic' ? timeframe : timeSlot,
+        personalDetails
+      );
+      
+      if (result) {
+        console.log(`Consultation created for ${service}:`, result);
+        lastResult = result;
+      }
+    }
+    
+    return lastResult;
+  };
+  
+  // Handle booking confirmation
   const handleConfirmBooking = async () => {
-    console.log("handleConfirmBooking called with services:", selectedServices);
+    console.log("handleConfirmBooking called with services:", state.selectedServices);
     setIsProcessing(true);
     setBookingError(null);
     
     try {
-      // For combined bookings, we'll create multiple consultations
-      if (selectedServices.length === 0) {
+      if (state.selectedServices.length === 0) {
         throw new Error("Please select at least one service");
       }
 
-      console.log("Starting booking process for services:", selectedServices);
-      console.log("Using date:", date);
-      console.log("Using time slot:", timeSlot);
-      console.log("Using timeframe:", timeframe);
-      console.log("Using personal details:", personalDetails);
+      console.log("Starting booking process with state:", {
+        services: state.selectedServices,
+        date: state.date,
+        timeSlot: state.timeSlot,
+        timeframe: state.timeframe,
+        personalDetails: state.personalDetails
+      });
 
-      let lastResult;
-      
-      // Create a consultation for each selected service
-      for (const service of selectedServices) {
-        console.log(`Creating consultation for service: ${service}`);
-        const result = await saveConsultation(
-          service,
-          serviceCategory === 'holistic' ? undefined : date,
-          serviceCategory === 'holistic' ? timeframe : timeSlot,
-          personalDetails
-        );
-        
-        if (result) {
-          console.log(`Consultation created for ${service}:`, result);
-          lastResult = result;
-        }
-      }
+      // Process all service bookings
+      const lastResult = await processServiceBookings();
       
       if (lastResult) {
         console.log("All consultations created successfully. Last result:", lastResult);
         setReferenceId(lastResult.referenceId);
 
-        // Send confirmation email with booking details
-        const bookingDetails = {
-          referenceId: lastResult.referenceId,
-          clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
-          email: personalDetails.email,
-          phone: personalDetails.phone,
-          consultationType: selectedServices.length > 1 ? 'multiple' : selectedServices[0],
-          services: selectedServices,
-          date: serviceCategory === 'holistic' ? undefined : date,
-          timeSlot: serviceCategory === 'holistic' ? undefined : timeSlot,
-          timeframe: serviceCategory === 'holistic' ? timeframe : undefined,
-          message: personalDetails.message
-        };
-
-        // Send confirmation email
+        // Prepare and send booking confirmation email
+        const bookingDetails = prepareBookingDetails(lastResult);
         await sendBookingConfirmationEmail(bookingDetails);
         
         setSubmitted(true);
@@ -115,7 +161,7 @@ export function useConsultationBooking() {
         
         toast({
           title: "Booking Confirmed",
-          description: `Your consultation${selectedServices.length > 1 ? 's have' : ' has'} been successfully booked.`,
+          description: `Your consultation${state.selectedServices.length > 1 ? 's have' : ' has'} been successfully booked.`,
         });
       }
     } catch (error: any) {
@@ -132,22 +178,14 @@ export function useConsultationBooking() {
     }
   };
 
+  // Return all state and functions
   return {
-    date,
+    ...state,
     setDate,
-    serviceCategory,
     setServiceCategory,
-    selectedServices,
     setSelectedServices,
-    timeSlot,
     setTimeSlot,
-    timeframe,
     setTimeframe,
-    submitted,
-    isProcessing,
-    referenceId,
-    bookingError,
-    personalDetails,
     handlePersonalDetailsChange,
     handleConfirmBooking
   };
