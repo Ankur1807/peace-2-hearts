@@ -45,10 +45,15 @@ export function useConsultationBooking() {
   // State setter functions
   const setDate = (date: Date | undefined) => setState(prev => ({ ...prev, date }));
   const setServiceCategory = (serviceCategory: string) => setState(prev => ({ ...prev, serviceCategory }));
+  
   const setSelectedServices = (selectedServices: string[]) => {
     console.log("Setting selected services:", selectedServices);
-    setState(prev => ({ ...prev, selectedServices }));
+    setState(prev => {
+      // Ensure we're not directly modifying the previous state's array
+      return { ...prev, selectedServices: [...selectedServices] };
+    });
   };
+  
   const setTimeSlot = (timeSlot: string) => setState(prev => ({ ...prev, timeSlot }));
   const setTimeframe = (timeframe: string) => setState(prev => ({ ...prev, timeframe }));
   const setSubmitted = (submitted: boolean) => setState(prev => ({ ...prev, submitted }));

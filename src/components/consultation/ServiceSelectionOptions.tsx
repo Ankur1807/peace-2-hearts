@@ -2,6 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface ServiceOption {
   id: string;
@@ -102,12 +103,13 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
           
           return (
             <div key={service.id} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
+              <Checkbox
                 id={service.id}
                 checked={isChecked}
-                onChange={(e) => handleServiceSelection(service.id, e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 focus:ring-peacefulBlue"
+                onCheckedChange={(checked) => {
+                  handleServiceSelection(service.id, checked === true);
+                }}
+                className="h-4 w-4"
               />
               <label
                 htmlFor={service.id}
