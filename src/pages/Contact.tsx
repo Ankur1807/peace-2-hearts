@@ -6,6 +6,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
+import { supabase } from '@/integrations/supabase/client';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -16,6 +17,7 @@ const Contact = () => {
     subject: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -25,24 +27,47 @@ const Contact = () => {
     }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would send the form data to a server
-    console.log('Form submitted:', formData);
+    setIsSubmitting(true);
     
-    toast({
-      title: "Message Sent",
-      description: "Thank you for contacting us. We'll get back to you soon.",
-    });
-    
-    // Reset the form
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: ''
-    });
+    try {
+      console.log('Sending contact form data:', formData);
+      
+      const { data, error } = await supabase.functions.invoke('send-contact-confirmation', {
+        body: formData,
+      });
+      
+      if (error) {
+        throw new Error(error.message || 'Failed to send your message');
+      }
+      
+      console.log('Contact form submission successful:', data);
+      
+      toast({
+        title: "Message Sent",
+        description: "Thank you for contacting us. We'll get back to you soon.",
+      });
+      
+      // Reset the form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+    } catch (error: any) {
+      console.error('Contact form submission error:', error);
+      
+      toast({
+        title: "Message Failed",
+        description: error.message || "There was a problem sending your message. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -84,7 +109,7 @@ const Contact = () => {
                 <Mail className="h-7 w-7 text-peacefulBlue" />
               </div>
               <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">Email Us</h3>
-              <p className="text-gray-600 mb-2">support@peace2hearts.com</p>
+              <p className="text-gray-600 mb-2">contact@peace2hearts.com</p>
               <p className="text-gray-500 text-sm">We typically respond within 24 hours</p>
             </div>
             
@@ -111,6 +136,7 @@ const Contact = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
+                    disabled={isSubmitting}
                     className="w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-peacefulBlue/50"
                   />
                 </div>
@@ -124,6 +150,7 @@ const Contact = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
+                    disabled={isSubmitting}
                     className="w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-peacefulBlue/50"
                   />
                 </div>
@@ -136,6 +163,7 @@ const Contact = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    disabled={isSubmitting}
                     className="w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-peacefulBlue/50"
                   />
                 </div>
@@ -148,6 +176,7 @@ const Contact = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     required
+                    disabled={isSubmitting}
                     className="w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-peacefulBlue/50"
                   >
                     <option value="">Select a subject</option>
@@ -166,13 +195,18 @@ const Contact = () => {
                     value={formData.message}
                     onChange={handleChange}
                     required
+                    disabled={isSubmitting}
                     rows={5}
                     className="w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-peacefulBlue/50"
                   ></textarea>
                 </div>
                 
-                <Button type="submit" className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white w-full">
-                  Send Message
+                <Button 
+                  type="submit" 
+                  className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </div>
