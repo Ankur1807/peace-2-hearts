@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { saveConsultation } from '@/utils/consultationApi';
@@ -44,7 +45,10 @@ export function useConsultationBooking() {
   // State setter functions
   const setDate = (date: Date | undefined) => setState(prev => ({ ...prev, date }));
   const setServiceCategory = (serviceCategory: string) => setState(prev => ({ ...prev, serviceCategory }));
-  const setSelectedServices = (selectedServices: string[]) => setState(prev => ({ ...prev, selectedServices }));
+  const setSelectedServices = (selectedServices: string[]) => {
+    console.log("Setting selected services:", selectedServices);
+    setState(prev => ({ ...prev, selectedServices }));
+  };
   const setTimeSlot = (timeSlot: string) => setState(prev => ({ ...prev, timeSlot }));
   const setTimeframe = (timeframe: string) => setState(prev => ({ ...prev, timeframe }));
   const setSubmitted = (submitted: boolean) => setState(prev => ({ ...prev, submitted }));
