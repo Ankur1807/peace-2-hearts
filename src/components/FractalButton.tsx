@@ -21,7 +21,7 @@ const FractalButton = React.forwardRef<HTMLButtonElement, FractalButtonProps>(
       <div className={cn("fractal-button-wrapper relative", pulseClass)}>
         <div className="fractal-noise absolute inset-0 z-0 opacity-30"></div>
         <Button
-          className={cn("relative z-10", className)}
+          className={cn("relative z-10 font-bold", className)}
           variant={fractalVariant}
           ref={ref}
           {...props}

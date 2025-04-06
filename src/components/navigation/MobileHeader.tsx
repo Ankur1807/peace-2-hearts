@@ -62,7 +62,8 @@ const MobileHeader = ({ isLoggedIn, userName, onSignOut }: MobileHeaderProps) =>
         onMenuItemClick={handleMenuItemClick}
       />
       
-      <div className="h-24"></div> {/* Increased height to accommodate ticker */}
+      {/* Adjust this spacer to prevent content from being hidden under the header */}
+      <div className="h-28"></div> {/* Increased height to provide more space */}
     </div>
   );
 };
