@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { saveConsultation } from '@/utils/consultationApi';
 import { PersonalDetails } from '@/utils/types';
+import { sendBookingConfirmationEmail } from '@/utils/emailService';
 
 // Types
 interface BookingState {
@@ -125,12 +125,28 @@ export function useConsultationBooking() {
         console.log("All consultations created successfully. Last result:", lastResult);
         setReferenceId(lastResult.referenceId);
 
-        // Create booking details (previously used for email)
+        // Create booking details for email
         const bookingDetails = prepareBookingDetails(lastResult);
         console.log("Booking details created:", bookingDetails);
         
-        // Since we're removing Supabase edge functions, we'll skip the email sending
-        // and just show a success message
+        // Send confirmation email
+        try {
+          await sendBookingConfirmationEmail({
+            clientName: bookingDetails.clientName,
+            email: bookingDetails.email,
+            referenceId: bookingDetails.referenceId,
+            consultationType: bookingDetails.consultationType,
+            services: state.selectedServices,
+            date: state.date,
+            timeSlot: state.timeSlot,
+            timeframe: state.timeframe,
+            message: state.personalDetails.message
+          });
+          console.log("Confirmation email sent successfully");
+        } catch (emailError) {
+          console.error("Error sending confirmation email:", emailError);
+          // Continue with the booking process even if email fails
+        }
         
         setSubmitted(true);
         window.scrollTo(0, 0);

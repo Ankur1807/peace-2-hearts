@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
@@ -5,6 +6,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
+import { sendContactEmail } from '@/utils/emailService';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -32,22 +34,26 @@ const Contact = () => {
     try {
       console.log('Form data submitted:', formData);
       
-      // Since we're removing Supabase edge functions, we'll just show a success message
-      // In a real implementation, you would integrate with a service like Resend here
+      // Send email using our email service
+      const emailSent = await sendContactEmail(formData);
       
-      toast({
-        title: "Message Received",
-        description: "Thank you for contacting us. We'll get back to you soon.",
-      });
-      
-      // Reset the form
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
-      });
+      if (emailSent) {
+        toast({
+          title: "Message Received",
+          description: "Thank you for contacting us. We'll get back to you soon.",
+        });
+        
+        // Reset the form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        throw new Error("Failed to send email");
+      }
     } catch (error: any) {
       console.error('Contact form submission error:', error);
       
