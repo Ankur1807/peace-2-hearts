@@ -44,9 +44,11 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
       if (serviceCategory === 'holistic' && selectedServices.length >= 4 && !selectedServices.includes(serviceId)) {
         return;
       }
-      setSelectedServices(prev => [...prev, serviceId]);
+      // Fix: Don't use function form of setState, directly provide the new array
+      setSelectedServices([...selectedServices, serviceId]);
     } else {
-      setSelectedServices(prev => prev.filter(id => id !== serviceId));
+      // Fix: Don't use function form of setState, directly provide the new array
+      setSelectedServices(selectedServices.filter(id => id !== serviceId));
     }
   };
 
