@@ -60,15 +60,13 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     
     if (checked) {
       // Add service to selection
-      const updatedServices = [...selectedServices];
-      if (!updatedServices.includes(serviceId)) {
-        updatedServices.push(serviceId);
-      }
-      setSelectedServices(updatedServices);
+      setSelectedServices(prev => {
+        if (prev.includes(serviceId)) return prev;
+        return [...prev, serviceId];
+      });
     } else {
       // Remove service from selection
-      const updatedServices = selectedServices.filter(id => id !== serviceId);
-      setSelectedServices(updatedServices);
+      setSelectedServices(prev => prev.filter(id => id !== serviceId));
     }
   };
 
