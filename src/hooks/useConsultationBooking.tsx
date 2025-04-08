@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { saveConsultation } from '@/utils/consultationApi';
 import { PersonalDetails } from '@/utils/types';
@@ -42,30 +42,50 @@ export function useConsultationBooking() {
   
   const { toast } = useToast();
 
-  // State setter functions
-  const setDate = (date: Date | undefined) => setState(prev => ({ ...prev, date }));
-  const setServiceCategory = (serviceCategory: string) => setState(prev => ({ ...prev, serviceCategory }));
+  // State setter functions using useCallback to prevent unnecessary rerenders
+  const setDate = useCallback((date: Date | undefined) => 
+    setState(prev => ({ ...prev, date })), []);
   
-  const setSelectedServices = (selectedServices: string[]) => {
-    console.log("Setting selected services:", selectedServices);
-    setState(prev => ({ ...prev, selectedServices }));
-  };
+  const setServiceCategory = useCallback((serviceCategory: string) => 
+    setState(prev => ({ ...prev, serviceCategory })), []);
   
-  const setTimeSlot = (timeSlot: string) => setState(prev => ({ ...prev, timeSlot }));
-  const setTimeframe = (timeframe: string) => setState(prev => ({ ...prev, timeframe }));
-  const setSubmitted = (submitted: boolean) => setState(prev => ({ ...prev, submitted }));
-  const setIsProcessing = (isProcessing: boolean) => setState(prev => ({ ...prev, isProcessing }));
-  const setReferenceId = (referenceId: string | null) => setState(prev => ({ ...prev, referenceId }));
-  const setBookingError = (bookingError: string | null) => setState(prev => ({ ...prev, bookingError }));
+  const setSelectedServices = useCallback((services: string[] | ((prev: string[]) => string[])) => {
+    setState(prev => {
+      const updatedServices = typeof services === 'function' 
+        ? services(prev.selectedServices) 
+        : services;
+      
+      console.log("Updating selected services:", updatedServices);
+      return { ...prev, selectedServices: updatedServices };
+    });
+  }, []);
+  
+  const setTimeSlot = useCallback((timeSlot: string) => 
+    setState(prev => ({ ...prev, timeSlot })), []);
+  
+  const setTimeframe = useCallback((timeframe: string) => 
+    setState(prev => ({ ...prev, timeframe })), []);
+  
+  const setSubmitted = useCallback((submitted: boolean) => 
+    setState(prev => ({ ...prev, submitted })), []);
+  
+  const setIsProcessing = useCallback((isProcessing: boolean) => 
+    setState(prev => ({ ...prev, isProcessing })), []);
+  
+  const setReferenceId = useCallback((referenceId: string | null) => 
+    setState(prev => ({ ...prev, referenceId })), []);
+  
+  const setBookingError = useCallback((bookingError: string | null) => 
+    setState(prev => ({ ...prev, bookingError })), []);
 
   // Handle personal details updates
-  const handlePersonalDetailsChange = (details: PersonalDetails) => {
+  const handlePersonalDetailsChange = useCallback((details: PersonalDetails) => {
     console.log("Updating personal details:", details);
     setState(prev => ({ ...prev, personalDetails: details }));
-  };
+  }, []);
 
   // Create booking details for email
-  const prepareBookingDetails = (lastResult: any) => {
+  const prepareBookingDetails = useCallback((lastResult: any) => {
     const { personalDetails, selectedServices, serviceCategory, date, timeSlot, timeframe } = state;
     
     return {
@@ -80,10 +100,10 @@ export function useConsultationBooking() {
       timeframe: serviceCategory === 'holistic' ? timeframe : undefined,
       message: personalDetails.message
     };
-  };
+  }, [state]);
 
   // Process each service booking
-  const processServiceBookings = async () => {
+  const processServiceBookings = useCallback(async () => {
     const { selectedServices, serviceCategory, date, timeSlot, timeframe, personalDetails } = state;
     let lastResult;
     
@@ -103,10 +123,10 @@ export function useConsultationBooking() {
     }
     
     return lastResult;
-  };
+  }, [state]);
   
   // Handle booking confirmation
-  const handleConfirmBooking = async () => {
+  const handleConfirmBooking = useCallback(async () => {
     console.log("handleConfirmBooking called with services:", state.selectedServices);
     setIsProcessing(true);
     setBookingError(null);
@@ -174,7 +194,7 @@ export function useConsultationBooking() {
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [state, processServiceBookings, prepareBookingDetails, toast, setIsProcessing, setBookingError, setReferenceId, setSubmitted]);
 
   // Return all state and functions
   return {

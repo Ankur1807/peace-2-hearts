@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
@@ -55,30 +55,33 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   ];
 
-  // Improved service selection handler
-  const handleServiceSelection = (serviceId: string, checked: boolean) => {
+  // Improved service selection handler using useCallback to prevent recreations
+  const handleServiceSelection = useCallback((serviceId: string, checked: boolean) => {
     console.log(`Service ${serviceId} selection changed to ${checked}`);
     
-    if (checked) {
-      // Add the service if it's not already in the list
-      if (!selectedServices.includes(serviceId)) {
-        setSelectedServices([...selectedServices, serviceId]);
+    setSelectedServices(prevServices => {
+      if (checked) {
+        // Add the service if it's not already in the list
+        if (!prevServices.includes(serviceId)) {
+          return [...prevServices, serviceId];
+        }
+        return prevServices;
+      } else {
+        // Remove the service
+        return prevServices.filter(id => id !== serviceId);
       }
-    } else {
-      // Remove the service
-      setSelectedServices(selectedServices.filter(id => id !== serviceId));
-    }
-  };
+    });
+  }, [setSelectedServices]);
 
-  const handlePackageSelection = (packageId: string) => {
+  const handlePackageSelection = useCallback((packageId: string) => {
     const selectedPackage = holisticPackages.find(pkg => pkg.id === packageId);
     if (selectedPackage) {
       setSelectedServices(selectedPackage.services);
     }
-  };
+  }, [holisticPackages, setSelectedServices]);
 
+  // Only reset services when the category actually changes
   useEffect(() => {
-    // Reset selected services when the category changes
     setSelectedServices([]);
   }, [serviceCategory, setSelectedServices]);
 
