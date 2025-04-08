@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { saveConsultation } from '@/utils/consultationApi';
@@ -17,6 +16,16 @@ interface BookingState {
   referenceId: string | null;
   bookingError: string | null;
   personalDetails: PersonalDetails;
+  bookingDetails: {
+    clientName: string;
+    email: string;
+    consultationType: string;
+    services: string[];
+    date?: Date;
+    timeSlot?: string;
+    timeframe?: string;
+    message?: string;
+  } | null;
 }
 
 // Hook for managing consultation booking state
@@ -37,7 +46,8 @@ export function useConsultationBooking() {
       email: '',
       phone: '',
       message: ''
-    }
+    },
+    bookingDetails: null
   });
   
   const { toast } = useToast();
@@ -154,6 +164,21 @@ export function useConsultationBooking() {
         // Create booking details for email
         const bookingDetails = prepareBookingDetails(lastResult);
         console.log("Booking details created:", bookingDetails);
+        
+        // Store booking details for potential resend
+        setState(prev => ({
+          ...prev,
+          bookingDetails: {
+            clientName: bookingDetails.clientName,
+            email: bookingDetails.email,
+            consultationType: bookingDetails.consultationType,
+            services: state.selectedServices,
+            date: state.date,
+            timeSlot: state.timeSlot,
+            timeframe: state.timeframe,
+            message: state.personalDetails.message
+          }
+        }));
         
         // Send confirmation email
         try {
