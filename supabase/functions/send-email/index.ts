@@ -32,6 +32,7 @@ interface BookingEmailRequest {
   timeframe?: string;
   message?: string;
   isResend?: boolean;
+  packageName?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -140,15 +141,29 @@ async function handleContactEmail(data: ContactEmailRequest) {
 
 // Handle booking confirmation emails
 async function handleBookingEmail(data: BookingEmailRequest) {
-  const { clientName, email, referenceId, consultationType, services, date, timeSlot, timeframe, message, isResend } = data;
+  const { clientName, email, referenceId, consultationType, services, date, timeSlot, timeframe, message, isResend, packageName } = data;
   
   // Determine if this is a holistic package (which uses timeframe instead of date/time)
   const isHolisticPackage = !date && timeframe;
   
-  // Format consultation details
-  const servicesList = services.map(service => {
-    return `<li>${formatServiceName(service)}</li>`;
-  }).join('');
+  // Generate service content based on whether it's a holistic package or not
+  let serviceContent;
+  if (isHolisticPackage && packageName) {
+    // For holistic packages, just show the package name, not individual services
+    serviceContent = `<p><strong>Package Selected:</strong> ${packageName}</p>`;
+  } else {
+    // For individual services, list them all
+    const servicesList = services.map(service => {
+      return `<li>${formatServiceName(service)}</li>`;
+    }).join('');
+    
+    serviceContent = `
+      <p><strong>Services Selected:</strong></p>
+      <ul>
+        ${servicesList}
+      </ul>
+    `;
+  }
 
   // Generate the appropriate date/time or timeframe information
   const appointmentTimeInfo = isHolisticPackage 
@@ -174,10 +189,7 @@ async function handleBookingEmail(data: BookingEmailRequest) {
           
           <h3>Booking Details:</h3>
           <div style="background-color: #f8f8f8; padding: 20px; margin: 20px 0;">
-            <p><strong>Services Selected:</strong></p>
-            <ul>
-              ${servicesList}
-            </ul>
+            ${serviceContent}
             ${appointmentTimeInfo}
           </div>
           
@@ -211,8 +223,11 @@ async function handleBookingEmail(data: BookingEmailRequest) {
           <p><strong>Reference ID:</strong> ${referenceId}</p>
           <p><strong>Client:</strong> ${clientName}</p>
           <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Services Requested:</strong></p>
-          <ul>${servicesList}</ul>
+          ${isHolisticPackage && packageName 
+            ? `<p><strong>Package Selected:</strong> ${packageName}</p>` 
+            : `<p><strong>Services Requested:</strong></p>
+              <ul>${services.map(s => `<li>${formatServiceName(s)}</li>`).join('')}</ul>`
+          }
           ${isHolisticPackage 
             ? `<p><strong>Preferred Timeframe:</strong> ${formatTimeframe(timeframe || '')}</p>` 
             : `<p><strong>Appointment Date:</strong> ${formatDate(date)}</p>

@@ -21,6 +21,7 @@ interface BookingDetails {
   timeframe?: string;
   message?: string;
   isResend?: boolean;
+  packageName?: string;
 }
 
 export async function sendContactEmail(formData: ContactFormData): Promise<boolean> {

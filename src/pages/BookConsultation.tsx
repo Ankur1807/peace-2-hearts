@@ -25,11 +25,49 @@ const BookConsultation = () => {
   } = bookingState;
   const [isDevelopment, setIsDevelopment] = useState(false);
 
+  // Function to determine package name based on selected services
+  const getPackageName = () => {
+    if (serviceCategory !== 'holistic') return null;
+    
+    // Divorce Prevention Package services
+    const divorcePrevention = [
+      'couples-counselling',
+      'mental-health-counselling',
+      'mediation',
+      'general-legal'
+    ];
+    
+    // Pre-Marriage Clarity Package services
+    const preMarriageClarity = [
+      'pre-marriage-legal',
+      'premarital-counselling',
+      'mental-health-counselling'
+    ];
+
+    // Check if selected services match a package
+    const services = selectedServices || [];
+    
+    if (services.length === divorcePrevention.length && 
+        divorcePrevention.every(s => services.includes(s))) {
+      return "Divorce Prevention Package";
+    }
+    
+    if (services.length === preMarriageClarity.length && 
+        preMarriageClarity.every(s => services.includes(s))) {
+      return "Pre-Marriage Clarity Package";
+    }
+    
+    return null;
+  };
+
   useEffect(() => {
     // Check if we're in development mode
     setIsDevelopment(process.env.NODE_ENV === 'development');
     initializeBookingFromStorage(bookingState);
   }, []);
+
+  // Get package name if applicable
+  const packageName = getPackageName();
 
   if (submitted) {
     return (
@@ -51,7 +89,8 @@ const BookConsultation = () => {
                 date: date,
                 timeSlot: timeSlot,
                 timeframe: timeframe,
-                serviceCategory: serviceCategory
+                serviceCategory: serviceCategory,
+                packageName: packageName
               }} 
             />
           </div>

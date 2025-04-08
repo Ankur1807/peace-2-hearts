@@ -16,6 +16,7 @@ interface SuccessViewProps {
     timeSlot?: string;
     timeframe?: string;
     serviceCategory: string;
+    packageName?: string;
   };
 }
 
@@ -36,7 +37,8 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
         services: bookingDetails.services,
         date: bookingDetails.date,
         timeSlot: bookingDetails.timeSlot,
-        timeframe: bookingDetails.timeframe
+        timeframe: bookingDetails.timeframe,
+        packageName: bookingDetails.packageName
       });
 
       if (success) {
@@ -64,6 +66,61 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
 
   const isHolisticPackage = bookingDetails?.serviceCategory === 'holistic';
 
+  // Function to determine package name based on selected services
+  const getPackageName = () => {
+    const services = bookingDetails?.services || [];
+    
+    // Divorce Prevention Package services
+    const divorcePrevention = [
+      'couples-counselling',
+      'mental-health-counselling',
+      'mediation',
+      'general-legal'
+    ];
+    
+    // Pre-Marriage Clarity Package services
+    const preMarriageClarity = [
+      'pre-marriage-legal',
+      'premarital-counselling',
+      'mental-health-counselling'
+    ];
+
+    // Check if selected services match a package
+    if (services.length === divorcePrevention.length && 
+        divorcePrevention.every(s => services.includes(s))) {
+      return "Divorce Prevention Package";
+    }
+    
+    if (services.length === preMarriageClarity.length && 
+        preMarriageClarity.every(s => services.includes(s))) {
+      return "Pre-Marriage Clarity Package";
+    }
+    
+    return null;
+  };
+
+  // Get readable service names
+  const getServiceName = (serviceId: string) => {
+    const serviceNames: Record<string, string> = {
+      'mental-health-counselling': 'Mental Health Counseling',
+      'family-therapy': 'Family Therapy',
+      'premarital-counselling': 'Premarital Counseling',
+      'couples-counselling': 'Couples Counseling',
+      'sexual-health-counselling': 'Sexual Health Counseling',
+      'pre-marriage-legal': 'Pre-Marriage Legal Consultation',
+      'mediation': 'Mediation Services',
+      'divorce': 'Divorce Consultation',
+      'custody': 'Child Custody Consultation',
+      'maintenance': 'Maintenance Consultation',
+      'general-legal': 'General Legal Consultation'
+    };
+    
+    return serviceNames[serviceId] || serviceId;
+  };
+
+  // Get the package name if it's a holistic booking
+  const packageName = isHolisticPackage ? bookingDetails?.packageName || getPackageName() : null;
+
   return (
     <div className="text-center">
       <div className="flex justify-center mb-6">
@@ -81,6 +138,48 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
           <p className="text-sm text-gray-500 mb-1">Your Booking Reference</p>
           <p className="text-lg font-medium">{referenceId}</p>
           <p className="text-xs text-gray-500 mt-1">Please save this for future reference</p>
+        </div>
+      )}
+      
+      {bookingDetails && (
+        <div className="mb-8 max-w-lg mx-auto text-left">
+          <h3 className="text-xl font-semibold mb-3">Booking Details:</h3>
+          <div className="bg-gray-50 p-6 rounded-lg">
+            {isHolisticPackage && packageName ? (
+              <>
+                <p className="font-medium mb-2">Package Selected:</p>
+                <p className="mb-4">{packageName}</p>
+                <p className="font-medium mb-2">Preferred Timeframe:</p>
+                <p>{bookingDetails.timeframe}</p>
+              </>
+            ) : (
+              <>
+                <p className="font-medium mb-2">Services Selected:</p>
+                <ul className="list-disc pl-5 mb-4">
+                  {bookingDetails.services.map((service, index) => (
+                    <li key={index}>{getServiceName(service)}</li>
+                  ))}
+                </ul>
+                {bookingDetails.date && (
+                  <>
+                    <p className="font-medium mb-2">Appointment Date:</p>
+                    <p className="mb-2">{bookingDetails.date.toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric'
+                    })}</p>
+                  </>
+                )}
+                {bookingDetails.timeSlot && (
+                  <>
+                    <p className="font-medium mb-2">Time:</p>
+                    <p>{bookingDetails.timeSlot.replace('-', ':').toUpperCase()}</p>
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </div>
       )}
       
