@@ -107,9 +107,7 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
                 id={service.id}
                 checked={isChecked}
                 onCheckedChange={(checked) => {
-                  if (typeof checked === 'boolean') {
-                    handleServiceSelection(service.id, checked);
-                  }
+                  handleServiceSelection(service.id, checked === true);
                 }}
               />
               <label

@@ -18,7 +18,7 @@ const ServiceOption: React.FC<ServiceOptionProps> = ({
   isSelected,
   onClick
 }) => {
-  // Use a memoized click handler to avoid re-renders
+  // Use a memoized click handler to prevent propagation issues
   const handleClick = React.useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();

@@ -48,12 +48,7 @@ export function useConsultationBooking() {
   
   const setSelectedServices = (selectedServices: string[]) => {
     console.log("Setting selected services:", selectedServices);
-    setState(prev => {
-      if (JSON.stringify(prev.selectedServices) === JSON.stringify(selectedServices)) {
-        return prev; // No change needed
-      }
-      return { ...prev, selectedServices: [...selectedServices] };
-    });
+    setState(prev => ({ ...prev, selectedServices }));
   };
   
   const setTimeSlot = (timeSlot: string) => setState(prev => ({ ...prev, timeSlot }));
