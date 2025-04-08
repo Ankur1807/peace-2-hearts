@@ -70,29 +70,3 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
     return false;
   }
 }
-
-// New function to handle resend triggers for both types of emails
-export async function resendEmail(emailType: 'contact' | 'booking-confirmation', emailData: ContactFormData | BookingDetails): Promise<boolean> {
-  try {
-    console.log(`Attempting to resend ${emailType} email:`, emailData);
-    
-    const { data, error } = await supabase.functions.invoke('send-email', {
-      body: {
-        type: emailType,
-        ...emailData,
-        isResend: true // Flag to indicate this is a resend attempt
-      }
-    });
-    
-    if (error) {
-      console.error(`Error resending ${emailType} email:`, error);
-      return false;
-    }
-    
-    console.log(`${emailType} email resent successfully:`, data);
-    return true;
-  } catch (error) {
-    console.error(`Exception resending ${emailType} email:`, error);
-    return false;
-  }
-}

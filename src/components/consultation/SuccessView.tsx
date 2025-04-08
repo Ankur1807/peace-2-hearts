@@ -1,60 +1,13 @@
 
-import { useState } from "react";
-import { CheckCircle2, Mail } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { resendEmail } from "@/utils/emailService";
-import { useToast } from "@/hooks/use-toast";
 
 interface SuccessViewProps {
   referenceId?: string | null;
-  bookingDetails?: {
-    clientName: string;
-    email: string;
-    consultationType: string;
-    services: string[];
-    date?: Date;
-    timeSlot?: string;
-    timeframe?: string;
-    message?: string;
-  };
 }
 
-const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
-  const [isResending, setIsResending] = useState(false);
-  const { toast } = useToast();
-
-  const handleResendEmail = async () => {
-    if (!bookingDetails || !referenceId) return;
-    
-    setIsResending(true);
-    
-    try {
-      const success = await resendEmail("booking-confirmation", {
-        ...bookingDetails,
-        referenceId
-      });
-      
-      if (success) {
-        toast({
-          title: "Email Resent",
-          description: "Confirmation email has been resent successfully."
-        });
-      } else {
-        throw new Error("Failed to resend email");
-      }
-    } catch (error) {
-      console.error("Error resending email:", error);
-      toast({
-        title: "Resend Failed",
-        description: "There was a problem resending the confirmation email.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsResending(false);
-    }
-  };
-  
+const SuccessView = ({ referenceId }: SuccessViewProps) => {
   return (
     <div className="text-center">
       <div className="flex justify-center mb-6">
@@ -93,23 +46,6 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
           </li>
         </ul>
       </div>
-      
-      {bookingDetails && (
-        <div className="mt-6">
-          <Button 
-            variant="outline" 
-            onClick={handleResendEmail}
-            disabled={isResending}
-            className="flex items-center gap-2"
-          >
-            <Mail className="h-4 w-4" />
-            {isResending ? "Sending..." : "Resend Confirmation Email"}
-          </Button>
-          <p className="text-xs text-gray-500 mt-2">
-            Didn't receive our email? Click above to resend.
-          </p>
-        </div>
-      )}
       
       <div className="mt-10">
         <Link to="/">

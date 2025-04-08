@@ -18,7 +18,6 @@ interface ContactEmailRequest {
   subject: string;
   message: string;
   phone?: string;
-  isResend?: boolean;
 }
 
 interface BookingEmailRequest {
@@ -31,7 +30,6 @@ interface BookingEmailRequest {
   timeSlot?: string;
   timeframe?: string;
   message?: string;
-  isResend?: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -41,19 +39,19 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { type, isResend, ...data } = await req.json();
-    console.log(`Processing ${type} email request${isResend ? ' (RESEND)' : ''}`, data);
+    const { type, ...data } = await req.json();
+    console.log(`Processing ${type} email request`, data);
 
     let emailResponse;
 
     // Handle different email types
     switch (type) {
       case "contact":
-        emailResponse = await handleContactEmail(data as ContactEmailRequest, Boolean(isResend));
+        emailResponse = await handleContactEmail(data as ContactEmailRequest);
         break;
       
       case "booking-confirmation":
-        emailResponse = await handleBookingEmail(data as BookingEmailRequest, Boolean(isResend));
+        emailResponse = await handleBookingEmail(data as BookingEmailRequest);
         break;
       
       default:
@@ -82,24 +80,18 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 // Handle contact form emails
-async function handleContactEmail(data: ContactEmailRequest, isResend: boolean) {
+async function handleContactEmail(data: ContactEmailRequest) {
   const { name, email, subject, message, phone } = data;
-  
-  // Add resend indicator in subject if it's a resend
-  const emailSubject = isResend 
-    ? "[RESEND] We've received your message - Peace2Hearts" 
-    : "We've received your message - Peace2Hearts";
   
   // Send email to the user (confirmation)
   const userEmailResponse = await resend.emails.send({
     from: "Peace2Hearts <contact@peace2hearts.com>",
     to: [email],
-    subject: emailSubject,
+    subject: "We've received your message - Peace2Hearts",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background-color: #f0f7ff; padding: 30px; text-align: center;">
           <h1 style="color: #2c5282; margin-bottom: 10px;">Thank You for Contacting Us</h1>
-          ${isResend ? '<p style="color: #4a5568; font-size: 14px;">(This is a resend of a previous confirmation)</p>' : ''}
         </div>
         <div style="padding: 30px;">
           <p>Dear ${name},</p>
@@ -119,18 +111,14 @@ async function handleContactEmail(data: ContactEmailRequest, isResend: boolean) 
   });
   
   // Send notification to admin
-  const adminSubject = isResend 
-    ? `[RESEND] New Contact Form Submission: ${subject}` 
-    : `New Contact Form Submission: ${subject}`;
-  
   const adminEmailResponse = await resend.emails.send({
     from: "Peace2Hearts Website <contact@peace2hearts.com>",
     to: ["contact@peace2hearts.com"],
-    subject: adminSubject,
+    subject: `New Contact Form Submission: ${subject}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="padding: 20px;">
-          <h2>New Contact Form Submission${isResend ? ' (RESEND)' : ''}</h2>
+          <h2>New Contact Form Submission</h2>
           <p><strong>Name:</strong> ${name}</p>
           <p><strong>Email:</strong> ${email}</p>
           ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
@@ -148,7 +136,7 @@ async function handleContactEmail(data: ContactEmailRequest, isResend: boolean) 
 }
 
 // Handle booking confirmation emails
-async function handleBookingEmail(data: BookingEmailRequest, isResend: boolean) {
+async function handleBookingEmail(data: BookingEmailRequest) {
   const { clientName, email, referenceId, consultationType, services, date, timeSlot, timeframe, message } = data;
   
   // Format consultation details
@@ -161,21 +149,15 @@ async function handleBookingEmail(data: BookingEmailRequest, isResend: boolean) 
     : `<p><strong>Appointment Date:</strong> ${formatDate(date)}<br>
        <strong>Time:</strong> ${formatTimeSlot(timeSlot)}</p>`;
 
-  // Add resend indicator in subject if it's a resend
-  const emailSubject = isResend 
-    ? "[RESEND] Your Consultation Booking Confirmation - Peace2Hearts" 
-    : "Your Consultation Booking Confirmation - Peace2Hearts";
-  
   // Send confirmation email to client
   const userEmailResponse = await resend.emails.send({
     from: "Peace2Hearts <contact@peace2hearts.com>",
     to: [email],
-    subject: emailSubject,
+    subject: "Your Consultation Booking Confirmation - Peace2Hearts",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background-color: #f0f7ff; padding: 30px; text-align: center;">
           <h1 style="color: #2c5282; margin-bottom: 10px;">Booking Confirmation</h1>
-          ${isResend ? '<p style="color: #4a5568; font-size: 14px;">(This is a resend of a previous confirmation)</p>' : ''}
           <p style="font-size: 18px; margin-top: 0;">Reference ID: ${referenceId}</p>
         </div>
         <div style="padding: 30px;">
@@ -209,20 +191,15 @@ async function handleBookingEmail(data: BookingEmailRequest, isResend: boolean) 
     `,
   });
   
-  // Add resend indicator in admin subject if it's a resend
-  const adminSubject = isResend 
-    ? `[RESEND] New Consultation Booking: ${referenceId}` 
-    : `New Consultation Booking: ${referenceId}`;
-  
   // Send notification to admin
   const adminEmailResponse = await resend.emails.send({
     from: "Peace2Hearts Booking System <contact@peace2hearts.com>",
     to: ["contact@peace2hearts.com"],
-    subject: adminSubject,
+    subject: `New Consultation Booking: ${referenceId}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="padding: 20px;">
-          <h2>New Consultation Booking${isResend ? ' (RESEND)' : ''}</h2>
+          <h2>New Consultation Booking</h2>
           <p><strong>Reference ID:</strong> ${referenceId}</p>
           <p><strong>Client:</strong> ${clientName}</p>
           <p><strong>Email:</strong> ${email}</p>

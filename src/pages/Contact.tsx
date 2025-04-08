@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
@@ -5,7 +6,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
-import { sendContactEmail, resendEmail } from '@/utils/emailService';
+import { sendContactEmail } from '@/utils/emailService';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -16,9 +17,7 @@ const Contact = () => {
     subject: '',
     message: ''
   });
-  const [submittedData, setSubmittedData] = useState<null | typeof formData>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isResending, setIsResending] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -39,9 +38,6 @@ const Contact = () => {
       const emailSent = await sendContactEmail(formData);
       
       if (emailSent) {
-        // Save submitted data for potential resend
-        setSubmittedData({ ...formData });
-        
         toast({
           title: "Message Received",
           description: "Thank you for contacting us. We'll get back to you soon.",
@@ -71,35 +67,6 @@ const Contact = () => {
     }
   };
   
-  const handleResend = async () => {
-    if (!submittedData) return;
-    
-    setIsResending(true);
-    
-    try {
-      const success = await resendEmail('contact', submittedData);
-      
-      if (success) {
-        toast({
-          title: "Email Resent",
-          description: "Your message has been resent successfully.",
-        });
-      } else {
-        throw new Error("Failed to resend email");
-      }
-    } catch (error: any) {
-      console.error('Resend error:', error);
-      
-      toast({
-        title: "Resend Failed",
-        description: "There was a problem resending your message.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsResending(false);
-    }
-  };
-  
   return (
     <>
       <SEO 
@@ -117,25 +84,6 @@ const Contact = () => {
             <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
               Have questions or ready to start your journey? Our team is here to help. Reach out to us today.
             </p>
-            
-            {/* Show resend button if there's submitted data */}
-            {submittedData && (
-              <div className="mb-8">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleResend}
-                  disabled={isResending}
-                  className="flex items-center gap-2"
-                >
-                  <Mail className="h-4 w-4" />
-                  {isResending ? "Resending..." : "Resend Last Message"}
-                </Button>
-                <p className="text-xs text-gray-500 mt-2">
-                  Didn't receive our confirmation? Click above to resend.
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </section>
