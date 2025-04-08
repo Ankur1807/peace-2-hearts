@@ -18,6 +18,7 @@ interface ContactEmailRequest {
   subject: string;
   message: string;
   phone?: string;
+  isResend?: boolean;
 }
 
 interface BookingEmailRequest {
@@ -30,6 +31,7 @@ interface BookingEmailRequest {
   timeSlot?: string;
   timeframe?: string;
   message?: string;
+  isResend?: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -81,17 +83,18 @@ const handler = async (req: Request): Promise<Response> => {
 
 // Handle contact form emails
 async function handleContactEmail(data: ContactEmailRequest) {
-  const { name, email, subject, message, phone } = data;
+  const { name, email, subject, message, phone, isResend } = data;
   
   // Send email to the user (confirmation)
   const userEmailResponse = await resend.emails.send({
     from: "Peace2Hearts <contact@peace2hearts.com>",
     to: [email],
-    subject: "We've received your message - Peace2Hearts",
+    subject: isResend ? "Re: We've received your message - Peace2Hearts" : "We've received your message - Peace2Hearts",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background-color: #f0f7ff; padding: 30px; text-align: center;">
           <h1 style="color: #2c5282; margin-bottom: 10px;">Thank You for Contacting Us</h1>
+          ${isResend ? "<p style='font-weight: bold; color: #e53e3e;'>This is a resent confirmation of your original message.</p>" : ""}
         </div>
         <div style="padding: 30px;">
           <p>Dear ${name},</p>
@@ -114,11 +117,11 @@ async function handleContactEmail(data: ContactEmailRequest) {
   const adminEmailResponse = await resend.emails.send({
     from: "Peace2Hearts Website <contact@peace2hearts.com>",
     to: ["contact@peace2hearts.com"],
-    subject: `New Contact Form Submission: ${subject}`,
+    subject: `${isResend ? "[RESEND] " : ""}New Contact Form Submission: ${subject}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="padding: 20px;">
-          <h2>New Contact Form Submission</h2>
+          <h2>${isResend ? "[RESENT] " : ""}New Contact Form Submission</h2>
           <p><strong>Name:</strong> ${name}</p>
           <p><strong>Email:</strong> ${email}</p>
           ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
@@ -137,28 +140,33 @@ async function handleContactEmail(data: ContactEmailRequest) {
 
 // Handle booking confirmation emails
 async function handleBookingEmail(data: BookingEmailRequest) {
-  const { clientName, email, referenceId, consultationType, services, date, timeSlot, timeframe, message } = data;
+  const { clientName, email, referenceId, consultationType, services, date, timeSlot, timeframe, message, isResend } = data;
+  
+  // Determine if this is a holistic package (which uses timeframe instead of date/time)
+  const isHolisticPackage = !date && timeframe;
   
   // Format consultation details
   const servicesList = services.map(service => {
     return `<li>${formatServiceName(service)}</li>`;
   }).join('');
 
-  const dateTimeInfo = timeframe 
-    ? `<p><strong>Preferred Timeframe:</strong> ${formatTimeframe(timeframe)}</p>` 
+  // Generate the appropriate date/time or timeframe information
+  const appointmentTimeInfo = isHolisticPackage 
+    ? `<p><strong>Preferred Timeframe:</strong> ${formatTimeframe(timeframe || '')}</p>` 
     : `<p><strong>Appointment Date:</strong> ${formatDate(date)}<br>
-       <strong>Time:</strong> ${formatTimeSlot(timeSlot)}</p>`;
+       <strong>Time:</strong> ${formatTimeSlot(timeSlot || '')}</p>`;
 
   // Send confirmation email to client
   const userEmailResponse = await resend.emails.send({
     from: "Peace2Hearts <contact@peace2hearts.com>",
     to: [email],
-    subject: "Your Consultation Booking Confirmation - Peace2Hearts",
+    subject: isResend ? "Re: Your Consultation Booking Confirmation - Peace2Hearts" : "Your Consultation Booking Confirmation - Peace2Hearts",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background-color: #f0f7ff; padding: 30px; text-align: center;">
           <h1 style="color: #2c5282; margin-bottom: 10px;">Booking Confirmation</h1>
           <p style="font-size: 18px; margin-top: 0;">Reference ID: ${referenceId}</p>
+          ${isResend ? "<p style='font-weight: bold; color: #e53e3e;'>This is a resent copy of your booking confirmation.</p>" : ""}
         </div>
         <div style="padding: 30px;">
           <p>Dear ${clientName},</p>
@@ -170,7 +178,7 @@ async function handleBookingEmail(data: BookingEmailRequest) {
             <ul>
               ${servicesList}
             </ul>
-            ${dateTimeInfo}
+            ${appointmentTimeInfo}
           </div>
           
           <h3>What happens next?</h3>
@@ -195,17 +203,20 @@ async function handleBookingEmail(data: BookingEmailRequest) {
   const adminEmailResponse = await resend.emails.send({
     from: "Peace2Hearts Booking System <contact@peace2hearts.com>",
     to: ["contact@peace2hearts.com"],
-    subject: `New Consultation Booking: ${referenceId}`,
+    subject: `${isResend ? "[RESEND] " : ""}New Consultation Booking: ${referenceId}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="padding: 20px;">
-          <h2>New Consultation Booking</h2>
+          <h2>${isResend ? "[RESENT] " : ""}New Consultation Booking</h2>
           <p><strong>Reference ID:</strong> ${referenceId}</p>
           <p><strong>Client:</strong> ${clientName}</p>
           <p><strong>Email:</strong> ${email}</p>
           <p><strong>Services Requested:</strong></p>
           <ul>${servicesList}</ul>
-          ${dateTimeInfo}
+          ${isHolisticPackage 
+            ? `<p><strong>Preferred Timeframe:</strong> ${formatTimeframe(timeframe || '')}</p>` 
+            : `<p><strong>Appointment Date:</strong> ${formatDate(date)}</p>
+               <p><strong>Time:</strong> ${formatTimeSlot(timeSlot || '')}</p>`}
           ${message ? `<p><strong>Client Message:</strong> ${message}</p>` : ''}
         </div>
       </div>

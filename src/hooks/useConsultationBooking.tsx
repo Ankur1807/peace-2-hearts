@@ -84,24 +84,6 @@ export function useConsultationBooking() {
     setState(prev => ({ ...prev, personalDetails: details }));
   }, []);
 
-  // Create booking details for email
-  const prepareBookingDetails = useCallback((lastResult: any) => {
-    const { personalDetails, selectedServices, serviceCategory, date, timeSlot, timeframe } = state;
-    
-    return {
-      referenceId: lastResult.referenceId,
-      clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
-      email: personalDetails.email,
-      phone: personalDetails.phone,
-      consultationType: selectedServices.length > 1 ? 'multiple' : selectedServices[0],
-      services: selectedServices,
-      date: serviceCategory === 'holistic' ? undefined : date,
-      timeSlot: serviceCategory === 'holistic' ? undefined : timeSlot,
-      timeframe: serviceCategory === 'holistic' ? timeframe : undefined,
-      message: personalDetails.message
-    };
-  }, [state]);
-
   // Process each service booking
   const processServiceBookings = useCallback(async () => {
     const { selectedServices, serviceCategory, date, timeSlot, timeframe, personalDetails } = state;
@@ -150,22 +132,20 @@ export function useConsultationBooking() {
       if (lastResult) {
         console.log("All consultations created successfully. Last result:", lastResult);
         setReferenceId(lastResult.referenceId);
-
-        // Create booking details for email
-        const bookingDetails = prepareBookingDetails(lastResult);
-        console.log("Booking details created:", bookingDetails);
         
         // Send confirmation email
         try {
           await sendBookingConfirmationEmail({
-            clientName: bookingDetails.clientName,
-            email: bookingDetails.email,
-            referenceId: bookingDetails.referenceId,
-            consultationType: bookingDetails.consultationType,
+            clientName: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
+            email: state.personalDetails.email,
+            referenceId: lastResult.referenceId,
+            consultationType: state.selectedServices.length > 1 ? 'multiple' : state.selectedServices[0],
             services: state.selectedServices,
-            date: state.date,
-            timeSlot: state.timeSlot,
-            timeframe: state.timeframe,
+            // Only send date and timeSlot for non-holistic bookings
+            date: state.serviceCategory === 'holistic' ? undefined : state.date,
+            timeSlot: state.serviceCategory === 'holistic' ? undefined : state.timeSlot,
+            // Only send timeframe for holistic bookings
+            timeframe: state.serviceCategory === 'holistic' ? state.timeframe : undefined,
             message: state.personalDetails.message
           });
           console.log("Confirmation email sent successfully");
@@ -194,7 +174,7 @@ export function useConsultationBooking() {
     } finally {
       setIsProcessing(false);
     }
-  }, [state, processServiceBookings, prepareBookingDetails, toast, setIsProcessing, setBookingError, setReferenceId, setSubmitted]);
+  }, [state, processServiceBookings, toast, setIsProcessing, setBookingError, setReferenceId, setSubmitted]);
 
   // Return all state and functions
   return {

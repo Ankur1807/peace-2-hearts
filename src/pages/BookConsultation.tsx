@@ -12,7 +12,17 @@ import { Toaster } from '@/components/ui/toaster';
 
 const BookConsultation = () => {
   const bookingState = useConsultationBooking();
-  const { submitted, referenceId, bookingError } = bookingState;
+  const { 
+    submitted, 
+    referenceId, 
+    bookingError,
+    date,
+    timeSlot,
+    timeframe,
+    serviceCategory,
+    selectedServices,
+    personalDetails
+  } = bookingState;
   const [isDevelopment, setIsDevelopment] = useState(false);
 
   useEffect(() => {
@@ -32,7 +42,18 @@ const BookConsultation = () => {
         <Navigation />
         <main className="py-16 md:py-24">
           <div className="container mx-auto px-4 max-w-4xl">
-            <SuccessView referenceId={referenceId} />
+            <SuccessView 
+              referenceId={referenceId}
+              bookingDetails={{
+                clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
+                email: personalDetails.email,
+                services: selectedServices,
+                date: date,
+                timeSlot: timeSlot,
+                timeframe: timeframe,
+                serviceCategory: serviceCategory
+              }} 
+            />
           </div>
         </main>
         <Footer />

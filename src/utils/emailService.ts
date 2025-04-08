@@ -7,6 +7,7 @@ interface ContactFormData {
   phone?: string;
   subject: string;
   message: string;
+  isResend?: boolean;
 }
 
 interface BookingDetails {
@@ -19,11 +20,12 @@ interface BookingDetails {
   timeSlot?: string;
   timeframe?: string;
   message?: string;
+  isResend?: boolean;
 }
 
 export async function sendContactEmail(formData: ContactFormData): Promise<boolean> {
   try {
-    const { name, email, phone, subject, message } = formData;
+    const { name, email, phone, subject, message, isResend } = formData;
     
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
@@ -32,7 +34,8 @@ export async function sendContactEmail(formData: ContactFormData): Promise<boole
         email,
         phone,
         subject,
-        message
+        message,
+        isResend: isResend || false
       }
     });
     
@@ -54,7 +57,8 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
         type: 'booking-confirmation',
-        ...bookingDetails
+        ...bookingDetails,
+        isResend: bookingDetails.isResend || false
       }
     });
     
@@ -69,4 +73,18 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
     console.error('Exception sending booking confirmation email:', error);
     return false;
   }
+}
+
+export async function resendBookingConfirmationEmail(bookingDetails: BookingDetails): Promise<boolean> {
+  return sendBookingConfirmationEmail({
+    ...bookingDetails,
+    isResend: true
+  });
+}
+
+export async function resendContactEmail(formData: ContactFormData): Promise<boolean> {
+  return sendContactEmail({
+    ...formData,
+    isResend: true
+  });
 }

@@ -1,13 +1,69 @@
 
-import { CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, MailIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { resendBookingConfirmationEmail } from "@/utils/emailService";
 
 interface SuccessViewProps {
   referenceId?: string | null;
+  bookingDetails?: {
+    clientName: string;
+    email: string;
+    services: string[];
+    date?: Date;
+    timeSlot?: string;
+    timeframe?: string;
+    serviceCategory: string;
+  };
 }
 
-const SuccessView = ({ referenceId }: SuccessViewProps) => {
+const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
+  const [resending, setResending] = useState(false);
+  const { toast } = useToast();
+
+  const handleResendEmail = async () => {
+    if (!bookingDetails || !referenceId) return;
+    
+    setResending(true);
+    try {
+      const success = await resendBookingConfirmationEmail({
+        clientName: bookingDetails.clientName,
+        email: bookingDetails.email,
+        referenceId,
+        consultationType: bookingDetails.services[0],
+        services: bookingDetails.services,
+        date: bookingDetails.date,
+        timeSlot: bookingDetails.timeSlot,
+        timeframe: bookingDetails.timeframe
+      });
+
+      if (success) {
+        toast({
+          title: "Email Sent",
+          description: "Your booking confirmation has been resent to your email.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to resend the booking confirmation. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error resending email:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    }
+    setResending(false);
+  };
+
+  const isHolisticPackage = bookingDetails?.serviceCategory === 'holistic';
+
   return (
     <div className="text-center">
       <div className="flex justify-center mb-6">
@@ -46,6 +102,20 @@ const SuccessView = ({ referenceId }: SuccessViewProps) => {
           </li>
         </ul>
       </div>
+      
+      {bookingDetails && (
+        <div className="mt-6 mb-8">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={handleResendEmail}
+            disabled={resending}
+          >
+            <MailIcon className="h-4 w-4" />
+            {resending ? "Sending..." : "Resend Confirmation Email"}
+          </Button>
+        </div>
+      )}
       
       <div className="mt-10">
         <Link to="/">
