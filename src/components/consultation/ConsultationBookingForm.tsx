@@ -1,16 +1,9 @@
 
 import React, { useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
-import ServiceCategorySelector from './ServiceCategorySelector';
-import ServiceSelectionOptions from './ServiceSelectionOptions';
-import DateTimePicker from './DateTimePicker';
-import TimeframeSelector from './TimeframeSelector';
-import PersonalDetailsFields from './PersonalDetailsFields';
+import BookingForm from './BookingForm';
 import PaymentStep from './PaymentStep';
-import PriceSummary from './PriceSummary';
-import { formatPrice } from '@/utils/pricing/fetchPricing';
 
 interface ConsultationBookingFormProps {
   bookingState: ConsultationBookingHook;
@@ -94,36 +87,12 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     setSelectedServices([]);
   }, [serviceCategory, setSelectedServices]);
 
-  const isFormValid = () => {
-    if (serviceCategory === 'holistic') {
-      return (
-        selectedServices.length > 0 &&
-        timeframe !== '' &&
-        personalDetails.firstName.trim() !== '' &&
-        personalDetails.lastName.trim() !== '' &&
-        personalDetails.email.trim() !== '' &&
-        personalDetails.phone.trim() !== ''
-      );
-    } else {
-      return (
-        selectedServices.length > 0 &&
-        date !== undefined &&
-        timeSlot !== '' &&
-        personalDetails.firstName.trim() !== '' &&
-        personalDetails.lastName.trim() !== '' &&
-        personalDetails.email.trim() !== '' &&
-        personalDetails.phone.trim() !== ''
-      );
-    }
-  };
-
   // Handle payment form submission
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     processPayment();
   };
 
-  // If we're in payment step, show the payment form
   if (showPaymentStep) {
     return (
       <Card className="p-6 md:p-8">
@@ -151,61 +120,25 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
         </div>
       )}
       
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        proceedToPayment();
-      }} className="space-y-6">
-        <ServiceCategorySelector 
-          serviceCategory={serviceCategory}
-          setServiceCategory={setServiceCategory}
-        />
-        
-        <ServiceSelectionOptions 
-          serviceCategory={serviceCategory}
-          selectedServices={selectedServices}
-          handleServiceSelection={handleServiceSelection}
-          handlePackageSelection={handlePackageSelection}
-          pricing={pricing}
-        />
-        
-        {serviceCategory === 'holistic' ? (
-          <TimeframeSelector
-            timeframe={timeframe}
-            setTimeframe={setTimeframe}
-          />
-        ) : (
-          <DateTimePicker 
-            date={date}
-            setDate={setDate}
-            timeSlot={timeSlot}
-            setTimeSlot={setTimeSlot}
-          />
-        )}
-        
-        <PersonalDetailsFields 
-          personalDetails={personalDetails}
-          handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
-        />
-        
-        {selectedServices.length > 0 && (
-          <PriceSummary 
-            services={selectedServices}
-            pricing={pricing}
-            totalPrice={totalPrice}
-            currency="INR"
-          />
-        )}
-        
-        <div className="pt-6">
-          <Button 
-            type="submit" 
-            className="w-full bg-peacefulBlue hover:bg-peacefulBlue/90"
-            disabled={!isFormValid() || isProcessing || totalPrice <= 0}
-          >
-            {isProcessing ? "Processing..." : `Proceed to Payment (${formatPrice(totalPrice)})`}
-          </Button>
-        </div>
-      </form>
+      <BookingForm
+        serviceCategory={serviceCategory}
+        setServiceCategory={setServiceCategory}
+        selectedServices={selectedServices}
+        handleServiceSelection={handleServiceSelection}
+        handlePackageSelection={handlePackageSelection}
+        date={date}
+        setDate={setDate}
+        timeSlot={timeSlot}
+        setTimeSlot={setTimeSlot}
+        timeframe={timeframe}
+        setTimeframe={setTimeframe}
+        personalDetails={personalDetails}
+        handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
+        isProcessing={isProcessing}
+        pricing={pricing}
+        totalPrice={totalPrice}
+        onSubmit={proceedToPayment}
+      />
     </Card>
   );
 };
