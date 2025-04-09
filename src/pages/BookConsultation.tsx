@@ -83,7 +83,7 @@ const BookConsultation = () => {
       timeframe: timeframe,
       serviceCategory: serviceCategory,
       packageName: packageName,
-      amount: totalPrice // Now properly included in the interface
+      amount: totalPrice
     };
 
     return (

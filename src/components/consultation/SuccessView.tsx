@@ -17,6 +17,7 @@ interface SuccessViewProps {
     timeframe?: string;
     serviceCategory: string;
     packageName?: string;
+    amount?: number;
   };
 }
 

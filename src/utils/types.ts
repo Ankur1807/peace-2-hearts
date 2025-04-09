@@ -1,12 +1,13 @@
 
 export interface BookingDetails {
   serviceCategory: string;
-  selectedServices: string[];
+  selectedServices?: string[];
+  services?: string[];
   date?: string | Date;
   timeSlot?: string;
   timeframe?: string;
   packageName?: string;
-  amount?: number;  // Now explicitly added to the interface
+  amount?: number;
   personalDetails?: {
     firstName: string;
     lastName: string;
