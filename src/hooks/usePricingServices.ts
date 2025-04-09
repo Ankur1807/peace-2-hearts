@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ServicePrice } from '@/utils/pricingTypes';
+import { NewServiceFormValues } from '@/components/pricing/AddServiceForm';
 
 export const usePricingServices = () => {
   const [services, setServices] = useState<ServicePrice[]>([]);
@@ -34,9 +34,7 @@ export const usePricingServices = () => {
       }
       
       if (data && data.length === 0) {
-        // If no services found, let's add some initial services
         await addInitialServices();
-        // After adding initial services, fetch them again
         const result = await supabase
           .from('service_pricing')
           .select('*')
@@ -62,21 +60,18 @@ export const usePricingServices = () => {
 
   const addInitialServices = async () => {
     const initialServices = [
-      // Mental Health Services
       { service_name: 'Individual Therapy', service_id: 'therapy-individual', price: 2500, category: 'mental-health', is_active: true },
       { service_name: 'Couples Counselling', service_id: 'therapy-couples', price: 3000, category: 'mental-health', is_active: true },
       { service_name: 'Family Therapy', service_id: 'therapy-family', price: 3500, category: 'mental-health', is_active: true },
       { service_name: 'Premarital Counselling', service_id: 'therapy-premarital', price: 2800, category: 'mental-health', is_active: true },
       { service_name: 'Relationship Counselling', service_id: 'therapy-relationship', price: 3000, category: 'mental-health', is_active: true },
       
-      // Legal Services
       { service_name: 'Divorce Consultation', service_id: 'legal-divorce', price: 5000, category: 'legal', is_active: true },
       { service_name: 'Child Custody Consultation', service_id: 'legal-custody', price: 4500, category: 'legal', is_active: true },
       { service_name: 'Legal Document Review', service_id: 'legal-document', price: 3000, category: 'legal', is_active: true },
       { service_name: 'Court Representation', service_id: 'legal-court', price: 10000, category: 'legal', is_active: true },
       { service_name: 'Maintenance Consultation', service_id: 'legal-maintenance', price: 3500, category: 'legal', is_active: true },
       
-      // Holistic Services
       { service_name: 'Meditation Session', service_id: 'holistic-meditation', price: 1500, category: 'holistic', is_active: true },
       { service_name: 'Yoga Therapy', service_id: 'holistic-yoga', price: 1800, category: 'holistic', is_active: true },
       { service_name: 'Art Therapy', service_id: 'holistic-art', price: 2000, category: 'holistic', is_active: true },
@@ -203,12 +198,7 @@ export const usePricingServices = () => {
     }
   };
 
-  const addNewService = async (data: {
-    service_name: string;
-    service_id: string;
-    price: number;
-    category: string;
-  }) => {
+  const addNewService = async (data: NewServiceFormValues) => {
     try {
       const { error } = await supabase
         .from('service_pricing')
