@@ -10,11 +10,14 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
       .from('service_pricing')
       .select('service_id, price, is_active');
     
+    // Apply service_id filter if provided
     if (serviceIds && serviceIds.length > 0) {
       query = query.in('service_id', serviceIds);
     }
     
-    // Remove the is_active filter to check if data exists at all
+    // Only fetch active services
+    query = query.eq('is_active', true);
+    
     const { data, error } = await query;
     
     if (error) {
@@ -26,19 +29,32 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
     const pricingMap = new Map<string, number>();
     
     if (!data || data.length === 0) {
-      console.warn('No pricing data found for the requested services:', serviceIds);
-      return pricingMap; // Return empty map if no data found
+      console.warn('No active pricing data found for the requested services:', serviceIds);
+      
+      // Try fetching without the is_active filter to see if any data exists
+      const { data: allData, error: allError } = await supabase
+        .from('service_pricing')
+        .select('service_id, price, is_active')
+        .in('service_id', serviceIds || []);
+      
+      if (allError) {
+        console.error('Error fetching all service pricing:', allError);
+      } else if (allData && allData.length > 0) {
+        console.warn('Found inactive pricing data:', allData);
+      }
+      
+      return pricingMap; // Return empty map if no active data found
     }
     
     console.log('Retrieved pricing data:', data);
     
     // Use the pricing data from the database
     data.forEach((item) => {
-      if (item.price > 0) {
+      if (item.price && item.price > 0) {
         pricingMap.set(item.service_id, item.price);
         console.log(`Set price for ${item.service_id}: ${item.price}`);
       } else {
-        console.log(`Service ${item.service_id} has invalid price: ${item.price}`);
+        console.warn(`Service ${item.service_id} has invalid price: ${item.price}`);
       }
     });
     
@@ -55,16 +71,16 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
   try {
     console.log('Fetching package pricing for:', packageIds);
     
-    // First try to get actual package pricing
-    let query = supabase
-      .from('package_pricing')
-      .select('package_id, price, is_active');
-    
-    if (packageIds && packageIds.length > 0) {
-      query = query.in('package_id', packageIds);
+    if (!packageIds || packageIds.length === 0) {
+      return new Map<string, number>();
     }
     
-    const { data, error } = await query;
+    // First try to get actual package pricing
+    const { data, error } = await supabase
+      .from('package_pricing')
+      .select('package_id, price, is_active')
+      .in('package_id', packageIds)
+      .eq('is_active', true);
     
     // Create a map of package_id to price
     const pricingMap = new Map<string, number>();
@@ -123,11 +139,11 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
     } else {
       // Use the pricing data from the database
       data.forEach((item) => {
-        if (item.price > 0) {
+        if (item.price && item.price > 0) {
           pricingMap.set(item.package_id, item.price);
           console.log(`Set package price from DB for ${item.package_id}: ${item.price}`);
         } else {
-          console.log(`Package ${item.package_id} has invalid price: ${item.price}`);
+          console.warn(`Package ${item.package_id} has invalid price: ${item.price}`);
         }
       });
     }
