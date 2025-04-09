@@ -5,6 +5,8 @@ export interface BookingDetails {
   date?: string;
   timeSlot: string;
   timeframe?: string;
+  packageName?: string;
+  amount?: number;
   personalDetails?: {
     firstName: string;
     lastName: string;
@@ -12,6 +14,8 @@ export interface BookingDetails {
     phone: string;
     message: string;
   };
+  clientName?: string;
+  email?: string;
 }
 
 export interface PersonalDetails {

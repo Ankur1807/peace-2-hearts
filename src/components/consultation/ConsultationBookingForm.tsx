@@ -8,6 +8,9 @@ import ServiceSelectionOptions from './ServiceSelectionOptions';
 import DateTimePicker from './DateTimePicker';
 import TimeframeSelector from './TimeframeSelector';
 import PersonalDetailsFields from './PersonalDetailsFields';
+import PaymentStep from './PaymentStep';
+import PriceSummary from './PriceSummary';
+import { formatPrice } from '@/utils/pricing/fetchPricing';
 
 interface ConsultationBookingFormProps {
   bookingState: ConsultationBookingHook;
@@ -29,7 +32,13 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     bookingError,
     personalDetails,
     handlePersonalDetailsChange,
-    handleConfirmBooking
+    handleConfirmBooking,
+    pricing,
+    totalPrice,
+    showPaymentStep,
+    proceedToPayment,
+    setShowPaymentStep,
+    processPayment
   } = bookingState;
 
   const handlePersonalDetailsFieldChange = (field: string, value: string) => {
@@ -108,6 +117,30 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   };
 
+  // Handle payment form submission
+  const handlePaymentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    processPayment();
+  };
+
+  // If we're in payment step, show the payment form
+  if (showPaymentStep) {
+    return (
+      <Card className="p-6 md:p-8">
+        <form onSubmit={handlePaymentSubmit} className="space-y-6">
+          <PaymentStep 
+            consultationType={selectedServices.join(', ')}
+            onNextStep={processPayment}
+            onPrevStep={() => setShowPaymentStep(false)}
+            onSubmit={handlePaymentSubmit}
+            isProcessing={isProcessing}
+            totalPrice={totalPrice}
+          />
+        </form>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-6 md:p-8">
       <h2 className="text-2xl font-lora font-semibold mb-6">Book Your Consultation</h2>
@@ -120,7 +153,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
       
       <form onSubmit={(e) => {
         e.preventDefault();
-        handleConfirmBooking();
+        proceedToPayment();
       }} className="space-y-6">
         <ServiceCategorySelector 
           serviceCategory={serviceCategory}
@@ -132,6 +165,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
           selectedServices={selectedServices}
           handleServiceSelection={handleServiceSelection}
           handlePackageSelection={handlePackageSelection}
+          pricing={pricing}
         />
         
         {serviceCategory === 'holistic' ? (
@@ -153,13 +187,22 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
           handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
         />
         
+        {selectedServices.length > 0 && (
+          <PriceSummary 
+            services={selectedServices}
+            pricing={pricing}
+            totalPrice={totalPrice}
+            currency="INR"
+          />
+        )}
+        
         <div className="pt-6">
           <Button 
             type="submit" 
             className="w-full bg-peacefulBlue hover:bg-peacefulBlue/90"
-            disabled={!isFormValid() || isProcessing}
+            disabled={!isFormValid() || isProcessing || totalPrice <= 0}
           >
-            {isProcessing ? "Processing..." : "Book Consultation"}
+            {isProcessing ? "Processing..." : `Proceed to Payment (${formatPrice(totalPrice)})`}
           </Button>
         </div>
       </form>

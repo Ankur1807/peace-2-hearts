@@ -9,6 +9,7 @@ import ConsultationBookingForm from '@/components/consultation/ConsultationBooki
 import SuccessView from '@/components/consultation/SuccessView';
 import ConsultationAlert from '@/components/consultation/ConsultationAlert';
 import { Toaster } from '@/components/ui/toaster';
+import Script from '@/components/Script';
 
 const BookConsultation = () => {
   const bookingState = useConsultationBooking();
@@ -21,7 +22,8 @@ const BookConsultation = () => {
     timeframe,
     serviceCategory,
     selectedServices,
-    personalDetails
+    personalDetails,
+    totalPrice
   } = bookingState;
   const [isDevelopment, setIsDevelopment] = useState(false);
 
@@ -90,7 +92,8 @@ const BookConsultation = () => {
                 timeSlot: timeSlot,
                 timeframe: timeframe,
                 serviceCategory: serviceCategory,
-                packageName: packageName
+                packageName: packageName,
+                amount: totalPrice
               }} 
             />
           </div>
@@ -108,6 +111,7 @@ const BookConsultation = () => {
         description="Schedule a consultation with our relationship counselors or legal experts. Take the first step towards peace and clarity in your relationship journey."
         keywords="book relationship counseling, legal consultation appointment, therapy session, mental health support"
       />
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       <Navigation />
       <main className="py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-4xl">

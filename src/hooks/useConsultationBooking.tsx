@@ -1,9 +1,10 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { saveConsultation } from '@/utils/consultationApi';
 import { PersonalDetails } from '@/utils/types';
 import { sendBookingConfirmationEmail } from '@/utils/emailService';
+import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing/fetchPricing';
 
 // Types
 interface BookingState {
@@ -17,6 +18,11 @@ interface BookingState {
   referenceId: string | null;
   bookingError: string | null;
   personalDetails: PersonalDetails;
+  pricing: Map<string, number>;
+  totalPrice: number;
+  showPaymentStep: boolean;
+  paymentCompleted: boolean;
+  orderId: string | null;
 }
 
 // Helper to determine package name based on service selection
@@ -68,7 +74,12 @@ export function useConsultationBooking() {
       email: '',
       phone: '',
       message: ''
-    }
+    },
+    pricing: new Map<string, number>(),
+    totalPrice: 0,
+    showPaymentStep: false,
+    paymentCompleted: false,
+    orderId: null
   });
   
   const { toast } = useToast();
@@ -108,12 +119,153 @@ export function useConsultationBooking() {
   
   const setBookingError = useCallback((bookingError: string | null) => 
     setState(prev => ({ ...prev, bookingError })), []);
+    
+  const setShowPaymentStep = useCallback((showPaymentStep: boolean) => 
+    setState(prev => ({ ...prev, showPaymentStep })), []);
+    
+  const setPaymentCompleted = useCallback((paymentCompleted: boolean) => 
+    setState(prev => ({ ...prev, paymentCompleted })), []);
+    
+  const setOrderId = useCallback((orderId: string | null) => 
+    setState(prev => ({ ...prev, orderId })), []);
 
   // Handle personal details updates
   const handlePersonalDetailsChange = useCallback((details: PersonalDetails) => {
     console.log("Updating personal details:", details);
     setState(prev => ({ ...prev, personalDetails: details }));
   }, []);
+
+  // Fetch pricing data when services change
+  useEffect(() => {
+    const loadPricing = async () => {
+      if (state.selectedServices.length === 0) {
+        setState(prev => ({ ...prev, totalPrice: 0 }));
+        return;
+      }
+      
+      try {
+        let pricingMap: Map<string, number>;
+        
+        if (state.serviceCategory === 'holistic') {
+          // Check if it matches a pre-defined package
+          const packageName = getPackageName(state.selectedServices);
+          if (packageName === "Divorce Prevention Package") {
+            pricingMap = await fetchPackagePricing(['divorce-prevention']);
+          } else if (packageName === "Pre-Marriage Clarity Package") {
+            pricingMap = await fetchPackagePricing(['pre-marriage-clarity']);
+          } else {
+            // If not a pre-defined package, get individual service prices
+            pricingMap = await fetchServicePricing(state.selectedServices);
+          }
+        } else {
+          // For regular services, get individual prices
+          pricingMap = await fetchServicePricing(state.selectedServices);
+        }
+        
+        // Calculate total price
+        let total = 0;
+        if (state.serviceCategory === 'holistic') {
+          const packageName = getPackageName(state.selectedServices);
+          if (packageName === "Divorce Prevention Package") {
+            total = pricingMap.get('divorce-prevention') || 0;
+          } else if (packageName === "Pre-Marriage Clarity Package") {
+            total = pricingMap.get('pre-marriage-clarity') || 0;
+          } else {
+            // Sum individual services
+            state.selectedServices.forEach(serviceId => {
+              total += pricingMap.get(serviceId) || 0;
+            });
+          }
+        } else {
+          // Sum individual services
+          state.selectedServices.forEach(serviceId => {
+            total += pricingMap.get(serviceId) || 0;
+          });
+        }
+        
+        setState(prev => ({ ...prev, pricing: pricingMap, totalPrice: total }));
+      } catch (error) {
+        console.error("Error fetching pricing:", error);
+      }
+    };
+    
+    loadPricing();
+  }, [state.selectedServices, state.serviceCategory]);
+  
+  // Process payment using Razorpay
+  const processPayment = useCallback(async () => {
+    if (!state.totalPrice) {
+      toast({
+        title: "Invalid Amount",
+        description: "Cannot process payment for zero amount.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsProcessing(true);
+    
+    try {
+      // This would normally come from your backend
+      // For now we'll generate a temporary order ID locally
+      const tempOrderId = `order_${Math.random().toString(36).substring(2, 15)}`;
+      setOrderId(tempOrderId);
+      
+      // In production, you would create an order on your backend and get the order ID
+      // Example: const order = await createOrder(state.totalPrice);
+      
+      const options = {
+        key: "RAZORPAY_KEY_ID", // Replace with actual key in production
+        amount: state.totalPrice * 100, // Razorpay accepts amount in paise
+        currency: "INR",
+        name: "Peace2Hearts",
+        description: `Payment for ${state.selectedServices.length} services`,
+        order_id: tempOrderId,
+        handler: function(response: any) {
+          // Handle successful payment
+          console.log("Payment successful:", response);
+          setPaymentCompleted(true);
+          
+          // Now proceed with booking confirmation
+          handleConfirmBooking();
+        },
+        prefill: {
+          name: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
+          email: state.personalDetails.email,
+          contact: state.personalDetails.phone
+        },
+        notes: {
+          services: state.selectedServices.join(',')
+        },
+        theme: {
+          color: "#3399cc"
+        }
+      };
+      
+      // Initialize and open Razorpay
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+      
+      // Handle errors from Razorpay
+      razorpay.on('payment.failed', function(response: any) {
+        console.error("Payment failed:", response.error);
+        toast({
+          title: "Payment Failed",
+          description: response.error.description || "Your payment was not successful. Please try again.",
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+      });
+    } catch (error: any) {
+      console.error("Error processing payment:", error);
+      toast({
+        title: "Payment Processing Error",
+        description: error.message || "There was an error processing your payment. Please try again.",
+        variant: "destructive"
+      });
+      setIsProcessing(false);
+    }
+  }, [state.totalPrice, state.personalDetails, state.selectedServices, toast, setIsProcessing, setOrderId, setPaymentCompleted, handleConfirmBooking]);
 
   // Process each service booking
   const processServiceBookings = useCallback(async () => {
@@ -154,7 +306,8 @@ export function useConsultationBooking() {
         date: state.date,
         timeSlot: state.timeSlot,
         timeframe: state.timeframe,
-        personalDetails: state.personalDetails
+        personalDetails: state.personalDetails,
+        totalPrice: state.totalPrice
       });
 
       // Process all service bookings
@@ -214,6 +367,25 @@ export function useConsultationBooking() {
     }
   }, [state, processServiceBookings, toast, setIsProcessing, setBookingError, setReferenceId, setSubmitted]);
 
+  // Function to proceed to payment step
+  const proceedToPayment = useCallback(() => {
+    // Validate form first
+    if (!state.personalDetails.firstName || 
+        !state.personalDetails.lastName ||
+        !state.personalDetails.email ||
+        !state.personalDetails.phone ||
+        state.selectedServices.length === 0) {
+      toast({
+        title: "Form Incomplete",
+        description: "Please fill out all required fields before proceeding to payment.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setShowPaymentStep(true);
+  }, [state.personalDetails, state.selectedServices, toast, setShowPaymentStep]);
+
   // Return all state and functions
   return {
     ...state,
@@ -223,7 +395,10 @@ export function useConsultationBooking() {
     setTimeSlot,
     setTimeframe,
     handlePersonalDetailsChange,
-    handleConfirmBooking
+    handleConfirmBooking,
+    processPayment,
+    proceedToPayment,
+    setShowPaymentStep
   };
 }
 
