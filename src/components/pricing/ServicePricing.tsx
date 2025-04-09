@@ -22,7 +22,8 @@ const ServicePricing = () => {
     handleCancel,
     handleSave,
     toggleServiceStatus,
-    addNewService
+    addNewService,
+    deleteService
   } = usePricingServices();
 
   useEffect(() => {
@@ -33,6 +34,13 @@ const ServicePricing = () => {
     const success = await addNewService(data);
     if (success) {
       setOpenNewServiceDialog(false);
+      fetchServices();
+    }
+  };
+
+  const handleDeleteService = async (id: string) => {
+    const success = await deleteService(id);
+    if (success) {
       fetchServices();
     }
   };
@@ -63,6 +71,7 @@ const ServicePricing = () => {
           onSave={handleSave}
           onCancel={handleCancel}
           onToggleStatus={toggleServiceStatus}
+          onDelete={handleDeleteService}
           editMode={editMode}
           editedPrice={editedPrice}
           setEditedPrice={setEditedPrice}

@@ -5,7 +5,8 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Edit, Save, X } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Edit, Save, X, Trash2 } from 'lucide-react';
 
 interface ServiceEditRowProps {
   service: ServicePrice;
@@ -16,6 +17,7 @@ interface ServiceEditRowProps {
   onSave: (id: string) => void;
   onCancel: () => void;
   onToggleStatus: (id: string, currentStatus: boolean) => void;
+  onDelete: (id: string) => void;
 }
 
 const ServiceEditRow = ({
@@ -27,6 +29,7 @@ const ServiceEditRow = ({
   onSave,
   onCancel,
   onToggleStatus,
+  onDelete,
 }: ServiceEditRowProps) => {
   return (
     <TableRow>
@@ -60,32 +63,65 @@ const ServiceEditRow = ({
         </div>
       </TableCell>
       <TableCell>
-        {editMode === service.id ? (
-          <div className="flex space-x-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onSave(service.id)}
-            >
-              <Save className="h-4 w-4 mr-1" /> Save
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onCancel}
-            >
-              <X className="h-4 w-4 mr-1" /> Cancel
-            </Button>
-          </div>
-        ) : (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onEdit(service.id, service.price)}
-          >
-            <Edit className="h-4 w-4 mr-1" /> Edit
-          </Button>
-        )}
+        <div className="flex space-x-2">
+          {editMode === service.id ? (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onSave(service.id)}
+              >
+                <Save className="h-4 w-4 mr-1" /> Save
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onCancel}
+              >
+                <X className="h-4 w-4 mr-1" /> Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onEdit(service.id, service.price)}
+              >
+                <Edit className="h-4 w-4 mr-1" /> Edit
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-red-500 hover:bg-red-50 hover:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" /> Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete the service "{service.service_name}". 
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={() => onDelete(service.id)}
+                      className="bg-red-500 hover:bg-red-600"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
+          )}
+        </div>
       </TableCell>
     </TableRow>
   );

@@ -243,6 +243,42 @@ export const usePricingServices = () => {
     }
   };
 
+  const deleteService = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('service_pricing')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          toast({
+            title: 'Permission Denied',
+            description: 'You do not have permission to delete services. Please make sure you are logged in as an admin.',
+            variant: 'destructive',
+          });
+        } else {
+          throw error;
+        }
+        return false;
+      }
+
+      toast({
+        title: 'Service Deleted',
+        description: 'Service has been successfully deleted.',
+      });
+
+      return true;
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: `Failed to delete service: ${error.message}`,
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
   return {
     services,
     loading,
@@ -255,5 +291,6 @@ export const usePricingServices = () => {
     handleSave,
     toggleServiceStatus,
     addNewService,
+    deleteService,
   };
 };

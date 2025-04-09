@@ -11,6 +11,7 @@ interface ServiceListProps {
   onSave: (id: string) => void;
   onCancel: () => void;
   onToggleStatus: (id: string, currentStatus: boolean) => void;
+  onDelete: (id: string) => void;
   editMode: string | null;
   editedPrice: string;
   setEditedPrice: (price: string) => void;
@@ -23,6 +24,7 @@ const ServiceList = ({
   onSave,
   onCancel,
   onToggleStatus,
+  onDelete,
   editMode,
   editedPrice,
   setEditedPrice,
@@ -65,6 +67,7 @@ const ServiceList = ({
                 onSave={onSave}
                 onCancel={onCancel}
                 onToggleStatus={onToggleStatus}
+                onDelete={onDelete}
               />
             ))
           )}
