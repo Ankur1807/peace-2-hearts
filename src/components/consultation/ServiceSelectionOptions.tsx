@@ -21,7 +21,7 @@ interface ServiceSelectionOptionsProps {
   selectedServices: string[];
   handleServiceSelection: (serviceId: string, checked: boolean) => void;
   handlePackageSelection: (packageId: string) => void;
-  pricing?: Map<string, number>; // Add the missing pricing prop
+  pricing?: Map<string, number>;
 }
 
 const mentalHealthServices: ServiceOption[] = [

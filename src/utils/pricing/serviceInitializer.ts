@@ -72,6 +72,7 @@ export const fetchInitialServices = async () => {
         is_active: true,
         scenario: "regular"
       },
+      // Legal services with correct IDs matching the UI components
       {
         service_name: "General Legal Consultation",
         service_id: "general-legal",
@@ -83,7 +84,7 @@ export const fetchInitialServices = async () => {
       },
       {
         service_name: "Divorce Consultation",
-        service_id: "divorce-legal",
+        service_id: "divorce", // This needs to match the ID used in LegalServices.tsx
         price: 3500,
         category: "legal",
         currency: "INR",
@@ -91,8 +92,8 @@ export const fetchInitialServices = async () => {
         scenario: "regular"
       },
       {
-        service_name: "Custody Consultation",
-        service_id: "custody-legal",
+        service_name: "Child Custody Consultation",
+        service_id: "custody", // This needs to match the ID used in LegalServices.tsx
         price: 3500,
         category: "legal",
         currency: "INR",
@@ -109,14 +110,24 @@ export const fetchInitialServices = async () => {
         scenario: "regular"
       },
       {
-        service_name: "Pre-Marriage Legal",
+        service_name: "Pre-Marriage Legal Consultation",
         service_id: "pre-marriage-legal",
+        price: 2000,
+        category: "legal",
+        currency: "INR",
+        is_active: true,
+        scenario: "regular"
+      },
+      {
+        service_name: "Maintenance Consultation",
+        service_id: "maintenance", // This needs to match the ID used in LegalServices.tsx
         price: 2500,
         category: "legal",
         currency: "INR",
         is_active: true,
         scenario: "regular"
       },
+      // Packages
       {
         service_name: "Divorce Prevention Package",
         service_id: "divorce-prevention",
