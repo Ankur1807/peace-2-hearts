@@ -257,7 +257,7 @@ export function useConsultationBooking() {
       // Example: const order = await createOrder(state.totalPrice);
       
       const options = {
-        key: "RAZORPAY_KEY_ID", // Replace with actual key in production
+        key: "rzp_test_C4wVqKJiq5fXgj", // Replace with actual key
         amount: state.totalPrice * 100, // Razorpay accepts amount in paise
         currency: "INR",
         name: "Peace2Hearts",

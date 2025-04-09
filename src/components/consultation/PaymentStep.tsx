@@ -1,13 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CreditCard, Shield } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getConsultationTypeLabel } from '@/utils/consultationLabels';
-import { formatCardNumber, formatExpiryDate } from '@/utils/formatUtils';
 import { formatPrice } from '@/utils/pricing/fetchPricing';
 
 type PaymentStepProps = {
@@ -30,22 +27,21 @@ const PaymentStep = ({
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
-  // Load Razorpay script
+  // Check if Razorpay is loaded
   useEffect(() => {
-    if (typeof window !== 'undefined' && !(window as any).Razorpay) {
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      script.onload = () => setRazorpayLoaded(true);
-      document.body.appendChild(script);
-      
-      return () => {
-        if (document.body.contains(script)) {
-          document.body.removeChild(script);
+    if (typeof window !== 'undefined') {
+      // Check if Razorpay script is already loaded
+      if ((window as any).Razorpay) {
+        setRazorpayLoaded(true);
+      } else {
+        // Look for the script in the document
+        const existingScript = document.querySelector('script[src*="checkout.razorpay.com"]');
+        if (existingScript) {
+          setRazorpayLoaded(true);
+        } else {
+          console.log("Razorpay script not detected. Make sure it's loaded on the page.");
         }
-      };
-    } else if (typeof window !== 'undefined' && (window as any).Razorpay) {
-      setRazorpayLoaded(true);
+      }
     }
   }, []);
 
@@ -78,7 +74,7 @@ const PaymentStep = ({
           <Checkbox 
             id="terms" 
             checked={acceptTerms}
-            onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+            onCheckedChange={(checked) => setAcceptTerms(checked === true)}
           />
           <label
             htmlFor="terms"
