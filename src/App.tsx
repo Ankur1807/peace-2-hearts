@@ -37,6 +37,10 @@ import ChildCustodyConsultation from "./pages/services/legal/ChildCustodyConsult
 import MaintenanceConsultation from "./pages/services/legal/MaintenanceConsultation";
 import GeneralConsultation from "./pages/services/legal/GeneralConsultation";
 
+// Holistic Service Pages
+import DivorcePreventionPackage from "./pages/services/holistic/DivorcePreventionPackage";
+import PreMarriageClarityPackage from "./pages/services/holistic/PreMarriageClarityPackage";
+
 // Legacy Service Pages
 import TherapyService from "./pages/services/TherapyService";
 import DivorceService from "./pages/services/DivorceService";
@@ -90,6 +94,10 @@ const App = () => {
                 <Route path="/services/legal-support/maintenance" element={<MaintenanceConsultation />} />
                 <Route path="/services/legal-support/general" element={<GeneralConsultation />} />
                 
+                {/* Holistic Service Pages */}
+                <Route path="/services/holistic/divorce-prevention" element={<DivorcePreventionPackage />} />
+                <Route path="/services/holistic/pre-marriage-clarity" element={<PreMarriageClarityPackage />} />
+                
                 {/* Legacy Service Pages - kept for backward compatibility */}
                 <Route path="/services/therapy" element={<TherapyService />} />
                 <Route path="/services/divorce" element={<DivorceService />} />
@@ -110,7 +118,7 @@ const App = () => {
                 <Route path="/shipping-delivery" element={<ShippingDelivery />} />
                 
                 {/* Resources route commented out */}
-                {/* <Route path="/resources" element={<Resources />} /> */}
+                {/* <Route path="/services" element={<Resources />} /> */}
                 
                 <Route path="/news" element={<News />} />
                 <Route path="/contact" element={<Contact />} />

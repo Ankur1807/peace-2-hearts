@@ -1,6 +1,7 @@
+
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, HeartPulse, Gavel, Users, MessageSquare, Calendar } from 'lucide-react';
+import { ArrowRight, HeartPulse, Gavel, Users, MessageSquare, Calendar, PackageCheck } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
@@ -129,6 +130,78 @@ const Services = () => {
               <Button asChild className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white">
                 <Link to="/services/legal-support">Learn More About Legal Services</Link>
               </Button>
+            </div>
+          </div>
+          
+          {/* Holistic Solutions Section */}
+          <div className="mt-16 mb-16">
+            <div className="text-center max-w-3xl mx-auto mb-12">
+              <h2 className="section-title text-3xl font-lora font-semibold text-gray-800">Holistic Solution Packages</h2>
+              <p className="text-gray-600 mt-4">
+                Our integrated packages combine mental health support and legal guidance to provide comprehensive care for your specific relationship journey.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-10">
+              <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                <div className="mb-6 flex items-center">
+                  <div className="p-3 rounded-full bg-vibrantPurple/15 mr-4">
+                    <PackageCheck className="h-7 w-7 text-vibrantPurple" />
+                  </div>
+                  <h3 className="text-xl font-lora font-semibold text-gray-800">Divorce Prevention Package</h3>
+                </div>
+                
+                <p className="text-gray-600 mb-4">
+                  A comprehensive approach to resolving relationship challenges before they lead to separation, combining therapy and legal mediation.
+                </p>
+                
+                <ul className="mb-6 space-y-2">
+                  <li className="flex items-center gap-2 text-gray-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
+                    2 Therapy Sessions
+                  </li>
+                  <li className="flex items-center gap-2 text-gray-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
+                    1 Mediation Session
+                  </li>
+                  <li className="flex items-center gap-2 text-gray-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
+                    1 Legal Consultation
+                  </li>
+                </ul>
+                
+                <Button asChild className="bg-vibrantPurple hover:bg-vibrantPurple/90 text-white">
+                  <Link to="/services/holistic/divorce-prevention">Learn More About This Package</Link>
+                </Button>
+              </div>
+              
+              <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+                <div className="mb-6 flex items-center">
+                  <div className="p-3 rounded-full bg-peacefulBlue/15 mr-4">
+                    <PackageCheck className="h-7 w-7 text-peacefulBlue" />
+                  </div>
+                  <h3 className="text-xl font-lora font-semibold text-gray-800">Pre-Marriage Clarity Package</h3>
+                </div>
+                
+                <p className="text-gray-600 mb-4">
+                  Start your marriage journey with confidence by addressing both emotional readiness and legal considerations.
+                </p>
+                
+                <ul className="mb-6 space-y-2">
+                  <li className="flex items-center gap-2 text-gray-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+                    1 Legal Consultation
+                  </li>
+                  <li className="flex items-center gap-2 text-gray-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+                    2 Mental Health Sessions
+                  </li>
+                </ul>
+                
+                <Button asChild className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white">
+                  <Link to="/services/holistic/pre-marriage-clarity">Learn More About This Package</Link>
+                </Button>
+              </div>
             </div>
           </div>
           

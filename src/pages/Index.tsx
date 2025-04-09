@@ -7,6 +7,7 @@ import { SEO } from '@/components/SEO';
 import { OrganizationSchema } from '@/components/StructuredData';
 import HeroSection from '@/components/home/HeroSection';
 import ServicesSection from '@/components/home/ServicesSection';
+import HolisticSolutionsSection from '@/components/home/HolisticSolutionsSection';
 import WhyChooseUsSection from '@/components/home/WhyChooseUsSection';
 import CTASection from '@/components/home/CTASection';
 
@@ -35,6 +36,7 @@ const HomePage = () => {
       
       <HeroSection />
       <ServicesSection />
+      <HolisticSolutionsSection />
       <WhyChooseUsSection />
       <CTASection />
       
