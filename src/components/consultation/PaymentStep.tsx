@@ -29,20 +29,43 @@ const PaymentStep = ({
 
   // Check if Razorpay is loaded
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Check if Razorpay script is already loaded
-      if ((window as any).Razorpay) {
+    // Function to check if Razorpay is loaded
+    const checkRazorpayLoaded = () => {
+      if (typeof window !== 'undefined' && window.Razorpay) {
+        console.log("Razorpay script detected and loaded");
         setRazorpayLoaded(true);
-      } else {
-        // Look for the script in the document
-        const existingScript = document.querySelector('script[src*="checkout.razorpay.com"]');
-        if (existingScript) {
-          setRazorpayLoaded(true);
-        } else {
-          console.log("Razorpay script not detected. Make sure it's loaded on the page.");
-        }
+        return true;
       }
+      return false;
+    };
+
+    // Check immediately if already loaded
+    if (checkRazorpayLoaded()) return;
+
+    // Set up an observer to check periodically
+    const observer = setInterval(() => {
+      if (checkRazorpayLoaded()) {
+        clearInterval(observer);
+      }
+    }, 500);
+
+    // Load the script if not present
+    if (typeof window !== 'undefined' && !document.querySelector('script[src*="checkout.razorpay.com"]')) {
+      console.log("Razorpay script not found, loading dynamically");
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => {
+        console.log("Razorpay script loaded dynamically");
+        setRazorpayLoaded(true);
+      };
+      script.onerror = () => {
+        console.error("Failed to load Razorpay script");
+      };
+      document.body.appendChild(script);
     }
+
+    return () => clearInterval(observer);
   }, []);
 
   return (
@@ -116,9 +139,15 @@ const PaymentStep = ({
           className="bg-peacefulBlue hover:bg-peacefulBlue/90"
           disabled={isProcessing || !acceptTerms || !razorpayLoaded}
         >
-          {isProcessing ? "Processing..." : `Pay ${formatPrice(totalPrice)}`}
+          {!razorpayLoaded ? "Loading Payment..." : isProcessing ? "Processing..." : `Pay ${formatPrice(totalPrice)}`}
         </Button>
       </div>
+      
+      {!razorpayLoaded && (
+        <div className="text-center text-amber-600 text-sm mt-2">
+          Payment gateway is loading. Please wait...
+        </div>
+      )}
     </div>
   );
 };

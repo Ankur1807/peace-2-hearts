@@ -63,6 +63,11 @@ export function useConsultationPayment({
     setIsProcessing(true);
     
     try {
+      // Check if Razorpay is loaded
+      if (typeof window === 'undefined' || !window.Razorpay) {
+        throw new Error("Payment gateway not loaded. Please refresh the page and try again.");
+      }
+      
       // Generate a reference ID for this transaction
       const receiptId = generateReferenceId();
       if (setReferenceId) {
@@ -92,9 +97,7 @@ export function useConsultationPayment({
       
       // Initialize Razorpay
       const options = {
-        key: process.env.NODE_ENV === 'production' 
-          ? process.env.RAZORPAY_KEY_ID 
-          : "rzp_test_C4wVqKJiq5fXgj", // Fallback to test key
+        key: "rzp_test_C4wVqKJiq5fXgj", // Use test key for now
         amount: order.amount, // Amount in paise
         currency: order.currency,
         name: "Peace2Hearts",
@@ -157,23 +160,41 @@ export function useConsultationPayment({
         },
         theme: {
           color: "#3399cc"
+        },
+        modal: {
+          ondismiss: function() {
+            console.log("Payment modal dismissed");
+            setIsProcessing(false);
+            toast({
+              title: "Payment Cancelled",
+              description: "You cancelled the payment process.",
+              variant: "default"
+            });
+          }
         }
       };
       
-      // Initialize and open Razorpay
-      const razorpay = new (window as any).Razorpay(options);
-      razorpay.open();
-      
-      // Handle errors from Razorpay
-      razorpay.on('payment.failed', function(response: any) {
-        console.error("Payment failed:", response.error);
-        toast({
-          title: "Payment Failed",
-          description: response.error.description || "Your payment was not successful. Please try again.",
-          variant: "destructive"
+      try {
+        // Initialize and open Razorpay
+        const razorpay = new window.Razorpay(options);
+        
+        // Handle errors from Razorpay
+        razorpay.on('payment.failed', function(response: any) {
+          console.error("Payment failed:", response.error);
+          toast({
+            title: "Payment Failed",
+            description: response.error.description || "Your payment was not successful. Please try again.",
+            variant: "destructive"
+          });
+          setIsProcessing(false);
         });
-        setIsProcessing(false);
-      });
+        
+        razorpay.open();
+      } catch (err) {
+        console.error("Error initializing Razorpay:", err);
+        throw new Error("Failed to initialize payment gateway");
+      }
+      
     } catch (error: any) {
       console.error("Error processing payment:", error);
       toast({

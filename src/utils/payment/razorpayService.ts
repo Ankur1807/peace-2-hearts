@@ -40,6 +40,8 @@ export const createRazorpayOrder = async (params: CreateOrderParams): Promise<Or
   try {
     const { amount, currency = 'INR', receipt, notes } = params;
     
+    console.log("Creating Razorpay order with params:", { amount, currency, receipt, notes });
+    
     const { data, error } = await supabase.functions.invoke('razorpay', {
       body: JSON.stringify({
         action: 'create_order',
@@ -60,6 +62,7 @@ export const createRazorpayOrder = async (params: CreateOrderParams): Promise<Or
       return { success: false, error: error.message };
     }
     
+    console.log("Razorpay order response:", data);
     return data as OrderResponse;
   } catch (err) {
     console.error('Exception creating order:', err);
@@ -78,6 +81,8 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
   try {
     const { paymentId, orderId, signature } = params;
     
+    console.log("Verifying payment:", { paymentId, orderId });
+    
     const { data, error } = await supabase.functions.invoke('razorpay', {
       body: JSON.stringify({
         action: 'verify_payment',
@@ -95,6 +100,7 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
       return false;
     }
     
+    console.log("Payment verification response:", data);
     return data?.verified === true;
   } catch (err) {
     console.error('Exception verifying payment:', err);
@@ -112,6 +118,8 @@ export const savePaymentDetails = async (
   consultationId: string
 ): Promise<boolean> => {
   try {
+    console.log("Saving payment details:", { paymentId, orderId, amount, consultationId });
+    
     const { error } = await supabase.from('payments').insert({
       transaction_id: paymentId,
       consultation_id: consultationId,
@@ -126,9 +134,17 @@ export const savePaymentDetails = async (
       return false;
     }
     
+    console.log("Payment details saved successfully");
     return true;
   } catch (err) {
     console.error('Exception saving payment details:', err);
     return false;
   }
 };
+
+// Make sure we have the global Razorpay type defined
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}

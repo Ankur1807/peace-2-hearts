@@ -25,13 +25,29 @@ serve(async (req: Request) => {
   if (corsResponse) return corsResponse;
   
   try {
-    const { action, amount, currency, receipt, orderData, paymentId } = await req.json();
+    // Parse request body
+    let requestData;
+    try {
+      requestData = await req.json();
+      console.log("Request data received:", JSON.stringify(requestData));
+    } catch (err) {
+      console.error("Error parsing request JSON:", err);
+      return new Response(JSON.stringify({
+        error: 'Invalid JSON in request body'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      });
+    }
+    
+    const { action, amount, currency, receipt, orderData, paymentId } = requestData;
     
     // Get Razorpay API keys from environment variables
     const key_id = Deno.env.get('RAZORPAY_KEY_ID');
     const key_secret = Deno.env.get('RAZORPAY_KEY_SECRET');
     
     if (!key_id || !key_secret) {
+      console.error("Razorpay API keys not configured");
       return new Response(JSON.stringify({
         error: 'Razorpay API keys not configured'
       }), {
@@ -46,6 +62,7 @@ serve(async (req: Request) => {
     // Handle different actions
     if (action === 'create_order') {
       if (!amount || !currency || !receipt) {
+        console.error("Missing required parameters:", { amount, currency, receipt });
         return new Response(JSON.stringify({
           error: 'Missing required parameters'
         }), {
@@ -54,45 +71,72 @@ serve(async (req: Request) => {
         });
       }
       
+      console.log("Creating order with params:", { amount, currency, receipt, notes: orderData?.notes });
+      
       // Create order on Razorpay
-      const razorpayResponse = await fetch('https://api.razorpay.com/v1/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Basic ${auth}`
-        },
-        body: JSON.stringify({
-          amount: amount * 100, // Convert to paise
-          currency: currency,
-          receipt: receipt,
-          notes: orderData?.notes || {}
-        })
-      });
+      const orderPayload = {
+        amount: amount * 100, // Convert to paise
+        currency: currency,
+        receipt: receipt,
+        notes: orderData?.notes || {}
+      };
       
-      const orderResult = await razorpayResponse.json();
-      console.log("Order created:", orderResult);
+      console.log("Sending request to Razorpay:", JSON.stringify(orderPayload));
       
-      if (!razorpayResponse.ok) {
+      try {
+        const razorpayResponse = await fetch('https://api.razorpay.com/v1/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${auth}`
+          },
+          body: JSON.stringify(orderPayload)
+        });
+        
+        const orderResult = await razorpayResponse.json();
+        console.log("Order created:", JSON.stringify(orderResult));
+        
+        if (!razorpayResponse.ok) {
+          console.error("Razorpay API error:", orderResult);
+          return new Response(JSON.stringify({
+            error: 'Failed to create order',
+            details: orderResult
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: razorpayResponse.status
+          });
+        }
+        
+        // Add key_id to the order response for client use
+        const responseOrder = {
+          ...orderResult,
+          notes: {
+            ...orderResult.notes,
+          }
+        };
+        
+        // Return the successful order response
         return new Response(JSON.stringify({
-          error: 'Failed to create order',
-          details: orderResult
+          success: true,
+          order: responseOrder
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: razorpayResponse.status
+          status: 200
+        });
+      } catch (err) {
+        console.error("Error calling Razorpay API:", err);
+        return new Response(JSON.stringify({
+          error: 'Error communicating with Razorpay',
+          details: err.message
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500
         });
       }
-      
-      // Return the successful order response
-      return new Response(JSON.stringify({
-        success: true,
-        order: orderResult
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
-      });
     } 
     else if (action === 'verify_payment') {
       if (!paymentId || !orderData) {
+        console.error("Missing payment verification data");
         return new Response(JSON.stringify({
           error: 'Missing payment verification data'
         }), {
@@ -103,6 +147,12 @@ serve(async (req: Request) => {
       
       // Verify the payment signature
       const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = orderData;
+      
+      console.log("Verifying payment:", { 
+        razorpay_order_id, 
+        razorpay_payment_id, 
+        razorpay_signature: razorpay_signature ? "signature-provided" : "missing" 
+      });
       
       // In a production app, you'd verify the signature here using crypto
       // For demo purposes, we're just returning success
@@ -117,6 +167,7 @@ serve(async (req: Request) => {
       });
     }
     
+    console.error("Invalid action requested:", action);
     return new Response(JSON.stringify({
       error: 'Invalid action'
     }), {

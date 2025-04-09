@@ -9,7 +9,6 @@ import ConsultationBookingForm from '@/components/consultation/ConsultationBooki
 import SuccessView from '@/components/consultation/SuccessView';
 import ConsultationAlert from '@/components/consultation/ConsultationAlert';
 import { Toaster } from '@/components/ui/toaster';
-import Script from '@/components/Script';
 import { BookingDetails } from '@/utils/types';
 
 const BookConsultation = () => {
@@ -28,6 +27,7 @@ const BookConsultation = () => {
     pricing
   } = bookingState;
   const [isDevelopment, setIsDevelopment] = useState(false);
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
   // Function to determine package name based on selected services
   const getPackageName = () => {
@@ -64,6 +64,28 @@ const BookConsultation = () => {
     return null;
   };
 
+  // Load Razorpay script
+  useEffect(() => {
+    // Only load if not already loaded
+    if (typeof window !== 'undefined' && !window.Razorpay && !document.querySelector('script[src*="checkout.razorpay.com"]')) {
+      console.log("Loading Razorpay script");
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => {
+        console.log("Razorpay script loaded");
+        setRazorpayLoaded(true);
+      };
+      script.onerror = () => {
+        console.error("Failed to load Razorpay script");
+      };
+      document.body.appendChild(script);
+    } else if (typeof window !== 'undefined' && window.Razorpay) {
+      console.log("Razorpay already loaded");
+      setRazorpayLoaded(true);
+    }
+  }, []);
+
   useEffect(() => {
     // Check if we're in development mode
     setIsDevelopment(process.env.NODE_ENV === 'development');
@@ -78,8 +100,8 @@ const BookConsultation = () => {
     const bookingDetails: BookingDetails = {
       clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
       email: personalDetails.email,
-      services: selectedServices || [], // Ensure services is always an array, even if selectedServices is undefined
-      date: date, // date is already a Date object from the state
+      services: selectedServices || [], 
+      date: date, 
       timeSlot: timeSlot,
       timeframe: timeframe,
       serviceCategory: serviceCategory,
@@ -116,7 +138,6 @@ const BookConsultation = () => {
         description="Schedule a consultation with our relationship counselors or legal experts. Take the first step towards peace and clarity in your relationship journey."
         keywords="book relationship counseling, legal consultation appointment, therapy session, mental health support"
       />
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       <Navigation />
       <main className="py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-4xl">
@@ -138,6 +159,15 @@ const BookConsultation = () => {
             <ConsultationAlert
               title="Development Mode"
               description="This is a development environment. Bookings will create consultants if none exist."
+              variant="default"
+              className="mb-6"
+            />
+          )}
+
+          {!razorpayLoaded && (
+            <ConsultationAlert
+              title="Loading Payment Gateway"
+              description="Please wait while we initialize the payment system..."
               variant="default"
               className="mb-6"
             />
