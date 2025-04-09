@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
 import { sendContactEmail } from '@/utils/emailService';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -69,6 +70,7 @@ const Contact = () => {
   
   return (
     <>
+      <GoogleAnalytics />
       <SEO 
         title="Contact Us"
         description="Reach out to Peace2Hearts for relationship counseling, legal consultation, or general inquiries. Our team is here to help you find peace in your relationships."
