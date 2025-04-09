@@ -4,7 +4,8 @@ import {
   savePaymentDetails, 
   verifyRazorpayPayment, 
   isRazorpayAvailable, 
-  loadRazorpayScript 
+  loadRazorpayScript,
+  type SavePaymentParams
 } from '@/utils/payment/razorpayService';
 import { generateReferenceId } from '@/utils/referenceGenerator';
 
@@ -88,12 +89,14 @@ export function useRazorpayPayment({
           }
           
           // Save payment details in database
-          await savePaymentDetails(
-            response.razorpay_payment_id,
-            response.razorpay_order_id,
-            state.totalPrice,
-            receiptId // Using reference ID as consultation ID for now
-          );
+          const paymentParams: SavePaymentParams = {
+            paymentId: response.razorpay_payment_id,
+            orderId: response.razorpay_order_id,
+            amount: state.totalPrice,
+            consultationId: receiptId // Using reference ID as consultation ID for now
+          };
+          
+          await savePaymentDetails(paymentParams);
           
           if (setPaymentCompleted) {
             setPaymentCompleted(true);
