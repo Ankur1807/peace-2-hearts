@@ -22,15 +22,15 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
     // Divorce Prevention Package services
     const divorcePrevention = [
       'couples-counselling',
-      'mental-health-counselling',
+      'general-legal',
       'mediation',
-      'general-legal'
+      'mental-health-counselling'
     ];
     
     // Pre-Marriage Clarity Package services
     const preMarriageClarity = [
       'pre-marriage-legal',
-      'premarital-counselling',
+      'premarital-counselling-individual',
       'mental-health-counselling'
     ];
 

@@ -74,20 +74,26 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
           onValueChange={handlePackageSelection} 
           className="space-y-3"
         >
-          {holisticPackages.map(pkg => (
-            <div key={pkg.id} className="flex items-start space-x-2">
-              <RadioGroupItem value={pkg.id} id={pkg.id} />
-              <div className="grid gap-1">
-                <label
-                  htmlFor={pkg.id}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {pkg.label}
-                </label>
-                <p className="text-xs text-muted-foreground">{pkg.description}</p>
+          {holisticPackages.map(pkg => {
+            // Show package price if available
+            const price = pricing?.get(pkg.id);
+            const priceDisplay = price ? ` - ₹${price.toLocaleString('en-IN')}` : '';
+            
+            return (
+              <div key={pkg.id} className="flex items-start space-x-2">
+                <RadioGroupItem value={pkg.id} id={pkg.id} />
+                <div className="grid gap-1">
+                  <label
+                    htmlFor={pkg.id}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {pkg.label}{priceDisplay}
+                  </label>
+                  <p className="text-xs text-muted-foreground">{pkg.description}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </RadioGroup>
       </div>
     );
@@ -104,6 +110,8 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {servicesToDisplay.map(service => {
           const isChecked = selectedServices.includes(service.id);
+          const price = pricing?.get(service.id);
+          const priceDisplay = price ? ` - ₹${price.toLocaleString('en-IN')}` : '';
           
           return (
             <div key={service.id} className="flex items-center space-x-2">
@@ -121,7 +129,7 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
                 className="text-sm font-medium leading-none cursor-pointer"
                 onClick={() => handleServiceSelection(service.id, !isChecked)}
               >
-                {service.label}
+                {service.label}{priceDisplay}
               </label>
             </div>
           );
