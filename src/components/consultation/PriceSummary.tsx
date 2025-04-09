@@ -61,11 +61,11 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
     <div className="border rounded-lg p-4 bg-gray-50">
       <h3 className="font-medium text-lg mb-3">Price Summary</h3>
       
-      {totalPrice === 0 && (
-        <div className="mb-3 flex items-center gap-2 bg-amber-50 p-3 rounded-md">
+      {!hasPricing && totalPrice === 0 && (
+        <div className="mb-3 flex items-center gap-2 bg-amber-50 p-3 rounded-md border border-amber-200">
           <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
           <p className="text-sm text-amber-600">
-            Price information is currently unavailable from our database. 
+            Price information is currently unavailable from our database.
           </p>
         </div>
       )}

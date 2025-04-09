@@ -4,6 +4,8 @@ import { ServicePrice } from '@/utils/pricingTypes';
 
 export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<string, number>> {
   try {
+    console.log('Fetching service pricing for:', serviceIds);
+    
     let query = supabase
       .from('service_pricing')
       .select('service_id, price, is_active')
@@ -24,7 +26,7 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
     const pricingMap = new Map<string, number>();
     
     if (!data || data.length === 0) {
-      console.warn('No pricing data found for the requested services');
+      console.warn('No pricing data found for the requested services:', serviceIds);
       return pricingMap; // Return empty map if no data found
     }
     
@@ -32,10 +34,13 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
     data.forEach((item) => {
       if (item.is_active && item.price > 0) {
         pricingMap.set(item.service_id, item.price);
+        console.log(`Set price for ${item.service_id}: ${item.price}`);
+      } else {
+        console.log(`Skipping ${item.service_id}: Active=${item.is_active}, Price=${item.price}`);
       }
     });
     
-    console.log('Using database pricing:', pricingMap);
+    console.log('Final pricing map:', Object.fromEntries(pricingMap));
     return pricingMap;
   } catch (error) {
     console.error('Error in fetchServicePricing:', error);
@@ -46,6 +51,8 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
 
 export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<string, number>> {
   try {
+    console.log('Fetching package pricing for:', packageIds);
+    
     // First try to get actual package pricing
     let query = supabase
       .from('package_pricing')
@@ -67,7 +74,7 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
     }
     
     if (!data || data.length === 0) {
-      console.warn('No package pricing data found');
+      console.warn('No package pricing data found for:', packageIds);
       
       // If no package pricing, calculate based on component services
       if (packageIds && packageIds.length > 0) {
@@ -76,8 +83,10 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
           
           if (packageId === 'divorce-prevention') {
             serviceIds = ['couples-counselling', 'mental-health-counselling', 'mediation', 'general-legal'];
+            console.log('Calculating divorce prevention package from services:', serviceIds);
           } else if (packageId === 'pre-marriage-clarity') {
             serviceIds = ['pre-marriage-legal', 'premarital-counselling', 'mental-health-counselling'];
+            console.log('Calculating pre-marriage clarity package from services:', serviceIds);
           }
           
           if (serviceIds.length > 0) {
@@ -88,10 +97,12 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
             // Sum up the prices of component services
             serviceIds.forEach(serviceId => {
               const servicePrice = servicesPricing.get(serviceId);
-              if (servicePrice) {
+              if (servicePrice && servicePrice > 0) {
                 packageTotal += servicePrice;
+                console.log(`Adding ${servicePrice} for ${serviceId}`);
               } else {
                 allServicesHavePrices = false;
+                console.log(`Missing price for ${serviceId}`);
               }
             });
             
@@ -99,21 +110,28 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
             if (packageTotal > 0 && allServicesHavePrices) {
               packageTotal = Math.round(packageTotal * 0.85); // 15% discount
               pricingMap.set(packageId, packageTotal);
+              console.log(`Set package price for ${packageId}: ${packageTotal} (after 15% discount)`);
+            } else if (packageTotal > 0) {
+              // If we have some prices but not all, still set the price without discount
+              pricingMap.set(packageId, packageTotal);
+              console.log(`Set partial package price for ${packageId}: ${packageTotal} (no discount applied)`);
             }
           }
         }
-        console.log('Calculated package pricing from services:', pricingMap);
       }
     } else {
       // Use the pricing data from the database
       data.forEach((item) => {
         if (item.is_active && item.price > 0) {
           pricingMap.set(item.package_id, item.price);
+          console.log(`Set package price from DB for ${item.package_id}: ${item.price}`);
+        } else {
+          console.log(`Skipping package ${item.package_id}: Active=${item.is_active}, Price=${item.price}`);
         }
       });
-      console.log('Using database package pricing:', pricingMap);
     }
     
+    console.log('Final package pricing map:', Object.fromEntries(pricingMap));
     return pricingMap;
   } catch (error) {
     console.error('Error in fetchPackagePricing:', error);
