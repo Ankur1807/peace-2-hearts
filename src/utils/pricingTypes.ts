@@ -58,4 +58,6 @@ export interface ServiceOption {
   service_id: string;
   service_name: string;
   category: string;
+  price?: number;
+  is_active?: boolean;
 }

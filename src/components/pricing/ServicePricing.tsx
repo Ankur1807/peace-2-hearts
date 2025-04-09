@@ -31,7 +31,18 @@ const ServicePricing = () => {
         .order('category', { ascending: true })
         .order('service_name', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          toast({
+            title: 'Authentication Error',
+            description: 'You need to be logged in as an admin to access pricing data.',
+            variant: 'destructive',
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
       
       if (data && data.length === 0) {
         // If no services found, let's add some initial services
@@ -139,7 +150,18 @@ const ServicePricing = () => {
         .update({ price: Number(editedPrice), updated_at: new Date().toISOString() })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          toast({
+            title: 'Permission Denied',
+            description: 'You do not have permission to update prices. Please make sure you are logged in as an admin.',
+            variant: 'destructive',
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       toast({
         title: 'Price Updated',
@@ -164,7 +186,18 @@ const ServicePricing = () => {
         .update({ is_active: !currentStatus, updated_at: new Date().toISOString() })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          toast({
+            title: 'Permission Denied',
+            description: 'You do not have permission to update service status. Please make sure you are logged in as an admin.',
+            variant: 'destructive',
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       toast({
         title: 'Status Updated',
@@ -197,7 +230,18 @@ const ServicePricing = () => {
           updated_at: new Date().toISOString(),
         }]);
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          toast({
+            title: 'Permission Denied',
+            description: 'You do not have permission to add services. Please make sure you are logged in as an admin.',
+            variant: 'destructive',
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       toast({
         title: 'Service Added',
