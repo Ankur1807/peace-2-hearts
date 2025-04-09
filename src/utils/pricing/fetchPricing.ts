@@ -6,7 +6,7 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
   try {
     let query = supabase
       .from('service_pricing')
-      .select('service_id, price')
+      .select('service_id, price, is_active')
       .eq('is_active', true);
     
     if (serviceIds && serviceIds.length > 0) {
@@ -26,14 +26,16 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
     if (!data || data.length === 0) {
       console.warn('No pricing data found for the requested services');
       return pricingMap; // Return empty map if no data found
-    } else {
-      // Use the pricing data from the database
-      data.forEach((item) => {
-        pricingMap.set(item.service_id, item.price);
-      });
-      console.log('Using database pricing:', pricingMap);
     }
     
+    // Use the pricing data from the database
+    data.forEach((item) => {
+      if (item.is_active && item.price > 0) {
+        pricingMap.set(item.service_id, item.price);
+      }
+    });
+    
+    console.log('Using database pricing:', pricingMap);
     return pricingMap;
   } catch (error) {
     console.error('Error in fetchServicePricing:', error);
@@ -47,7 +49,7 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
     // First try to get actual package pricing
     let query = supabase
       .from('package_pricing')
-      .select('package_id, price')
+      .select('package_id, price, is_active')
       .eq('is_active', true);
     
     if (packageIds && packageIds.length > 0) {
@@ -58,6 +60,11 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
     
     // Create a map of package_id to price
     const pricingMap = new Map<string, number>();
+    
+    if (error) {
+      console.error('Error fetching package pricing:', error);
+      throw error;
+    }
     
     if (!data || data.length === 0) {
       console.warn('No package pricing data found');
@@ -76,17 +83,20 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
           if (serviceIds.length > 0) {
             const servicesPricing = await fetchServicePricing(serviceIds);
             let packageTotal = 0;
+            let allServicesHavePrices = true;
             
             // Sum up the prices of component services
             serviceIds.forEach(serviceId => {
               const servicePrice = servicesPricing.get(serviceId);
               if (servicePrice) {
                 packageTotal += servicePrice;
+              } else {
+                allServicesHavePrices = false;
               }
             });
             
-            // Apply discount (15% for packages)
-            if (packageTotal > 0) {
+            // Only apply the package discount if all services have prices
+            if (packageTotal > 0 && allServicesHavePrices) {
               packageTotal = Math.round(packageTotal * 0.85); // 15% discount
               pricingMap.set(packageId, packageTotal);
             }
@@ -97,7 +107,9 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
     } else {
       // Use the pricing data from the database
       data.forEach((item) => {
-        pricingMap.set(item.package_id, item.price);
+        if (item.is_active && item.price > 0) {
+          pricingMap.set(item.package_id, item.price);
+        }
       });
       console.log('Using database package pricing:', pricingMap);
     }

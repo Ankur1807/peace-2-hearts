@@ -78,7 +78,7 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
         toast({ 
           title: "Pricing information unavailable", 
           description: "Unable to retrieve current prices from our database.",
-          variant: "warning"
+          variant: "destructive"
         });
       }
     } catch (error) {
