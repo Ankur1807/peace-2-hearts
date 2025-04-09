@@ -109,15 +109,13 @@ export function useRazorpayPayment({
           
           toast({
             title: "Payment Successful",
-            description: "Your payment has been processed successfully.",
-            variant: "default"
+            description: "Your payment has been processed successfully."
           });
         } catch (error) {
           console.error("Error processing payment confirmation:", error);
           toast({
             title: "Payment Verification Error",
-            description: error instanceof Error ? error.message : "Failed to verify payment",
-            variant: "destructive"
+            description: error instanceof Error ? error.message : "Failed to verify payment"
           });
         } finally {
           setIsProcessing(false);
@@ -140,8 +138,7 @@ export function useRazorpayPayment({
           setIsProcessing(false);
           toast({
             title: "Payment Cancelled",
-            description: "You cancelled the payment process.",
-            variant: "default"
+            description: "You cancelled the payment process."
           });
         }
       }
@@ -156,8 +153,7 @@ export function useRazorpayPayment({
         console.error("Payment failed:", response.error);
         toast({
           title: "Payment Failed",
-          description: response.error.description || "Your payment was not successful. Please try again.",
-          variant: "destructive"
+          description: response.error.description || "Your payment was not successful. Please try again."
         });
         setIsProcessing(false);
       });
