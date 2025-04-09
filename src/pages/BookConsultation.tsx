@@ -10,6 +10,7 @@ import SuccessView from '@/components/consultation/SuccessView';
 import ConsultationAlert from '@/components/consultation/ConsultationAlert';
 import { Toaster } from '@/components/ui/toaster';
 import Script from '@/components/Script';
+import { BookingDetails } from '@/utils/types';
 
 const BookConsultation = () => {
   const bookingState = useConsultationBooking();
@@ -72,6 +73,19 @@ const BookConsultation = () => {
   const packageName = getPackageName();
 
   if (submitted) {
+    // Create a properly typed booking details object
+    const bookingDetails: BookingDetails = {
+      clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
+      email: personalDetails.email,
+      services: selectedServices,
+      date: date,
+      timeSlot: timeSlot,
+      timeframe: timeframe,
+      serviceCategory: serviceCategory,
+      packageName: packageName,
+      amount: totalPrice // Now properly included in the interface
+    };
+
     return (
       <>
         <SEO 
@@ -84,17 +98,7 @@ const BookConsultation = () => {
           <div className="container mx-auto px-4 max-w-4xl">
             <SuccessView 
               referenceId={referenceId}
-              bookingDetails={{
-                clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
-                email: personalDetails.email,
-                services: selectedServices,
-                date: date,
-                timeSlot: timeSlot,
-                timeframe: timeframe,
-                serviceCategory: serviceCategory,
-                packageName: packageName,
-                amount: totalPrice
-              }} 
+              bookingDetails={bookingDetails}
             />
           </div>
         </main>
