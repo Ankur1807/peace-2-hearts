@@ -79,7 +79,7 @@ const BookConsultation = () => {
       clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
       email: personalDetails.email,
       services: selectedServices || [], // Ensure services is always an array, even if selectedServices is undefined
-      date: date,
+      date: date, // date is already a Date object from the state
       timeSlot: timeSlot,
       timeframe: timeframe,
       serviceCategory: serviceCategory,

@@ -1,24 +1,14 @@
-
 import { useState } from "react";
 import { CheckCircle2, MailIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { resendBookingConfirmationEmail } from "@/utils/emailService";
+import { BookingDetails } from "@/utils/types";
 
 interface SuccessViewProps {
   referenceId?: string | null;
-  bookingDetails?: {
-    clientName: string;
-    email: string;
-    services: string[];
-    date?: Date;
-    timeSlot?: string;
-    timeframe?: string;
-    serviceCategory: string;
-    packageName?: string;
-    amount?: number;
-  };
+  bookingDetails?: BookingDetails;
 }
 
 const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
@@ -67,11 +57,9 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
 
   const isHolisticPackage = bookingDetails?.serviceCategory === 'holistic';
 
-  // Function to determine package name based on selected services
   const getPackageName = () => {
     const services = bookingDetails?.services || [];
     
-    // Divorce Prevention Package services
     const divorcePrevention = [
       'couples-counselling',
       'mental-health-counselling',
@@ -79,14 +67,12 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
       'general-legal'
     ];
     
-    // Pre-Marriage Clarity Package services
     const preMarriageClarity = [
       'pre-marriage-legal',
       'premarital-counselling',
       'mental-health-counselling'
     ];
 
-    // Check if selected services match a package
     if (services.length === divorcePrevention.length && 
         divorcePrevention.every(s => services.includes(s))) {
       return "Divorce Prevention Package";
@@ -100,7 +86,6 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
     return null;
   };
 
-  // Get readable service names
   const getServiceName = (serviceId: string) => {
     const serviceNames: Record<string, string> = {
       'mental-health-counselling': 'Mental Health Counseling',
@@ -119,7 +104,6 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
     return serviceNames[serviceId] || serviceId;
   };
 
-  // Get the package name if it's a holistic booking
   const packageName = isHolisticPackage ? bookingDetails?.packageName || getPackageName() : null;
 
   return (
