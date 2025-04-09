@@ -2,11 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Shield } from 'lucide-react';
+import { Shield, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getConsultationTypeLabel } from '@/utils/consultationLabels';
 import { formatPrice } from '@/utils/pricing/fetchPricing';
 import Script from '@/components/Script';
+import { loadRazorpayScript, isRazorpayAvailable } from '@/utils/payment/razorpayService';
 
 type PaymentStepProps = {
   consultationType: string;
@@ -27,46 +28,35 @@ const PaymentStep = ({
 }: PaymentStepProps) => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Check if Razorpay is loaded
+  // Load Razorpay script
   useEffect(() => {
-    // Function to check if Razorpay is loaded
-    const checkRazorpayLoaded = () => {
-      if (typeof window !== 'undefined' && window.Razorpay) {
-        console.log("Razorpay script detected and loaded");
-        setRazorpayLoaded(true);
-        return true;
+    const checkAndLoadRazorpay = async () => {
+      try {
+        // Check if already loaded
+        if (isRazorpayAvailable()) {
+          console.log("Razorpay already available in window");
+          setRazorpayLoaded(true);
+          return;
+        }
+
+        // Try to load the script
+        const loaded = await loadRazorpayScript();
+        console.log("Razorpay script load result:", loaded);
+        setRazorpayLoaded(loaded);
+        
+        if (!loaded) {
+          setLoadError("Failed to load payment gateway. Please refresh and try again.");
+        }
+      } catch (err) {
+        console.error("Error loading Razorpay:", err);
+        setLoadError("Error initializing payment gateway. Please refresh and try again.");
+        setRazorpayLoaded(false);
       }
-      return false;
     };
 
-    // Check immediately if already loaded
-    if (checkRazorpayLoaded()) return;
-
-    // Set up an observer to check periodically
-    const observer = setInterval(() => {
-      if (checkRazorpayLoaded()) {
-        clearInterval(observer);
-      }
-    }, 500);
-
-    // Load the script if not present
-    if (typeof window !== 'undefined' && !document.querySelector('script[src*="checkout.razorpay.com"]')) {
-      console.log("Razorpay script not found, loading dynamically");
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      script.onload = () => {
-        console.log("Razorpay script loaded dynamically");
-        setRazorpayLoaded(true);
-      };
-      script.onerror = (e) => {
-        console.error("Failed to load Razorpay script:", e);
-      };
-      document.body.appendChild(script);
-    }
-
-    return () => clearInterval(observer);
+    checkAndLoadRazorpay();
   }, []);
 
   return (
@@ -77,10 +67,20 @@ const PaymentStep = ({
         onLoad={() => {
           console.log("Razorpay script loaded via Script component");
           setRazorpayLoaded(true);
+          setLoadError(null);
         }}
       />
       
       <h2 className="text-2xl font-lora font-semibold mb-6">Payment Information</h2>
+      
+      {loadError && (
+        <div className="flex items-center p-4 mb-4 bg-red-50 rounded-lg border border-red-200">
+          <AlertCircle className="h-5 w-5 text-red-500 mr-3" />
+          <p className="text-sm text-red-600">
+            {loadError}
+          </p>
+        </div>
+      )}
       
       <div className="mb-6">
         <div className="bg-gray-50 p-4 rounded-lg mb-6">
@@ -153,7 +153,7 @@ const PaymentStep = ({
         </Button>
       </div>
       
-      {!razorpayLoaded && (
+      {!razorpayLoaded && !loadError && (
         <div className="text-center text-amber-600 text-sm mt-2">
           Payment gateway is loading. Please wait...
         </div>

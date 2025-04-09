@@ -1,6 +1,12 @@
 
 import { useCallback } from 'react';
-import { createRazorpayOrder, savePaymentDetails, verifyRazorpayPayment } from '@/utils/payment/razorpayService';
+import { 
+  createRazorpayOrder, 
+  savePaymentDetails, 
+  verifyRazorpayPayment, 
+  isRazorpayAvailable, 
+  loadRazorpayScript 
+} from '@/utils/payment/razorpayService';
 import { generateReferenceId } from '@/utils/referenceGenerator';
 import { toast } from '@/hooks/use-toast';
 
@@ -64,9 +70,16 @@ export function useConsultationPayment({
     setIsProcessing(true);
     
     try {
-      // Check if Razorpay is loaded
-      if (typeof window === 'undefined' || !window.Razorpay) {
-        throw new Error("Payment gateway not loaded. Please refresh the page and try again.");
+      // Ensure Razorpay is loaded
+      let razorpayLoaded = isRazorpayAvailable();
+      
+      if (!razorpayLoaded) {
+        console.log("Razorpay not loaded, attempting to load script");
+        razorpayLoaded = await loadRazorpayScript();
+        
+        if (!razorpayLoaded) {
+          throw new Error("Payment gateway failed to load. Please refresh the page and try again.");
+        }
       }
       
       // Generate a reference ID for this transaction
@@ -91,15 +104,15 @@ export function useConsultationPayment({
         throw new Error(orderResponse.error || 'Failed to create order');
       }
       
-      const { order } = orderResponse;
+      const { order, key_id } = orderResponse;
       console.log("Order created successfully:", order);
       
       if (setOrderId) {
         setOrderId(order.id);
       }
       
-      // Use explicit key for testing
-      const razorpayKey = "rzp_test_C4wVqKJiq5fXgj";  // This is a test key, in production use key from backend
+      // Use key from response or fallback to test key
+      const razorpayKey = key_id || "rzp_test_C4wVqKJiq5fXgj";
       
       console.log("Initializing Razorpay with key:", razorpayKey);
       

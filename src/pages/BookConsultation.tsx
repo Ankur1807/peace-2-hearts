@@ -10,6 +10,7 @@ import SuccessView from '@/components/consultation/SuccessView';
 import ConsultationAlert from '@/components/consultation/ConsultationAlert';
 import { Toaster } from '@/components/ui/toaster';
 import { BookingDetails } from '@/utils/types';
+import { loadRazorpayScript, isRazorpayAvailable } from '@/utils/payment/razorpayService';
 
 const BookConsultation = () => {
   const bookingState = useConsultationBooking();
@@ -28,6 +29,7 @@ const BookConsultation = () => {
   } = bookingState;
   const [isDevelopment, setIsDevelopment] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [initializingPayment, setInitializingPayment] = useState(true);
 
   // Function to determine package name based on selected services
   const getPackageName = () => {
@@ -66,24 +68,29 @@ const BookConsultation = () => {
 
   // Load Razorpay script
   useEffect(() => {
-    // Only load if not already loaded
-    if (typeof window !== 'undefined' && !window.Razorpay && !document.querySelector('script[src*="checkout.razorpay.com"]')) {
-      console.log("Loading Razorpay script");
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      script.onload = () => {
-        console.log("Razorpay script loaded");
-        setRazorpayLoaded(true);
-      };
-      script.onerror = () => {
-        console.error("Failed to load Razorpay script");
-      };
-      document.body.appendChild(script);
-    } else if (typeof window !== 'undefined' && window.Razorpay) {
-      console.log("Razorpay already loaded");
-      setRazorpayLoaded(true);
-    }
+    const initRazorpay = async () => {
+      try {
+        // Check if already loaded
+        if (isRazorpayAvailable()) {
+          console.log("Razorpay already loaded in window object");
+          setRazorpayLoaded(true);
+          setInitializingPayment(false);
+          return;
+        }
+        
+        // Try to load it
+        console.log("Attempting to load Razorpay script");
+        const result = await loadRazorpayScript();
+        setRazorpayLoaded(result);
+        console.log("Razorpay script load result:", result);
+      } catch (err) {
+        console.error("Error initializing Razorpay:", err);
+      } finally {
+        setInitializingPayment(false);
+      }
+    };
+    
+    initRazorpay();
   }, []);
 
   useEffect(() => {
@@ -164,7 +171,7 @@ const BookConsultation = () => {
             />
           )}
 
-          {!razorpayLoaded && (
+          {initializingPayment && (
             <ConsultationAlert
               title="Loading Payment Gateway"
               description="Please wait while we initialize the payment system..."
