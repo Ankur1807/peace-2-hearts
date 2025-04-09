@@ -1,14 +1,12 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import ServiceCategorySelector from './ServiceCategorySelector';
-import ServiceSelectionOptions from './ServiceSelectionOptions';
-import DateTimePicker from './DateTimePicker';
-import TimeframeSelector from './TimeframeSelector';
-import PersonalDetailsFields from './PersonalDetailsFields';
-import PriceSummary from './PriceSummary';
-import FormActions from './FormActions';
 import { PersonalDetails } from '@/utils/types';
+import ServiceSection from './form/ServiceSection';
+import DateTimeSection from './form/DateTimeSection';
+import PersonalDetailsFields from './PersonalDetailsFields';
+import PricingSection from './form/PricingSection';
+import FormActions from './FormActions';
+import { isFormValid } from './form/ValidationHelper';
 
 interface BookingFormProps {
   serviceCategory: string;
@@ -49,77 +47,50 @@ const BookingForm: React.FC<BookingFormProps> = ({
   totalPrice,
   onSubmit
 }) => {
-  const isFormValid = () => {
-    if (serviceCategory === 'holistic') {
-      return (
-        selectedServices.length > 0 &&
-        timeframe !== '' &&
-        personalDetails.firstName.trim() !== '' &&
-        personalDetails.lastName.trim() !== '' &&
-        personalDetails.email.trim() !== '' &&
-        personalDetails.phone.trim() !== ''
-      );
-    } else {
-      return (
-        selectedServices.length > 0 &&
-        date !== undefined &&
-        timeSlot !== '' &&
-        personalDetails.firstName.trim() !== '' &&
-        personalDetails.lastName.trim() !== '' &&
-        personalDetails.email.trim() !== '' &&
-        personalDetails.phone.trim() !== ''
-      );
-    }
-  };
-
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
       onSubmit(e);
     }} className="space-y-6">
-      <ServiceCategorySelector 
+      <ServiceSection
         serviceCategory={serviceCategory}
         setServiceCategory={setServiceCategory}
-      />
-      
-      <ServiceSelectionOptions 
-        serviceCategory={serviceCategory}
         selectedServices={selectedServices}
         handleServiceSelection={handleServiceSelection}
         handlePackageSelection={handlePackageSelection}
         pricing={pricing}
       />
       
-      {serviceCategory === 'holistic' ? (
-        <TimeframeSelector
-          timeframe={timeframe}
-          setTimeframe={setTimeframe}
-        />
-      ) : (
-        <DateTimePicker 
-          date={date}
-          setDate={setDate}
-          timeSlot={timeSlot}
-          setTimeSlot={setTimeSlot}
-        />
-      )}
+      <DateTimeSection
+        serviceCategory={serviceCategory}
+        date={date}
+        setDate={setDate}
+        timeSlot={timeSlot}
+        setTimeSlot={setTimeSlot}
+        timeframe={timeframe}
+        setTimeframe={setTimeframe}
+      />
       
       <PersonalDetailsFields 
         personalDetails={personalDetails}
         handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
       />
       
-      {selectedServices.length > 0 && (
-        <PriceSummary 
-          services={selectedServices}
-          pricing={pricing}
-          totalPrice={totalPrice}
-          currency="INR"
-        />
-      )}
+      <PricingSection
+        selectedServices={selectedServices}
+        pricing={pricing}
+        totalPrice={totalPrice}
+      />
       
       <FormActions 
-        isFormValid={isFormValid()} 
+        isFormValid={isFormValid(
+          serviceCategory,
+          selectedServices,
+          date,
+          timeSlot,
+          timeframe,
+          personalDetails
+        )} 
         isProcessing={isProcessing} 
         totalPrice={totalPrice} 
       />
