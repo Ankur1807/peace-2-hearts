@@ -1,6 +1,13 @@
 
 import Script from './Script';
 
+// Extend Window interface to include dataLayer property
+declare global {
+  interface Window {
+    dataLayer: any[];
+  }
+}
+
 const GoogleAnalytics = () => {
   return (
     <>
@@ -10,6 +17,7 @@ const GoogleAnalytics = () => {
       />
       <Script
         id="google-analytics"
+        src="" // Empty string for inline script
         async={false}
         onLoad={() => {
           window.dataLayer = window.dataLayer || [];
