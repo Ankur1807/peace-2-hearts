@@ -1,0 +1,128 @@
+
+import { useCallback } from 'react';
+import { saveConsultation } from '@/utils/consultationApi';
+import { sendBookingConfirmationEmail } from '@/utils/emailService';
+import { getPackageName } from './consultationHelpers';
+
+interface UseConsultationActionsProps {
+  state: any;
+  setReferenceId: (id: string | null) => void;
+  setSubmitted: (submitted: boolean) => void;
+  setBookingError: (error: string | null) => void;
+  setIsProcessing: (isProcessing: boolean) => void;
+  toast: any;
+}
+
+export function useConsultationActions({
+  state,
+  setReferenceId,
+  setSubmitted,
+  setBookingError,
+  setIsProcessing,
+  toast
+}: UseConsultationActionsProps) {
+  // Process each service booking
+  const processServiceBookings = useCallback(async () => {
+    const { selectedServices, serviceCategory, date, timeSlot, timeframe, personalDetails } = state;
+    let lastResult;
+    
+    for (const service of selectedServices) {
+      console.log(`Creating consultation for service: ${service}`);
+      const result = await saveConsultation(
+        service,
+        serviceCategory === 'holistic' ? undefined : date,
+        serviceCategory === 'holistic' ? timeframe : timeSlot,
+        personalDetails
+      );
+      
+      if (result) {
+        console.log(`Consultation created for ${service}:`, result);
+        lastResult = result;
+      }
+    }
+    
+    return lastResult;
+  }, [state]);
+  
+  // Handle booking confirmation
+  const handleConfirmBooking = useCallback(async () => {
+    console.log("handleConfirmBooking called with services:", state.selectedServices);
+    setIsProcessing(true);
+    setBookingError(null);
+    
+    try {
+      if (state.selectedServices.length === 0) {
+        throw new Error("Please select at least one service");
+      }
+
+      console.log("Starting booking process with state:", {
+        services: state.selectedServices,
+        date: state.date,
+        timeSlot: state.timeSlot,
+        timeframe: state.timeframe,
+        personalDetails: state.personalDetails,
+        totalPrice: state.totalPrice
+      });
+
+      // Process all service bookings
+      const lastResult = await processServiceBookings();
+      
+      if (lastResult) {
+        console.log("All consultations created successfully. Last result:", lastResult);
+        setReferenceId(lastResult.referenceId);
+        
+        // Get package name if applicable
+        const packageName = state.serviceCategory === 'holistic' 
+          ? getPackageName(state.selectedServices) 
+          : null;
+        
+        // Send confirmation email
+        try {
+          await sendBookingConfirmationEmail({
+            clientName: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
+            email: state.personalDetails.email,
+            referenceId: lastResult.referenceId,
+            consultationType: state.selectedServices.length > 1 ? 'multiple' : state.selectedServices[0],
+            services: state.selectedServices,
+            // Only send date and timeSlot for non-holistic bookings
+            date: state.serviceCategory === 'holistic' ? undefined : state.date,
+            timeSlot: state.serviceCategory === 'holistic' ? undefined : state.timeSlot,
+            // Only send timeframe for holistic bookings
+            timeframe: state.serviceCategory === 'holistic' ? state.timeframe : undefined,
+            message: state.personalDetails.message,
+            // Include package name if applicable
+            packageName: packageName
+          });
+          console.log("Confirmation email sent successfully");
+        } catch (emailError) {
+          console.error("Error sending confirmation email:", emailError);
+          // Continue with the booking process even if email fails
+        }
+        
+        setSubmitted(true);
+        window.scrollTo(0, 0);
+        
+        toast({
+          title: "Booking Confirmed",
+          description: `Your consultation${state.selectedServices.length > 1 ? 's have' : ' has'} been successfully booked.`,
+        });
+      }
+    } catch (error: any) {
+      console.error("Error confirming booking:", error);
+      setBookingError(error.message || "Unknown error occurred");
+      
+      toast({
+        title: "Booking Failed",
+        description: error.message || "There was an error confirming your booking. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [state, processServiceBookings, toast, setIsProcessing, setBookingError, setReferenceId, setSubmitted]);
+
+  return {
+    processServiceBookings,
+    handleConfirmBooking
+  };
+}

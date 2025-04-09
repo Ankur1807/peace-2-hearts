@@ -2,11 +2,11 @@
 export interface BookingDetails {
   serviceCategory: string;
   selectedServices: string[];
-  date?: string;
-  timeSlot: string;
+  date?: string | Date;
+  timeSlot?: string;
   timeframe?: string;
   packageName?: string;
-  amount?: number;  // Keep this property - it's needed
+  amount?: number;  // Now explicitly added to the interface
   personalDetails?: {
     firstName: string;
     lastName: string;
