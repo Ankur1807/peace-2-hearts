@@ -31,7 +31,7 @@ export const fetchInitialServices = async () => {
     // First check if we already have services in the database
     const { data, error } = await supabase
       .from('service_pricing')
-      .select('count(*)');
+      .select('*');  // Use * instead of count(*) to avoid type issues
 
     if (error) {
       console.error('Error checking for services:', error);
@@ -39,8 +39,8 @@ export const fetchInitialServices = async () => {
     }
 
     // If we have services, just return
-    if (data && data[0]?.count > 0) {
-      console.log(`Found ${data[0].count} existing services, no need to initialize`);
+    if (data && data.length > 0) {
+      console.log(`Found ${data.length} existing services, no need to initialize`);
       return;
     }
 
