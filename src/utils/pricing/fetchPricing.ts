@@ -8,13 +8,13 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
     
     let query = supabase
       .from('service_pricing')
-      .select('service_id, price, is_active')
-      .eq('is_active', true);
+      .select('service_id, price, is_active');
     
     if (serviceIds && serviceIds.length > 0) {
       query = query.in('service_id', serviceIds);
     }
     
+    // Remove the is_active filter to check if data exists at all
     const { data, error } = await query;
     
     if (error) {
@@ -30,13 +30,15 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
       return pricingMap; // Return empty map if no data found
     }
     
+    console.log('Retrieved pricing data:', data);
+    
     // Use the pricing data from the database
     data.forEach((item) => {
-      if (item.is_active && item.price > 0) {
+      if (item.price > 0) {
         pricingMap.set(item.service_id, item.price);
         console.log(`Set price for ${item.service_id}: ${item.price}`);
       } else {
-        console.log(`Skipping ${item.service_id}: Active=${item.is_active}, Price=${item.price}`);
+        console.log(`Service ${item.service_id} has invalid price: ${item.price}`);
       }
     });
     
@@ -56,8 +58,7 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
     // First try to get actual package pricing
     let query = supabase
       .from('package_pricing')
-      .select('package_id, price, is_active')
-      .eq('is_active', true);
+      .select('package_id, price, is_active');
     
     if (packageIds && packageIds.length > 0) {
       query = query.in('package_id', packageIds);
@@ -122,11 +123,11 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
     } else {
       // Use the pricing data from the database
       data.forEach((item) => {
-        if (item.is_active && item.price > 0) {
+        if (item.price > 0) {
           pricingMap.set(item.package_id, item.price);
           console.log(`Set package price from DB for ${item.package_id}: ${item.price}`);
         } else {
-          console.log(`Skipping package ${item.package_id}: Active=${item.is_active}, Price=${item.price}`);
+          console.log(`Package ${item.package_id} has invalid price: ${item.price}`);
         }
       });
     }

@@ -50,8 +50,9 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
 
   // Check if we have valid pricing data
   const hasPricing = services.some(service => pricing.has(service) && pricing.get(service)! > 0);
-  const isPackage = getPackageName() !== null;
   const packageName = getPackageName();
+  const hasPackagePrice = packageName && ((packageName === "Divorce Prevention Package" && pricing.has('divorce-prevention')) || 
+                           (packageName === "Pre-Marriage Clarity Package" && pricing.has('pre-marriage-clarity')));
 
   if (services.length === 0) {
     return null;
@@ -61,7 +62,7 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
     <div className="border rounded-lg p-4 bg-gray-50">
       <h3 className="font-medium text-lg mb-3">Price Summary</h3>
       
-      {!hasPricing && totalPrice === 0 && (
+      {!hasPricing && !hasPackagePrice && totalPrice === 0 && (
         <div className="mb-3 flex items-center gap-2 bg-amber-50 p-3 rounded-md border border-amber-200">
           <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
           <p className="text-sm text-amber-600">
@@ -74,7 +75,9 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
         <div className="flex justify-between items-center py-2 border-b border-gray-200">
           <span className="font-medium">{packageName}</span>
           <span className="font-semibold">
-            {totalPrice > 0 ? formatPrice(totalPrice, currency) : "Price not available"}
+            {hasPackagePrice && totalPrice > 0 
+              ? formatPrice(totalPrice, currency) 
+              : "Price not available"}
           </span>
         </div>
       ) : (

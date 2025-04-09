@@ -13,16 +13,19 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
   const [pricing, setPricing] = useState<Map<string, number>>(new Map());
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [pricingError, setPricingError] = useState<string | null>(null);
   const { toast } = useToast();
   
   // Load pricing data when services change
   const updatePricing = useCallback(async () => {
     if (selectedServices.length === 0) {
       setTotalPrice(0);
+      setPricingError(null);
       return;
     }
     
     setIsLoading(true);
+    setPricingError(null);
     console.log('Updating pricing for services:', selectedServices, 'in category:', serviceCategory);
     
     try {
@@ -47,6 +50,8 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
         console.log('Fetching individual service prices for category:', serviceCategory);
         pricingMap = await fetchServicePricing(selectedServices);
       }
+      
+      console.log('Pricing data retrieved:', Object.fromEntries(pricingMap));
       
       // Calculate total price
       let total = 0;
@@ -83,15 +88,13 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       
       // Show warning if no prices found
       if (total === 0 && selectedServices.length > 0) {
-        console.warn('No pricing information available for selected services');
-        toast({ 
-          title: "Pricing information unavailable", 
-          description: "Unable to retrieve current prices from our database.",
-          variant: "destructive"
-        });
+        const errorMsg = 'No pricing information available for selected services';
+        console.warn(errorMsg);
+        setPricingError(errorMsg);
       }
     } catch (error) {
       console.error("Error fetching pricing:", error);
+      setPricingError("Failed to fetch pricing information");
       toast({ 
         title: "Error retrieving pricing information", 
         description: "Please try again later or contact support.",
@@ -106,5 +109,5 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
     updatePricing();
   }, [updatePricing]);
   
-  return { pricing, totalPrice, isLoading, updatePricing };
+  return { pricing, totalPrice, isLoading, pricingError, updatePricing };
 }
