@@ -29,7 +29,7 @@ export const fetchInitialServices = async () => {
     const defaultServices = [
       {
         service_name: "Mental Health Counselling",
-        service_id: "mental-health-counselling",
+        service_id: "Mental-Health-Counselling",
         price: 2500,
         category: "mental-health",
         currency: "INR",
@@ -38,7 +38,7 @@ export const fetchInitialServices = async () => {
       },
       {
         service_name: "Family Therapy",
-        service_id: "family-therapy",
+        service_id: "Family-Therapy",
         price: 3000,
         category: "mental-health",
         currency: "INR",
@@ -47,7 +47,7 @@ export const fetchInitialServices = async () => {
       },
       {
         service_name: "Couples Counselling",
-        service_id: "couples-counselling",
+        service_id: "Couples-Counselling",
         price: 3000,
         category: "mental-health",
         currency: "INR",
@@ -56,7 +56,7 @@ export const fetchInitialServices = async () => {
       },
       {
         service_name: "Premarital Counselling",
-        service_id: "premarital-counselling",
+        service_id: "Premarital-Counselling",
         price: 2500,
         category: "mental-health",
         currency: "INR",
@@ -65,7 +65,7 @@ export const fetchInitialServices = async () => {
       },
       {
         service_name: "Sexual Health Counselling",
-        service_id: "sexual-health-counselling",
+        service_id: "Sexual-Health-Counselling",
         price: 2800,
         category: "mental-health",
         currency: "INR",
@@ -74,7 +74,7 @@ export const fetchInitialServices = async () => {
       },
       {
         service_name: "General Legal Consultation",
-        service_id: "general-legal",
+        service_id: "General-Legal-Consultation",
         price: 2000, 
         category: "legal",
         currency: "INR",
@@ -83,7 +83,7 @@ export const fetchInitialServices = async () => {
       },
       {
         service_name: "Divorce Consultation",
-        service_id: "divorce-legal",
+        service_id: "Divorce-Consultation",
         price: 3500,
         category: "legal",
         currency: "INR",
@@ -91,8 +91,8 @@ export const fetchInitialServices = async () => {
         scenario: "regular"
       },
       {
-        service_name: "Custody Consultation",
-        service_id: "custody-legal",
+        service_name: "Child Custody Consultation",
+        service_id: "Child-Custody-Consultation",
         price: 3500,
         category: "legal",
         currency: "INR",
@@ -100,8 +100,8 @@ export const fetchInitialServices = async () => {
         scenario: "regular"
       },
       {
-        service_name: "Mediation Service",
-        service_id: "mediation",
+        service_name: "Mediation Services",
+        service_id: "Mediation-Services",
         price: 4000,
         category: "legal",
         currency: "INR",
@@ -109,8 +109,8 @@ export const fetchInitialServices = async () => {
         scenario: "regular"
       },
       {
-        service_name: "Pre-Marriage Legal",
-        service_id: "pre-marriage-legal",
+        service_name: "Pre-Marriage Legal Consultation",
+        service_id: "Pre-Marriage-Legal-Consultation",
         price: 2500,
         category: "legal",
         currency: "INR",
@@ -118,8 +118,17 @@ export const fetchInitialServices = async () => {
         scenario: "regular"
       },
       {
+        service_name: "Maintenance Consultation",
+        service_id: "Maintenance-Consultation",
+        price: 3000,
+        category: "legal",
+        currency: "INR",
+        is_active: true,
+        scenario: "regular"
+      },
+      {
         service_name: "Divorce Prevention Package",
-        service_id: "divorce-prevention",
+        service_id: "Divorce-Prevention-Package",
         price: 10000,
         category: "holistic",
         currency: "INR",
@@ -128,7 +137,7 @@ export const fetchInitialServices = async () => {
       },
       {
         service_name: "Pre-Marriage Clarity Package",
-        service_id: "pre-marriage-clarity",
+        service_id: "Pre-Marriage-Package",
         price: 6000,
         category: "holistic",
         currency: "INR",

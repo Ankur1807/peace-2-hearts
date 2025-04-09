@@ -1,31 +1,82 @@
 
-// Helper to determine package name based on service selection
-export const getPackageName = (services: string[]): string | null => {
+// Map of client-side service IDs to display names
+const serviceDisplayNames: Record<string, string> = {
+  // Mental Health Services
+  'mental-health-counselling': 'Mental Health Counselling',
+  'family-therapy': 'Family Therapy',
+  'premarital-counselling': 'Premarital Counselling',
+  'couples-counselling': 'Couples Counselling',
+  'sexual-health-counselling': 'Sexual Health Counselling',
+  
+  // Legal Services
+  'pre-marriage-legal': 'Pre-marriage Legal Consultation',
+  'mediation': 'Mediation Services',
+  'divorce': 'Divorce Consultation',
+  'custody': 'Child Custody Consultation',
+  'maintenance': 'Maintenance Consultation',
+  'general-legal': 'General Legal Consultation',
+  
+  // Package Services
+  'divorce-prevention': 'Divorce Prevention Package',
+  'pre-marriage-clarity': 'Pre-Marriage Clarity Package',
+};
+
+/**
+ * Gets a package name if the selected services match a pre-defined package
+ */
+export function getPackageName(selectedServices: string[]): string | null {
+  if (!selectedServices || selectedServices.length === 0) return null;
+  
+  const sortedServices = [...selectedServices].sort();
+  
   // Divorce Prevention Package services
   const divorcePrevention = [
     'couples-counselling',
-    'mental-health-counselling',
+    'general-legal',
     'mediation',
-    'general-legal'
-  ];
+    'mental-health-counselling'
+  ].sort();
   
   // Pre-Marriage Clarity Package services
   const preMarriageClarity = [
+    'mental-health-counselling',
     'pre-marriage-legal',
-    'premarital-counselling',
-    'mental-health-counselling'
-  ];
-
-  // Check if selected services match a package
-  if (services.length === divorcePrevention.length && 
-      divorcePrevention.every(s => services.includes(s))) {
+    'premarital-counselling'
+  ].sort();
+  
+  if (sortedServices.length === divorcePrevention.length && 
+      JSON.stringify(sortedServices) === JSON.stringify(divorcePrevention)) {
     return "Divorce Prevention Package";
   }
   
-  if (services.length === preMarriageClarity.length && 
-      preMarriageClarity.every(s => services.includes(s))) {
+  if (sortedServices.length === preMarriageClarity.length && 
+      JSON.stringify(sortedServices) === JSON.stringify(preMarriageClarity)) {
     return "Pre-Marriage Clarity Package";
   }
   
   return null;
-};
+}
+
+/**
+ * Gets a client-friendly display name for a service ID
+ */
+export function getServiceDisplayName(serviceId: string): string {
+  return serviceDisplayNames[serviceId] || serviceId;
+}
+
+/**
+ * Gets the package service ID from a package name
+ */
+export function getPackageServiceId(packageName: string | null): string | null {
+  if (!packageName) return null;
+  
+  if (packageName === "Divorce Prevention Package") {
+    return "divorce-prevention";
+  }
+  
+  if (packageName === "Pre-Marriage Clarity Package") {
+    return "pre-marriage-clarity";
+  }
+  
+  return null;
+}

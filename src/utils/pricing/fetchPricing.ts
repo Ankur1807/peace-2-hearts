@@ -6,26 +6,29 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
   try {
     console.log('Fetching service pricing for:', serviceIds);
     
-    // Map of service IDs from client to potential database service IDs
-    const serviceIdMap: Record<string, string[]> = {
-      'mental-health-counselling': ['mental-health-counselling', 'Mental-Health-Counselling'],
-      'premarital-counselling': ['premarital-counselling', 'Premarital Counselling- Individual', 'Premarital Counselling- couple'],
-      'sexual-health-counselling': ['sexual-health-counselling', 'Sexual Health Counselling- Individual', 'Sexual Health Counselling- couple'],
-      'pre-marriage-legal': ['pre-marriage-legal', 'Pre-marriage-Legal-Consultation'],
-      'couples-counselling': ['couples-counselling', 'Couples-Counselling'],
-      'family-therapy': ['family-therapy', 'Family-Therapy'],
-      'general-legal': ['general-legal'],
-      'divorce-legal': ['divorce-legal', 'Divorce-Consultation'],
-      'custody-legal': ['custody-legal', 'Child-Custody-Consultation'],
-      'mediation': ['mediation', 'Mediation-Services']
+    // Map of client service IDs to database service IDs
+    const clientToDbServiceIdMap: Record<string, string[]> = {
+      'mental-health-counselling': ['Mental-Health-Counselling'],
+      'family-therapy': ['Family-Therapy'],
+      'premarital-counselling': ['Premarital-Counselling'],
+      'couples-counselling': ['Couples-Counselling'],
+      'sexual-health-counselling': ['Sexual-Health-Counselling'],
+      'pre-marriage-legal': ['Pre-Marriage-Legal-Consultation'],
+      'divorce-legal': ['Divorce-Consultation'],
+      'custody-legal': ['Child-Custody-Consultation'],
+      'custody': ['Child-Custody-Consultation'],
+      'divorce': ['Divorce-Consultation'],
+      'mediation': ['Mediation-Services'],
+      'maintenance': ['Maintenance-Consultation'],
+      'general-legal': ['General-Legal-Consultation']
     };
     
-    // Expand the requested IDs to include possible DB matches
+    // Expand the requested IDs to include database matches
     let expandedIds: string[] = [];
     if (serviceIds && serviceIds.length > 0) {
       serviceIds.forEach(id => {
-        if (serviceIdMap[id]) {
-          expandedIds = [...expandedIds, ...serviceIdMap[id]];
+        if (clientToDbServiceIdMap[id]) {
+          expandedIds = [...expandedIds, ...clientToDbServiceIdMap[id]];
         } else {
           expandedIds.push(id);
         }
@@ -85,16 +88,31 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
     
     console.log('Retrieved pricing data:', data);
     
-    // Map database service IDs back to client service IDs
+    // Map from database service IDs back to client service IDs
+    // Create reverse mapping for db to client IDs
+    const dbToClientServiceIdMap: Record<string, string> = {};
+    Object.entries(clientToDbServiceIdMap).forEach(([clientId, dbIds]) => {
+      dbIds.forEach(dbId => {
+        dbToClientServiceIdMap[dbId] = clientId;
+      });
+    });
+    
     data.forEach((item) => {
       if (item.price && item.price > 0) {
         // Find which client ID this DB ID maps to
-        let clientId = serviceIds?.find(id => 
-          serviceIdMap[id] && serviceIdMap[id].includes(item.service_id)
-        ) || item.service_id;
+        const clientId = dbToClientServiceIdMap[item.service_id] || item.service_id;
         
-        pricingMap.set(clientId, item.price);
-        console.log(`Set price for ${clientId} (from DB ID ${item.service_id}): ${item.price}`);
+        // If we have a client ID mapping, use it
+        if (clientId) {
+          pricingMap.set(clientId, item.price);
+          console.log(`Set price for ${clientId} (from DB ID ${item.service_id}): ${item.price}`);
+        }
+        
+        // Also set the original service_id for direct matches
+        if (!serviceIds || serviceIds.includes(item.service_id)) {
+          pricingMap.set(item.service_id, item.price);
+          console.log(`Set price for original service ID ${item.service_id}: ${item.price}`);
+        }
       } else {
         console.warn(`Service ${item.service_id} has invalid price: ${item.price}`);
       }
@@ -117,18 +135,18 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
       return new Map<string, number>();
     }
     
-    // Map of package IDs from client to potential database package IDs
-    const packageIdMap: Record<string, string[]> = {
-      'divorce-prevention': ['divorce-prevention', 'Divorce-Prevention-Package'],
-      'pre-marriage-clarity': ['pre-marriage-clarity', 'Pre-Marriage-Package']
+    // Map of client package IDs to database package IDs
+    const clientToDbPackageIdMap: Record<string, string[]> = {
+      'divorce-prevention': ['Divorce-Prevention-Package'],
+      'pre-marriage-clarity': ['Pre-Marriage-Package']
     };
     
-    // Expand the requested IDs to include possible DB matches
+    // Expand the requested IDs to include database matches
     let expandedIds: string[] = [];
     if (packageIds && packageIds.length > 0) {
       packageIds.forEach(id => {
-        if (packageIdMap[id]) {
-          expandedIds = [...expandedIds, ...packageIdMap[id]];
+        if (clientToDbPackageIdMap[id]) {
+          expandedIds = [...expandedIds, ...clientToDbPackageIdMap[id]];
         } else {
           expandedIds.push(id);
         }
@@ -137,115 +155,135 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
     
     console.log('Expanded package IDs to search for:', expandedIds);
     
-    // First try to get actual package pricing
+    // First try to get package pricing from the service_pricing table
     const { data, error } = await supabase
-      .from('package_pricing')
-      .select('package_id, price, is_active')
-      .in('package_id', expandedIds)
+      .from('service_pricing')
+      .select('service_id, price, is_active')
+      .in('service_id', expandedIds)
       .eq('is_active', true);
     
     // Create a map of package_id to price
     const pricingMap = new Map<string, number>();
     
     if (error) {
-      console.error('Error fetching package pricing:', error);
-      throw error;
-    }
-    
-    if (!data || data.length === 0) {
-      console.warn('No package pricing data found for:', packageIds);
+      console.error('Error fetching package pricing from service_pricing:', error);
+    } else if (data && data.length > 0) {
+      console.log('Found package pricing in service_pricing table:', data);
       
-      // Log all packages in the database to help debugging
-      const { data: allPackages, error: allPackagesError } = await supabase
-        .from('package_pricing')
-        .select('package_id, price, is_active');
-        
-      if (!allPackagesError && allPackages) {
-        console.log('All available packages in database:', allPackages.map(p => p.package_id));
-      }
+      // Create reverse mapping for db to client IDs
+      const dbToClientPackageIdMap: Record<string, string> = {};
+      Object.entries(clientToDbPackageIdMap).forEach(([clientId, dbIds]) => {
+        dbIds.forEach(dbId => {
+          dbToClientPackageIdMap[dbId] = clientId;
+        });
+      });
       
-      // If no package pricing, check the service_pricing table for package entries
-      const { data: servicePackages, error: servicePackagesError } = await supabase
-        .from('service_pricing')
-        .select('service_id, price, is_active')
-        .in('service_id', expandedIds)
-        .eq('is_active', true);
+      // Use these prices
+      data.forEach(pkg => {
+        // Find which client ID this DB ID maps to
+        const clientId = dbToClientPackageIdMap[pkg.service_id] || pkg.service_id;
         
-      if (!servicePackagesError && servicePackages && servicePackages.length > 0) {
-        console.log('Found package pricing in service_pricing table:', servicePackages);
-        
-        // Use these prices
-        servicePackages.forEach(pkg => {
-          // Find which client ID this DB ID maps to
-          let clientId = packageIds?.find(id => 
-            packageIdMap[id] && packageIdMap[id].includes(pkg.service_id)
-          ) || pkg.service_id;
-          
+        if (clientId) {
           pricingMap.set(clientId, pkg.price);
           console.log(`Set package price from service table for ${clientId} (from ${pkg.service_id}): ${pkg.price}`);
-        });
-        
-        return pricingMap;
-      }
-      
-      // If no package pricing, calculate based on component services
-      if (packageIds && packageIds.length > 0) {
-        for (const packageId of packageIds) {
-          let serviceIds: string[] = [];
-          
-          if (packageId === 'divorce-prevention') {
-            serviceIds = ['couples-counselling', 'mental-health-counselling', 'mediation', 'general-legal'];
-            console.log('Calculating divorce prevention package from services:', serviceIds);
-          } else if (packageId === 'pre-marriage-clarity') {
-            serviceIds = ['pre-marriage-legal', 'premarital-counselling', 'mental-health-counselling'];
-            console.log('Calculating pre-marriage clarity package from services:', serviceIds);
-          }
-          
-          if (serviceIds.length > 0) {
-            const servicesPricing = await fetchServicePricing(serviceIds);
-            let packageTotal = 0;
-            let allServicesHavePrices = true;
-            
-            // Sum up the prices of component services
-            serviceIds.forEach(serviceId => {
-              const servicePrice = servicesPricing.get(serviceId);
-              if (servicePrice && servicePrice > 0) {
-                packageTotal += servicePrice;
-                console.log(`Adding ${servicePrice} for ${serviceId}`);
-              } else {
-                allServicesHavePrices = false;
-                console.log(`Missing price for ${serviceId}`);
-              }
-            });
-            
-            // Only apply the package discount if all services have prices
-            if (packageTotal > 0 && allServicesHavePrices) {
-              packageTotal = Math.round(packageTotal * 0.85); // 15% discount
-              pricingMap.set(packageId, packageTotal);
-              console.log(`Set package price for ${packageId}: ${packageTotal} (after 15% discount)`);
-            } else if (packageTotal > 0) {
-              // If we have some prices but not all, still set the price without discount
-              pricingMap.set(packageId, packageTotal);
-              console.log(`Set partial package price for ${packageId}: ${packageTotal} (no discount applied)`);
-            }
-          }
         }
-      }
-    } else {
-      // Use the pricing data from the database
-      data.forEach((item) => {
-        if (item.price && item.price > 0) {
-          // Find which client ID this DB ID maps to
-          let clientId = packageIds?.find(id => 
-            packageIdMap[id] && packageIdMap[id].includes(item.package_id)
-          ) || item.package_id;
-          
-          pricingMap.set(clientId, item.price);
-          console.log(`Set package price from DB for ${clientId} (from ${item.package_id}): ${item.price}`);
-        } else {
-          console.warn(`Package ${item.package_id} has invalid price: ${item.price}`);
+        
+        // Also set the original service_id for direct matches
+        if (!packageIds || packageIds.includes(pkg.service_id)) {
+          pricingMap.set(pkg.service_id, pkg.price);
+          console.log(`Set price for original package ID ${pkg.service_id}: ${pkg.price}`);
         }
       });
+      
+      return pricingMap;
+    }
+    
+    // If no pricing found, try fallback to dedicated package_pricing table (if it exists)
+    try {
+      const { data: packageData, error: packageError } = await supabase
+        .from('package_pricing')
+        .select('package_id, price, is_active')
+        .in('package_id', expandedIds)
+        .eq('is_active', true);
+      
+      if (packageError) {
+        console.error('Error fetching from package_pricing table:', packageError);
+      } else if (packageData && packageData.length > 0) {
+        console.log('Found package pricing in package_pricing table:', packageData);
+        
+        // Create reverse mapping for db to client IDs
+        const dbToClientPackageIdMap: Record<string, string> = {};
+        Object.entries(clientToDbPackageIdMap).forEach(([clientId, dbIds]) => {
+          dbIds.forEach(dbId => {
+            dbToClientPackageIdMap[dbId] = clientId;
+          });
+        });
+        
+        // Use these prices
+        packageData.forEach(pkg => {
+          // Find which client ID this DB ID maps to
+          const clientId = dbToClientPackageIdMap[pkg.package_id] || pkg.package_id;
+          
+          if (clientId) {
+            pricingMap.set(clientId, pkg.price);
+            console.log(`Set package price from package table for ${clientId} (from ${pkg.package_id}): ${pkg.price}`);
+          }
+          
+          // Also set the original package_id for direct matches
+          if (!packageIds || packageIds.includes(pkg.package_id)) {
+            pricingMap.set(pkg.package_id, pkg.price);
+            console.log(`Set price for original package ID ${pkg.package_id}: ${pkg.price}`);
+          }
+        });
+      }
+    } catch (packageTableError) {
+      // Ignore errors from package_pricing table as it might not exist
+      console.log('Failed to fetch from package_pricing table (it might not exist):', packageTableError);
+    }
+    
+    // If we still don't have pricing information for the requested packages, 
+    // calculate based on component services as a last resort
+    if (pricingMap.size === 0 && packageIds && packageIds.length > 0) {
+      for (const packageId of packageIds) {
+        let serviceIds: string[] = [];
+        
+        if (packageId === 'divorce-prevention') {
+          serviceIds = ['couples-counselling', 'mental-health-counselling', 'mediation', 'general-legal'];
+          console.log('Calculating divorce prevention package from services:', serviceIds);
+        } else if (packageId === 'pre-marriage-clarity') {
+          serviceIds = ['pre-marriage-legal', 'premarital-counselling', 'mental-health-counselling'];
+          console.log('Calculating pre-marriage clarity package from services:', serviceIds);
+        }
+        
+        if (serviceIds.length > 0) {
+          const servicesPricing = await fetchServicePricing(serviceIds);
+          let packageTotal = 0;
+          let allServicesHavePrices = true;
+          
+          // Sum up the prices of component services
+          serviceIds.forEach(serviceId => {
+            const servicePrice = servicesPricing.get(serviceId);
+            if (servicePrice && servicePrice > 0) {
+              packageTotal += servicePrice;
+              console.log(`Adding ${servicePrice} for ${serviceId}`);
+            } else {
+              allServicesHavePrices = false;
+              console.log(`Missing price for ${serviceId}`);
+            }
+          });
+          
+          // Only apply the package discount if all services have prices
+          if (packageTotal > 0 && allServicesHavePrices) {
+            packageTotal = Math.round(packageTotal * 0.85); // 15% discount
+            pricingMap.set(packageId, packageTotal);
+            console.log(`Set package price for ${packageId}: ${packageTotal} (after 15% discount)`);
+          } else if (packageTotal > 0) {
+            // If we have some prices but not all, still set the price without discount
+            pricingMap.set(packageId, packageTotal);
+            console.log(`Set partial package price for ${packageId}: ${packageTotal} (no discount applied)`);
+          }
+        }
+      }
     }
     
     console.log('Final package pricing map:', Object.fromEntries(pricingMap));
