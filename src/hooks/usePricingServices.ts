@@ -1,8 +1,16 @@
+
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ServicePrice } from '@/utils/pricingTypes';
 import { NewServiceFormValues } from '@/components/pricing/AddServiceForm';
+import { 
+  fetchAllServices, 
+  updateServicePrice, 
+  toggleServiceActive, 
+  createService, 
+  removeService 
+} from '@/utils/pricing/serviceOperations';
+import { addInitialServices } from '@/utils/pricing/initialServices';
 
 export const usePricingServices = () => {
   const [services, setServices] = useState<ServicePrice[]>([]);
@@ -14,13 +22,18 @@ export const usePricingServices = () => {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('service_pricing')
-        .select('*')
-        .order('category', { ascending: true })
-        .order('service_name', { ascending: true });
-
-      if (error) {
+      let data: ServicePrice[];
+      
+      try {
+        data = await fetchAllServices();
+        
+        if (data.length === 0) {
+          await addInitialServices();
+          data = await fetchAllServices();
+        }
+        
+        setServices(data);
+      } catch (error: any) {
         if (error.code === 'PGRST116') {
           toast({
             title: 'Authentication Error',
@@ -30,21 +43,6 @@ export const usePricingServices = () => {
         } else {
           throw error;
         }
-        return;
-      }
-      
-      if (data && data.length === 0) {
-        await addInitialServices();
-        const result = await supabase
-          .from('service_pricing')
-          .select('*')
-          .order('category', { ascending: true })
-          .order('service_name', { ascending: true });
-          
-        if (result.error) throw result.error;
-        setServices(result.data as ServicePrice[] || []);
-      } else {
-        setServices(data as ServicePrice[] || []);
       }
     } catch (error: any) {
       toast({
@@ -55,56 +53,6 @@ export const usePricingServices = () => {
       console.error('Error fetching services:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const addInitialServices = async () => {
-    const initialServices = [
-      { service_name: 'Individual Therapy', service_id: 'therapy-individual', price: 2500, category: 'mental-health', is_active: true },
-      { service_name: 'Couples Counselling', service_id: 'therapy-couples', price: 3000, category: 'mental-health', is_active: true },
-      { service_name: 'Family Therapy', service_id: 'therapy-family', price: 3500, category: 'mental-health', is_active: true },
-      { service_name: 'Premarital Counselling', service_id: 'therapy-premarital', price: 2800, category: 'mental-health', is_active: true },
-      { service_name: 'Relationship Counselling', service_id: 'therapy-relationship', price: 3000, category: 'mental-health', is_active: true },
-      
-      { service_name: 'Divorce Consultation', service_id: 'legal-divorce', price: 5000, category: 'legal', is_active: true },
-      { service_name: 'Child Custody Consultation', service_id: 'legal-custody', price: 4500, category: 'legal', is_active: true },
-      { service_name: 'Legal Document Review', service_id: 'legal-document', price: 3000, category: 'legal', is_active: true },
-      { service_name: 'Court Representation', service_id: 'legal-court', price: 10000, category: 'legal', is_active: true },
-      { service_name: 'Maintenance Consultation', service_id: 'legal-maintenance', price: 3500, category: 'legal', is_active: true },
-      
-      { service_name: 'Meditation Session', service_id: 'holistic-meditation', price: 1500, category: 'holistic', is_active: true },
-      { service_name: 'Yoga Therapy', service_id: 'holistic-yoga', price: 1800, category: 'holistic', is_active: true },
-      { service_name: 'Art Therapy', service_id: 'holistic-art', price: 2000, category: 'holistic', is_active: true },
-      { service_name: 'Naturopathy Consultation', service_id: 'holistic-naturopathy', price: 2500, category: 'holistic', is_active: true },
-    ];
-
-    try {
-      for (const service of initialServices) {
-        const { error } = await supabase
-          .from('service_pricing')
-          .insert([{
-            ...service,
-            currency: 'INR',
-            scenario: 'regular',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }]);
-          
-        if (error) {
-          console.error('Error adding initial service:', error);
-        }
-      }
-      
-      toast({
-        title: 'Services Added',
-        description: 'Initial services have been added to the database.',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: `Failed to add initial services: ${error.message}`,
-        variant: 'destructive',
-      });
     }
   };
 
@@ -129,23 +77,7 @@ export const usePricingServices = () => {
         return;
       }
 
-      const { error } = await supabase
-        .from('service_pricing')
-        .update({ price: Number(editedPrice), updated_at: new Date().toISOString() })
-        .eq('id', id);
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          toast({
-            title: 'Permission Denied',
-            description: 'You do not have permission to update prices. Please make sure you are logged in as an admin.',
-            variant: 'destructive',
-          });
-        } else {
-          throw error;
-        }
-        return;
-      }
+      await updateServicePrice(id, Number(editedPrice));
 
       toast({
         title: 'Price Updated',
@@ -155,34 +87,14 @@ export const usePricingServices = () => {
       setEditMode(null);
       fetchServices();
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: `Failed to update price: ${error.message}`,
-        variant: 'destructive',
-      });
+      handleOperationError(error, 'update price');
     }
   };
 
   const toggleServiceStatus = async (id: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('service_pricing')
-        .update({ is_active: !currentStatus, updated_at: new Date().toISOString() })
-        .eq('id', id);
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          toast({
-            title: 'Permission Denied',
-            description: 'You do not have permission to update service status. Please make sure you are logged in as an admin.',
-            variant: 'destructive',
-          });
-        } else {
-          throw error;
-        }
-        return;
-      }
-
+      await toggleServiceActive(id, currentStatus);
+      
       toast({
         title: 'Status Updated',
         description: `Service ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
@@ -190,43 +102,14 @@ export const usePricingServices = () => {
 
       fetchServices();
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: `Failed to update status: ${error.message}`,
-        variant: 'destructive',
-      });
+      handleOperationError(error, 'update status');
     }
   };
 
   const addNewService = async (data: NewServiceFormValues) => {
     try {
-      const { error } = await supabase
-        .from('service_pricing')
-        .insert([{
-          service_name: data.service_name,
-          service_id: data.service_id,
-          price: data.price,
-          category: data.category,
-          currency: 'INR',
-          is_active: true,
-          scenario: 'regular',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }]);
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          toast({
-            title: 'Permission Denied',
-            description: 'You do not have permission to add services. Please make sure you are logged in as an admin.',
-            variant: 'destructive',
-          });
-        } else {
-          throw error;
-        }
-        return false;
-      }
-
+      await createService(data);
+      
       toast({
         title: 'Service Added',
         description: 'New service has been successfully added.',
@@ -234,35 +117,15 @@ export const usePricingServices = () => {
 
       return true;
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: `Failed to add service: ${error.message}`,
-        variant: 'destructive',
-      });
+      handleOperationError(error, 'add service');
       return false;
     }
   };
 
   const deleteService = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('service_pricing')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          toast({
-            title: 'Permission Denied',
-            description: 'You do not have permission to delete services. Please make sure you are logged in as an admin.',
-            variant: 'destructive',
-          });
-        } else {
-          throw error;
-        }
-        return false;
-      }
-
+      await removeService(id);
+      
       toast({
         title: 'Service Deleted',
         description: 'Service has been successfully deleted.',
@@ -270,13 +133,27 @@ export const usePricingServices = () => {
 
       return true;
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: `Failed to delete service: ${error.message}`,
-        variant: 'destructive',
-      });
+      handleOperationError(error, 'delete service');
       return false;
     }
+  };
+
+  // Helper function to handle operation errors
+  const handleOperationError = (error: any, operation: string) => {
+    if (error.code === 'PGRST116') {
+      toast({
+        title: 'Permission Denied',
+        description: `You do not have permission to ${operation}. Please make sure you are logged in as an admin.`,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Error',
+        description: `Failed to ${operation}: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+    console.error(`Error: ${operation}:`, error);
   };
 
   return {
