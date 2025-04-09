@@ -21,6 +21,7 @@ interface OrderResponse {
     receipt: string;
     status: string;
     created_at: number;
+    notes?: Record<string, string>; // Added notes property to fix the TypeScript error
   };
   error?: string;
   details?: any;

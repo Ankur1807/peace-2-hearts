@@ -92,7 +92,9 @@ export function useConsultationPayment({
       
       // Initialize Razorpay
       const options = {
-        key: order.notes?.key_id || "rzp_test_C4wVqKJiq5fXgj", // Use key from server or fallback to test key
+        key: process.env.NODE_ENV === 'production' 
+          ? process.env.RAZORPAY_KEY_ID 
+          : "rzp_test_C4wVqKJiq5fXgj", // Fallback to test key
         amount: order.amount, // Amount in paise
         currency: order.currency,
         name: "Peace2Hearts",
