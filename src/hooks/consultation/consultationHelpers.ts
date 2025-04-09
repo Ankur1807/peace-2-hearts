@@ -4,9 +4,11 @@ const serviceDisplayNames: Record<string, string> = {
   // Mental Health Services
   'mental-health-counselling': 'Mental Health Counselling',
   'family-therapy': 'Family Therapy',
-  'premarital-counselling': 'Premarital Counselling',
+  'premarital-counselling-individual': 'Premarital Counselling - Individual',
+  'premarital-counselling-couple': 'Premarital Counselling - Couple',
   'couples-counselling': 'Couples Counselling',
-  'sexual-health-counselling': 'Sexual Health Counselling',
+  'sexual-health-counselling-individual': 'Sexual Health Counselling - Individual',
+  'sexual-health-counselling-couple': 'Sexual Health Counselling - Couple',
   
   // Legal Services
   'pre-marriage-legal': 'Pre-marriage Legal Consultation',
@@ -41,7 +43,7 @@ export function getPackageName(selectedServices: string[]): string | null {
   const preMarriageClarity = [
     'mental-health-counselling',
     'pre-marriage-legal',
-    'premarital-counselling'
+    'premarital-counselling-individual'
   ].sort();
   
   if (sortedServices.length === divorcePrevention.length && 

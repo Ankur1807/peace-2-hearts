@@ -21,15 +21,17 @@ interface ServiceSelectionOptionsProps {
   selectedServices: string[];
   handleServiceSelection: (serviceId: string, checked: boolean) => void;
   handlePackageSelection: (packageId: string) => void;
-  pricing?: Map<string, number>; // Add the missing pricing prop
+  pricing?: Map<string, number>; 
 }
 
 const mentalHealthServices: ServiceOption[] = [
   { id: 'mental-health-counselling', label: 'Mental Health Counselling' },
   { id: 'family-therapy', label: 'Family Therapy' },
-  { id: 'premarital-counselling', label: 'Premarital Counselling' },
+  { id: 'premarital-counselling-individual', label: 'Premarital Counselling - Individual' },
+  { id: 'premarital-counselling-couple', label: 'Premarital Counselling - Couple' },
   { id: 'couples-counselling', label: 'Couples Counselling' },
-  { id: 'sexual-health-counselling', label: 'Sexual Health Counselling' }
+  { id: 'sexual-health-counselling-individual', label: 'Sexual Health Counselling - Individual' },
+  { id: 'sexual-health-counselling-couple', label: 'Sexual Health Counselling - Couple' }
 ];
 
 const legalServices: ServiceOption[] = [
@@ -45,14 +47,14 @@ const holisticPackages: HolisticPackage[] = [
   { 
     id: 'divorce-prevention', 
     label: 'Divorce Prevention Package', 
-    description: '4 sessions (2 therapy + 1 mediation + 1 legal)',
+    description: '2 therapy + 1 mediation + 1 legal',
     services: ['couples-counselling', 'mental-health-counselling', 'mediation', 'general-legal']
   },
   { 
     id: 'pre-marriage-clarity', 
     label: 'Pre-Marriage Clarity Package', 
-    description: '3 sessions (1 legal + 2 mental health)',
-    services: ['pre-marriage-legal', 'premarital-counselling', 'mental-health-counselling'] 
+    description: '1 legal + 2 mental health',
+    services: ['pre-marriage-legal', 'premarital-counselling-individual', 'mental-health-counselling'] 
   }
 ];
 
