@@ -24,7 +24,8 @@ const BookConsultation = () => {
     serviceCategory,
     selectedServices,
     personalDetails,
-    totalPrice
+    totalPrice,
+    pricing
   } = bookingState;
   const [isDevelopment, setIsDevelopment] = useState(false);
 

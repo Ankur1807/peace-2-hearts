@@ -15,8 +15,8 @@ export interface BookingDetails {
     phone: string;
     message: string;
   };
-  clientName?: string;
-  email?: string;
+  clientName: string;
+  email: string;
 }
 
 export interface PersonalDetails {
