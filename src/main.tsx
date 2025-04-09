@@ -3,7 +3,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
-import { fetchInitialServices } from './utils/pricing/serviceOperations';
+import { fetchInitialServices } from './utils/pricing/serviceInitializer';
 
 // Initialize default services if needed
 fetchInitialServices()

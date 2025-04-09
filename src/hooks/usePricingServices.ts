@@ -10,7 +10,7 @@ import {
   createService, 
   removeService 
 } from '@/utils/pricing/serviceOperations';
-import { addInitialServices } from '@/utils/pricing/initialServices';
+import { addInitialServices } from '@/utils/pricing/serviceInitializer';
 
 export const usePricingServices = () => {
   const [services, setServices] = useState<ServicePrice[]>([]);
