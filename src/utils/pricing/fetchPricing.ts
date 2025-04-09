@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ServicePrice } from '@/utils/pricingTypes';
 
@@ -13,7 +14,7 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
       'pre-marriage-legal': ['pre-marriage-legal', 'Pre-marriage-Legal-Consultation'],
       'couples-counselling': ['couples-counselling', 'Couples-Counselling'],
       'family-therapy': ['family-therapy', 'Family-Therapy'],
-      'general-legal': ['general-legal'],
+      'general-legal': ['general-legal', 'General-Legal-Consultation'],
       'divorce': ['divorce', 'divorce-legal', 'Divorce-Consultation'],
       'custody': ['custody', 'custody-legal', 'Child-Custody-Consultation'],
       'maintenance': ['maintenance', 'Maintenance-Consultation'],
