@@ -21,6 +21,7 @@ interface ServiceSelectionOptionsProps {
   selectedServices: string[];
   handleServiceSelection: (serviceId: string, checked: boolean) => void;
   handlePackageSelection: (packageId: string) => void;
+  pricing?: Map<string, number>; // Add the missing pricing prop
 }
 
 const mentalHealthServices: ServiceOption[] = [
@@ -59,7 +60,8 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
   serviceCategory,
   selectedServices,
   handleServiceSelection,
-  handlePackageSelection
+  handlePackageSelection,
+  pricing
 }) => {
   // For holistic package selection
   if (serviceCategory === 'holistic') {

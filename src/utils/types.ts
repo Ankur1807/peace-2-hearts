@@ -6,7 +6,7 @@ export interface BookingDetails {
   timeSlot: string;
   timeframe?: string;
   packageName?: string;
-  amount?: number;
+  amount?: number;  // Keep this property - it's needed
   personalDetails?: {
     firstName: string;
     lastName: string;

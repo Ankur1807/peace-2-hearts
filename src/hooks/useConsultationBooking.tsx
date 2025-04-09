@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { saveConsultation } from '@/utils/consultationApi';
@@ -84,7 +83,7 @@ export function useConsultationBooking() {
   
   const { toast } = useToast();
 
-  // State setter functions using useCallback to prevent unnecessary rerenders
+  // State setter functions using useCallback
   const setDate = useCallback((date: Date | undefined) => 
     setState(prev => ({ ...prev, date })), []);
   
@@ -134,138 +133,6 @@ export function useConsultationBooking() {
     console.log("Updating personal details:", details);
     setState(prev => ({ ...prev, personalDetails: details }));
   }, []);
-
-  // Fetch pricing data when services change
-  useEffect(() => {
-    const loadPricing = async () => {
-      if (state.selectedServices.length === 0) {
-        setState(prev => ({ ...prev, totalPrice: 0 }));
-        return;
-      }
-      
-      try {
-        let pricingMap: Map<string, number>;
-        
-        if (state.serviceCategory === 'holistic') {
-          // Check if it matches a pre-defined package
-          const packageName = getPackageName(state.selectedServices);
-          if (packageName === "Divorce Prevention Package") {
-            pricingMap = await fetchPackagePricing(['divorce-prevention']);
-          } else if (packageName === "Pre-Marriage Clarity Package") {
-            pricingMap = await fetchPackagePricing(['pre-marriage-clarity']);
-          } else {
-            // If not a pre-defined package, get individual service prices
-            pricingMap = await fetchServicePricing(state.selectedServices);
-          }
-        } else {
-          // For regular services, get individual prices
-          pricingMap = await fetchServicePricing(state.selectedServices);
-        }
-        
-        // Calculate total price
-        let total = 0;
-        if (state.serviceCategory === 'holistic') {
-          const packageName = getPackageName(state.selectedServices);
-          if (packageName === "Divorce Prevention Package") {
-            total = pricingMap.get('divorce-prevention') || 0;
-          } else if (packageName === "Pre-Marriage Clarity Package") {
-            total = pricingMap.get('pre-marriage-clarity') || 0;
-          } else {
-            // Sum individual services
-            state.selectedServices.forEach(serviceId => {
-              total += pricingMap.get(serviceId) || 0;
-            });
-          }
-        } else {
-          // Sum individual services
-          state.selectedServices.forEach(serviceId => {
-            total += pricingMap.get(serviceId) || 0;
-          });
-        }
-        
-        setState(prev => ({ ...prev, pricing: pricingMap, totalPrice: total }));
-      } catch (error) {
-        console.error("Error fetching pricing:", error);
-      }
-    };
-    
-    loadPricing();
-  }, [state.selectedServices, state.serviceCategory]);
-  
-  // Process payment using Razorpay
-  const processPayment = useCallback(async () => {
-    if (!state.totalPrice) {
-      toast({
-        title: "Invalid Amount",
-        description: "Cannot process payment for zero amount.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setIsProcessing(true);
-    
-    try {
-      // This would normally come from your backend
-      // For now we'll generate a temporary order ID locally
-      const tempOrderId = `order_${Math.random().toString(36).substring(2, 15)}`;
-      setOrderId(tempOrderId);
-      
-      // In production, you would create an order on your backend and get the order ID
-      // Example: const order = await createOrder(state.totalPrice);
-      
-      const options = {
-        key: "RAZORPAY_KEY_ID", // Replace with actual key in production
-        amount: state.totalPrice * 100, // Razorpay accepts amount in paise
-        currency: "INR",
-        name: "Peace2Hearts",
-        description: `Payment for ${state.selectedServices.length} services`,
-        order_id: tempOrderId,
-        handler: function(response: any) {
-          // Handle successful payment
-          console.log("Payment successful:", response);
-          setPaymentCompleted(true);
-          
-          // Now proceed with booking confirmation
-          handleConfirmBooking();
-        },
-        prefill: {
-          name: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
-          email: state.personalDetails.email,
-          contact: state.personalDetails.phone
-        },
-        notes: {
-          services: state.selectedServices.join(',')
-        },
-        theme: {
-          color: "#3399cc"
-        }
-      };
-      
-      // Initialize and open Razorpay
-      const razorpay = new (window as any).Razorpay(options);
-      razorpay.open();
-      
-      // Handle errors from Razorpay
-      razorpay.on('payment.failed', function(response: any) {
-        console.error("Payment failed:", response.error);
-        toast({
-          title: "Payment Failed",
-          description: response.error.description || "Your payment was not successful. Please try again.",
-          variant: "destructive"
-        });
-        setIsProcessing(false);
-      });
-    } catch (error: any) {
-      console.error("Error processing payment:", error);
-      toast({
-        title: "Payment Processing Error",
-        description: error.message || "There was an error processing your payment. Please try again.",
-        variant: "destructive"
-      });
-      setIsProcessing(false);
-    }
-  }, [state.totalPrice, state.personalDetails, state.selectedServices, toast, setIsProcessing, setOrderId, setPaymentCompleted, handleConfirmBooking]);
 
   // Process each service booking
   const processServiceBookings = useCallback(async () => {
@@ -367,6 +234,81 @@ export function useConsultationBooking() {
     }
   }, [state, processServiceBookings, toast, setIsProcessing, setBookingError, setReferenceId, setSubmitted]);
 
+  // Process payment using Razorpay
+  const processPayment = useCallback(async () => {
+    if (!state.totalPrice) {
+      toast({
+        title: "Invalid Amount",
+        description: "Cannot process payment for zero amount.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsProcessing(true);
+    
+    try {
+      // This would normally come from your backend
+      // For now we'll generate a temporary order ID locally
+      const tempOrderId = `order_${Math.random().toString(36).substring(2, 15)}`;
+      setOrderId(tempOrderId);
+      
+      // In production, you would create an order on your backend and get the order ID
+      // Example: const order = await createOrder(state.totalPrice);
+      
+      const options = {
+        key: "RAZORPAY_KEY_ID", // Replace with actual key in production
+        amount: state.totalPrice * 100, // Razorpay accepts amount in paise
+        currency: "INR",
+        name: "Peace2Hearts",
+        description: `Payment for ${state.selectedServices.length} services`,
+        order_id: tempOrderId,
+        handler: function(response: any) {
+          // Handle successful payment
+          console.log("Payment successful:", response);
+          setPaymentCompleted(true);
+          
+          // Now proceed with booking confirmation
+          handleConfirmBooking();
+        },
+        prefill: {
+          name: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
+          email: state.personalDetails.email,
+          contact: state.personalDetails.phone
+        },
+        notes: {
+          services: state.selectedServices.join(',')
+        },
+        theme: {
+          color: "#3399cc"
+        }
+      };
+      
+      // Initialize and open Razorpay
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+      
+      // Handle errors from Razorpay
+      razorpay.on('payment.failed', function(response: any) {
+        console.error("Payment failed:", response.error);
+        toast({
+          title: "Payment Failed",
+          description: response.error.description || "Your payment was not successful. Please try again.",
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+      });
+    } catch (error: any) {
+      console.error("Error processing payment:", error);
+      toast({
+        title: "Payment Processing Error",
+        description: error.message || "There was an error processing your payment. Please try again.",
+        variant: "destructive"
+      });
+      setIsProcessing(false);
+    }
+  }, [state.totalPrice, state.personalDetails, state.selectedServices, toast, setIsProcessing, setOrderId, setPaymentCompleted, handleConfirmBooking]);
+
   // Function to proceed to payment step
   const proceedToPayment = useCallback(() => {
     // Validate form first
@@ -385,6 +327,63 @@ export function useConsultationBooking() {
     
     setShowPaymentStep(true);
   }, [state.personalDetails, state.selectedServices, toast, setShowPaymentStep]);
+
+  // Fetch pricing data when services change
+  useEffect(() => {
+    const loadPricing = async () => {
+      if (state.selectedServices.length === 0) {
+        setState(prev => ({ ...prev, totalPrice: 0 }));
+        return;
+      }
+      
+      try {
+        let pricingMap: Map<string, number>;
+        
+        if (state.serviceCategory === 'holistic') {
+          // Check if it matches a pre-defined package
+          const packageName = getPackageName(state.selectedServices);
+          if (packageName === "Divorce Prevention Package") {
+            pricingMap = await fetchPackagePricing(['divorce-prevention']);
+          } else if (packageName === "Pre-Marriage Clarity Package") {
+            pricingMap = await fetchPackagePricing(['pre-marriage-clarity']);
+          } else {
+            // If not a pre-defined package, get individual service prices
+            pricingMap = await fetchServicePricing(state.selectedServices);
+          }
+        } else {
+          // For regular services, get individual prices
+          pricingMap = await fetchServicePricing(state.selectedServices);
+        }
+        
+        // Calculate total price
+        let total = 0;
+        if (state.serviceCategory === 'holistic') {
+          const packageName = getPackageName(state.selectedServices);
+          if (packageName === "Divorce Prevention Package") {
+            total = pricingMap.get('divorce-prevention') || 0;
+          } else if (packageName === "Pre-Marriage Clarity Package") {
+            total = pricingMap.get('pre-marriage-clarity') || 0;
+          } else {
+            // Sum individual services
+            state.selectedServices.forEach(serviceId => {
+              total += pricingMap.get(serviceId) || 0;
+            });
+          }
+        } else {
+          // Sum individual services
+          state.selectedServices.forEach(serviceId => {
+            total += pricingMap.get(serviceId) || 0;
+          });
+        }
+        
+        setState(prev => ({ ...prev, pricing: pricingMap, totalPrice: total }));
+      } catch (error) {
+        console.error("Error fetching pricing:", error);
+      }
+    };
+    
+    loadPricing();
+  }, [state.selectedServices, state.serviceCategory]);
 
   // Return all state and functions
   return {
