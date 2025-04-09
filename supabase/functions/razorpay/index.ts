@@ -56,6 +56,8 @@ serve(async (req: Request) => {
       });
     }
     
+    console.log("Using Razorpay key_id:", key_id);
+    
     // Authorization for Razorpay API
     const auth = btoa(`${key_id}:${key_secret}`);
     
@@ -99,6 +101,7 @@ serve(async (req: Request) => {
         if (!razorpayResponse.ok) {
           console.error("Razorpay API error:", orderResult);
           return new Response(JSON.stringify({
+            success: false,
             error: 'Failed to create order',
             details: orderResult
           }), {
@@ -107,18 +110,10 @@ serve(async (req: Request) => {
           });
         }
         
-        // Add key_id to the order response for client use
-        const responseOrder = {
-          ...orderResult,
-          notes: {
-            ...orderResult.notes,
-          }
-        };
-        
         // Return the successful order response
         return new Response(JSON.stringify({
           success: true,
-          order: responseOrder
+          order: orderResult
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200

@@ -6,6 +6,7 @@ import { Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getConsultationTypeLabel } from '@/utils/consultationLabels';
 import { formatPrice } from '@/utils/pricing/fetchPricing';
+import Script from '@/components/Script';
 
 type PaymentStepProps = {
   consultationType: string;
@@ -59,8 +60,8 @@ const PaymentStep = ({
         console.log("Razorpay script loaded dynamically");
         setRazorpayLoaded(true);
       };
-      script.onerror = () => {
-        console.error("Failed to load Razorpay script");
+      script.onerror = (e) => {
+        console.error("Failed to load Razorpay script:", e);
       };
       document.body.appendChild(script);
     }
@@ -70,6 +71,15 @@ const PaymentStep = ({
 
   return (
     <div className="space-y-6">
+      <Script 
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        id="razorpay-script"
+        onLoad={() => {
+          console.log("Razorpay script loaded via Script component");
+          setRazorpayLoaded(true);
+        }}
+      />
+      
       <h2 className="text-2xl font-lora font-semibold mb-6">Payment Information</h2>
       
       <div className="mb-6">

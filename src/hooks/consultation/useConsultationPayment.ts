@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { createRazorpayOrder, savePaymentDetails, verifyRazorpayPayment } from '@/utils/payment/razorpayService';
 import { generateReferenceId } from '@/utils/referenceGenerator';
+import { toast } from '@/hooks/use-toast';
 
 interface UseConsultationPaymentProps {
   state: any;
@@ -74,6 +75,8 @@ export function useConsultationPayment({
         setReferenceId(receiptId);
       }
       
+      console.log("Starting payment process with amount:", state.totalPrice);
+      
       // Create an order through our edge function
       const orderResponse = await createRazorpayOrder({
         amount: state.totalPrice,
@@ -95,13 +98,18 @@ export function useConsultationPayment({
         setOrderId(order.id);
       }
       
+      // Use explicit key for testing
+      const razorpayKey = "rzp_test_C4wVqKJiq5fXgj";  // This is a test key, in production use key from backend
+      
+      console.log("Initializing Razorpay with key:", razorpayKey);
+      
       // Initialize Razorpay
       const options = {
-        key: "rzp_test_C4wVqKJiq5fXgj", // Use test key for now
+        key: razorpayKey,
         amount: order.amount, // Amount in paise
         currency: order.currency,
         name: "Peace2Hearts",
-        description: `Payment for ${state.selectedServices.length} services`,
+        description: `Payment for consultation services`,
         order_id: order.id,
         handler: async function(response: any) {
           // Handle successful payment
@@ -189,6 +197,7 @@ export function useConsultationPayment({
           setIsProcessing(false);
         });
         
+        console.log("Opening Razorpay payment modal");
         razorpay.open();
       } catch (err) {
         console.error("Error initializing Razorpay:", err);
