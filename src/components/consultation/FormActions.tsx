@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/utils/pricing/fetchPricing';
+import { AlertCircle } from 'lucide-react';
 
 interface FormActionsProps {
   isFormValid: boolean;
@@ -35,9 +36,12 @@ const FormActions: React.FC<FormActionsProps> = ({
         {buttonText}
       </Button>
       {totalPrice === 0 && isFormValid && (
-        <p className="text-sm text-amber-600 mt-2 text-center">
-          Note: Pricing information may be unavailable. You can still proceed with booking.
-        </p>
+        <div className="mt-3 flex items-center gap-2 border border-amber-300 bg-amber-50 p-3 rounded-md">
+          <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
+          <p className="text-sm text-amber-600">
+            Pricing information is currently unavailable. Please contact support for assistance.
+          </p>
+        </div>
       )}
     </div>
   );

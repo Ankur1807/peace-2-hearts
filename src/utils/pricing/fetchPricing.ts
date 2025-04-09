@@ -25,21 +25,7 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
     
     if (!data || data.length === 0) {
       console.warn('No pricing data found for the requested services');
-      
-      // If no pricing data is found, use fallback default prices
-      if (serviceIds && serviceIds.length > 0) {
-        serviceIds.forEach(id => {
-          // Set default prices based on service type
-          if (id.includes('counselling') || id.includes('therapy')) {
-            pricingMap.set(id, 1500); // Default price for counselling services
-          } else if (id.includes('legal') || id.includes('divorce') || id.includes('custody')) {
-            pricingMap.set(id, 2000); // Default price for legal services
-          } else {
-            pricingMap.set(id, 1000); // Generic default price
-          }
-        });
-        console.log('Using fallback pricing:', pricingMap);
-      }
+      return pricingMap; // Return empty map if no data found
     } else {
       // Use the pricing data from the database
       data.forEach((item) => {
@@ -58,6 +44,7 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
 
 export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<string, number>> {
   try {
+    // First try to get actual package pricing
     let query = supabase
       .from('package_pricing')
       .select('package_id, price')
@@ -69,29 +56,43 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
     
     const { data, error } = await query;
     
-    if (error) {
-      console.error('Error fetching package pricing:', error);
-      throw error;
-    }
-    
     // Create a map of package_id to price
     const pricingMap = new Map<string, number>();
     
     if (!data || data.length === 0) {
       console.warn('No package pricing data found');
       
-      // If no pricing data is found, use fallback default prices
+      // If no package pricing, calculate based on component services
       if (packageIds && packageIds.length > 0) {
-        packageIds.forEach(id => {
-          if (id === 'divorce-prevention') {
-            pricingMap.set(id, 5500);  // Default price for divorce prevention package
-          } else if (id === 'pre-marriage-clarity') {
-            pricingMap.set(id, 4500);  // Default price for pre-marriage clarity package
-          } else {
-            pricingMap.set(id, 3500);  // Generic default package price
+        for (const packageId of packageIds) {
+          let serviceIds: string[] = [];
+          
+          if (packageId === 'divorce-prevention') {
+            serviceIds = ['couples-counselling', 'mental-health-counselling', 'mediation', 'general-legal'];
+          } else if (packageId === 'pre-marriage-clarity') {
+            serviceIds = ['pre-marriage-legal', 'premarital-counselling', 'mental-health-counselling'];
           }
-        });
-        console.log('Using fallback package pricing:', pricingMap);
+          
+          if (serviceIds.length > 0) {
+            const servicesPricing = await fetchServicePricing(serviceIds);
+            let packageTotal = 0;
+            
+            // Sum up the prices of component services
+            serviceIds.forEach(serviceId => {
+              const servicePrice = servicesPricing.get(serviceId);
+              if (servicePrice) {
+                packageTotal += servicePrice;
+              }
+            });
+            
+            // Apply discount (15% for packages)
+            if (packageTotal > 0) {
+              packageTotal = Math.round(packageTotal * 0.85); // 15% discount
+              pricingMap.set(packageId, packageTotal);
+            }
+          }
+        }
+        console.log('Calculated package pricing from services:', pricingMap);
       }
     } else {
       // Use the pricing data from the database

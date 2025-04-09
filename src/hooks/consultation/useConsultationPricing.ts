@@ -12,6 +12,7 @@ interface UseConsultationPricingProps {
 export function useConsultationPricing({ selectedServices, serviceCategory }: UseConsultationPricingProps) {
   const [pricing, setPricing] = useState<Map<string, number>>(new Map());
   const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { toast } = useToast();
   
   // Load pricing data when services change
@@ -20,6 +21,8 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       setTotalPrice(0);
       return;
     }
+    
+    setIsLoading(true);
     
     try {
       let pricingMap: Map<string, number> = new Map();
@@ -72,14 +75,21 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       // Show warning if no prices found
       if (total === 0 && selectedServices.length > 0) {
         console.warn('No pricing information available for selected services');
+        toast({ 
+          title: "Pricing information unavailable", 
+          description: "Unable to retrieve current prices from our database.",
+          variant: "warning"
+        });
       }
     } catch (error) {
       console.error("Error fetching pricing:", error);
       toast({ 
         title: "Error retrieving pricing information", 
-        description: "Using default pricing for now. Please try again later.",
+        description: "Please try again later or contact support.",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   }, [selectedServices, serviceCategory, toast]);
   
@@ -87,5 +97,5 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
     updatePricing();
   }, [updatePricing]);
   
-  return { pricing, totalPrice, updatePricing };
+  return { pricing, totalPrice, isLoading, updatePricing };
 }
