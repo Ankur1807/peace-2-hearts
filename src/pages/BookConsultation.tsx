@@ -74,11 +74,11 @@ const BookConsultation = () => {
   const packageName = getPackageName();
 
   if (submitted) {
-    // Create a properly typed booking details object
+    // Create a properly typed booking details object with all required properties
     const bookingDetails: BookingDetails = {
       clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
       email: personalDetails.email,
-      services: selectedServices,
+      services: selectedServices || [], // Ensure services is always an array, even if selectedServices is undefined
       date: date,
       timeSlot: timeSlot,
       timeframe: timeframe,

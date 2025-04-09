@@ -2,7 +2,7 @@
 export interface BookingDetails {
   serviceCategory: string;
   selectedServices?: string[];
-  services?: string[];
+  services: string[]; // Changed from optional to required
   date?: string | Date;
   timeSlot?: string;
   timeframe?: string;
