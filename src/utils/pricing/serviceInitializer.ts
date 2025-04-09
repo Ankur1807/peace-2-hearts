@@ -64,6 +64,15 @@ export const fetchInitialServices = async () => {
         scenario: "regular"
       },
       {
+        service_name: "Sexual Health Counselling",
+        service_id: "sexual-health-counselling",
+        price: 2800,
+        category: "mental-health",
+        currency: "INR",
+        is_active: true,
+        scenario: "regular"
+      },
+      {
         service_name: "General Legal Consultation",
         service_id: "general-legal",
         price: 2000, 
@@ -104,6 +113,24 @@ export const fetchInitialServices = async () => {
         service_id: "pre-marriage-legal",
         price: 2500,
         category: "legal",
+        currency: "INR",
+        is_active: true,
+        scenario: "regular"
+      },
+      {
+        service_name: "Divorce Prevention Package",
+        service_id: "divorce-prevention",
+        price: 10000,
+        category: "holistic",
+        currency: "INR",
+        is_active: true,
+        scenario: "regular"
+      },
+      {
+        service_name: "Pre-Marriage Clarity Package",
+        service_id: "pre-marriage-clarity",
+        price: 6000,
+        category: "holistic",
         currency: "INR",
         is_active: true,
         scenario: "regular"

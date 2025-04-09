@@ -6,13 +6,41 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
   try {
     console.log('Fetching service pricing for:', serviceIds);
     
+    // Map of service IDs from client to potential database service IDs
+    const serviceIdMap: Record<string, string[]> = {
+      'mental-health-counselling': ['mental-health-counselling', 'Mental-Health-Counselling'],
+      'premarital-counselling': ['premarital-counselling', 'Premarital Counselling- Individual', 'Premarital Counselling- couple'],
+      'sexual-health-counselling': ['sexual-health-counselling', 'Sexual Health Counselling- Individual', 'Sexual Health Counselling- couple'],
+      'pre-marriage-legal': ['pre-marriage-legal', 'Pre-marriage-Legal-Consultation'],
+      'couples-counselling': ['couples-counselling', 'Couples-Counselling'],
+      'family-therapy': ['family-therapy', 'Family-Therapy'],
+      'general-legal': ['general-legal'],
+      'divorce-legal': ['divorce-legal', 'Divorce-Consultation'],
+      'custody-legal': ['custody-legal', 'Child-Custody-Consultation'],
+      'mediation': ['mediation', 'Mediation-Services']
+    };
+    
+    // Expand the requested IDs to include possible DB matches
+    let expandedIds: string[] = [];
+    if (serviceIds && serviceIds.length > 0) {
+      serviceIds.forEach(id => {
+        if (serviceIdMap[id]) {
+          expandedIds = [...expandedIds, ...serviceIdMap[id]];
+        } else {
+          expandedIds.push(id);
+        }
+      });
+    }
+    
+    console.log('Expanded service IDs to search for:', expandedIds);
+    
     let query = supabase
       .from('service_pricing')
       .select('service_id, price, is_active');
     
     // Apply service_id filter if provided
-    if (serviceIds && serviceIds.length > 0) {
-      query = query.in('service_id', serviceIds);
+    if (expandedIds.length > 0) {
+      query = query.in('service_id', expandedIds);
     }
     
     // Only fetch active services
@@ -35,7 +63,7 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
       const { data: allData, error: allError } = await supabase
         .from('service_pricing')
         .select('service_id, price, is_active')
-        .in('service_id', serviceIds || []);
+        .in('service_id', expandedIds || []);
       
       if (allError) {
         console.error('Error fetching all service pricing:', allError);
@@ -43,16 +71,30 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
         console.warn('Found inactive pricing data:', allData);
       }
       
+      // Also log all services in the database to help debugging
+      const { data: allServices, error: allServicesError } = await supabase
+        .from('service_pricing')
+        .select('service_id, price, is_active');
+        
+      if (!allServicesError && allServices) {
+        console.log('All available services in database:', allServices.map(s => s.service_id));
+      }
+      
       return pricingMap; // Return empty map if no active data found
     }
     
     console.log('Retrieved pricing data:', data);
     
-    // Use the pricing data from the database
+    // Map database service IDs back to client service IDs
     data.forEach((item) => {
       if (item.price && item.price > 0) {
-        pricingMap.set(item.service_id, item.price);
-        console.log(`Set price for ${item.service_id}: ${item.price}`);
+        // Find which client ID this DB ID maps to
+        let clientId = serviceIds?.find(id => 
+          serviceIdMap[id] && serviceIdMap[id].includes(item.service_id)
+        ) || item.service_id;
+        
+        pricingMap.set(clientId, item.price);
+        console.log(`Set price for ${clientId} (from DB ID ${item.service_id}): ${item.price}`);
       } else {
         console.warn(`Service ${item.service_id} has invalid price: ${item.price}`);
       }
@@ -75,11 +117,31 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
       return new Map<string, number>();
     }
     
+    // Map of package IDs from client to potential database package IDs
+    const packageIdMap: Record<string, string[]> = {
+      'divorce-prevention': ['divorce-prevention', 'Divorce-Prevention-Package'],
+      'pre-marriage-clarity': ['pre-marriage-clarity', 'Pre-Marriage-Package']
+    };
+    
+    // Expand the requested IDs to include possible DB matches
+    let expandedIds: string[] = [];
+    if (packageIds && packageIds.length > 0) {
+      packageIds.forEach(id => {
+        if (packageIdMap[id]) {
+          expandedIds = [...expandedIds, ...packageIdMap[id]];
+        } else {
+          expandedIds.push(id);
+        }
+      });
+    }
+    
+    console.log('Expanded package IDs to search for:', expandedIds);
+    
     // First try to get actual package pricing
     const { data, error } = await supabase
       .from('package_pricing')
       .select('package_id, price, is_active')
-      .in('package_id', packageIds)
+      .in('package_id', expandedIds)
       .eq('is_active', true);
     
     // Create a map of package_id to price
@@ -92,6 +154,39 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
     
     if (!data || data.length === 0) {
       console.warn('No package pricing data found for:', packageIds);
+      
+      // Log all packages in the database to help debugging
+      const { data: allPackages, error: allPackagesError } = await supabase
+        .from('package_pricing')
+        .select('package_id, price, is_active');
+        
+      if (!allPackagesError && allPackages) {
+        console.log('All available packages in database:', allPackages.map(p => p.package_id));
+      }
+      
+      // If no package pricing, check the service_pricing table for package entries
+      const { data: servicePackages, error: servicePackagesError } = await supabase
+        .from('service_pricing')
+        .select('service_id, price, is_active')
+        .in('service_id', expandedIds)
+        .eq('is_active', true);
+        
+      if (!servicePackagesError && servicePackages && servicePackages.length > 0) {
+        console.log('Found package pricing in service_pricing table:', servicePackages);
+        
+        // Use these prices
+        servicePackages.forEach(pkg => {
+          // Find which client ID this DB ID maps to
+          let clientId = packageIds?.find(id => 
+            packageIdMap[id] && packageIdMap[id].includes(pkg.service_id)
+          ) || pkg.service_id;
+          
+          pricingMap.set(clientId, pkg.price);
+          console.log(`Set package price from service table for ${clientId} (from ${pkg.service_id}): ${pkg.price}`);
+        });
+        
+        return pricingMap;
+      }
       
       // If no package pricing, calculate based on component services
       if (packageIds && packageIds.length > 0) {
@@ -140,8 +235,13 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
       // Use the pricing data from the database
       data.forEach((item) => {
         if (item.price && item.price > 0) {
-          pricingMap.set(item.package_id, item.price);
-          console.log(`Set package price from DB for ${item.package_id}: ${item.price}`);
+          // Find which client ID this DB ID maps to
+          let clientId = packageIds?.find(id => 
+            packageIdMap[id] && packageIdMap[id].includes(item.package_id)
+          ) || item.package_id;
+          
+          pricingMap.set(clientId, item.price);
+          console.log(`Set package price from DB for ${clientId} (from ${item.package_id}): ${item.price}`);
         } else {
           console.warn(`Package ${item.package_id} has invalid price: ${item.price}`);
         }
