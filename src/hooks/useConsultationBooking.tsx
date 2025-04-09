@@ -53,7 +53,8 @@ export function useConsultationBooking() {
     state,
     toast,
     setIsProcessing,
-    handleConfirmBooking
+    handleConfirmBooking,
+    setReferenceId
   });
 
   // Return all state and functions

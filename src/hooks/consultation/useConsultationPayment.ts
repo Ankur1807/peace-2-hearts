@@ -1,5 +1,7 @@
 
 import { useCallback } from 'react';
+import { createRazorpayOrder, savePaymentDetails, verifyRazorpayPayment } from '@/utils/payment/razorpayService';
+import { generateReferenceId } from '@/utils/referenceGenerator';
 
 interface UseConsultationPaymentProps {
   state: any;
@@ -9,6 +11,7 @@ interface UseConsultationPaymentProps {
   handleConfirmBooking?: () => Promise<void>;
   setOrderId?: (id: string | null) => void;
   setPaymentCompleted?: (completed: boolean) => void;
+  setReferenceId?: (id: string) => void;
 }
 
 export function useConsultationPayment({
@@ -18,7 +21,8 @@ export function useConsultationPayment({
   setShowPaymentStep,
   handleConfirmBooking,
   setOrderId,
-  setPaymentCompleted
+  setPaymentCompleted,
+  setReferenceId
 }: UseConsultationPaymentProps) {
   // Function to proceed to payment step
   const proceedToPayment = useCallback(() => {
@@ -59,32 +63,87 @@ export function useConsultationPayment({
     setIsProcessing(true);
     
     try {
-      // This would normally come from your backend
-      // For now we'll generate a temporary order ID locally
-      const tempOrderId = `order_${Math.random().toString(36).substring(2, 15)}`;
-      if (setOrderId) {
-        setOrderId(tempOrderId);
+      // Generate a reference ID for this transaction
+      const receiptId = generateReferenceId();
+      if (setReferenceId) {
+        setReferenceId(receiptId);
       }
       
-      // In production, you would create an order on your backend and get the order ID
-      // Example: const order = await createOrder(state.totalPrice);
+      // Create an order through our edge function
+      const orderResponse = await createRazorpayOrder({
+        amount: state.totalPrice,
+        receipt: receiptId,
+        notes: {
+          services: state.selectedServices.join(','),
+          client: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`
+        }
+      });
       
+      if (!orderResponse.success || !orderResponse.order) {
+        throw new Error(orderResponse.error || 'Failed to create order');
+      }
+      
+      const { order } = orderResponse;
+      console.log("Order created successfully:", order);
+      
+      if (setOrderId) {
+        setOrderId(order.id);
+      }
+      
+      // Initialize Razorpay
       const options = {
-        key: "rzp_test_C4wVqKJiq5fXgj", // Replace with actual key
-        amount: state.totalPrice * 100, // Razorpay accepts amount in paise
-        currency: "INR",
+        key: order.notes?.key_id || "rzp_test_C4wVqKJiq5fXgj", // Use key from server or fallback to test key
+        amount: order.amount, // Amount in paise
+        currency: order.currency,
         name: "Peace2Hearts",
         description: `Payment for ${state.selectedServices.length} services`,
-        order_id: tempOrderId,
-        handler: function(response: any) {
+        order_id: order.id,
+        handler: async function(response: any) {
           // Handle successful payment
           console.log("Payment successful:", response);
-          if (setPaymentCompleted) {
-            setPaymentCompleted(true);
-          }
           
-          // Now proceed with booking confirmation
-          handleConfirmBooking();
+          try {
+            // Verify the payment
+            const isVerified = await verifyRazorpayPayment({
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature
+            });
+            
+            if (!isVerified) {
+              throw new Error("Payment verification failed");
+            }
+            
+            // Save payment details in database
+            await savePaymentDetails(
+              response.razorpay_payment_id,
+              response.razorpay_order_id,
+              state.totalPrice,
+              receiptId // Using reference ID as consultation ID for now
+            );
+            
+            if (setPaymentCompleted) {
+              setPaymentCompleted(true);
+            }
+            
+            // Now proceed with booking confirmation
+            await handleConfirmBooking();
+            
+            toast({
+              title: "Payment Successful",
+              description: "Your payment has been processed successfully.",
+              variant: "default"
+            });
+          } catch (error) {
+            console.error("Error processing payment confirmation:", error);
+            toast({
+              title: "Payment Verification Error",
+              description: error instanceof Error ? error.message : "Failed to verify payment",
+              variant: "destructive"
+            });
+          } finally {
+            setIsProcessing(false);
+          }
         },
         prefill: {
           name: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
@@ -122,7 +181,7 @@ export function useConsultationPayment({
       });
       setIsProcessing(false);
     }
-  }, [state.totalPrice, state.personalDetails, state.selectedServices, toast, setIsProcessing, setOrderId, setPaymentCompleted, handleConfirmBooking]);
+  }, [state.totalPrice, state.personalDetails, state.selectedServices, toast, setIsProcessing, setOrderId, setPaymentCompleted, setReferenceId, handleConfirmBooking]);
 
   return {
     proceedToPayment,
