@@ -1,9 +1,8 @@
-
 import React, { useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 import BookingForm from './BookingForm';
-import PaymentStep from './PaymentStep';
+import PaymentStep from './payment/PaymentStep';
 
 interface ConsultationBookingFormProps {
   bookingState: ConsultationBookingHook;
