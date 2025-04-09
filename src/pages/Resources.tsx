@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Search, Newspaper } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 // Mock data for resources
 const resourcesData = [
@@ -99,6 +100,7 @@ const Resources = () => {
   
   return (
     <>
+      <GoogleAnalytics />
       <Navigation />
       
       {/* Hero Section */}

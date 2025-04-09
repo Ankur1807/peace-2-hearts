@@ -1,10 +1,12 @@
 
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const Terms = () => {
   return (
     <>
+      <GoogleAnalytics />
       <Navigation />
       
       {/* Hero Section */}

@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Consultant, getConsultants } from "@/utils/consultants";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const ConsultantListing = () => {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
@@ -53,6 +54,7 @@ const ConsultantListing = () => {
 
   return (
     <>
+      <GoogleAnalytics />
       <SEO 
         title="Our Consultants - Peace2Hearts"
         description="Meet our team of specialized consultants offering legal and mental health support."

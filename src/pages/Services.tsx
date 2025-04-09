@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, HeartPulse, Gavel, Users, MessageSquare, Calendar, PackageCheck } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const Services = () => {
   return (
     <>
+      <GoogleAnalytics />
       <Navigation />
       
       {/* Hero Section */}

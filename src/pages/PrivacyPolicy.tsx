@@ -3,10 +3,12 @@ import React from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const PrivacyPolicy = () => {
   return (
     <>
+      <GoogleAnalytics />
       <SEO 
         title="Privacy Policy" 
         description="Peace2Hearts Privacy Policy - Learn how we collect, use, and protect your personal information."

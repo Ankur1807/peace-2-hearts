@@ -3,10 +3,12 @@ import React from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const ShippingDelivery = () => {
   return (
     <>
+      <GoogleAnalytics />
       <SEO 
         title="Shipping and Delivery Policy" 
         description="Peace2Hearts Shipping and Delivery Policy - Information about our digital service delivery process."

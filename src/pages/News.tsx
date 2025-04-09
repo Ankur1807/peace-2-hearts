@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 // Mock data for news articles
 const newsData = [
@@ -128,6 +129,7 @@ const News = () => {
   
   return (
     <>
+      <GoogleAnalytics />
       <Navigation />
       
       {/* Hero Section */}

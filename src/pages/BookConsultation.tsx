@@ -11,6 +11,7 @@ import ConsultationAlert from '@/components/consultation/ConsultationAlert';
 import { Toaster } from '@/components/ui/toaster';
 import { BookingDetails } from '@/utils/types';
 import { loadRazorpayScript, isRazorpayAvailable } from '@/utils/payment/razorpayService';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const BookConsultation = () => {
   const bookingState = useConsultationBooking();
@@ -118,6 +119,7 @@ const BookConsultation = () => {
 
     return (
       <>
+        <GoogleAnalytics />
         <SEO 
           title="Consultation Confirmed"
           description="Your consultation with Peace2Hearts has been successfully booked. We look forward to supporting you on your relationship journey."
@@ -140,6 +142,7 @@ const BookConsultation = () => {
 
   return (
     <>
+      <GoogleAnalytics />
       <SEO 
         title="Book a Consultation"
         description="Schedule a consultation with our relationship counselors or legal experts. Take the first step towards peace and clarity in your relationship journey."

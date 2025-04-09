@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const ConsultantDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -44,6 +45,7 @@ const ConsultantDetail = () => {
   if (loading) {
     return (
       <>
+        <GoogleAnalytics />
         <SEO 
           title="Loading Consultant Details - Peace2Hearts"
           description="Loading consultant information"
@@ -65,6 +67,7 @@ const ConsultantDetail = () => {
   if (!consultant) {
     return (
       <>
+        <GoogleAnalytics />
         <SEO 
           title="Consultant Not Found - Peace2Hearts"
           description="The requested consultant could not be found"
@@ -91,6 +94,7 @@ const ConsultantDetail = () => {
 
   return (
     <>
+      <GoogleAnalytics />
       <SEO 
         title={`Consultant - Peace2Hearts`}
         description={`Learn about our consultant specializing in ${consultant.specialization} at Peace2Hearts.`}

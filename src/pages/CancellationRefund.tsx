@@ -3,10 +3,12 @@ import React from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const CancellationRefund = () => {
   return (
     <>
+      <GoogleAnalytics />
       <SEO 
         title="Cancellation and Refund Policy" 
         description="Peace2Hearts Cancellation and Refund Policy - Learn about our cancellation terms and refund process for consultations."
