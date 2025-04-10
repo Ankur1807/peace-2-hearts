@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -11,7 +10,6 @@ import ConsultationAlert from '@/components/consultation/ConsultationAlert';
 import { Toaster } from '@/components/ui/toaster';
 import { BookingDetails } from '@/utils/types';
 import { loadRazorpayScript, isRazorpayAvailable } from '@/utils/payment/razorpayService';
-import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const BookConsultation = () => {
   const bookingState = useConsultationBooking();
@@ -32,11 +30,9 @@ const BookConsultation = () => {
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [initializingPayment, setInitializingPayment] = useState(true);
 
-  // Function to determine package name based on selected services
   const getPackageName = () => {
     if (serviceCategory !== 'holistic') return null;
     
-    // Divorce Prevention Package services
     const divorcePrevention = [
       'couples-counselling',
       'mental-health-counselling',
@@ -44,14 +40,12 @@ const BookConsultation = () => {
       'general-legal'
     ];
     
-    // Pre-Marriage Clarity Package services
     const preMarriageClarity = [
       'pre-marriage-legal',
       'premarital-counselling',
       'mental-health-counselling'
     ];
 
-    // Check if selected services match a package
     const services = selectedServices || [];
     
     if (services.length === divorcePrevention.length && 
@@ -67,11 +61,9 @@ const BookConsultation = () => {
     return null;
   };
 
-  // Load Razorpay script
   useEffect(() => {
     const initRazorpay = async () => {
       try {
-        // Check if already loaded
         if (isRazorpayAvailable()) {
           console.log("Razorpay already loaded in window object");
           setRazorpayLoaded(true);
@@ -79,7 +71,6 @@ const BookConsultation = () => {
           return;
         }
         
-        // Try to load it
         console.log("Attempting to load Razorpay script");
         const result = await loadRazorpayScript();
         setRazorpayLoaded(result);
@@ -95,16 +86,13 @@ const BookConsultation = () => {
   }, []);
 
   useEffect(() => {
-    // Check if we're in development mode
     setIsDevelopment(process.env.NODE_ENV === 'development');
     initializeBookingFromStorage(bookingState);
   }, []);
 
-  // Get package name if applicable
   const packageName = getPackageName();
 
   if (submitted) {
-    // Create a properly typed booking details object with all required properties
     const bookingDetails: BookingDetails = {
       clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
       email: personalDetails.email,
@@ -119,7 +107,6 @@ const BookConsultation = () => {
 
     return (
       <>
-        <GoogleAnalytics />
         <SEO 
           title="Consultation Confirmed"
           description="Your consultation with Peace2Hearts has been successfully booked. We look forward to supporting you on your relationship journey."
@@ -142,7 +129,6 @@ const BookConsultation = () => {
 
   return (
     <>
-      <GoogleAnalytics />
       <SEO 
         title="Book a Consultation"
         description="Schedule a consultation with our relationship counselors or legal experts. Take the first step towards peace and clarity in your relationship journey."

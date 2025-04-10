@@ -10,7 +10,7 @@ import ServicesSection from '@/components/home/ServicesSection';
 import HolisticSolutionsSection from '@/components/home/HolisticSolutionsSection';
 import WhyChooseUsSection from '@/components/home/WhyChooseUsSection';
 import CTASection from '@/components/home/CTASection';
-import GoogleAnalytics from '@/components/GoogleAnalytics';
+// Removed GoogleAnalytics import as it's now in App.tsx
 
 const HomePage = () => {
   // Organization social media links for schema
@@ -23,7 +23,7 @@ const HomePage = () => {
 
   return (
     <>
-      <GoogleAnalytics />
+      {/* Removed GoogleAnalytics component */}
       <SEO 
         title="Supporting You Before, During & After Marriage" 
         description="Focused on saving Indian marriages, we offer divorce prevention, psychological support, and legal help to manage complex relationship challenges." 
