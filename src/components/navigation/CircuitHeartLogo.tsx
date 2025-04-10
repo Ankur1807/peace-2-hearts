@@ -35,6 +35,7 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
   
   // Main color for the logo
   const logoColor = "#0EA5E9"; // peacefulBlue
+  const peaceSymbolColor = "#F97316"; // brightOrange - contrasting color for peace symbol
   const secondaryColor = "#86EFAC"; // softGreen for subtle accents
   const shadowColor = "rgba(14, 165, 233, 0.4)"; // peacefulBlue with transparency for shadows
 
@@ -75,11 +76,11 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             className="drop-shadow-sm"
           />
 
-          {/* Peace symbol in the center */}
-          <circle cx="50" cy="50" r="17" stroke={logoColor} strokeWidth="2.5" fill="transparent" />
-          <path d="M50 33 L50 67" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M50 50 L33 67" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M50 50 L67 67" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
+          {/* Peace symbol in the center with contrasting color */}
+          <circle cx="50" cy="50" r="17" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
+          <path d="M50 33 L50 67" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M50 50 L33 67" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M50 50 L67 67" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
           
           {/* Circuit lines - horizontal */}
           <path d="M10 35H33" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
@@ -96,7 +97,7 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           <circle cx="75" cy="35" r="3.5" fill={logoColor} className="animate-pulse" filter="url(#glow)" />
           <circle cx="25" cy="65" r="3.5" fill={logoColor} className="animate-pulse" filter="url(#glow)" />
           <circle cx="75" cy="65" r="3.5" fill={logoColor} className="animate-pulse" filter="url(#glow)" />
-          <circle cx="50" cy="50" r="4" fill={logoColor} className="animate-pulse" filter="url(#glow)" />
+          <circle cx="50" cy="50" r="4" fill={peaceSymbolColor} className="animate-pulse" filter="url(#glow)" />
           
           {/* Add subtle accent points */}
           <circle cx="33" cy="35" r="2.5" fill={secondaryColor} className="animate-pulse" />
