@@ -58,23 +58,24 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           viewBox="0 0 100 100" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full filter drop-shadow-md"
+          className="w-full h-full filter"
         >
-          {/* Base layer - shadow heart */}
+          {/* Base heart shadow layer */}
           <path 
             d="M50 92C47 92 44 91 41 89C27 81 7 60 7 33C7 19 18 8 32 8C40 8 47 12 50 18C53 12 60 8 68 8C82 8 93 19 93 33C93 60 73 81 59 89C56 91 53 92 50 92Z" 
             fill={shadowColor}
             transform="translate(3, 3)"
           />
           
-          {/* Main heart with beating animation */}
-          <path 
-            d="M50 90C47.5 90 45 89 42.5 87.5C30 80 10 60 10 35C10 22.5 20 12.5 32.5 12.5C40 12.5 46.25 16.25 50 22.5C53.75 16.25 60 12.5 67.5 12.5C80 12.5 90 22.5 90 35C90 60 70 80 57.5 87.5C55 89 52.5 90 50 90Z" 
-            stroke={logoColor} 
-            strokeWidth="4"
-            fill="rgba(14, 165, 233, 0.15)"
-            className="animate-[heartbeat_1.5s_ease-in-out_infinite]"
-          />
+          {/* Main heart with subtle glow animation - using a filter on the group instead of transform */}
+          <g className="animate-[heartbeat-glow_1.5s_ease-in-out_infinite]">
+            <path 
+              d="M50 90C47.5 90 45 89 42.5 87.5C30 80 10 60 10 35C10 22.5 20 12.5 32.5 12.5C40 12.5 46.25 16.25 50 22.5C53.75 16.25 60 12.5 67.5 12.5C80 12.5 90 22.5 90 35C90 60 70 80 57.5 87.5C55 89 52.5 90 50 90Z" 
+              stroke={logoColor} 
+              strokeWidth="4"
+              fill="rgba(14, 165, 233, 0.15)"
+            />
+          </g>
 
           {/* Peace symbol in the center with contrasting color */}
           <circle cx="50" cy="50" r="17" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
@@ -92,7 +93,7 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           <path d="M25 35V65" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
           <path d="M75 35V65" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
           
-          {/* Connection points - removed animation */}
+          {/* Connection points - no animation */}
           <circle cx="25" cy="35" r="3.5" fill={logoColor} />
           <circle cx="75" cy="35" r="3.5" fill={logoColor} />
           <circle cx="25" cy="65" r="3.5" fill={logoColor} />

@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -117,13 +116,13 @@ export default {
 					'0%': { transform: 'translateX(5%)' },
 					'100%': { transform: 'translateX(-105%)' }
 				},
-				// Added heartbeat animation
-				'heartbeat': {
-					'0%': { transform: 'scale(1)' },
-					'14%': { transform: 'scale(1.12)' },
-					'28%': { transform: 'scale(1)' },
-					'42%': { transform: 'scale(1.15)' },
-					'70%': { transform: 'scale(1)' }
+				// Updated heartbeat animation to be a subtle glow effect
+				'heartbeat-glow': {
+					'0%': { filter: 'drop-shadow(0 0 2px rgba(14, 165, 233, 0.3))' },
+					'25%': { filter: 'drop-shadow(0 0 6px rgba(14, 165, 233, 0.7))' },
+					'50%': { filter: 'drop-shadow(0 0 8px rgba(14, 165, 233, 0.9))' },
+					'75%': { filter: 'drop-shadow(0 0 6px rgba(14, 165, 233, 0.7))' },
+					'100%': { filter: 'drop-shadow(0 0 2px rgba(14, 165, 233, 0.3))' }
 				}
 			},
 			animation: {
