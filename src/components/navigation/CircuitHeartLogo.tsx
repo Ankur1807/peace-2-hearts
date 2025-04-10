@@ -37,6 +37,8 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
   const logoColor = "#0EA5E9"; // peacefulBlue
   const peaceSymbolColor = "#F97316"; // brightOrange - contrasting color for peace symbol
   const secondaryColor = "#86EFAC"; // softGreen for subtle accents
+  const accentColor = "#D946EF"; // vividPink for additional accents
+  const tertiaryColor = "#8B5CF6"; // vibrantPurple
   const shadowColor = "rgba(14, 165, 233, 0.4)"; // peacefulBlue with transparency for shadows
 
   return (
@@ -67,6 +69,9 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             transform="translate(3, 3)"
           />
           
+          {/* Decorative outer ring */}
+          <circle cx="50" cy="50" r="42" stroke={tertiaryColor} strokeWidth="1.5" strokeDasharray="4 2" fill="transparent" />
+          
           {/* Main heart with glow animation */}
           <path 
             d="M50 90C47.5 90 45 89 42.5 87.5C30 80 10 60 10 35C10 22.5 20 12.5 32.5 12.5C40 12.5 46.25 16.25 50 22.5C53.75 16.25 60 12.5 67.5 12.5C80 12.5 90 22.5 90 35C90 60 70 80 57.5 87.5C55 89 52.5 90 50 90Z" 
@@ -74,8 +79,11 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             strokeWidth="4"
             fill="rgba(14, 165, 233, 0.15)"
           />
-
-          {/* Peace symbol in the center with contrasting color - updated to match reference image */}
+          
+          {/* Inner decorative pattern */}
+          <circle cx="50" cy="50" r="30" stroke={accentColor} strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.6" fill="transparent" />
+          
+          {/* Peace symbol in the center */}
           <circle cx="50" cy="50" r="20" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
           
           {/* Peace symbol lines */}
@@ -88,6 +96,23 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           
           {/* Connection points */}
           <circle cx="50" cy="50" r="3" fill={peaceSymbolColor} />
+          
+          {/* Additional decorative elements */}
+          {/* Small accent circles along the heart outline */}
+          <circle cx="20" cy="35" r="2" fill={secondaryColor} />
+          <circle cx="80" cy="35" r="2" fill={secondaryColor} />
+          <circle cx="30" cy="25" r="2" fill={tertiaryColor} />
+          <circle cx="70" cy="25" r="2" fill={tertiaryColor} />
+          <circle cx="25" cy="70" r="2" fill={accentColor} />
+          <circle cx="75" cy="70" r="2" fill={accentColor} />
+          <circle cx="50" cy="15" r="2" fill={logoColor} />
+          <circle cx="50" cy="85" r="2" fill={logoColor} />
+          
+          {/* Energy lines radiating from center */}
+          <path d="M50 50 L30 35" stroke={tertiaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
+          <path d="M50 50 L70 35" stroke={accentColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
+          <path d="M50 50 L40 80" stroke={secondaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
+          <path d="M50 50 L60 80" stroke={secondaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
         </svg>
 
         {/* Enhanced hover effect */}
