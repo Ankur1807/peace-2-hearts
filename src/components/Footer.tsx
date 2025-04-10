@@ -26,16 +26,29 @@ const Footer = () => {
       </svg>
 
       <div className="container mx-auto relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div>
-            {/* Changed background color to a vibrant orange that contrasts with the blue logo */}
-            <div className="bg-brightOrange/90 backdrop-blur-sm rounded-lg p-3 inline-block mb-4 shadow-lg">
-              <div className="flex items-center gap-2">
-                <CircuitHeartLogo size="lg" textColor="text-white" className="footer-heartbeat-glow" />
+        {/* New gradient header section with extended orange background */}
+        <div className="rounded-xl mb-10 overflow-hidden shadow-lg">
+          <div className="bg-gradient-to-b from-brightOrange via-[#20BDBE] to-peacefulBlue p-6">
+            <div className="flex flex-col md:flex-row items-center md:justify-between">
+              <div className="flex items-center mb-4 md:mb-0">
+                {/* Logo with improved contrast */}
+                <div className="bg-white/30 backdrop-blur-sm rounded-lg p-3 shadow-xl">
+                  <CircuitHeartLogo size="lg" textColor="text-white" className="footer-heartbeat-glow" />
+                </div>
+              </div>
+              <div className="text-white text-center md:text-right">
+                <h3 className="font-lora text-xl font-semibold mb-2">Helping you find peace,</h3>
+                <p className="text-white/90 text-lg">with or without love.</p>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          {/* First column is now just social media and empty space since logo moved up */}
+          <div>
             <p className="text-white/90 mb-4 ml-1">
-              Helping you find peace, with or without love.
+              Your emotional well-being matters—let's explore solutions together.
             </p>
             {/* Social media icons removed */}
           </div>
