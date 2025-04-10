@@ -116,6 +116,14 @@ export default {
 				'marquee': {
 					'0%': { transform: 'translateX(5%)' },
 					'100%': { transform: 'translateX(-105%)' }
+				},
+				// Added heartbeat animation
+				'heartbeat': {
+					'0%': { transform: 'scale(1)' },
+					'14%': { transform: 'scale(1.12)' },
+					'28%': { transform: 'scale(1)' },
+					'42%': { transform: 'scale(1.15)' },
+					'70%': { transform: 'scale(1)' }
 				}
 			},
 			animation: {

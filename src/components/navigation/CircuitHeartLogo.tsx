@@ -67,13 +67,13 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             transform="translate(3, 3)"
           />
           
-          {/* Main heart with stronger outline */}
+          {/* Main heart with beating animation */}
           <path 
             d="M50 90C47.5 90 45 89 42.5 87.5C30 80 10 60 10 35C10 22.5 20 12.5 32.5 12.5C40 12.5 46.25 16.25 50 22.5C53.75 16.25 60 12.5 67.5 12.5C80 12.5 90 22.5 90 35C90 60 70 80 57.5 87.5C55 89 52.5 90 50 90Z" 
             stroke={logoColor} 
             strokeWidth="4"
             fill="rgba(14, 165, 233, 0.15)"
-            className="drop-shadow-sm"
+            className="animate-[heartbeat_1.5s_ease-in-out_infinite]"
           />
 
           {/* Peace symbol in the center with contrasting color */}
@@ -92,18 +92,18 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           <path d="M25 35V65" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
           <path d="M75 35V65" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
           
-          {/* Connection points with glowing effect */}
-          <circle cx="25" cy="35" r="3.5" fill={logoColor} className="animate-pulse" filter="url(#glow)" />
-          <circle cx="75" cy="35" r="3.5" fill={logoColor} className="animate-pulse" filter="url(#glow)" />
-          <circle cx="25" cy="65" r="3.5" fill={logoColor} className="animate-pulse" filter="url(#glow)" />
-          <circle cx="75" cy="65" r="3.5" fill={logoColor} className="animate-pulse" filter="url(#glow)" />
-          <circle cx="50" cy="50" r="4" fill={peaceSymbolColor} className="animate-pulse" filter="url(#glow)" />
+          {/* Connection points - removed animation */}
+          <circle cx="25" cy="35" r="3.5" fill={logoColor} />
+          <circle cx="75" cy="35" r="3.5" fill={logoColor} />
+          <circle cx="25" cy="65" r="3.5" fill={logoColor} />
+          <circle cx="75" cy="65" r="3.5" fill={logoColor} />
+          <circle cx="50" cy="50" r="4" fill={peaceSymbolColor} />
           
           {/* Add subtle accent points */}
-          <circle cx="33" cy="35" r="2.5" fill={secondaryColor} className="animate-pulse" />
-          <circle cx="67" cy="35" r="2.5" fill={secondaryColor} className="animate-pulse" />
-          <circle cx="33" cy="67" r="2.5" fill={secondaryColor} className="animate-pulse" />
-          <circle cx="67" cy="67" r="2.5" fill={secondaryColor} className="animate-pulse" />
+          <circle cx="33" cy="35" r="2.5" fill={secondaryColor} />
+          <circle cx="67" cy="35" r="2.5" fill={secondaryColor} />
+          <circle cx="33" cy="67" r="2.5" fill={secondaryColor} />
+          <circle cx="67" cy="67" r="2.5" fill={secondaryColor} />
           
           {/* Filters for glow effects */}
           <defs>
