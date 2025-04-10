@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -63,15 +62,14 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Peace2Hearts colorful palette based on the new logo
-				peacefulBlue: '#0EA5E9',  // Blue from the peace symbol
-				vibrantPurple: '#8B5CF6',  // Purple from the peace symbol
-				brightOrange: '#F97316',   // Orange from the peace symbol
-				softPink: '#F9A8D4',      // Pink from the heart gradient
-				vividPink: '#D946EF',     // Pink from the heart gradient
-				lightBlue: '#93C5FD',     // Blue from the sparkles
-				paleYellow: '#FDE68A',    // Yellow from the sparkles
-				softGreen: '#86EFAC'      // Green from the sparkles
+				peacefulBlue: '#0EA5E9',
+				vibrantPurple: '#8B5CF6',
+				brightOrange: '#F97316',
+				softPink: '#F9A8D4',
+				vividPink: '#D946EF',
+				lightBlue: '#93C5FD',
+				paleYellow: '#FDE68A',
+				softGreen: '#86EFAC'
 			},
 			fontFamily: {
 				lora: ['Lora', 'serif'],
@@ -117,15 +115,14 @@ export default {
 					'0%': { transform: 'translateX(5%)' },
 					'100%': { transform: 'translateX(-105%)' }
 				},
-				// Updated heartbeat animation to be a subtle glow effect
 				'heartbeat-glow': {
 					'0%': { filter: 'drop-shadow(0 0 2px rgba(14, 165, 233, 0.3))' },
-					'25%': { filter: 'drop-shadow(0 0 6px rgba(14, 165, 233, 0.7))' },
-					'50%': { filter: 'drop-shadow(0 0 8px rgba(14, 165, 233, 0.9))' },
-					'75%': { filter: 'drop-shadow(0 0 6px rgba(14, 165, 233, 0.7))' },
+					'20%': { filter: 'drop-shadow(0 0 5px rgba(14, 165, 233, 0.5))' },
+					'40%': { filter: 'drop-shadow(0 0 8px rgba(14, 165, 233, 0.8))' },
+					'60%': { filter: 'drop-shadow(0 0 10px rgba(14, 165, 233, 1))' },
+					'80%': { filter: 'drop-shadow(0 0 5px rgba(14, 165, 233, 0.5))' },
 					'100%': { filter: 'drop-shadow(0 0 2px rgba(14, 165, 233, 0.3))' }
 				},
-				// Fractal animations moved from CSS to Tailwind
 				'fractalRotate': {
 					'0%': { transform: 'rotate(0)' },
 					'100%': { transform: 'rotate(360deg)' }
@@ -147,6 +144,7 @@ export default {
 				'fade-in': 'fade-in 0.5s ease-out',
 				'wave': 'wave 3s ease-in-out infinite',
 				'marquee': 'marquee 15s linear infinite',
+				'heartbeat-glow': 'heartbeat-glow 1.5s ease-in-out infinite',
 				'fractal-rotate': 'fractalRotate 4s linear infinite',
 				'pulse-fractal': 'pulseFractal 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
 			},

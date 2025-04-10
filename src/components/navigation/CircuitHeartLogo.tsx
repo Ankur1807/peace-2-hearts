@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -58,7 +57,7 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           viewBox="0 0 100 100" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full filter"
+          className="w-full h-full heartbeat-glow"
         >
           {/* Base heart shadow layer */}
           <path 
@@ -67,21 +66,22 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             transform="translate(3, 3)"
           />
           
-          {/* Main heart with subtle glow animation - using a filter on the group instead of transform */}
-          <g className="animate-[heartbeat-glow_1.5s_ease-in-out_infinite]">
-            <path 
-              d="M50 90C47.5 90 45 89 42.5 87.5C30 80 10 60 10 35C10 22.5 20 12.5 32.5 12.5C40 12.5 46.25 16.25 50 22.5C53.75 16.25 60 12.5 67.5 12.5C80 12.5 90 22.5 90 35C90 60 70 80 57.5 87.5C55 89 52.5 90 50 90Z" 
-              stroke={logoColor} 
-              strokeWidth="4"
-              fill="rgba(14, 165, 233, 0.15)"
-            />
-          </g>
+          {/* Main heart with glow animation - applied via CSS class now */}
+          <path 
+            d="M50 90C47.5 90 45 89 42.5 87.5C30 80 10 60 10 35C10 22.5 20 12.5 32.5 12.5C40 12.5 46.25 16.25 50 22.5C53.75 16.25 60 12.5 67.5 12.5C80 12.5 90 22.5 90 35C90 60 70 80 57.5 87.5C55 89 52.5 90 50 90Z" 
+            stroke={logoColor} 
+            strokeWidth="4"
+            fill="rgba(14, 165, 233, 0.15)"
+          />
 
-          {/* Peace symbol in the center with contrasting color */}
+          {/* Peace symbol in the center with contrasting color - TRIMMED to stay inside heart */}
           <circle cx="50" cy="50" r="17" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
+          {/* Vertical line - unchanged */}
           <path d="M50 33 L50 67" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M50 50 L33 67" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M50 50 L67 67" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
+          {/* Left diagonal line - TRIMMED (was: M50 50 L33 67) */}
+          <path d="M50 50 L37 63" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
+          {/* Right diagonal line - TRIMMED (was: M50 50 L67 67) */}
+          <path d="M50 50 L63 63" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
           
           {/* Circuit lines - horizontal */}
           <path d="M10 35H33" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
@@ -93,33 +93,25 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           <path d="M25 35V65" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
           <path d="M75 35V65" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
           
-          {/* Connection points - no animation */}
+          {/* Connection points */}
           <circle cx="25" cy="35" r="3.5" fill={logoColor} />
           <circle cx="75" cy="35" r="3.5" fill={logoColor} />
           <circle cx="25" cy="65" r="3.5" fill={logoColor} />
           <circle cx="75" cy="65" r="3.5" fill={logoColor} />
           <circle cx="50" cy="50" r="4" fill={peaceSymbolColor} />
           
-          {/* Add subtle accent points */}
+          {/* Accent points */}
           <circle cx="33" cy="35" r="2.5" fill={secondaryColor} />
           <circle cx="67" cy="35" r="2.5" fill={secondaryColor} />
           <circle cx="33" cy="67" r="2.5" fill={secondaryColor} />
           <circle cx="67" cy="67" r="2.5" fill={secondaryColor} />
-          
-          {/* Filters for glow effects */}
-          <defs>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
         </svg>
 
         {/* Enhanced hover effect */}
         <div className="absolute inset-0 bg-peacefulBlue opacity-0 rounded-full blur-xl group-hover:opacity-30 transition-all duration-500 transform group-hover:scale-110"></div>
       </div>
       
-      {/* Brand name with slight shadow for better visibility */}
+      {/* Brand name */}
       <span className={`font-lora ${textSize} font-bold ${textColor} drop-shadow-sm`}>Peace2Hearts</span>
     </Link>
   );
