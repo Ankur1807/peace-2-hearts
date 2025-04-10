@@ -28,8 +28,8 @@ const Footer = () => {
       <div className="container mx-auto relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
-            {/* Added background color strip behind logo */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 inline-block mb-4">
+            {/* Changed background color to a vibrant orange that contrasts with the blue logo */}
+            <div className="bg-brightOrange/90 backdrop-blur-sm rounded-lg p-3 inline-block mb-4 shadow-lg">
               <div className="flex items-center gap-2">
                 <CircuitHeartLogo size="lg" textColor="text-white" className="footer-heartbeat-glow" />
               </div>
