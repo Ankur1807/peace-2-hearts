@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -66,7 +67,7 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             transform="translate(3, 3)"
           />
           
-          {/* Main heart with glow animation - applied via CSS class now */}
+          {/* Main heart with glow animation */}
           <path 
             d="M50 90C47.5 90 45 89 42.5 87.5C30 80 10 60 10 35C10 22.5 20 12.5 32.5 12.5C40 12.5 46.25 16.25 50 22.5C53.75 16.25 60 12.5 67.5 12.5C80 12.5 90 22.5 90 35C90 60 70 80 57.5 87.5C55 89 52.5 90 50 90Z" 
             stroke={logoColor} 
@@ -74,14 +75,12 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             fill="rgba(14, 165, 233, 0.15)"
           />
 
-          {/* Peace symbol in the center with contrasting color - TRIMMED to stay inside heart */}
+          {/* Peace symbol in the center with contrasting color */}
           <circle cx="50" cy="50" r="17" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
-          {/* Vertical line - unchanged */}
+          {/* Vertical line */}
           <path d="M50 33 L50 67" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
-          {/* Left diagonal line - REMOVED */}
-          {/* Right diagonal line - REMOVED */}
           
-          {/* Circuit lines - horizontal */}
+          {/* Circuit lines connecting peace symbol to heart - horizontal */}
           <path d="M10 35H33" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
           <path d="M67 35H90" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
           <path d="M10 65H25" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />

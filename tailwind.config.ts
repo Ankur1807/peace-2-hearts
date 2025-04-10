@@ -125,12 +125,12 @@ export default {
 					'100%': { filter: 'drop-shadow(0 0 2px rgba(14, 165, 233, 0.3))' }
 				},
 				'strong-heartbeat-glow': {
-					'0%': { filter: 'drop-shadow(0 0 3px rgba(14, 165, 233, 0.5))' },
-					'20%': { filter: 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.7))' },
-					'40%': { filter: 'drop-shadow(0 0 12px rgba(249, 115, 22, 0.9))' },
-					'60%': { filter: 'drop-shadow(0 0 15px rgba(217, 70, 239, 1))' },
-					'80%': { filter: 'drop-shadow(0 0 12px rgba(139, 92, 246, 0.8))' },
-					'100%': { filter: 'drop-shadow(0 0 3px rgba(14, 165, 233, 0.5))' }
+					'0%': { filter: 'drop-shadow(0 0 4px rgba(14, 165, 233, 0.6))' },
+					'20%': { filter: 'drop-shadow(0 0 10px rgba(139, 92, 246, 0.8))' },
+					'40%': { filter: 'drop-shadow(0 0 15px rgba(249, 115, 22, 1))' },
+					'60%': { filter: 'drop-shadow(0 0 18px rgba(217, 70, 239, 1))' },
+					'80%': { filter: 'drop-shadow(0 0 15px rgba(139, 92, 246, 0.9))' },
+					'100%': { filter: 'drop-shadow(0 0 4px rgba(14, 165, 233, 0.6))' }
 				},
 				'fractalRotate': {
 					'0%': { transform: 'rotate(0)' },
