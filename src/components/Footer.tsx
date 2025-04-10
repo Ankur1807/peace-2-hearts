@@ -2,9 +2,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import CircuitHeartLogo from './navigation/CircuitHeartLogo';
+import { useIsMobile } from '../hooks/use-mobile';
 
 const Footer = () => {
   const location = useLocation();
+  const isMobile = useIsMobile();
   const isHomePage = location.pathname === '/';
 
   return (
@@ -19,33 +21,47 @@ const Footer = () => {
             <stop offset="1" stopColor="#0EA5E9"/>
           </linearGradient>
           <linearGradient id="footer-wave2" x1="0" y1="0" x2="1440" y2="0" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#F97316"/>
-            <stop offset="1" stopColor="#D946EF"/>
+            <stop stopColor="#F9A8D4"/>
+            <stop offset="1" stopColor="#20BDBE"/>
           </linearGradient>
         </defs>
       </svg>
 
-      <div className="container mx-auto relative z-10">
-        {/* New gradient header section with extended orange background */}
-        <div className="rounded-xl mb-10 overflow-hidden shadow-lg">
-          <div className="bg-gradient-to-b from-brightOrange via-[#20BDBE] to-peacefulBlue p-6">
-            <div className="flex flex-col md:flex-row items-center md:justify-between">
-              <div className="flex items-center mb-4 md:mb-0">
-                {/* Logo with improved contrast */}
-                <div className="bg-white/30 backdrop-blur-sm rounded-lg p-3 shadow-xl">
-                  <CircuitHeartLogo size="lg" textColor="text-white" className="footer-heartbeat-glow" />
+      <div className={`container mx-auto relative z-10 ${isMobile ? 'text-center' : ''}`}>
+        {/* Conditional header based on mobile/desktop */}
+        {isMobile ? (
+          // Mobile: Full width frame with pink/teal gradient
+          <div className="w-full mb-10 overflow-hidden shadow-lg">
+            <div className="bg-gradient-to-b from-softPink via-[#20BDBE] to-peacefulBlue p-6">
+              <div className="flex flex-col items-center justify-center">
+                <div className="flex items-center mb-4">
+                  {/* Logo with translucent backdrop */}
+                  <div className="bg-white/30 backdrop-blur-sm rounded-lg p-3 shadow-xl">
+                    <CircuitHeartLogo size="lg" textColor="text-white" className="footer-heartbeat-glow" />
+                  </div>
                 </div>
-              </div>
-              <div className="text-white text-center md:text-right">
-                <h3 className="font-lora text-xl font-semibold mb-2">Helping you find peace,</h3>
-                <p className="text-white/90 text-lg">with or without love.</p>
+                <div className="text-white">
+                  <h3 className="font-lora text-xl font-semibold mb-2">Helping you find peace,</h3>
+                  <p className="text-white/90 text-lg">with or without love.</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          // Desktop: Simple logo with translucent box and tagline
+          <div className="flex items-center mb-10 gap-6">
+            <div className="bg-white/30 backdrop-blur-sm rounded-lg p-3 shadow-xl">
+              <CircuitHeartLogo size="lg" textColor="text-white" className="footer-heartbeat-glow" />
+            </div>
+            <div className="text-white">
+              <h3 className="font-lora text-xl font-semibold mb-1">Helping you find peace,</h3>
+              <p className="text-white/90">with or without love.</p>
+            </div>
+          </div>
+        )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* First column is now just social media and empty space since logo moved up */}
+        <div className={`grid grid-cols-1 ${isMobile ? 'md:grid-cols-4' : 'md:grid-cols-4'} gap-8 mb-8`}>
+          {/* First column - tagline */}
           <div>
             <p className="text-white/90 mb-4 ml-1">
               Your emotional well-being matters—let's explore solutions together.
@@ -53,18 +69,19 @@ const Footer = () => {
             {/* Social media icons removed */}
           </div>
           
+          {/* Quick Links column */}
           <div>
             <h3 className="font-lora text-lg font-semibold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li><Link to="/about" className="text-white/90 hover:text-white">About Us</Link></li>
               <li><Link to="/services" className="text-white/90 hover:text-white">Our Services</Link></li>
-              {/* Resources link removed */}
               <li><Link to="/contact" className="text-white/90 hover:text-white">Contact Us</Link></li>
               <li><Link to="/terms" className="text-white/90 hover:text-white">Terms & Conditions</Link></li>
               <li><Link to="/privacy-policy" className="text-white/90 hover:text-white">Privacy Policy</Link></li>
             </ul>
           </div>
           
+          {/* Services column */}
           <div>
             <h3 className="font-lora text-lg font-semibold text-white mb-4">Services</h3>
             <ul className="space-y-2">
@@ -76,6 +93,7 @@ const Footer = () => {
             </ul>
           </div>
           
+          {/* Contact Us column */}
           <div>
             <h3 className="font-lora text-lg font-semibold text-white mb-4">Contact Us</h3>
             <ul className="space-y-3">
