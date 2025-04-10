@@ -75,33 +75,19 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             fill="rgba(14, 165, 233, 0.15)"
           />
 
-          {/* Peace symbol in the center with contrasting color */}
-          <circle cx="50" cy="50" r="17" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
+          {/* Peace symbol in the center with contrasting color - updated to match reference image */}
+          <circle cx="50" cy="50" r="20" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
+          
+          {/* Peace symbol lines */}
           {/* Vertical line */}
-          <path d="M50 33 L50 67" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
-          
-          {/* Circuit lines connecting peace symbol to heart - horizontal */}
-          <path d="M10 35H33" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M67 35H90" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M10 65H25" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M75 65H90" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
-          
-          {/* Circuit lines - vertical connections */}
-          <path d="M25 35V65" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M75 35V65" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M50 30 L50 70" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
+          {/* Left diagonal line */}
+          <path d="M50 50 L35 65" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
+          {/* Right diagonal line */}
+          <path d="M50 50 L65 65" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
           
           {/* Connection points */}
-          <circle cx="25" cy="35" r="3.5" fill={logoColor} />
-          <circle cx="75" cy="35" r="3.5" fill={logoColor} />
-          <circle cx="25" cy="65" r="3.5" fill={logoColor} />
-          <circle cx="75" cy="65" r="3.5" fill={logoColor} />
-          <circle cx="50" cy="50" r="4" fill={peaceSymbolColor} />
-          
-          {/* Accent points */}
-          <circle cx="33" cy="35" r="2.5" fill={secondaryColor} />
-          <circle cx="67" cy="35" r="2.5" fill={secondaryColor} />
-          <circle cx="33" cy="67" r="2.5" fill={secondaryColor} />
-          <circle cx="67" cy="67" r="2.5" fill={secondaryColor} />
+          <circle cx="50" cy="50" r="3" fill={peaceSymbolColor} />
         </svg>
 
         {/* Enhanced hover effect */}
