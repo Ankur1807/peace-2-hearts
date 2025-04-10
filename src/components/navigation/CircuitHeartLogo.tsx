@@ -57,7 +57,7 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           viewBox="0 0 100 100" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full heartbeat-glow"
+          className="w-full h-full strong-heartbeat-glow"
         >
           {/* Base heart shadow layer */}
           <path 
@@ -78,10 +78,8 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           <circle cx="50" cy="50" r="17" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
           {/* Vertical line - unchanged */}
           <path d="M50 33 L50 67" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
-          {/* Left diagonal line - TRIMMED (was: M50 50 L33 67) */}
-          <path d="M50 50 L37 63" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
-          {/* Right diagonal line - TRIMMED (was: M50 50 L67 67) */}
-          <path d="M50 50 L63 63" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
+          {/* Left diagonal line - REMOVED */}
+          {/* Right diagonal line - REMOVED */}
           
           {/* Circuit lines - horizontal */}
           <path d="M10 35H33" stroke={logoColor} strokeWidth="2.5" strokeLinecap="round" />

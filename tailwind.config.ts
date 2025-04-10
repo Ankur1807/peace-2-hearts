@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -123,6 +124,14 @@ export default {
 					'80%': { filter: 'drop-shadow(0 0 5px rgba(14, 165, 233, 0.5))' },
 					'100%': { filter: 'drop-shadow(0 0 2px rgba(14, 165, 233, 0.3))' }
 				},
+				'strong-heartbeat-glow': {
+					'0%': { filter: 'drop-shadow(0 0 3px rgba(14, 165, 233, 0.5))' },
+					'20%': { filter: 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.7))' },
+					'40%': { filter: 'drop-shadow(0 0 12px rgba(249, 115, 22, 0.9))' },
+					'60%': { filter: 'drop-shadow(0 0 15px rgba(217, 70, 239, 1))' },
+					'80%': { filter: 'drop-shadow(0 0 12px rgba(139, 92, 246, 0.8))' },
+					'100%': { filter: 'drop-shadow(0 0 3px rgba(14, 165, 233, 0.5))' }
+				},
 				'fractalRotate': {
 					'0%': { transform: 'rotate(0)' },
 					'100%': { transform: 'rotate(360deg)' }
@@ -145,6 +154,7 @@ export default {
 				'wave': 'wave 3s ease-in-out infinite',
 				'marquee': 'marquee 15s linear infinite',
 				'heartbeat-glow': 'heartbeat-glow 1.5s ease-in-out infinite',
+				'strong-heartbeat-glow': 'strong-heartbeat-glow 1.5s ease-in-out infinite',
 				'fractal-rotate': 'fractalRotate 4s linear infinite',
 				'pulse-fractal': 'pulseFractal 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
 			},
