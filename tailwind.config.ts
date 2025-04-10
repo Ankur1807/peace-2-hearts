@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -131,6 +132,14 @@ export default {
 					'80%': { filter: 'drop-shadow(0 0 18px rgba(139, 92, 246, 1)) drop-shadow(0 0 15px rgba(139, 92, 246, 0.5))' },
 					'100%': { filter: 'drop-shadow(0 0 5px rgba(14, 165, 233, 0.7)) drop-shadow(0 0 10px rgba(14, 165, 233, 0.3))' }
 				},
+				'footer-heartbeat-glow': {
+					'0%': { filter: 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 10px rgba(249, 115, 22, 0.3))' },
+					'20%': { filter: 'drop-shadow(0 0 10px rgba(249, 168, 212, 0.7)) drop-shadow(0 0 15px rgba(249, 168, 212, 0.4))' },
+					'40%': { filter: 'drop-shadow(0 0 15px rgba(217, 70, 239, 0.8)) drop-shadow(0 0 20px rgba(217, 70, 239, 0.5))' },
+					'60%': { filter: 'drop-shadow(0 0 18px rgba(139, 92, 246, 0.9)) drop-shadow(0 0 25px rgba(139, 92, 246, 0.6))' },
+					'80%': { filter: 'drop-shadow(0 0 12px rgba(249, 168, 212, 0.7)) drop-shadow(0 0 15px rgba(249, 168, 212, 0.4))' },
+					'100%': { filter: 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 10px rgba(249, 115, 22, 0.3))' }
+				},
 				'fractalRotate': {
 					'0%': { transform: 'rotate(0)' },
 					'100%': { transform: 'rotate(360deg)' }
@@ -154,6 +163,7 @@ export default {
 				'marquee': 'marquee 15s linear infinite',
 				'heartbeat-glow': 'heartbeat-glow 1.5s ease-in-out infinite',
 				'strong-heartbeat-glow': 'strong-heartbeat-glow 1.5s ease-in-out infinite',
+				'footer-heartbeat-glow': 'footer-heartbeat-glow 1.5s ease-in-out infinite',
 				'fractal-rotate': 'fractalRotate 4s linear infinite',
 				'pulse-fractal': 'pulseFractal 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
 			},

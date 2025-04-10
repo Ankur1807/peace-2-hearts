@@ -1,6 +1,6 @@
-
 import { Link, useLocation } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import CircuitHeartLogo from './navigation/CircuitHeartLogo';
 
 const Footer = () => {
   const location = useLocation();
@@ -28,14 +28,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img 
-                src="/lovable-uploads/6a7e5248-cc34-4298-b6e9-3cfe585ec7d1.png" 
-                alt="Peace2Hearts Logo" 
-                className="h-10"
-              />
-              <span className="font-lora text-xl font-semibold text-white">Peace2Hearts</span>
+              <CircuitHeartLogo size="lg" textColor="text-white" className="heartbeat-glow" />
             </div>
-            <p className="text-white/90 mb-4">
+            <p className="text-white/90 mb-4 ml-1">
               Helping you find peace, with or without love.
             </p>
             {/* Social media icons removed */}

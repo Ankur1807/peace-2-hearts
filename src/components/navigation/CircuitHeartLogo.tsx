@@ -6,12 +6,14 @@ interface CircuitHeartLogoProps {
   className?: string;
   textColor?: string;
   size?: 'sm' | 'md' | 'lg';
+  animationClass?: string; // New prop to customize the animation
 }
 
 const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({ 
   className = '',
   textColor = 'text-white',
-  size = 'md'
+  size = 'md',
+  animationClass = 'strong-heartbeat-glow' // Default animation
 }) => {
   // Calculate SVG and text sizes based on the size prop
   const getSvgSize = () => {
@@ -60,7 +62,7 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           viewBox="0 0 100 100" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full strong-heartbeat-glow"
+          className={`w-full h-full ${animationClass}`}
         >
           {/* Base heart shadow layer */}
           <path 
