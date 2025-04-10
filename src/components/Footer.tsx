@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import CircuitHeartLogo from './navigation/CircuitHeartLogo';
@@ -27,8 +28,11 @@ const Footer = () => {
       <div className="container mx-auto relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <CircuitHeartLogo size="lg" textColor="text-white" className="heartbeat-glow" />
+            {/* Added background color strip behind logo */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 inline-block mb-4">
+              <div className="flex items-center gap-2">
+                <CircuitHeartLogo size="lg" textColor="text-white" className="footer-heartbeat-glow" />
+              </div>
             </div>
             <p className="text-white/90 mb-4 ml-1">
               Helping you find peace, with or without love.
