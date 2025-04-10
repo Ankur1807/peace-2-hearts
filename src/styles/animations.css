@@ -1,0 +1,47 @@
+
+/* Animation Keyframes */
+@keyframes fractalRotate {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulseFractal {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+/* Splash effect */
+.color-splash {
+  position: relative;
+  overflow: hidden;
+}
+
+.color-splash::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(249, 168, 212, 0.15) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(90deg, #8B5CF6, #0EA5E9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}

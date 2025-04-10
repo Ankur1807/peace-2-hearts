@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -123,6 +124,21 @@ export default {
 					'50%': { filter: 'drop-shadow(0 0 8px rgba(14, 165, 233, 0.9))' },
 					'75%': { filter: 'drop-shadow(0 0 6px rgba(14, 165, 233, 0.7))' },
 					'100%': { filter: 'drop-shadow(0 0 2px rgba(14, 165, 233, 0.3))' }
+				},
+				// Fractal animations moved from CSS to Tailwind
+				'fractalRotate': {
+					'0%': { transform: 'rotate(0)' },
+					'100%': { transform: 'rotate(360deg)' }
+				},
+				'pulseFractal': {
+					'0%, 100%': {
+						opacity: '0',
+						transform: 'scale(1)'
+					},
+					'50%': {
+						opacity: '0.5',
+						transform: 'scale(1.05)'
+					}
 				}
 			},
 			animation: {
@@ -130,7 +146,9 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.5s ease-out',
 				'wave': 'wave 3s ease-in-out infinite',
-				'marquee': 'marquee 15s linear infinite'
+				'marquee': 'marquee 15s linear infinite',
+				'fractal-rotate': 'fractalRotate 4s linear infinite',
+				'pulse-fractal': 'pulseFractal 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
 			},
 			backgroundImage: {
 				'gradient-wave': 'linear-gradient(90deg, #8B5CF6 0%, #0EA5E9 100%)',

@@ -3,6 +3,10 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import './App.css';
+import './styles/buttons.css';
+import './styles/animations.css';
+import './styles/borders.css';
 import { fetchInitialServices } from './utils/pricing/serviceInitializer';
 
 // Initialize default services if needed
