@@ -4,41 +4,6 @@
  */
 
 /**
- * Draws flowing lines in a circular pattern
- */
-export const drawFlowingLines = (
-  ctx: CanvasRenderingContext2D, 
-  centerX: number, 
-  centerY: number, 
-  radius: number, 
-  scale: number, 
-  color: string,
-  lineWidth: number
-): void => {
-  ctx.beginPath();
-  const steps = 60;
-  
-  for (let i = 0; i < steps; i++) {
-    const angle = (i / steps) * Math.PI * 2;
-    const variation = Math.sin(i * 6) * 4; // Creates a wavy effect
-    const pointRadius = (radius + variation) * scale;
-    const x = centerX * scale + Math.cos(angle) * pointRadius;
-    const y = centerY * scale + Math.sin(angle) * pointRadius;
-    
-    if (i === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
-    }
-  }
-  
-  ctx.closePath();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = lineWidth * scale;
-  ctx.stroke();
-};
-
-/**
  * Draws sparkle patterns in a circular arrangement
  */
 export const drawSparklePattern = (

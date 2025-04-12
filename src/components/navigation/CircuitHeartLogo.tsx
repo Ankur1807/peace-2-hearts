@@ -71,16 +71,6 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             transform="translate(3, 3)"
           />
           
-          {/* Flowing lines instead of outer circle */}
-          <path 
-            d="M50,50 m-42,0 a42,40 0 1,0 84,0 a42,42 0 1,0 -84,0"
-            stroke={tertiaryColor} 
-            strokeWidth="1.5" 
-            strokeDasharray="4 3" 
-            fill="transparent"
-            className="animate-[spin_30s_linear_infinite]"
-          />
-          
           {/* Main heart with glow animation */}
           <path 
             d="M50 90C47.5 90 45 89 42.5 87.5C30 80 10 60 10 35C10 22.5 20 12.5 32.5 12.5C40 12.5 46.25 16.25 50 22.5C53.75 16.25 60 12.5 67.5 12.5C80 12.5 90 22.5 90 35C90 60 70 80 57.5 87.5C55 89 52.5 90 50 90Z" 

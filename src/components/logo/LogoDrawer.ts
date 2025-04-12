@@ -4,7 +4,6 @@
  */
 import { drawHeartPath, drawStar, drawDot } from '../../utils/logoRendering/drawShapes';
 import { 
-  drawFlowingLines, 
   drawSparklePattern, 
   drawCurvedEnergyLine,
   drawWavyPatterns 
@@ -57,9 +56,6 @@ export const drawHeartWithPeace = (
   ctx.fillStyle = 'rgba(14, 165, 233, 0.15)';
   ctx.fill();
   ctx.stroke();
-  
-  // Replace outer circle with flowing lines
-  drawFlowingLines(ctx, 50, 50, 40, scale, tertiaryColor, 1.5);
   
   // Replace inner circle with subtle sparkles
   drawSparklePattern(ctx, 50, 50, 30, scale, accentColor, secondaryColor, logoColor);
