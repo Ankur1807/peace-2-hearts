@@ -6,8 +6,7 @@ import { logoColors } from './logoColors';
 import { drawHeartPath, drawStar, drawDot, drawTreeBranch } from './drawShapes';
 import { 
   drawSparklePattern, 
-  drawCurvedEnergyLine,
-  drawVitruvianLines
+  drawCurvedEnergyLine
 } from './drawPatterns';
 
 /**
@@ -52,9 +51,6 @@ export const drawHeartWithPeace = (
   ctx.strokeStyle = peaceSymbolColor;
   ctx.lineWidth = 2.5 * scale;
   ctx.stroke();
-  
-  // Add the Da Vinci-inspired Vitruvian Man lines extending from the peace symbol
-  drawVitruvianLines(ctx, 50, 50, 20, scale, peaceSymbolColor);
   
   // Central white dot at the center of the peace symbol
   drawDot(ctx, 50, 50, 3.5, '#FFFFFF', scale);
