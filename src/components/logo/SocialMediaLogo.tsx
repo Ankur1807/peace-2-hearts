@@ -18,10 +18,10 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
   
   // Define colors - matching our existing branding
   const logoColor = "#0EA5E9"; // peacefulBlue
-  const peaceSymbolColor = "#F9A8D4"; // softPink (replacing the orange with pink as requested)
+  const peaceSymbolColor = "#F9A8D4"; // softPink (replacing orange with pink as requested)
   const secondaryColor = "#86EFAC"; // softGreen
   const accentColor = "#D946EF"; // vividPink
-  const tertiaryColor = "#8B5CF6"; // vibrantPurple
+  const tertiaryColor = "#8B5CF6"; // vibrantPurple - used for background
   const shadowColor = "rgba(14, 165, 233, 0.4)"; // peacefulBlue with transparency for shadows
   
   useEffect(() => {
@@ -38,13 +38,13 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
     
     // For profile picture (square format focused on the heart/peace symbol)
     if (type === 'profile') {
-      // Background gradient
+      // Purple background gradient instead of blue
       const backgroundGradient = ctx.createRadialGradient(
         canvas.width / 2, canvas.height / 2, 0,
         canvas.width / 2, canvas.height / 2, canvas.width * 0.7
       );
-      backgroundGradient.addColorStop(0, '#0EA5E9');  // peacefulBlue
-      backgroundGradient.addColorStop(1, '#0a7ba9');  // darker blue
+      backgroundGradient.addColorStop(0, '#8B5CF6');  // vibrantPurple
+      backgroundGradient.addColorStop(1, '#6D28D9');  // darker purple
       
       ctx.fillStyle = backgroundGradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -70,11 +70,11 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
       
     } else {
       // For cover image (rectangle format with logo and text)
-      // Background gradient - horizontal gradient
+      // Background gradient - horizontal gradient with purple
       const backgroundGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-      backgroundGradient.addColorStop(0, '#0a7ba9');    // darker blue
-      backgroundGradient.addColorStop(0.5, '#0EA5E9');  // peacefulBlue
-      backgroundGradient.addColorStop(1, '#0a7ba9');    // darker blue
+      backgroundGradient.addColorStop(0, '#6D28D9');    // darker purple
+      backgroundGradient.addColorStop(0.5, '#8B5CF6');  // vibrantPurple
+      backgroundGradient.addColorStop(1, '#6D28D9');    // darker purple
       
       ctx.fillStyle = backgroundGradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -125,7 +125,7 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
     }
   }, [type, size, onRender]);
   
-  // Helper function to draw the heart with peace symbol
+  // Helper function to draw the heart with peace symbol - updated design
   const drawHeartWithPeace = (
     ctx: CanvasRenderingContext2D, 
     x: number, 
@@ -142,15 +142,6 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
     ctx.save();
     ctx.translate(x, y);
     
-    // Decorative outer ring
-    ctx.beginPath();
-    ctx.arc(scalePos(50), scalePos(50), scalePos(42), 0, Math.PI * 2);
-    ctx.strokeStyle = tertiaryColor;
-    ctx.lineWidth = scalePos(1.5);
-    ctx.setLineDash([scalePos(4), scalePos(2)]);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    
     // Base heart shadow
     ctx.beginPath();
     drawHeartPath(ctx, 53, 53, 86, scale);
@@ -166,16 +157,11 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
     ctx.fill();
     ctx.stroke();
     
-    // Inner decorative pattern
-    ctx.beginPath();
-    ctx.arc(scalePos(50), scalePos(50), scalePos(30), 0, Math.PI * 2);
-    ctx.strokeStyle = accentColor;
-    ctx.lineWidth = scalePos(1);
-    ctx.setLineDash([scalePos(3), scalePos(3)]);
-    ctx.globalAlpha = 0.6;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-    ctx.setLineDash([]);
+    // Replace outer circle with flowing lines
+    drawFlowingLines(ctx, 50, 50, 40, scale, tertiaryColor, 1.5);
+    
+    // Replace inner circle with subtle sparkles
+    drawSparklePattern(ctx, 50, 50, 30, scale);
     
     // Peace symbol circle
     ctx.beginPath();
@@ -212,21 +198,19 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
     ctx.fillStyle = peaceSymbolColor;
     ctx.fill();
     
-    // Small accent circles along heart outline
-    drawAccentCircle(ctx, 20, 35, 2, secondaryColor, scale);
-    drawAccentCircle(ctx, 80, 35, 2, secondaryColor, scale);
-    drawAccentCircle(ctx, 30, 25, 2, tertiaryColor, scale);
-    drawAccentCircle(ctx, 70, 25, 2, tertiaryColor, scale);
-    drawAccentCircle(ctx, 25, 70, 2, accentColor, scale);
-    drawAccentCircle(ctx, 75, 70, 2, accentColor, scale);
-    drawAccentCircle(ctx, 50, 15, 2, logoColor, scale);
-    drawAccentCircle(ctx, 50, 85, 2, logoColor, scale);
+    // Small accent stars instead of circles
+    drawStar(ctx, 20, 35, 2.5, 5, secondaryColor, scale);
+    drawStar(ctx, 80, 35, 2.5, 5, secondaryColor, scale);
+    drawStar(ctx, 30, 25, 2.5, 5, tertiaryColor, scale);
+    drawStar(ctx, 70, 25, 2.5, 5, tertiaryColor, scale);
+    drawStar(ctx, 25, 70, 2.5, 5, accentColor, scale);
+    drawStar(ctx, 75, 70, 2.5, 5, accentColor, scale);
     
-    // Energy lines radiating from center
-    drawDashedLine(ctx, 50, 50, 30, 35, tertiaryColor, 1, 2, 2, 0.7, scale);
-    drawDashedLine(ctx, 50, 50, 70, 35, accentColor, 1, 2, 2, 0.7, scale);
-    drawDashedLine(ctx, 50, 50, 40, 80, secondaryColor, 1, 2, 2, 0.7, scale);
-    drawDashedLine(ctx, 50, 50, 60, 80, secondaryColor, 1, 2, 2, 0.7, scale);
+    // Energy lines radiating from center - make them more dynamic
+    drawCurvedEnergyLine(ctx, 50, 50, 30, 35, tertiaryColor, 1, scale);
+    drawCurvedEnergyLine(ctx, 50, 50, 70, 35, accentColor, 1, scale);
+    drawCurvedEnergyLine(ctx, 50, 50, 40, 80, secondaryColor, 1, scale);
+    drawCurvedEnergyLine(ctx, 50, 50, 60, 80, secondaryColor, 1, scale);
     
     // Restore context
     ctx.restore();
@@ -283,8 +267,98 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
     );
   };
   
-  // Helper function to draw an accent circle
-  const drawAccentCircle = (
+  // New helper function to draw flowing lines instead of circles
+  const drawFlowingLines = (
+    ctx: CanvasRenderingContext2D, 
+    centerX: number, 
+    centerY: number, 
+    radius: number, 
+    scale: number, 
+    color: string,
+    lineWidth: number
+  ) => {
+    ctx.beginPath();
+    const steps = 60;
+    
+    for (let i = 0; i < steps; i++) {
+      const angle = (i / steps) * Math.PI * 2;
+      const variation = Math.sin(i * 6) * 4; // Creates a wavy effect
+      const pointRadius = (radius + variation) * scale;
+      const x = centerX * scale + Math.cos(angle) * pointRadius;
+      const y = centerY * scale + Math.sin(angle) * pointRadius;
+      
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    
+    ctx.closePath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth * scale;
+    ctx.stroke();
+  };
+  
+  // New helper function to draw sparkle pattern instead of inner circle
+  const drawSparklePattern = (
+    ctx: CanvasRenderingContext2D, 
+    centerX: number, 
+    centerY: number, 
+    radius: number, 
+    scale: number
+  ) => {
+    const sparkleCount = 12;
+    
+    for (let i = 0; i < sparkleCount; i++) {
+      const angle = (i / sparkleCount) * Math.PI * 2;
+      const x = centerX * scale + Math.cos(angle) * radius * scale;
+      const y = centerY * scale + Math.sin(angle) * radius * scale;
+      
+      // Draw small sparkle
+      if (i % 3 === 0) {
+        drawStar(ctx, x / scale, y / scale, 1.5, 4, accentColor, scale);
+      } else if (i % 3 === 1) {
+        drawStar(ctx, x / scale, y / scale, 1, 4, secondaryColor, scale);
+      } else {
+        drawDot(ctx, x / scale, y / scale, 1.2, logoColor, scale);
+      }
+    }
+  };
+  
+  // Helper function to draw a star
+  const drawStar = (
+    ctx: CanvasRenderingContext2D, 
+    cx: number, 
+    cy: number, 
+    outerRadius: number, 
+    points: number, 
+    color: string, 
+    scale: number
+  ) => {
+    const innerRadius = outerRadius * 0.4;
+    ctx.beginPath();
+    
+    for (let i = 0; i < points * 2; i++) {
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      const angle = (i / (points * 2)) * Math.PI * 2;
+      const x = cx * scale + Math.cos(angle) * radius * scale;
+      const y = cy * scale + Math.sin(angle) * radius * scale;
+      
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  };
+  
+  // Helper function to draw a dot (for smaller accents)
+  const drawDot = (
     ctx: CanvasRenderingContext2D, 
     centerX: number, 
     centerY: number, 
@@ -298,8 +372,8 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
     ctx.fill();
   };
   
-  // Helper function to draw a dashed line
-  const drawDashedLine = (
+  // Helper function to draw curved energy lines
+  const drawCurvedEnergyLine = (
     ctx: CanvasRenderingContext2D, 
     fromX: number, 
     fromY: number, 
@@ -307,18 +381,24 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
     toY: number, 
     color: string, 
     lineWidth: number, 
-    dashLen: number, 
-    gapLen: number, 
-    opacity: number, 
     scale: number
   ) => {
+    const fromXScaled = fromX * scale;
+    const fromYScaled = fromY * scale;
+    const toXScaled = toX * scale;
+    const toYScaled = toY * scale;
+    
+    // Control point offset for curve
+    const cpX = (fromXScaled + toXScaled) / 2 + (Math.random() * 20 - 10);
+    const cpY = (fromYScaled + toYScaled) / 2 + (Math.random() * 20 - 10);
+    
     ctx.beginPath();
-    ctx.moveTo(fromX * scale, fromY * scale);
-    ctx.lineTo(toX * scale, toY * scale);
+    ctx.moveTo(fromXScaled, fromYScaled);
+    ctx.quadraticCurveTo(cpX, cpY, toXScaled, toYScaled);
     ctx.strokeStyle = color;
     ctx.lineWidth = lineWidth * scale;
-    ctx.setLineDash([dashLen * scale, gapLen * scale]);
-    ctx.globalAlpha = opacity;
+    ctx.setLineDash([scale * 2, scale * 2]);
+    ctx.globalAlpha = 0.7;
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.globalAlpha = 1;
@@ -349,7 +429,7 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
     ctx.closePath();
     
     const gradient1 = ctx.createLinearGradient(0, height * 0.7, 0, height);
-    gradient1.addColorStop(0, 'rgba(139, 92, 246, 0.1)'); // vibrantPurple with low opacity
+    gradient1.addColorStop(0, 'rgba(233, 213, 255, 0.15)'); // light purple with low opacity
     gradient1.addColorStop(1, 'rgba(14, 165, 233, 0.05)'); // peacefulBlue with very low opacity
     ctx.fillStyle = gradient1;
     ctx.fill();

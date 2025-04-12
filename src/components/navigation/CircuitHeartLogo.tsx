@@ -37,7 +37,7 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
   
   // Main color for the logo
   const logoColor = "#0EA5E9"; // peacefulBlue
-  const peaceSymbolColor = "#F97316"; // brightOrange - contrasting color for peace symbol
+  const peaceSymbolColor = "#F9A8D4"; // softPink - replacing orange with pink as requested
   const secondaryColor = "#86EFAC"; // softGreen for subtle accents
   const accentColor = "#D946EF"; // vividPink for additional accents
   const tertiaryColor = "#8B5CF6"; // vibrantPurple
@@ -71,8 +71,15 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             transform="translate(3, 3)"
           />
           
-          {/* Decorative outer ring */}
-          <circle cx="50" cy="50" r="42" stroke={tertiaryColor} strokeWidth="1.5" strokeDasharray="4 2" fill="transparent" />
+          {/* Flowing lines instead of outer circle */}
+          <path 
+            d="M50,50 m-42,0 a42,40 0 1,0 84,0 a42,42 0 1,0 -84,0"
+            stroke={tertiaryColor} 
+            strokeWidth="1.5" 
+            strokeDasharray="4 3" 
+            fill="transparent"
+            className="animate-[spin_30s_linear_infinite]"
+          />
           
           {/* Main heart with glow animation */}
           <path 
@@ -82,8 +89,38 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             fill="rgba(14, 165, 233, 0.15)"
           />
           
-          {/* Inner decorative pattern */}
-          <circle cx="50" cy="50" r="30" stroke={accentColor} strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.6" fill="transparent" />
+          {/* Sparkle pattern instead of inner circle */}
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, index) => {
+            const dist = 30;
+            const x = 50 + Math.cos(angle * Math.PI/180) * dist;
+            const y = 50 + Math.sin(angle * Math.PI/180) * dist;
+            const size = index % 3 === 0 ? 2 : 1.5;
+            const color = index % 3 === 0 ? accentColor : (index % 3 === 1 ? secondaryColor : peaceSymbolColor);
+            
+            if (index % 3 === 0) {
+              // Star
+              return (
+                <path 
+                  key={`sparkle-${index}`}
+                  d={`M${x},${y-size} L${x+size/3},${y-size/3} L${x+size},${y} L${x+size/3},${y+size/3} L${x},${y+size} L${x-size/3},${y+size/3} L${x-size},${y} L${x-size/3},${y-size/3} Z`}
+                  fill={color}
+                  opacity="0.6"
+                />
+              );
+            } else {
+              // Dot
+              return (
+                <circle 
+                  key={`dot-${index}`}
+                  cx={x}
+                  cy={y}
+                  r={size/2}
+                  fill={color}
+                  opacity="0.6"
+                />
+              );
+            }
+          })}
           
           {/* Peace symbol in the center */}
           <circle cx="50" cy="50" r="20" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
@@ -99,22 +136,21 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           {/* Connection points */}
           <circle cx="50" cy="50" r="3" fill={peaceSymbolColor} />
           
-          {/* Additional decorative elements */}
-          {/* Small accent circles along the heart outline */}
-          <circle cx="20" cy="35" r="2" fill={secondaryColor} />
-          <circle cx="80" cy="35" r="2" fill={secondaryColor} />
-          <circle cx="30" cy="25" r="2" fill={tertiaryColor} />
-          <circle cx="70" cy="25" r="2" fill={tertiaryColor} />
-          <circle cx="25" cy="70" r="2" fill={accentColor} />
-          <circle cx="75" cy="70" r="2" fill={accentColor} />
-          <circle cx="50" cy="15" r="2" fill={logoColor} />
-          <circle cx="50" cy="85" r="2" fill={logoColor} />
+          {/* Additional decorative elements - stars instead of circles */}
+          <path d="M20,33 l2,2 l-2,2 l-2,-2 z" fill={secondaryColor} />
+          <path d="M80,33 l2,2 l-2,2 l-2,-2 z" fill={secondaryColor} />
+          <path d="M30,23 l2,2 l-2,2 l-2,-2 z" fill={tertiaryColor} />
+          <path d="M70,23 l2,2 l-2,2 l-2,-2 z" fill={tertiaryColor} />
+          <path d="M25,68 l2,2 l-2,2 l-2,-2 z" fill={accentColor} />
+          <path d="M75,68 l2,2 l-2,2 l-2,-2 z" fill={accentColor} />
+          <path d="M50,13 l2,2 l-2,2 l-2,-2 z" fill={logoColor} />
+          <path d="M50,83 l2,2 l-2,2 l-2,-2 z" fill={logoColor} />
           
-          {/* Energy lines radiating from center */}
-          <path d="M50 50 L30 35" stroke={tertiaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
-          <path d="M50 50 L70 35" stroke={accentColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
-          <path d="M50 50 L40 80" stroke={secondaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
-          <path d="M50 50 L60 80" stroke={secondaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
+          {/* Curved energy lines radiating from center */}
+          <path d="M50,50 Q40,40 30,35" stroke={tertiaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
+          <path d="M50,50 Q60,40 70,35" stroke={accentColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
+          <path d="M50,50 Q45,65 40,80" stroke={secondaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
+          <path d="M50,50 Q55,65 60,80" stroke={secondaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
         </svg>
 
         {/* Enhanced hover effect */}

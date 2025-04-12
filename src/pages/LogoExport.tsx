@@ -61,12 +61,12 @@ const LogoExport = () => {
       
       {/* Logo preview */}
       <div className="mb-12 flex justify-center">
-        <div className="bg-gray-100 rounded-lg p-6 shadow-lg relative">
+        <div className="bg-gradient-to-br from-vibrantPurple to-vibrantPurple/80 rounded-lg p-6 shadow-lg relative">
           <div className="text-center mb-4">
-            <h2 className="font-semibold text-xl">
+            <h2 className="font-semibold text-xl text-white">
               {previewType === 'profile' ? 'Profile Picture Preview' : 'Cover Image Preview'}
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-white/80">
               {previewType === 'profile' 
                 ? '1200×1200 px - Square format for profile images'
                 : '1500×500 px - Rectangle format for cover/banner images'}
@@ -77,7 +77,7 @@ const LogoExport = () => {
             ${previewType === 'profile' 
               ? 'w-full max-w-md aspect-square' 
               : 'w-full max-w-2xl aspect-[3/1]'
-            } mx-auto border-2 border-dashed border-gray-300 bg-white`}>
+            } mx-auto border-2 border-white/20 rounded-lg`}>
             
             {/* Show appropriate preview */}
             {previewType === 'profile' ? (
