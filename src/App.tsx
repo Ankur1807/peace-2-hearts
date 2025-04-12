@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -18,35 +17,24 @@ import Terms from "./pages/Terms";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import CancellationRefund from "./pages/CancellationRefund";
 import ShippingDelivery from "./pages/ShippingDelivery";
-
-// Main Service Pages
 import MentalHealthService from "./pages/services/MentalHealthService";
 import LegalSupportService from "./pages/services/LegalSupportService";
-
-// Mental Health Sub-Services
 import MentalHealthCounselling from "./pages/services/mentalhealth/MentalHealthCounselling";
 import FamilyTherapy from "./pages/services/mentalhealth/FamilyTherapy";
 import PremaritalCounselling from "./pages/services/mentalhealth/PremaritalCounselling";
 import CouplesCounselling from "./pages/services/mentalhealth/CouplesCounselling";
 import SexualHealthCounselling from "./pages/services/mentalhealth/SexualHealthCounselling";
-
-// Legal Sub-Services
 import PreMarriageLegal from "./pages/services/legal/PreMarriageLegal";
 import MediationServices from "./pages/services/legal/MediationServices";
 import DivorceConsultation from "./pages/services/legal/DivorceConsultation";
 import ChildCustodyConsultation from "./pages/services/legal/ChildCustodyConsultation";
 import MaintenanceConsultation from "./pages/services/legal/MaintenanceConsultation";
 import GeneralConsultation from "./pages/services/legal/GeneralConsultation";
-
-// Holistic Service Pages
 import DivorcePreventionPackage from "./pages/services/holistic/DivorcePreventionPackage";
 import PreMarriageClarityPackage from "./pages/services/holistic/PreMarriageClarityPackage";
-
-// Legacy Service Pages
 import TherapyService from "./pages/services/TherapyService";
 import DivorceService from "./pages/services/DivorceService";
 import CustodyService from "./pages/services/CustodyService";
-
 import BookConsultation from "./pages/BookConsultation";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
@@ -56,8 +44,8 @@ import ConsultantDetail from "./pages/ConsultantDetail";
 import Dashboard from "./pages/Dashboard";
 import PricingManagement from "./pages/PricingManagement";
 import ConsultantManagement from "./pages/ConsultantManagement";
+import LogoExport from './pages/LogoExport';
 
-// Create a new QueryClient instance
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -132,6 +120,9 @@ const App = () => {
                 
                 {/* Catch-all route for 404 */}
                 <Route path="*" element={<NotFound />} />
+                
+                {/* Add the route for the logo export page in the Routes element */}
+                <Route path="/logo-export" element={<LogoExport />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
