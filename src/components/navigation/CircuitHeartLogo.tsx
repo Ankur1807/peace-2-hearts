@@ -37,7 +37,7 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
   
   // Main color for the logo
   const logoColor = "#0EA5E9"; // peacefulBlue
-  const peaceSymbolColor = "#F9A8D4"; // softPink - replacing orange with pink as requested
+  const peaceSymbolColor = "#86EFAC"; // softGreen for tree branches
   const secondaryColor = "#86EFAC"; // softGreen for subtle accents
   const accentColor = "#D946EF"; // vividPink for additional accents
   const tertiaryColor = "#8B5CF6"; // vibrantPurple
@@ -113,7 +113,7 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             );
           })}
           
-          {/* Peace symbol in the center */}
+          {/* Peace symbol circle */}
           <circle cx="50" cy="50" r="20" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
           
           {/* Da Vinci-inspired Vitruvian Man lines */}
@@ -154,16 +154,47 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             );
           })}
           
-          {/* Peace symbol lines */}
-          {/* Vertical line */}
-          <path d="M50 30 L50 70" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
-          {/* Left diagonal line */}
-          <path d="M50 50 L35 65" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
-          {/* Right diagonal line */}
-          <path d="M50 50 L65 65" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
+          {/* Central white dot where branches emerge from */}
+          <circle cx="50" cy="50" r="3.5" fill="#FFFFFF" />
           
-          {/* Connection points */}
-          <circle cx="50" cy="50" r="3" fill={peaceSymbolColor} />
+          {/* Tree branch peace symbol lines with gradients and curves */}
+          {/* Vertical branch */}
+          <path 
+            d="M50,30 C52,40 48,60 50,70" 
+            stroke="url(#branchGradient)" 
+            strokeWidth="2.5" 
+            strokeLinecap="round"
+          />
+          
+          {/* Left diagonal branch - connecting to heart edge */}
+          <path 
+            d="M50,50 C45,55 40,58 35,65" 
+            stroke="url(#branchGradient)" 
+            strokeWidth="2.5" 
+            strokeLinecap="round"
+          />
+          
+          {/* Right diagonal branch - connecting to heart edge */}
+          <path 
+            d="M50,50 C55,55 60,58 65,65" 
+            stroke="url(#branchGradient)" 
+            strokeWidth="2.5" 
+            strokeLinecap="round"
+          />
+          
+          {/* Small leaf buds on branches */}
+          <circle cx="51" cy="40" r="0.8" fill="#A3F2BE" />
+          <circle cx="49" cy="55" r="0.8" fill="#A3F2BE" />
+          <circle cx="42" cy="58" r="0.8" fill="#A3F2BE" />
+          <circle cx="58" cy="58" r="0.8" fill="#A3F2BE" />
+          
+          {/* Gradient definitions */}
+          <defs>
+            <linearGradient id="branchGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#F2FCE2" />
+              <stop offset="100%" stopColor="#86EFAC" />
+            </linearGradient>
+          </defs>
           
           {/* Additional decorative elements - stars */}
           {/* Replacing the previous square shapes with proper stars */}

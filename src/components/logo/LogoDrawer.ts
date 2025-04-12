@@ -1,8 +1,7 @@
-
 /**
  * Core drawing functions for the Peace2Hearts logo
  */
-import { drawHeartPath, drawStar, drawDot } from '../../utils/logoRendering/drawShapes';
+import { drawHeartPath, drawStar, drawDot, drawTreeBranch } from '../../utils/logoRendering/drawShapes';
 import { 
   drawSparklePattern, 
   drawCurvedEnergyLine,
@@ -15,7 +14,7 @@ import {
  */
 export const logoColors = {
   logoColor: "#0EA5E9", // peacefulBlue
-  peaceSymbolColor: "#F9A8D4", // softPink (replacing orange with pink as requested)
+  peaceSymbolColor: "#86EFAC", // softGreen for tree branches (changed from softPink)
   secondaryColor: "#86EFAC", // softGreen
   accentColor: "#D946EF", // vividPink
   tertiaryColor: "#8B5CF6", // vibrantPurple - used for background
@@ -71,33 +70,18 @@ export const drawHeartWithPeace = (
   // Add the Da Vinci-inspired Vitruvian Man lines extending from the peace symbol
   drawVitruvianLines(ctx, 50, 50, 20, scale, peaceSymbolColor);
   
-  // Peace symbol lines
-  // Vertical line
-  ctx.beginPath();
-  ctx.moveTo(scalePos(50), scalePos(30));
-  ctx.lineTo(scalePos(50), scalePos(70));
-  ctx.strokeStyle = peaceSymbolColor;
-  ctx.lineWidth = scalePos(2.5);
-  ctx.lineCap = 'round';
-  ctx.stroke();
+  // Central white dot at the center of the peace symbol
+  drawDot(ctx, 50, 50, 3.5, '#FFFFFF', scale);
   
-  // Left diagonal line
-  ctx.beginPath();
-  ctx.moveTo(scalePos(50), scalePos(50));
-  ctx.lineTo(scalePos(35), scalePos(65));
-  ctx.stroke();
+  // Draw tree branches instead of straight peace symbol lines
+  // Vertical branch (top to bottom)
+  drawTreeBranch(ctx, 50, 30, 50, 70, 2.5, scale);
   
-  // Right diagonal line
-  ctx.beginPath();
-  ctx.moveTo(scalePos(50), scalePos(50));
-  ctx.lineTo(scalePos(65), scalePos(65));
-  ctx.stroke();
+  // Left diagonal branch (connects to heart edge)
+  drawTreeBranch(ctx, 50, 50, 35, 65, 2.5, scale);
   
-  // Connection point
-  ctx.beginPath();
-  ctx.arc(scalePos(50), scalePos(50), scalePos(3), 0, Math.PI * 2);
-  ctx.fillStyle = peaceSymbolColor;
-  ctx.fill();
+  // Right diagonal branch (connects to heart edge)
+  drawTreeBranch(ctx, 50, 50, 65, 65, 2.5, scale);
   
   // Small accent stars instead of previous square shapes
   drawStar(ctx, 20, 35, 2.5, 5, secondaryColor, scale);
