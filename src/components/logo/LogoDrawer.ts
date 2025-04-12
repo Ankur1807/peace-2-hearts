@@ -6,7 +6,8 @@ import { drawHeartPath, drawStar, drawDot } from '../../utils/logoRendering/draw
 import { 
   drawSparklePattern, 
   drawCurvedEnergyLine,
-  drawWavyPatterns 
+  drawWavyPatterns,
+  drawVitruvianLines
 } from '../../utils/logoRendering/drawPatterns';
 
 /**
@@ -66,6 +67,9 @@ export const drawHeartWithPeace = (
   ctx.strokeStyle = peaceSymbolColor;
   ctx.lineWidth = scalePos(2.5);
   ctx.stroke();
+  
+  // Add the Da Vinci-inspired Vitruvian Man lines extending from the peace symbol
+  drawVitruvianLines(ctx, 50, 50, 20, scale, peaceSymbolColor);
   
   // Peace symbol lines
   // Vertical line

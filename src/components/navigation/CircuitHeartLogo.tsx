@@ -115,6 +115,44 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           {/* Peace symbol in the center */}
           <circle cx="50" cy="50" r="20" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
           
+          {/* Da Vinci-inspired Vitruvian Man lines */}
+          {/* Diagonal lines extending from center - represents limbs */}
+          {[45, 135, 225, 315].map((angle, index) => {
+            const lineLength = 30;
+            const radians = angle * Math.PI / 180;
+            const endX = 50 + Math.cos(radians) * lineLength;
+            const endY = 50 + Math.sin(radians) * lineLength;
+            
+            return (
+              <React.Fragment key={`vitruvian-line-${index}`}>
+                {/* Main limb line */}
+                <path 
+                  d={`M50,50 L${endX},${endY}`} 
+                  stroke={peaceSymbolColor} 
+                  strokeWidth="1" 
+                  strokeDasharray="2 1.5" 
+                  strokeOpacity="0.8"
+                />
+                
+                {/* Proportion markers along the line */}
+                {[1, 2, 3].map(division => {
+                  const divX = 50 + Math.cos(radians) * lineLength * division/3;
+                  const divY = 50 + Math.sin(radians) * lineLength * division/3;
+                  return (
+                    <circle 
+                      key={`marker-${index}-${division}`}
+                      cx={divX}
+                      cy={divY}
+                      r="0.8"
+                      fill={peaceSymbolColor}
+                      opacity="0.6"
+                    />
+                  );
+                })}
+              </React.Fragment>
+            );
+          })}
+          
           {/* Peace symbol lines */}
           {/* Vertical line */}
           <path d="M50 30 L50 70" stroke={peaceSymbolColor} strokeWidth="2.5" strokeLinecap="round" />
