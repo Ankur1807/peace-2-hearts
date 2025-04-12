@@ -35,40 +35,6 @@ export const drawSparklePattern = (
 };
 
 /**
- * Draw a curved energy line from point to point
- */
-export const drawCurvedEnergyLine = (
-  ctx: CanvasRenderingContext2D, 
-  fromX: number, 
-  fromY: number, 
-  toX: number, 
-  toY: number, 
-  color: string, 
-  lineWidth: number, 
-  scale: number
-): void => {
-  const fromXScaled = fromX * scale;
-  const fromYScaled = fromY * scale;
-  const toXScaled = toX * scale;
-  const toYScaled = toY * scale;
-  
-  // Control point offset for curve
-  const cpX = (fromXScaled + toXScaled) / 2 + (Math.random() * 20 - 10);
-  const cpY = (fromYScaled + toYScaled) / 2 + (Math.random() * 20 - 10);
-  
-  ctx.beginPath();
-  ctx.moveTo(fromXScaled, fromYScaled);
-  ctx.quadraticCurveTo(cpX, cpY, toXScaled, toYScaled);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = lineWidth * scale;
-  ctx.setLineDash([scale * 2, scale * 2]);
-  ctx.globalAlpha = 0.7;
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.globalAlpha = 1;
-};
-
-/**
  * Draws wavy patterns for background decoration
  */
 export const drawWavyPatterns = (

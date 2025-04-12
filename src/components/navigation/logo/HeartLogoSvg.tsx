@@ -148,12 +148,6 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
           />
         );
       })}
-      
-      {/* Curved energy lines radiating from center */}
-      <path d="M50,50 Q40,40 30,35" stroke={tertiaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
-      <path d="M50,50 Q60,40 70,35" stroke={accentColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
-      <path d="M50,50 Q45,65 40,80" stroke={secondaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
-      <path d="M50,50 Q55,65 60,80" stroke={secondaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />
     </svg>
   );
 };

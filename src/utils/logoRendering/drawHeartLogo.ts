@@ -4,10 +4,7 @@
  */
 import { logoColors } from './logoColors';
 import { drawHeartPath, drawStar, drawDot, drawTreeBranch } from './drawShapes';
-import { 
-  drawSparklePattern, 
-  drawCurvedEnergyLine
-} from './drawPatterns';
+import { drawSparklePattern } from './drawPatterns';
 
 /**
  * Draw the heart with peace symbol - the core logo component
@@ -74,12 +71,6 @@ export const drawHeartWithPeace = (
   drawStar(ctx, 75, 70, 2.5, 5, accentColor, scale);
   drawStar(ctx, 50, 15, 2.5, 5, logoColor, scale);
   drawStar(ctx, 50, 85, 2.5, 5, logoColor, scale);
-  
-  // Energy lines radiating from center - make them more dynamic
-  drawCurvedEnergyLine(ctx, 50, 50, 30, 35, tertiaryColor, 1, scale);
-  drawCurvedEnergyLine(ctx, 50, 50, 70, 35, accentColor, 1, scale);
-  drawCurvedEnergyLine(ctx, 50, 50, 40, 80, secondaryColor, 1, scale);
-  drawCurvedEnergyLine(ctx, 50, 50, 60, 80, secondaryColor, 1, scale);
   
   // Restore context
   ctx.restore();
