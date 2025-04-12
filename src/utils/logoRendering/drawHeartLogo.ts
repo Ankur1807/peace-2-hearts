@@ -49,9 +49,6 @@ export const drawHeartWithPeace = (
   ctx.lineWidth = 2.5 * scale;
   ctx.stroke();
   
-  // Central white dot at the center of the peace symbol
-  drawDot(ctx, 50, 50, 3.5, '#FFFFFF', scale);
-  
   // Draw tree branches instead of straight peace symbol lines
   // Vertical branch (top to bottom)
   drawTreeBranch(ctx, 50, 30, 50, 70, 2.5, scale);
@@ -71,6 +68,9 @@ export const drawHeartWithPeace = (
   drawStar(ctx, 75, 70, 2.5, 5, accentColor, scale);
   drawStar(ctx, 50, 15, 2.5, 5, logoColor, scale);
   drawStar(ctx, 50, 85, 2.5, 5, logoColor, scale);
+  
+  // Central white dot at the center of the peace symbol - MOVED TO END to draw it on top
+  drawDot(ctx, 50, 50, 3.5, '#FFFFFF', scale);
   
   // Restore context
   ctx.restore();

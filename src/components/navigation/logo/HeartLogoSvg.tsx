@@ -71,9 +71,6 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
       {/* Peace symbol circle */}
       <circle cx="50" cy="50" r="20" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
       
-      {/* Central white dot where branches emerge from */}
-      <circle cx="50" cy="50" r="3.5" fill="#FFFFFF" />
-      
       {/* Tree branch peace symbol lines with gradients and curves */}
       {/* Vertical branch */}
       <path 
@@ -148,6 +145,9 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
           />
         );
       })}
+
+      {/* Central white dot where branches emerge from - MOVED TO END so it's on top */}
+      <circle cx="50" cy="50" r="3.5" fill="#FFFFFF" />
     </svg>
   );
 };
