@@ -23,13 +23,13 @@ export const drawSparklePattern = (
     const x = centerX * scale + Math.cos(angle) * radius * scale;
     const y = centerY * scale + Math.sin(angle) * radius * scale;
     
-    // Draw small sparkle
+    // Draw sparkles with alternating styles and colors
     if (i % 3 === 0) {
-      drawStar(ctx, x / scale, y / scale, 1.5, 4, accentColor, scale);
+      drawStar(ctx, x / scale, y / scale, 2.5, 5, accentColor, scale);
     } else if (i % 3 === 1) {
-      drawStar(ctx, x / scale, y / scale, 1, 4, secondaryColor, scale);
+      drawStar(ctx, x / scale, y / scale, 2, 5, secondaryColor, scale);
     } else {
-      drawDot(ctx, x / scale, y / scale, 1.2, logoColor, scale);
+      drawStar(ctx, x / scale, y / scale, 1.8, 5, logoColor, scale);
     }
   }
 };

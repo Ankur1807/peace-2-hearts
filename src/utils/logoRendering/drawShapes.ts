@@ -64,7 +64,7 @@ export const drawStar = (
   cx: number, 
   cy: number, 
   outerRadius: number, 
-  points: number, 
+  points: number = 5, 
   color: string, 
   scale: number
 ): void => {
@@ -72,10 +72,12 @@ export const drawStar = (
   ctx.beginPath();
   
   for (let i = 0; i < points * 2; i++) {
-    const radius = i % 2 === 0 ? outerRadius : innerRadius;
-    const angle = (i / (points * 2)) * Math.PI * 2;
-    const x = cx * scale + Math.cos(angle) * radius * scale;
-    const y = cy * scale + Math.sin(angle) * radius * scale;
+    const radius = i % 2 === 0 ? outerRadius * scale : innerRadius * scale;
+    // Start at the top (270 degrees = -90 in standard position)
+    const startAngle = -Math.PI / 2;
+    const angle = startAngle + (i / (points * 2)) * Math.PI * 2;
+    const x = cx * scale + Math.cos(angle) * radius;
+    const y = cy * scale + Math.sin(angle) * radius;
     
     if (i === 0) {
       ctx.moveTo(x, y);

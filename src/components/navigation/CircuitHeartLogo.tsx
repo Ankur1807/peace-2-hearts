@@ -84,32 +84,33 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
             const dist = 30;
             const x = 50 + Math.cos(angle * Math.PI/180) * dist;
             const y = 50 + Math.sin(angle * Math.PI/180) * dist;
-            const size = index % 3 === 0 ? 2 : 1.5;
-            const color = index % 3 === 0 ? accentColor : (index % 3 === 1 ? secondaryColor : peaceSymbolColor);
+            const size = index % 3 === 0 ? 2.5 : 1.8;
+            const color = index % 3 === 0 ? accentColor : (index % 3 === 1 ? secondaryColor : logoColor);
             
-            if (index % 3 === 0) {
-              // Star
-              return (
-                <path 
-                  key={`sparkle-${index}`}
-                  d={`M${x},${y-size} L${x+size/3},${y-size/3} L${x+size},${y} L${x+size/3},${y+size/3} L${x},${y+size} L${x-size/3},${y+size/3} L${x-size},${y} L${x-size/3},${y-size/3} Z`}
-                  fill={color}
-                  opacity="0.6"
-                />
-              );
-            } else {
-              // Dot
-              return (
-                <circle 
-                  key={`dot-${index}`}
-                  cx={x}
-                  cy={y}
-                  r={size/2}
-                  fill={color}
-                  opacity="0.6"
-                />
-              );
+            // Star shape
+            const points = 5;
+            const outerRadius = size;
+            const innerRadius = size * 0.4;
+            let starPath = "";
+            
+            for (let i = 0; i < points * 2; i++) {
+              const radius = i % 2 === 0 ? outerRadius : innerRadius;
+              const angle = (i / (points * 2)) * Math.PI * 2;
+              const starX = x + Math.cos(angle) * radius;
+              const starY = y + Math.sin(angle) * radius;
+              
+              starPath += (i === 0 ? "M" : "L") + starX + "," + starY;
             }
+            starPath += "Z";
+            
+            return (
+              <path 
+                key={`star-${index}`}
+                d={starPath}
+                fill={color}
+                opacity="0.8"
+              />
+            );
           })}
           
           {/* Peace symbol in the center */}
@@ -164,15 +165,42 @@ const CircuitHeartLogo: React.FC<CircuitHeartLogoProps> = ({
           {/* Connection points */}
           <circle cx="50" cy="50" r="3" fill={peaceSymbolColor} />
           
-          {/* Additional decorative elements - stars instead of circles */}
-          <path d="M20,33 l2,2 l-2,2 l-2,-2 z" fill={secondaryColor} />
-          <path d="M80,33 l2,2 l-2,2 l-2,-2 z" fill={secondaryColor} />
-          <path d="M30,23 l2,2 l-2,2 l-2,-2 z" fill={tertiaryColor} />
-          <path d="M70,23 l2,2 l-2,2 l-2,-2 z" fill={tertiaryColor} />
-          <path d="M25,68 l2,2 l-2,2 l-2,-2 z" fill={accentColor} />
-          <path d="M75,68 l2,2 l-2,2 l-2,-2 z" fill={accentColor} />
-          <path d="M50,13 l2,2 l-2,2 l-2,-2 z" fill={logoColor} />
-          <path d="M50,83 l2,2 l-2,2 l-2,-2 z" fill={logoColor} />
+          {/* Additional decorative elements - stars */}
+          {/* Replacing the previous square shapes with proper stars */}
+          {[
+            {x: 20, y: 35, color: secondaryColor, size: 2.5},
+            {x: 80, y: 35, color: secondaryColor, size: 2.5},
+            {x: 30, y: 25, color: tertiaryColor, size: 2.5},
+            {x: 70, y: 25, color: tertiaryColor, size: 2.5},
+            {x: 25, y: 70, color: accentColor, size: 2.5},
+            {x: 75, y: 70, color: accentColor, size: 2.5},
+            {x: 50, y: 13, color: logoColor, size: 2.5},
+            {x: 50, y: 83, color: logoColor, size: 2.5}
+          ].map((star, index) => {
+            const points = 5;
+            const outerRadius = star.size;
+            const innerRadius = star.size * 0.4;
+            let starPath = "";
+            
+            for (let i = 0; i < points * 2; i++) {
+              const radius = i % 2 === 0 ? outerRadius : innerRadius;
+              const angle = (i / (points * 2)) * Math.PI * 2;
+              const starX = star.x + Math.cos(angle) * radius;
+              const starY = star.y + Math.sin(angle) * radius;
+              
+              starPath += (i === 0 ? "M" : "L") + starX + "," + starY;
+            }
+            starPath += "Z";
+            
+            return (
+              <path 
+                key={`accent-star-${index}`}
+                d={starPath}
+                fill={star.color}
+                opacity="0.85"
+              />
+            );
+          })}
           
           {/* Curved energy lines radiating from center */}
           <path d="M50,50 Q40,40 30,35" stroke={tertiaryColor} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.7" />

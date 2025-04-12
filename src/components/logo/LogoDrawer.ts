@@ -99,13 +99,15 @@ export const drawHeartWithPeace = (
   ctx.fillStyle = peaceSymbolColor;
   ctx.fill();
   
-  // Small accent stars instead of circles
+  // Small accent stars instead of previous square shapes
   drawStar(ctx, 20, 35, 2.5, 5, secondaryColor, scale);
   drawStar(ctx, 80, 35, 2.5, 5, secondaryColor, scale);
   drawStar(ctx, 30, 25, 2.5, 5, tertiaryColor, scale);
   drawStar(ctx, 70, 25, 2.5, 5, tertiaryColor, scale);
   drawStar(ctx, 25, 70, 2.5, 5, accentColor, scale);
   drawStar(ctx, 75, 70, 2.5, 5, accentColor, scale);
+  drawStar(ctx, 50, 15, 2.5, 5, logoColor, scale);
+  drawStar(ctx, 50, 85, 2.5, 5, logoColor, scale);
   
   // Energy lines radiating from center - make them more dynamic
   drawCurvedEnergyLine(ctx, 50, 50, 30, 35, tertiaryColor, 1, scale);
