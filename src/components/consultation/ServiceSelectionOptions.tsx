@@ -31,7 +31,8 @@ const mentalHealthServices: ServiceOption[] = [
   { id: 'premarital-counselling-couple', label: 'Premarital Counselling - Couple' },
   { id: 'couples-counselling', label: 'Couples Counselling' },
   { id: 'sexual-health-counselling-individual', label: 'Sexual Health Counselling - Individual' },
-  { id: 'sexual-health-counselling-couple', label: 'Sexual Health Counselling - Couple' }
+  { id: 'sexual-health-counselling-couple', label: 'Sexual Health Counselling - Couple' },
+  { id: 'test-service', label: 'Test Service (₹11)' }
 ];
 
 const legalServices: ServiceOption[] = [

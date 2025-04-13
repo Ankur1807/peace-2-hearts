@@ -37,6 +37,11 @@ const MentalHealthServices: React.FC<MentalHealthServicesProps> = ({
       id: 'sexual-health-counselling',
       title: 'Sexual Health Counselling',
       description: 'Specialized support for addressing intimacy concerns and enhancing relationship satisfaction.'
+    },
+    {
+      id: 'test-service',
+      title: 'Test Service (₹11)',
+      description: 'For testing payment gateway functionality.'
     }
   ];
 
