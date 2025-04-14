@@ -1,3 +1,4 @@
+
 import React, { useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
