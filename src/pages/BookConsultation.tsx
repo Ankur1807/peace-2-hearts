@@ -1,17 +1,15 @@
 
-import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
 import { useConsultationBooking } from '@/hooks/useConsultationBooking';
-import { initializeBookingFromStorage } from '@/utils/bookingInitializer';
-import ConsultationBookingForm from '@/components/consultation/ConsultationBookingForm';
-import SuccessView from '@/components/consultation/SuccessView';
-import ConsultationAlert from '@/components/consultation/ConsultationAlert';
 import { Toaster } from '@/components/ui/toaster';
 import { BookingDetails } from '@/utils/types';
-import { loadRazorpayScript, isRazorpayAvailable } from '@/utils/payment/razorpayService';
+import BookingSuccessView from '@/components/consultation/BookingSuccessView';
+import BookingFormContainer from '@/components/consultation/BookingFormContainer';
+import ConsultationInitializer from '@/components/consultation/ConsultationInitializer';
+import { getPackageName } from '@/utils/consultation/packageUtils';
 
 const BookConsultation = () => {
   const [searchParams] = useSearchParams();
@@ -21,193 +19,56 @@ const BookConsultation = () => {
   const bookingState = useConsultationBooking();
   const { 
     submitted, 
-    referenceId, 
-    bookingError,
+    referenceId,
     date,
     timeSlot,
     timeframe,
     serviceCategory,
     selectedServices,
     personalDetails,
-    totalPrice,
-    pricing,
-    setServiceCategory,
-    setSelectedServices
+    totalPrice
   } = bookingState;
-  
-  const [isDevelopment, setIsDevelopment] = useState(false);
-  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
-  const [initializingPayment, setInitializingPayment] = useState(true);
-  const [initialized, setInitialized] = useState(false);
 
-  const getPackageName = () => {
-    if (serviceCategory !== 'holistic') return null;
-    
-    const divorcePrevention = [
-      'couples-counselling',
-      'mental-health-counselling',
-      'mediation',
-      'general-legal'
-    ];
-    
-    const preMarriageClarity = [
-      'pre-marriage-legal',
-      'premarital-counselling',
-      'mental-health-counselling'
-    ];
-
-    const services = selectedServices || [];
-    
-    if (services.length === divorcePrevention.length && 
-        divorcePrevention.every(s => services.includes(s))) {
-      return "Divorce Prevention Package";
-    }
-    
-    if (services.length === preMarriageClarity.length && 
-        preMarriageClarity.every(s => services.includes(s))) {
-      return "Pre-Marriage Clarity Package";
-    }
-    
-    return null;
-  };
-
-  useEffect(() => {
-    const initRazorpay = async () => {
-      try {
-        if (isRazorpayAvailable()) {
-          console.log("Razorpay already loaded in window object");
-          setRazorpayLoaded(true);
-          setInitializingPayment(false);
-          return;
-        }
-        
-        console.log("Attempting to load Razorpay script");
-        const result = await loadRazorpayScript();
-        setRazorpayLoaded(result);
-        console.log("Razorpay script load result:", result);
-      } catch (err) {
-        console.error("Error initializing Razorpay:", err);
-      } finally {
-        setInitializingPayment(false);
-      }
-    };
-    
-    initRazorpay();
-  }, []);
-
-  useEffect(() => {
-    if (initialized) return; // Only run once on initial load
-    
-    setIsDevelopment(process.env.NODE_ENV === 'development');
-    initializeBookingFromStorage(bookingState);
-    
-    // Pre-select service category from URL if provided
-    if (serviceParam) {
-      console.log("Pre-selecting service category:", serviceParam);
-      setServiceCategory(serviceParam);
-      
-      // If subService is specified, pre-select it
-      if (subServiceParam) {
-        console.log("Pre-selecting sub-service:", subServiceParam);
-        setSelectedServices([subServiceParam]);
-        
-        // Log to confirm the selection was made
-        console.log("Selected services after pre-selection:", [subServiceParam]);
-      }
-    }
-    
-    setInitialized(true);
-  }, [serviceParam, subServiceParam, setServiceCategory, setSelectedServices, initialized, bookingState]);
-
-  // Another effect to ensure service selection persists
-  useEffect(() => {
-    if (initialized && subServiceParam && (!selectedServices || selectedServices.length === 0)) {
-      console.log("Re-selecting sub-service because selection was lost:", subServiceParam);
-      setSelectedServices([subServiceParam]);
-    }
-  }, [subServiceParam, selectedServices, setSelectedServices, initialized]);
-
-  const packageName = getPackageName();
-
-  if (submitted) {
-    const bookingDetails: BookingDetails = {
-      clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
-      email: personalDetails.email,
-      services: selectedServices || [], 
-      date: date, 
-      timeSlot: timeSlot,
-      timeframe: timeframe,
-      serviceCategory: serviceCategory,
-      packageName: packageName,
-      amount: totalPrice
-    };
-
-    return (
-      <>
-        <SEO 
-          title="Consultation Confirmed"
-          description="Your consultation with Peace2Hearts has been successfully booked. We look forward to supporting you on your relationship journey."
-          keywords="book relationship counseling, legal consultation appointment, therapy session, mental health support"
-        />
-        <Navigation />
-        <main className="py-16 md:py-24">
-          <div className="container mx-auto px-4 max-w-4xl">
-            <SuccessView 
-              referenceId={referenceId}
-              bookingDetails={bookingDetails}
-            />
-          </div>
-        </main>
-        <Footer />
-        <Toaster />
-      </>
-    );
-  }
+  // Generate booking details for success view
+  const createBookingDetails = (): BookingDetails => ({
+    clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
+    email: personalDetails.email,
+    services: selectedServices || [], 
+    date: date, 
+    timeSlot: timeSlot,
+    timeframe: timeframe,
+    serviceCategory: serviceCategory,
+    packageName: getPackageName(selectedServices),
+    amount: totalPrice
+  });
 
   return (
     <>
       <SEO 
-        title="Book a Consultation"
-        description="Schedule a consultation with our relationship counselors or legal experts. Take the first step towards peace and clarity in your relationship journey."
+        title={submitted ? "Consultation Confirmed" : "Book a Consultation"}
+        description={submitted 
+          ? "Your consultation with Peace2Hearts has been successfully booked. We look forward to supporting you on your relationship journey."
+          : "Schedule a consultation with our relationship counselors or legal experts. Take the first step towards peace and clarity in your relationship journey."
+        }
         keywords="book relationship counseling, legal consultation appointment, therapy session, mental health support"
       />
       <Navigation />
       <main className="py-16 md:py-24">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="section-title text-4xl md:text-5xl text-center mb-4">Book Your Consultation</h1>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-            Take the first step towards peace and clarity in your relationship journey. Our expert team is here to support you.
-          </p>
-
-          {bookingError && (
-            <ConsultationAlert
-              title="Booking Error"
-              description={bookingError}
-              variant="destructive"
-              className="mb-6"
+        {!submitted ? (
+          <>
+            <ConsultationInitializer 
+              serviceParam={serviceParam}
+              subServiceParam={subServiceParam}
+              bookingState={bookingState}
             />
-          )}
-
-          {isDevelopment && (
-            <ConsultationAlert
-              title="Development Mode"
-              description="This is a development environment. Bookings will create consultants if none exist."
-              variant="default"
-              className="mb-6"
-            />
-          )}
-
-          {initializingPayment && (
-            <ConsultationAlert
-              title="Loading Payment Gateway"
-              description="Please wait while we initialize the payment system..."
-              variant="default"
-              className="mb-6"
-            />
-          )}
-
-          <ConsultationBookingForm bookingState={bookingState} />
-        </div>
+            <BookingFormContainer bookingState={bookingState} />
+          </>
+        ) : (
+          <BookingSuccessView 
+            referenceId={referenceId}
+            bookingDetails={createBookingDetails()}
+          />
+        )}
       </main>
       <Footer />
       <Toaster />
