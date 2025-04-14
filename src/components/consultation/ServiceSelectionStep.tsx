@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MentalHealthServices from './service-selection/MentalHealthServices';
@@ -18,8 +18,23 @@ const ServiceSelectionStep = ({
 }: ServiceSelectionStepProps) => {
   const [serviceCategory, setServiceCategory] = React.useState("mental-health");
   
+  // Check if we should switch to legal services tab based on the pre-selected service
+  useEffect(() => {
+    // If a legal service is selected, switch to the legal tab
+    if (consultationType && (
+      consultationType.includes('legal') || 
+      consultationType === 'mediation' || 
+      consultationType === 'divorce' ||
+      consultationType === 'custody' ||
+      consultationType === 'maintenance'
+    )) {
+      setServiceCategory("legal");
+    }
+  }, [consultationType]);
+  
   // Function to handle clicking the entire box
   const handleBoxClick = (value: string) => {
+    console.log("Service option clicked:", value);
     setConsultationType(value);
   };
 

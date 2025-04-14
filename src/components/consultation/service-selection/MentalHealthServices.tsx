@@ -45,6 +45,9 @@ const MentalHealthServices: React.FC<MentalHealthServicesProps> = ({
     }
   ];
 
+  // Log the current consultationType to help with debugging
+  console.log("Mental Health Services - Current consultationType:", consultationType);
+
   return (
     <RadioGroup value={consultationType} onValueChange={handleBoxClick} className="space-y-4">
       {mentalHealthOptions.map(option => (

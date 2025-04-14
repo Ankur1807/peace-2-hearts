@@ -38,6 +38,7 @@ const BookConsultation = () => {
   const [isDevelopment, setIsDevelopment] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [initializingPayment, setInitializingPayment] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   const getPackageName = () => {
     if (serviceCategory !== 'holistic') return null;
@@ -95,6 +96,8 @@ const BookConsultation = () => {
   }, []);
 
   useEffect(() => {
+    if (initialized) return; // Only run once on initial load
+    
     setIsDevelopment(process.env.NODE_ENV === 'development');
     initializeBookingFromStorage(bookingState);
     
@@ -106,12 +109,23 @@ const BookConsultation = () => {
       // If subService is specified, pre-select it
       if (subServiceParam) {
         console.log("Pre-selecting sub-service:", subServiceParam);
-        
-        // Important: Use an array with the subServiceParam to properly set selected services
         setSelectedServices([subServiceParam]);
+        
+        // Log to confirm the selection was made
+        console.log("Selected services after pre-selection:", [subServiceParam]);
       }
     }
-  }, [serviceParam, subServiceParam, setServiceCategory, setSelectedServices]);
+    
+    setInitialized(true);
+  }, [serviceParam, subServiceParam, setServiceCategory, setSelectedServices, initialized, bookingState]);
+
+  // Another effect to ensure service selection persists
+  useEffect(() => {
+    if (initialized && subServiceParam && (!selectedServices || selectedServices.length === 0)) {
+      console.log("Re-selecting sub-service because selection was lost:", subServiceParam);
+      setSelectedServices([subServiceParam]);
+    }
+  }, [subServiceParam, selectedServices, setSelectedServices, initialized]);
 
   const packageName = getPackageName();
 
