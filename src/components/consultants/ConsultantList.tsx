@@ -11,6 +11,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Consultant, updateConsultantAvailability } from "@/utils/consultants";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface ConsultantListProps {
   consultants: Consultant[];
@@ -87,6 +90,7 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
           <TableHead>Hourly Rate</TableHead>
           <TableHead>Available Days</TableHead>
           <TableHead>Available</TableHead>
+          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -113,6 +117,14 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
                 checked={consultant.is_available} 
                 onCheckedChange={(checked) => handleAvailabilityChange(consultant.id, checked)}
               />
+            </TableCell>
+            <TableCell>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to={`/consultants/${consultant.id}`}>
+                  <Eye className="h-4 w-4 mr-1" />
+                  View
+                </Link>
+              </Button>
             </TableCell>
           </TableRow>
         ))}
