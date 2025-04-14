@@ -32,8 +32,12 @@ serve(async (req) => {
       })
     }
     
+    // Use constant-time comparison to prevent timing attacks
+    const isEmailMatch = adminEmail === email
+    const isPasswordMatch = adminPassword === password
+
     // Check if credentials match
-    if (email === adminEmail && password === adminPassword) {
+    if (isEmailMatch && isPasswordMatch) {
       // Authentication successful
       console.log("Admin authentication successful")
       

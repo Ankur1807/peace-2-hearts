@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { checkIsAdmin } from "@/utils/authUtils";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useAdminAuth = () => {
@@ -50,51 +49,32 @@ export const useAdminAuth = () => {
     };
   }, []);
 
-  // Manual login for admins - bypasses email confirmation
+  // Manual login for admins - uses edge function for authentication
   const loginAsAdmin = async (email: string, password: string) => {
     try {
-      // List of pre-approved admin emails
-      const preApprovedAdmins = ['ankurb@peace2hearts.com'];
-      const isPreApprovedAdmin = preApprovedAdmins.includes(email);
-      
-      if (!isPreApprovedAdmin) {
-        // Regular login for non-pre-approved admins
-        const { error } = await supabase.auth.signInWithPassword({
+      // Call the admin-auth edge function
+      const { data, error } = await supabase.functions.invoke('admin-auth', {
+        body: {
           email,
           password
-        });
-        
-        if (error) throw error;
-      } else {
-        // Special login path for pre-approved admins using signUp to force a session
-        // This bypasses email confirmation
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              admin: true
-            }
-          }
-        });
-        
-        // If user already exists, try direct login
-        if (error && error.message.includes("already exists")) {
-          await supabase.auth.signInWithPassword({
-            email,
-            password
-          });
-        } else if (error) {
-          throw error;
         }
-        
-        // Force authenticated state for pre-approved admins
-        setIsAuthenticated(true);
-        setIsAdmin(true);
+      });
+      
+      if (error) {
+        throw new Error(error.message || 'Authentication failed');
       }
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Invalid email or password');
+      }
+
+      // Set a session marker in localStorage
+      localStorage.setItem('p2h_admin_authenticated', 'true');
+      localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
       
       return { success: true };
     } catch (error: any) {
+      console.error('Authentication error:', error);
       return { 
         success: false, 
         error: error.message || "Authentication failed" 
@@ -103,4 +83,23 @@ export const useAdminAuth = () => {
   };
 
   return { isAdmin, isAdminChecking, isAuthenticated, loginAsAdmin };
+};
+
+// Helper function to check admin status (can be expanded later)
+const checkIsAdmin = async (): Promise<boolean> => {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return false;
+    
+    // Pre-approved admin emails list
+    const adminEmails = [
+      'admin@peace2hearts.com', 
+      'founder@peace2hearts.com',
+      'ankurb@peace2hearts.com'
+    ];
+    return adminEmails.includes(userData.user.email || '');
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
 };
