@@ -17,6 +17,16 @@ interface ConsultantHeaderProps {
 }
 
 export function ConsultantHeader({ consultant, getInitials, formatSpecialization }: ConsultantHeaderProps) {
+  // Generate a tagline based on specialization
+  const generateTagline = () => {
+    if (consultant.specialization === 'legal') {
+      return "Helping individuals navigate legal challenges with clarity and care";
+    } else if (consultant.specialization === 'mental_health') {
+      return "Supporting emotional wellbeing through life's challenging transitions";
+    }
+    return "Providing expert guidance and support for your journey";
+  };
+
   return (
     <div className="px-6 md:px-10 pb-8">
       <div className="flex flex-col md:flex-row gap-6 -mt-16">
@@ -29,6 +39,9 @@ export function ConsultantHeader({ consultant, getInitials, formatSpecialization
         </Avatar>
         <div className="pt-4 md:pt-0">
           <h1 className="text-3xl md:text-4xl font-bold mb-2 font-lora">{consultant.name || "Consultant"}</h1>
+          <p className="text-lg text-gray-600 mb-4 italic">
+            {generateTagline()}
+          </p>
           <div className="flex flex-wrap gap-2 mb-4">
             <Badge variant="secondary" className="text-sm px-3 py-1">
               {formatSpecialization(consultant.specialization)}
@@ -47,10 +60,10 @@ export function ConsultantHeader({ consultant, getInitials, formatSpecialization
                 Currently Unavailable
               </Badge>
             )}
+            <Badge variant="outline" className="text-sm px-3 py-1">
+              Virtual Sessions
+            </Badge>
           </div>
-          <p className="text-gray-600 mb-6 leading-relaxed">
-            {consultant.bio || "This consultant specializes in providing expert guidance and support tailored to your needs."}
-          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-primary/70" />

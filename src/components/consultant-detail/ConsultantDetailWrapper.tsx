@@ -7,6 +7,8 @@ import { ExpertiseTab } from "./ExpertiseTab";
 import { BookingTab } from "./BookingTab";
 import { ConsultantBreadcrumb } from "./ConsultantBreadcrumb";
 import { Consultant } from "@/utils/consultants";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface ConsultantDetailWrapperProps {
   consultant: Consultant;
@@ -32,28 +34,29 @@ export function ConsultantDetailWrapper({
         />
       </Card>
 
-      <Tabs defaultValue="about" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="about">About</TabsTrigger>
-          <TabsTrigger value="expertise">Expertise</TabsTrigger>
-          <TabsTrigger value="booking">Book</TabsTrigger>
-        </TabsList>
+      <div className="space-y-8">
+        <AboutTab consultant={consultant} />
         
-        <TabsContent value="about">
-          <AboutTab consultant={consultant} />
-        </TabsContent>
-        
-        <TabsContent value="expertise">
-          <ExpertiseTab 
-            consultant={consultant}
-            formatSpecialization={formatSpecialization}
-          />
-        </TabsContent>
-        
-        <TabsContent value="booking">
-          <BookingTab consultant={consultant} />
-        </TabsContent>
-      </Tabs>
+        <ExpertiseTab 
+          consultant={consultant}
+          formatSpecialization={formatSpecialization}
+        />
+
+        <Card className="overflow-hidden border shadow-sm">
+          <div className="p-6 bg-gray-50 border-b">
+            <div className="text-center">
+              <p className="text-gray-600 mb-4">
+                This expert may be matched to your case based on your needs. To begin, please book a session through our main service page.
+              </p>
+              <Link to="/book-consultation">
+                <Button className="px-8 py-6 text-lg">
+                  Book sessions with experts such as {consultant.name || "our consultants"}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }
