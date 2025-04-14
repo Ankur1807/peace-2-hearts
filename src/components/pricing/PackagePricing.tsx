@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -17,20 +16,19 @@ const PackagePricing = () => {
   const [editedPrice, setEditedPrice] = useState<string>('');
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchPackages();
-  }, []);
-
   const fetchPackages = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('package_pricing')
-        .select('*')
-        .order('package_name', { ascending: true });
+        .select('*');
 
-      if (error) throw error;
-      setPackages(data as PackagePrice[] || []);
+      if (error) {
+        console.error('Error fetching packages:', error);
+        throw error;
+      }
+
+      setPackages(data || []);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -65,7 +63,10 @@ const PackagePricing = () => {
 
       const { error } = await supabase
         .from('package_pricing')
-        .update({ price: Number(editedPrice), updated_at: new Date().toISOString() })
+        .update({ 
+          price: Number(editedPrice), 
+          updated_at: new Date().toISOString() 
+        })
         .eq('id', id);
 
       if (error) throw error;
@@ -90,7 +91,10 @@ const PackagePricing = () => {
     try {
       const { error } = await supabase
         .from('package_pricing')
-        .update({ is_active: !currentStatus, updated_at: new Date().toISOString() })
+        .update({ 
+          is_active: !currentStatus, 
+          updated_at: new Date().toISOString() 
+        })
         .eq('id', id);
 
       if (error) throw error;
@@ -109,6 +113,10 @@ const PackagePricing = () => {
       });
     }
   };
+
+  useEffect(() => {
+    fetchPackages();
+  }, []);
 
   return (
     <Card>
