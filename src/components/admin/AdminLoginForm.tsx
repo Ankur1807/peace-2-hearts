@@ -37,20 +37,20 @@ const AdminLoginForm = ({ onSubmit }: AdminLoginFormProps) => {
     try {
       setIsLoggingIn(true);
       await onSubmit(values.email, values.password);
+      // Form will be unmounted if login is successful due to parent component re-render
     } catch (error) {
       // Error handling is done in the parent component
-    } finally {
       setIsLoggingIn(false);
     }
   };
 
   return (
     <div className="container mx-auto px-4 max-w-md">
-      <h1 className="text-4xl font-lora font-bold text-center mb-12">Admin Login</h1>
+      <h1 className="text-4xl font-bold text-center mb-12">Admin Login</h1>
       
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-lora">Admin Access</CardTitle>
+          <CardTitle className="text-2xl">Admin Access</CardTitle>
           <CardDescription>
             Please login to access pricing management
           </CardDescription>

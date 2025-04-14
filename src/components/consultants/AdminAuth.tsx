@@ -42,6 +42,7 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
       // Set a session marker in localStorage
       localStorage.setItem('p2h_admin_authenticated', 'true');
       localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
+      
       onAuthenticated();
     } catch (err: any) {
       console.error('Authentication error:', err);
@@ -55,7 +56,7 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
     <div className="flex justify-center items-center min-h-[70vh]">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-lora text-center">Admin Authentication</CardTitle>
+          <CardTitle className="text-2xl text-center">Admin Authentication</CardTitle>
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">

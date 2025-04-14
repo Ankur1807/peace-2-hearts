@@ -13,19 +13,37 @@ export const useAdminAuth = () => {
     const checkAdminStatus = async () => {
       try {
         setIsAdminChecking(true);
-        // First check if user is authenticated
+        // First check if user is authenticated via Supabase
         const { data } = await supabase.auth.getSession();
-        if (!data.session) {
-          setIsAdmin(false);
+        
+        // Then check if admin status is set in localStorage from edge function auth
+        const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated');
+        const adminAuthTime = localStorage.getItem('p2h_admin_auth_time');
+        
+        // Admin auth is valid if set in last 24 hours
+        const isAdminAuthValid = adminAuthenticated === 'true' && 
+          adminAuthTime && 
+          (Date.now() - parseInt(adminAuthTime)) < 24 * 60 * 60 * 1000;
+        
+        if (data.session) {
+          setIsAuthenticated(true);
+        } else if (isAdminAuthValid) {
+          // If we have valid admin auth in localStorage but no Supabase session
+          setIsAuthenticated(true);
+        } else {
           setIsAuthenticated(false);
+          setIsAdmin(false);
           return;
         }
         
-        setIsAuthenticated(true);
-        
-        // Then check if user is admin
-        const adminStatus = await checkIsAdmin();
-        setIsAdmin(adminStatus);
+        // If we reach here, user is authenticated one way or another
+        // Check if they're an admin
+        if (isAdminAuthValid) {
+          setIsAdmin(true);
+        } else {
+          const adminStatus = await checkIsAdmin();
+          setIsAdmin(adminStatus);
+        }
       } catch (error) {
         console.error("Error checking admin status:", error);
         setIsAdmin(false);
@@ -71,6 +89,10 @@ export const useAdminAuth = () => {
       // Set a session marker in localStorage
       localStorage.setItem('p2h_admin_authenticated', 'true');
       localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
+      
+      // Set authentication state immediately (don't wait for effect)
+      setIsAuthenticated(true);
+      setIsAdmin(true);
       
       return { success: true };
     } catch (error: any) {

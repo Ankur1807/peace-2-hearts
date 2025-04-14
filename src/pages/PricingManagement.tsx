@@ -28,6 +28,10 @@ const PricingManagement = () => {
         title: "Login successful",
         description: "Welcome to pricing management",
       });
+      
+      // Force a re-render to show the pricing management interface
+      // This is no longer needed as we're setting state immediately in the hook
+      
     } catch (error: any) {
       toast({
         title: "Login failed",
@@ -61,13 +65,13 @@ const PricingManagement = () => {
   return (
     <>
       <SEO 
-        title={isAuthenticated ? "Pricing Management - Peace2Hearts Admin" : "Admin Login - Peace2Hearts"}
-        description={isAuthenticated ? "Manage service pricing, packages, and discount codes." : "Login to access pricing management"}
+        title={isAuthenticated && isAdmin ? "Pricing Management - Peace2Hearts Admin" : "Admin Login - Peace2Hearts"}
+        description={isAuthenticated && isAdmin ? "Manage service pricing, packages, and discount codes." : "Login to access pricing management"}
       />
       <Navigation />
       
       <main className="py-16 md:py-24">
-        {!isAuthenticated ? (
+        {!isAuthenticated || !isAdmin ? (
           <AdminLoginForm onSubmit={handleLogin} />
         ) : (
           <PricingTabs />
