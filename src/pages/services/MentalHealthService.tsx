@@ -25,7 +25,7 @@ const MentalHealthService: React.FC = () => {
       path: "/services/mental-health/premarital-counselling"
     },
     {
-      id: "couples-counselling",
+      id: "couples-counselling", // Make sure this ID matches what's in the selection options
       title: "Couples Counselling",
       description: "Professional guidance to strengthen communication and mutual understanding.",
       path: "/services/mental-health/couples-counselling"

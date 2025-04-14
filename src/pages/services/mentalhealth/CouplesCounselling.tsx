@@ -8,7 +8,7 @@ const CouplesCounselling = () => {
       description="Professional guidance to strengthen communication and mutual understanding in your relationship."
       image="https://images.unsplash.com/photo-1516058575910-2d692b5206e5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
       serviceType="mental-health"
-      serviceName="couples-counselling"
+      serviceName="couples-counselling" // Make sure this matches the ID in other files
       benefits={[
         "Improved communication skills to express needs effectively",
         "Strategies to resolve recurring conflicts constructively",

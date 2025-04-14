@@ -29,7 +29,7 @@ const MentalHealthServices: React.FC<MentalHealthServicesProps> = ({
       description: 'Prepare for a strong marriage through guided discussions and planning.'
     },
     {
-      id: 'couples-counselling',
+      id: 'couples-counselling', // Using consistent ID here
       title: 'Couples Counselling',
       description: 'Professional guidance to strengthen communication and mutual understanding.'
     },

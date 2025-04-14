@@ -106,6 +106,8 @@ const BookConsultation = () => {
       // If subService is specified, pre-select it
       if (subServiceParam) {
         console.log("Pre-selecting sub-service:", subServiceParam);
+        
+        // Important: Use an array with the subServiceParam to properly set selected services
         setSelectedServices([subServiceParam]);
       }
     }
