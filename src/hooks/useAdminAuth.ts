@@ -13,11 +13,11 @@ export const useAdminAuth = () => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
+        setIsAdminChecking(true);
         // First check if user is authenticated
         const { data } = await supabase.auth.getSession();
         if (!data.session) {
           setIsAdmin(false);
-          setIsAdminChecking(false);
           setIsAuthenticated(false);
           return;
         }
@@ -48,7 +48,7 @@ export const useAdminAuth = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [toast]);
+  }, []);
 
   // Manual login for admins - bypasses email confirmation
   const loginAsAdmin = async (email: string, password: string) => {

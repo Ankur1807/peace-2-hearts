@@ -30,7 +30,7 @@ const PricingTabs = ({ defaultTab = 'services' }: PricingTabsProps) => {
   return (
     <div className="container mx-auto px-4">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-lora font-bold">Pricing Management</h1>
+        <h1 className="text-4xl font-bold">Pricing Management</h1>
         <Button 
           variant="outline" 
           onClick={handleSignOut}
