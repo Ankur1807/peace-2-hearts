@@ -12,11 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { SEO } from '@/components/SEO';
 import { supabase } from "@/integrations/supabase/client";
 
-// Admin credentials stored as constants for demo purposes
-// In a production environment, these would be stored securely elsewhere
-const ADMIN_EMAIL = "ankurb@peace2hearts.com";
-const ADMIN_PASSWORD = "adminP2H@30";
-
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,7 +25,11 @@ const SignIn = () => {
 
     try {
       // Check if admin credentials
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      const { data, error: adminAuthError } = await supabase.functions.invoke('admin-auth', {
+        body: { email, password }
+      });
+      
+      if (data?.success) {
         // Set admin authentication in localStorage with a timestamp
         localStorage.setItem('p2h_admin_authenticated', 'true');
         localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
@@ -46,7 +45,7 @@ const SignIn = () => {
       }
 
       // Regular user authentication with Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });

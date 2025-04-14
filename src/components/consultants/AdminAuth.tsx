@@ -5,30 +5,49 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AdminAuthProps {
   onAuthenticated: () => void;
 }
 
-const ADMIN_EMAIL = "ankurb@peace2hearts.com";
-const ADMIN_PASSWORD = "adminP2H@30";
-
 const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsLoading(true);
 
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    try {
+      // Call the admin-auth edge function
+      const { data, error } = await supabase.functions.invoke('admin-auth', {
+        body: {
+          email,
+          password
+        }
+      });
+      
+      if (error) {
+        throw new Error(error.message || 'Authentication failed');
+      }
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Invalid email or password');
+      }
+
       // Set a session marker in localStorage
       localStorage.setItem('p2h_admin_authenticated', 'true');
       localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
       onAuthenticated();
-    } else {
-      setError("Invalid email or password");
+    } catch (err: any) {
+      console.error('Authentication error:', err);
+      setError(err.message || 'Authentication failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,7 +88,13 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">Sign In</Button>
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "Authenticating..." : "Sign In"}
+            </Button>
           </CardFooter>
         </form>
       </Card>
