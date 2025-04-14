@@ -1,14 +1,11 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, HeartPulse, Gavel, Users, MessageSquare, Calendar, PackageCheck } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
-
 const Services = () => {
-  return (
-    <>
+  return <>
       <GoogleAnalytics />
       <Navigation />
       
@@ -130,7 +127,7 @@ const Services = () => {
               </div>
               
               <Button asChild className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white">
-                <Link to="/services/legal-support">Learn More About Legal Services</Link>
+                <Link to="/services/legal-support" className="my-[31px]">Learn More About Legal Services</Link>
               </Button>
             </div>
           </div>
@@ -201,7 +198,7 @@ const Services = () => {
                 </ul>
                 
                 <Button asChild className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white">
-                  <Link to="/services/holistic/pre-marriage-clarity">Learn More About This Package</Link>
+                  <Link to="/services/holistic/pre-marriage-clarity" className="my-[34px]">Learn More About This Package</Link>
                 </Button>
               </div>
             </div>
@@ -258,8 +255,6 @@ const Services = () => {
       </section>
       
       <Footer />
-    </>
-  );
+    </>;
 };
-
 export default Services;
