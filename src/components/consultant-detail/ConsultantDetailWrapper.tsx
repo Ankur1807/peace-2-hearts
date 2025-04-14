@@ -9,6 +9,8 @@ import { ConsultantBreadcrumb } from "./ConsultantBreadcrumb";
 import { Consultant } from "@/utils/consultants";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Copy } from "lucide-react";
+import { toast } from "sonner";
 
 interface ConsultantDetailWrapperProps {
   consultant: Consultant;
@@ -21,6 +23,17 @@ export function ConsultantDetailWrapper({
   getInitials,
   formatSpecialization
 }: ConsultantDetailWrapperProps) {
+  const publicProfileLink = `${window.location.origin}/consultants/${consultant.id}`;
+
+  const handleShareLink = () => {
+    navigator.clipboard.writeText(publicProfileLink).then(() => {
+      toast.success("Consultant profile link copied to clipboard!");
+    }).catch((err) => {
+      console.error("Failed to copy link: ", err);
+      toast.error("Failed to copy link");
+    });
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <ConsultantBreadcrumb consultantName={consultant.name} />
@@ -32,6 +45,15 @@ export function ConsultantDetailWrapper({
           getInitials={getInitials}
           formatSpecialization={formatSpecialization}
         />
+        <div className="px-6 pb-4">
+          <Button 
+            variant="outline" 
+            onClick={handleShareLink} 
+            className="w-full"
+          >
+            <Copy className="mr-2 h-4 w-4" /> Copy Public Profile Link
+          </Button>
+        </div>
       </Card>
 
       <div className="space-y-8">
