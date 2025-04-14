@@ -1,4 +1,3 @@
-
 import ServiceLayout from "@/components/ServiceLayout";
 import SubServicesList from "@/components/SubServicesList";
 
@@ -41,6 +40,7 @@ const MentalHealthService = () => {
       title="Mental Health Support"
       description="Our mental health services provide specialized support for individuals navigating relationship challenges, including anxiety, depression, stress, and trauma related to difficult relationships."
       image="https://images.unsplash.com/photo-1573497620053-ea5300f94f21?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+      serviceType="mental-health"
       forWhom={[
         "Individuals experiencing anxiety or depression related to relationship issues",
         "Those struggling with stress from ongoing relationship conflicts",

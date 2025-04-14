@@ -1,4 +1,6 @@
+
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { SEO } from '@/components/SEO';
@@ -12,6 +14,10 @@ import { BookingDetails } from '@/utils/types';
 import { loadRazorpayScript, isRazorpayAvailable } from '@/utils/payment/razorpayService';
 
 const BookConsultation = () => {
+  const [searchParams] = useSearchParams();
+  const serviceParam = searchParams.get('service');
+  const subServiceParam = searchParams.get('subservice');
+  
   const bookingState = useConsultationBooking();
   const { 
     submitted, 
@@ -24,8 +30,11 @@ const BookConsultation = () => {
     selectedServices,
     personalDetails,
     totalPrice,
-    pricing
+    pricing,
+    setServiceCategory,
+    setSelectedServices
   } = bookingState;
+  
   const [isDevelopment, setIsDevelopment] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [initializingPayment, setInitializingPayment] = useState(true);
@@ -88,7 +97,19 @@ const BookConsultation = () => {
   useEffect(() => {
     setIsDevelopment(process.env.NODE_ENV === 'development');
     initializeBookingFromStorage(bookingState);
-  }, []);
+    
+    // Pre-select service category from URL if provided
+    if (serviceParam) {
+      console.log("Pre-selecting service category:", serviceParam);
+      setServiceCategory(serviceParam);
+      
+      // If subService is specified, pre-select it
+      if (subServiceParam) {
+        console.log("Pre-selecting sub-service:", subServiceParam);
+        setSelectedServices([subServiceParam]);
+      }
+    }
+  }, [serviceParam, subServiceParam, setServiceCategory, setSelectedServices]);
 
   const packageName = getPackageName();
 

@@ -14,9 +14,15 @@ interface ServiceLayoutProps {
   howItWorks: string[];
   image: string;
   children?: ReactNode;
+  serviceType?: string; // Add this prop to allow passing the service type
 }
 
-const ServiceLayout = ({ title, description, forWhom, howItWorks, image, children }: ServiceLayoutProps) => {
+const ServiceLayout = ({ title, description, forWhom, howItWorks, image, children, serviceType }: ServiceLayoutProps) => {
+  // Create the booking URL with service type parameter if available
+  const bookingUrl = serviceType 
+    ? `/book-consultation?service=${serviceType}` 
+    : '/book-consultation';
+    
   return (
     <>
       <Navigation />
@@ -30,7 +36,7 @@ const ServiceLayout = ({ title, description, forWhom, howItWorks, image, childre
                 <h1 className="section-title text-4xl md:text-5xl">{title}</h1>
                 <p className="text-gray-600 text-lg">{description}</p>
                 <div className="pt-4">
-                  <Link to="/book-consultation">
+                  <Link to={bookingUrl}>
                     <FractalButton className="hero-btn rounded-full px-6 py-3" fractalType="primary">
                       Book a Consultation
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -98,7 +104,7 @@ const ServiceLayout = ({ title, description, forWhom, howItWorks, image, childre
             <p className="text-gray-600 max-w-2xl mx-auto mb-8">
               Our professional team is here to support you through every step of your journey.
             </p>
-            <Link to="/book-consultation">
+            <Link to={bookingUrl}>
               <FractalButton className="hero-btn rounded-full px-6 py-3" fractalType="primary" pulseEffect={true}>
                 Book Your Consultation Now
                 <ArrowRight className="ml-2 h-4 w-4" />
