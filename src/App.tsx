@@ -106,6 +106,14 @@ const App = () => {
                 <Route path="/consultants/:id" element={<ConsultantDetail />} />
                 <Route path="/add-consultant" element={<AddConsultant />} />
                 
+                {/* Booking Route */}
+                <Route path="/book-consultation" element={<BookConsultation />} />
+                
+                {/* User Routes */}
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={
                   <AdminProvider>
@@ -122,11 +130,22 @@ const App = () => {
                   <Route path="settings" element={<AdminSettings />} />
                 </Route>
                 
+                {/* Legal Pages */}
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/cancellation-refund" element={<CancellationRefund />} />
+                <Route path="/shipping-delivery" element={<ShippingDelivery />} />
+                
+                {/* Other Pages */}
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/resources" element={<Resources />} />
+                <Route path="/news" element={<News />} />
+                
+                {/* Logo Export Page */}
+                <Route path="/logo-export" element={<LogoExport />} />
+                
                 {/* Catch-all route for 404 */}
                 <Route path="*" element={<NotFound />} />
-                
-                {/* Add the route for the logo export page in the Routes element */}
-                <Route path="/logo-export" element={<LogoExport />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
