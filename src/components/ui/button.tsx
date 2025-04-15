@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -22,6 +21,7 @@ const buttonVariants = cva(
         fractal: "relative fractal-border inline-block bg-gradient-to-r from-vibrantPurple to-vividPink text-white hover:from-vibrantPurple/90 hover:to-vividPink/90",
         fractalOutline: "relative fractal-border-outline inline-block bg-white text-peacefulBlue hover:bg-peacefulBlue/5",
         fractalSecondary: "relative fractal-border-secondary inline-block bg-gradient-to-r from-peacefulBlue to-softGreen text-white hover:from-peacefulBlue/90 hover:to-softGreen/90",
+        cta: "bg-vibrantPurple text-white border-2 border-peacefulBlue hover:bg-vibrantPurple/90",
       },
       size: {
         default: "h-10 px-4 py-2",
