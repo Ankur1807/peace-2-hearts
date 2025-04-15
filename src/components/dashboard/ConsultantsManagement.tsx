@@ -1,17 +1,26 @@
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Consultant, getConsultants } from "@/utils/consultants";
 import DashboardLoader from "./DashboardLoader";
 import ConsultantList from "@/components/consultants/ConsultantList";
 import AdminAuth from "@/components/consultants/AdminAuth";
+import ConsultantForm from "@/components/consultants/ConsultantForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { UserPlus } from "lucide-react";
 
 const ConsultantsManagement = () => {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -49,6 +58,15 @@ const ConsultantsManagement = () => {
       )
     );
   };
+  
+  const handleConsultantAdded = (newConsultant: Consultant) => {
+    setConsultants([...consultants, newConsultant]);
+    setDialogOpen(false);
+    toast({
+      title: "Success",
+      description: "Consultant added successfully",
+    });
+  };
 
   const handleAuthenticated = () => {
     setIsAuthenticated(true);
@@ -81,9 +99,23 @@ const ConsultantsManagement = () => {
           >
             Sign Out
           </Button>
-          <Button variant="default" asChild>
-            <Link to="/add-consultant">Add Consultant</Link>
-          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                Add Consultant
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>Add New Consultant</DialogTitle>
+              </DialogHeader>
+              <ConsultantForm 
+                onSuccess={handleConsultantAdded}
+                onCancel={() => setDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       
