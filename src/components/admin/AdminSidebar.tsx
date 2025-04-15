@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   LayoutDashboard,
   Users,
-  PriceTag,
+  DollarSign,
   CalendarClock,
   Settings,
   LogOut,
@@ -58,7 +58,7 @@ const AdminSidebar = () => {
         </NavLink>
         
         <NavLink to="/admin/pricing" className={navLinkClass}>
-          <PriceTag className="h-5 w-5" />
+          <DollarSign className="h-5 w-5" />
           <span>Services & Pricing</span>
         </NavLink>
         
