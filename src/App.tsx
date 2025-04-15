@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -104,7 +105,6 @@ const App = () => {
                 {/* Consultant Routes */}
                 <Route path="/consultants" element={<ConsultantListing />} />
                 <Route path="/consultants/:id" element={<ConsultantDetail />} />
-                <Route path="/add-consultant" element={<AddConsultant />} />
                 
                 {/* Booking Route */}
                 <Route path="/book-consultation" element={<BookConsultation />} />
