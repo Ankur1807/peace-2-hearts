@@ -11,7 +11,7 @@ import { useAdmin } from "@/hooks/useAdminContext";
 import Logo from "@/components/navigation/Logo";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("ankurb@peace2hearts.com"); // Pre-filled with admin email
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,10 +104,6 @@ const AdminLogin = () => {
               </CardFooter>
             </form>
           </Card>
-          
-          <div className="mt-4 text-sm text-gray-500">
-            <p>Default admin login: ankurb@peace2hearts.com / admin123</p>
-          </div>
         </div>
       </div>
     </>

@@ -1,9 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-// Hardcoded admin credentials - in a real app, these should come from a secure backend
-const ADMIN_EMAIL = "ankurb@peace2hearts.com";
-const ADMIN_PASSWORD = "admin123"; // Simple password for demo purposes
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminContextType {
   isAdmin: boolean;
@@ -29,25 +27,44 @@ interface AdminProviderProps {
 export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAdminChecking, setIsAdminChecking] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     checkAdminStatus();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      checkAdminStatus();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const checkAdminStatus = async () => {
     try {
       setIsAdminChecking(true);
       
-      // Check if admin status is set in localStorage
-      const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated');
-      const adminAuthTime = localStorage.getItem('p2h_admin_auth_time');
+      const { data: { session } } = await supabase.auth.getSession();
       
-      // Admin auth is valid if set in last 24 hours
-      const isAdminAuthValid = adminAuthenticated === 'true' && 
-        adminAuthTime && 
-        (Date.now() - parseInt(adminAuthTime)) < 24 * 60 * 60 * 1000;
-      
-      setIsAdmin(isAdminAuthValid);
+      if (!session) {
+        setIsAdmin(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+        return;
+      }
+
+      setIsAdmin(data?.role === 'admin');
     } catch (error) {
       console.error("Error checking admin status:", error);
       setIsAdmin(false);
@@ -58,19 +75,25 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
 
   const adminLogin = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Simple client-side authentication - replace with a real backend in production
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        // Set a session marker in localStorage
-        localStorage.setItem('p2h_admin_authenticated', 'true');
-        localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
-        
-        // Update state immediately
-        setIsAdmin(true);
-        
-        return { success: true };
-      } else {
-        throw new Error("Invalid email or password");
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_users')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      if (adminError || adminData?.role !== 'admin') {
+        await supabase.auth.signOut();
+        throw new Error('Unauthorized access');
       }
+
+      return { success: true };
     } catch (error: any) {
       console.error('Authentication error:', error);
       return { 
@@ -81,11 +104,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
   };
 
   const adminLogout = async (): Promise<void> => {
-    // Clear admin auth from localStorage
-    localStorage.removeItem('p2h_admin_authenticated');
-    localStorage.removeItem('p2h_admin_auth_time');
-    
-    // Update state
+    await supabase.auth.signOut();
     setIsAdmin(false);
   };
 
