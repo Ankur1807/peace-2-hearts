@@ -40,6 +40,7 @@ import ConsultantListing from "./pages/ConsultantListing";
 import ConsultantDetail from "./pages/ConsultantDetail";
 import Dashboard from "./pages/Dashboard";
 import LogoExport from './pages/LogoExport';
+import MobileBookings from './pages/MobileBookings';
 
 // Admin pages
 import AdminLayout from './components/admin/AdminLayout';
@@ -136,6 +137,9 @@ const App = () => {
                 
                 {/* Catch-all route for 404 */}
                 <Route path="*" element={<NotFound />} />
+                
+                {/* Mobile Bookings Route */}
+                <Route path="/mobile-bookings" element={<MobileBookings />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
