@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -5,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import GoogleAnalytics from "./components/GoogleAnalytics"; // Add Google Analytics import
+import GoogleAnalytics from "./components/GoogleAnalytics";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AboutUs from "./pages/AboutUs";
@@ -45,6 +46,15 @@ import Dashboard from "./pages/Dashboard";
 import PricingManagement from "./pages/PricingManagement";
 import ConsultantManagement from "./pages/ConsultantManagement";
 import LogoExport from './pages/LogoExport';
+
+// Admin pages
+import AdminLayout from './components/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminConsultants from './pages/admin/AdminConsultants';
+import AdminPricing from './pages/admin/AdminPricing';
+import AdminBookings from './pages/admin/AdminBookings';
+import AdminSettings from './pages/admin/AdminSettings';
+import AdminLogin from './pages/admin/AdminLogin';
 
 const queryClient = new QueryClient();
 
@@ -117,6 +127,16 @@ const App = () => {
                 <Route path="/sign-in" element={<SignIn />} />
                 <Route path="/sign-up" element={<SignUp />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                
+                {/* Admin Portal Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="consultants" element={<AdminConsultants />} />
+                  <Route path="pricing" element={<AdminPricing />} />
+                  <Route path="bookings" element={<AdminBookings />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                </Route>
                 
                 {/* Catch-all route for 404 */}
                 <Route path="*" element={<NotFound />} />
