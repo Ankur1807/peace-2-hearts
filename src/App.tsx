@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -43,8 +42,6 @@ import AddConsultant from "./pages/AddConsultant";
 import ConsultantListing from "./pages/ConsultantListing";
 import ConsultantDetail from "./pages/ConsultantDetail";
 import Dashboard from "./pages/Dashboard";
-import PricingManagement from "./pages/PricingManagement";
-import ConsultantManagement from "./pages/ConsultantManagement";
 import LogoExport from './pages/LogoExport';
 
 // Admin pages
@@ -68,7 +65,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <GoogleAnalytics /> {/* Add Google Analytics at the top of the router */}
+              <GoogleAnalytics />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<AboutUs />} />
@@ -108,28 +105,8 @@ const App = () => {
                 <Route path="/consultants" element={<ConsultantListing />} />
                 <Route path="/consultants/:id" element={<ConsultantDetail />} />
                 <Route path="/add-consultant" element={<AddConsultant />} />
-                <Route path="/consultant-management" element={<ConsultantManagement />} />
                 
                 {/* Admin Routes */}
-                <Route path="/pricing-management" element={<PricingManagement />} />
-                
-                {/* Policy Pages */}
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/cancellation-refund" element={<CancellationRefund />} />
-                <Route path="/shipping-delivery" element={<ShippingDelivery />} />
-                
-                {/* Resources route uncommented */}
-                <Route path="/resources" element={<Resources />} />
-                
-                <Route path="/news" element={<News />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/book-consultation" element={<BookConsultation />} />
-                <Route path="/sign-in" element={<SignIn />} />
-                <Route path="/sign-up" element={<SignUp />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                
-                {/* Admin Portal Routes - Wrap AdminLogin with AdminProvider */}
                 <Route path="/admin/login" element={
                   <AdminProvider>
                     <AdminLogin />
