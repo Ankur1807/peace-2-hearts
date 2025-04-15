@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -6,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import GoogleAnalytics from "./components/GoogleAnalytics";
+import GoogleAnalytics from "./components/GoogleAnalytics"; // Add Google Analytics import
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AboutUs from "./pages/AboutUs";
@@ -47,13 +46,6 @@ import PricingManagement from "./pages/PricingManagement";
 import ConsultantManagement from "./pages/ConsultantManagement";
 import LogoExport from './pages/LogoExport';
 
-// Admin pages
-import AdminIndex from './pages/admin/AdminIndex';
-import AdminConsultants from './pages/admin/AdminConsultants';
-import AdminPricing from './pages/admin/AdminPricing';
-import AdminBookings from './pages/admin/AdminBookings';
-import AdminSettings from './pages/admin/AdminSettings';
-
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -65,7 +57,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <GoogleAnalytics />
+              <GoogleAnalytics /> {/* Add Google Analytics at the top of the router */}
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<AboutUs />} />
@@ -115,7 +107,7 @@ const App = () => {
                 <Route path="/cancellation-refund" element={<CancellationRefund />} />
                 <Route path="/shipping-delivery" element={<ShippingDelivery />} />
                 
-                {/* Resources route */}
+                {/* Resources route uncommented */}
                 <Route path="/resources" element={<Resources />} />
                 
                 <Route path="/news" element={<News />} />
@@ -125,17 +117,12 @@ const App = () => {
                 <Route path="/sign-in" element={<SignIn />} />
                 <Route path="/sign-up" element={<SignUp />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/logo-export" element={<LogoExport />} />
-                
-                {/* New Admin Portal Routes */}
-                <Route path="/admin" element={<AdminIndex />} />
-                <Route path="/admin/consultants" element={<AdminConsultants />} />
-                <Route path="/admin/pricing" element={<AdminPricing />} />
-                <Route path="/admin/bookings" element={<AdminBookings />} />
-                <Route path="/admin/settings" element={<AdminSettings />} />
                 
                 {/* Catch-all route for 404 */}
                 <Route path="*" element={<NotFound />} />
+                
+                {/* Add the route for the logo export page in the Routes element */}
+                <Route path="/logo-export" element={<LogoExport />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
