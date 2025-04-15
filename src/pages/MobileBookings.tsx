@@ -1,7 +1,7 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useBookings } from '@/hooks/useBookings';
+import { useAdmin } from "@/hooks/useAdminContext";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell } from "lucide-react";
@@ -14,12 +14,17 @@ import { supabase } from "@/integrations/supabase/client";
 const MobileBookings = () => {
   const { bookings, loading } = useBookings();
   const { toast } = useToast();
+  const { isAdmin } = useAdmin();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
-  // Request browser notification permission
+  // Request browser notification permission only for admin users
   useEffect(() => {
     const requestNotificationPermission = async () => {
       try {
+        if (!isAdmin) {
+          return; // Don't request permissions for non-admin users
+        }
+
         if ('Notification' in window) {
           const permission = await Notification.requestPermission();
           setNotificationsEnabled(permission === 'granted');
@@ -30,10 +35,12 @@ const MobileBookings = () => {
     };
 
     requestNotificationPermission();
-  }, []);
+  }, [isAdmin]);
 
-  // Subscribe to new bookings
+  // Subscribe to new bookings for admin users only
   useEffect(() => {
+    if (!isAdmin) return; // Don't subscribe if not admin
+
     const channel = supabase
       .channel('booking-notifications')
       .on(
@@ -64,7 +71,7 @@ const MobileBookings = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [toast, notificationsEnabled]);
+  }, [toast, notificationsEnabled, isAdmin]);
 
   return (
     <>
