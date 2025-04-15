@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAdmin } from "@/hooks/useAdminContext";
-import { Logo } from "@/components/navigation/Logo";
+import Logo from "@/components/navigation/Logo"; // Fixed import
 
 const AdminLogin = () => {
   const [password, setPassword] = useState("");

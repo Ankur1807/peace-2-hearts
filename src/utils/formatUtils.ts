@@ -25,3 +25,14 @@ export const formatExpiryDate = (value: string): string => {
   
   return v;
 };
+
+// Add the formatDate function
+export const formatDate = (date: Date): string => {
+  return new Intl.DateTimeFormat('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
+};
