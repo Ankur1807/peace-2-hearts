@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
-// Set up CORS headers for browser requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -14,10 +13,12 @@ serve(async (req) => {
   }
 
   try {
-    // Get admin password from environment variable
+    // Get admin credentials from environment variables
+    const adminEmail = Deno.env.get('ADMIN_EMAIL')
     const adminPassword = Deno.env.get('ADMIN_PASSWORD')
-    if (!adminPassword) {
-      console.error("ADMIN_PASSWORD environment variable not set")
+    
+    if (!adminEmail || !adminPassword) {
+      console.error("Admin credentials not set in environment variables")
       return new Response(JSON.stringify({ 
         success: false, 
         error: 'Server configuration error' 
@@ -27,9 +28,9 @@ serve(async (req) => {
       })
     }
 
-    // For password-only authentication
+    // Get request data
     const requestData = await req.json()
-    const { password } = requestData
+    const { email, password } = requestData
 
     // Validate request method
     if (req.method !== 'POST') {
@@ -42,8 +43,8 @@ serve(async (req) => {
       })
     }
     
-    // Check if password matches
-    if (password === adminPassword) {
+    // Check if credentials match
+    if (email === adminEmail && password === adminPassword) {
       // Authentication successful
       console.log("Admin authentication successful")
       
@@ -56,11 +57,11 @@ serve(async (req) => {
       })
     } else {
       // Authentication failed
-      console.log("Admin authentication failed - invalid password")
+      console.log("Admin authentication failed - invalid credentials")
       
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'Invalid password'
+        error: 'Invalid email or password'
       }), { 
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
