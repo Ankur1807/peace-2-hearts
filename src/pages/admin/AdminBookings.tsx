@@ -40,7 +40,7 @@ interface Booking {
 const AdminBookings = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { toast } = useToast();
 
@@ -78,7 +78,7 @@ const AdminBookings = () => {
   const getFilteredBookings = () => {
     return bookings.filter(booking => {
       // Apply status filter
-      const statusMatch = statusFilter ? booking.status === statusFilter : true;
+      const statusMatch = statusFilter === "all" ? true : booking.status === statusFilter;
       
       // Apply search filter
       const searchLower = searchQuery.toLowerCase();
@@ -145,7 +145,7 @@ const AdminBookings = () => {
                       <SelectValue placeholder="All statuses" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All statuses</SelectItem>
+                      <SelectItem value="all">All statuses</SelectItem>
                       <SelectItem value="scheduled">Scheduled</SelectItem>
                       <SelectItem value="completed">Completed</SelectItem>
                       <SelectItem value="cancelled">Cancelled</SelectItem>
@@ -221,3 +221,4 @@ const AdminBookings = () => {
 };
 
 export default AdminBookings;
+
