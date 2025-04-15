@@ -9,7 +9,6 @@ import { SEO } from '@/components/SEO';
 import { BookingStatusBadge } from '@/components/admin/BookingStatusBadge';
 import { formatDate } from '@/utils/formatUtils';
 import { Booking } from '@/hooks/useBookings';
-import { PushNotifications } from '@capacitor/push-notifications';
 import { supabase } from "@/integrations/supabase/client";
 
 const MobileBookings = () => {
@@ -17,22 +16,20 @@ const MobileBookings = () => {
   const { toast } = useToast();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
-  // Initialize push notifications
+  // Request browser notification permission
   useEffect(() => {
-    const initializePushNotifications = async () => {
+    const requestNotificationPermission = async () => {
       try {
-        // Request permission
-        const permission = await PushNotifications.requestPermissions();
-        if (permission.receive === 'granted') {
-          await PushNotifications.register();
-          setNotificationsEnabled(true);
+        if ('Notification' in window) {
+          const permission = await Notification.requestPermission();
+          setNotificationsEnabled(permission === 'granted');
         }
       } catch (error) {
-        console.error('Error initializing push notifications:', error);
+        console.error('Error requesting notification permission:', error);
       }
     };
 
-    initializePushNotifications();
+    requestNotificationPermission();
   }, []);
 
   // Subscribe to new bookings
@@ -47,6 +44,15 @@ const MobileBookings = () => {
           table: 'consultations'
         },
         (payload) => {
+          // Show browser notification
+          if (notificationsEnabled) {
+            new Notification('New Booking!', {
+              body: `${payload.new.client_name} has booked a ${payload.new.consultation_type} consultation`,
+              icon: '/favicon.ico'
+            });
+          }
+
+          // Show toast notification
           toast({
             title: 'New Booking!',
             description: `${payload.new.client_name} has booked a ${payload.new.consultation_type} consultation`,
@@ -58,7 +64,7 @@ const MobileBookings = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [toast]);
+  }, [toast, notificationsEnabled]);
 
   return (
     <>
