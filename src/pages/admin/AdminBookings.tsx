@@ -1,6 +1,7 @@
+
 import { SEO } from '@/components/SEO';
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast, toast } from "@/hooks/use-toast";  // Updated import
 import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
@@ -47,6 +48,7 @@ const AdminBookings = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const { toast: useToastFunction } = useToast();  // Destructure toast method from hook
 
   const fetchBookings = async () => {
     try {
@@ -65,7 +67,7 @@ const AdminBookings = () => {
       }
     } catch (error) {
       console.error("Error fetching bookings:", error);
-      toast({
+      useToastFunction({
         title: "Error",
         description: "Failed to load booking history",
         variant: "destructive",
@@ -118,13 +120,13 @@ const AdminBookings = () => {
         booking.id === bookingId ? { ...booking, status: newStatus } : booking
       ));
 
-      toast({
+      useToastFunction({
         title: "Status Updated",
         description: "Booking status has been successfully updated",
       });
     } catch (error) {
       console.error("Error updating booking status:", error);
-      toast({
+      useToastFunction({
         title: "Error",
         description: "Failed to update booking status",
         variant: "destructive",
