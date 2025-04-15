@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useBookings } from '@/hooks/useBookings';
@@ -22,12 +23,14 @@ const MobileBookings = () => {
     const requestNotificationPermission = async () => {
       try {
         if (!isAdmin) {
-          return; // Don't request permissions for non-admin users
+          console.log('Not an admin, skipping notification permission');
+          return;
         }
 
         if ('Notification' in window) {
           const permission = await Notification.requestPermission();
           setNotificationsEnabled(permission === 'granted');
+          console.log('Notification permission status:', permission);
         }
       } catch (error) {
         console.error('Error requesting notification permission:', error);
@@ -39,7 +42,10 @@ const MobileBookings = () => {
 
   // Subscribe to new bookings for admin users only
   useEffect(() => {
-    if (!isAdmin) return; // Don't subscribe if not admin
+    if (!isAdmin) {
+      console.log('Not an admin, skipping booking notifications');
+      return;
+    }
 
     const channel = supabase
       .channel('booking-notifications')
@@ -57,6 +63,7 @@ const MobileBookings = () => {
               body: `${payload.new.client_name} has booked a ${payload.new.consultation_type} consultation`,
               icon: '/favicon.ico'
             });
+            console.log('Browser notification sent');
           }
 
           // Show toast notification
@@ -67,6 +74,8 @@ const MobileBookings = () => {
         }
       )
       .subscribe();
+
+    console.log('Subscribed to booking notifications');
 
     return () => {
       supabase.removeChannel(channel);
