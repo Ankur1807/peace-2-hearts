@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAdmin } from "@/hooks/useAdminContext";
-import Logo from "@/components/navigation/Logo"; // Fixed import
+import Logo from "@/components/navigation/Logo";
 
 const AdminLogin = () => {
+  const [email, setEmail] = useState("ankurb@peace2hearts.com"); // Pre-filled with admin email
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,12 +24,12 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-      const result = await adminLogin(password);
+      const result = await adminLogin(email, password);
       
       if (result.success) {
         navigate("/admin");
       } else {
-        throw new Error(result.error || "Invalid password");
+        throw new Error(result.error || "Invalid credentials");
       }
     } catch (err: any) {
       console.error("Login error:", err);
@@ -55,7 +56,7 @@ const AdminLogin = () => {
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl text-center">Admin Portal</CardTitle>
               <CardDescription className="text-center">
-                Enter your password to access the admin area
+                Enter your credentials to access the admin area
               </CardDescription>
             </CardHeader>
             
@@ -66,6 +67,18 @@ const AdminLogin = () => {
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="admin@example.com"
+                    required
+                  />
+                </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>

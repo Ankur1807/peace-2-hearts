@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface AdminContextType {
   isAdmin: boolean;
   isAdminChecking: boolean;
-  adminLogin: (password: string) => Promise<{ success: boolean; error?: string }>;
+  adminLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   adminLogout: () => Promise<void>;
 }
 
@@ -53,11 +53,11 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
     }
   };
 
-  const adminLogin = async (password: string): Promise<{ success: boolean; error?: string }> => {
+  const adminLogin = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       // Call the admin-auth edge function
       const { data, error } = await supabase.functions.invoke('admin-auth', {
-        body: { password }
+        body: { email, password }
       });
       
       if (error) {
@@ -65,7 +65,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
       }
       
       if (!data.success) {
-        throw new Error(data.error || 'Invalid password');
+        throw new Error(data.error || 'Invalid credentials');
       }
 
       // Set a session marker in localStorage
