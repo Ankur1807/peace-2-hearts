@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -29,7 +28,6 @@ const SubServiceLayout = ({
 }: SubServiceLayoutProps) => {
   const serviceTypeLabel = serviceType === 'mental-health' ? 'Mental Health Services' : 'Legal Services';
   
-  // Create the booking URL with service and subservice parameters
   const bookingUrl = `/book-consultation?service=${serviceType}&subservice=${serviceName}`;
   
   return (
@@ -37,7 +35,6 @@ const SubServiceLayout = ({
       <Navigation />
       
       <main>
-        {/* Breadcrumb */}
         <div className="container mx-auto px-4 py-4">
           <Breadcrumb>
             <BreadcrumbList>
@@ -60,7 +57,6 @@ const SubServiceLayout = ({
           </Breadcrumb>
         </div>
         
-        {/* Hero Section */}
         <section className="py-12 md:py-16 wave-pattern">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center gap-12">
@@ -91,7 +87,6 @@ const SubServiceLayout = ({
           </div>
         </section>
         
-        {/* Benefits Section */}
         <section className="py-12 bg-softGray">
           <div className="container mx-auto px-4">
             <h2 className="section-title text-2xl mb-8 text-center">Key Benefits</h2>
@@ -110,10 +105,8 @@ const SubServiceLayout = ({
           </div>
         </section>
         
-        {/* Additional Content */}
         {children}
         
-        {/* CTA Section */}
         <section className="py-12 bg-peacefulBlue/10">
           <div className="container mx-auto px-4 text-center">
             <h2 className="section-title text-2xl mb-4">Ready to Take the First Step?</h2>
@@ -121,7 +114,11 @@ const SubServiceLayout = ({
               Our professional team is here to support you through every step of your journey.
             </p>
             <Link to={bookingUrl}>
-              <FractalButton className="hero-btn rounded-full px-6 py-3" fractalType="primary" pulseEffect={true}>
+              <FractalButton 
+                className="text-lg font-bold bg-white text-peacefulBlue hover:bg-white/90 rounded-full px-8 py-5 shadow-lg" 
+                fractalType="primary" 
+                pulseEffect={true}
+              >
                 Book Your Consultation Now
                 <ArrowRight className="ml-2 h-4 w-4" />
               </FractalButton>

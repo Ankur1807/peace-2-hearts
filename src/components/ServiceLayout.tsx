@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -17,7 +16,15 @@ interface ServiceLayoutProps {
   serviceType?: string; // Add this prop to allow passing the service type
 }
 
-const ServiceLayout = ({ title, description, forWhom, howItWorks, image, children, serviceType }: ServiceLayoutProps) => {
+const ServiceLayout = ({ 
+  title, 
+  description, 
+  forWhom, 
+  howItWorks, 
+  image, 
+  children, 
+  serviceType 
+}: ServiceLayoutProps) => {
   // Create the booking URL with service type parameter if available
   const bookingUrl = serviceType 
     ? `/book-consultation?service=${serviceType}` 
@@ -105,7 +112,11 @@ const ServiceLayout = ({ title, description, forWhom, howItWorks, image, childre
               Our professional team is here to support you through every step of your journey.
             </p>
             <Link to={bookingUrl}>
-              <FractalButton className="hero-btn rounded-full px-6 py-3" fractalType="primary" pulseEffect={true}>
+              <FractalButton 
+                className="text-lg font-bold bg-white text-peacefulBlue hover:bg-white/90 rounded-full px-8 py-5 shadow-lg" 
+                fractalType="primary" 
+                pulseEffect={true}
+              >
                 Book Your Consultation Now
                 <ArrowRight className="ml-2 h-4 w-4" />
               </FractalButton>
