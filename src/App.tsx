@@ -36,8 +36,6 @@ import TherapyService from "./pages/services/TherapyService";
 import DivorceService from "./pages/services/DivorceService";
 import CustodyService from "./pages/services/CustodyService";
 import BookConsultation from "./pages/BookConsultation";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
 import ConsultantListing from "./pages/ConsultantListing";
 import ConsultantDetail from "./pages/ConsultantDetail";
 import Dashboard from "./pages/Dashboard";
@@ -107,11 +105,6 @@ const App = () => {
                 {/* Booking Route */}
                 <Route path="/book-consultation" element={<BookConsultation />} />
                 
-                {/* User Routes */}
-                <Route path="/signin" element={<SignIn />} />
-                <Route path="/signup" element={<SignUp />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={
                   <AdminProvider>
@@ -119,7 +112,6 @@ const App = () => {
                   </AdminProvider>
                 } />
                 
-                {/* The rest of the admin routes are already wrapped by AdminProvider in AdminLayout */}
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="consultants" element={<AdminConsultants />} />
