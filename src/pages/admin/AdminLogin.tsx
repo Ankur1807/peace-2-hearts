@@ -104,6 +104,10 @@ const AdminLogin = () => {
               </CardFooter>
             </form>
           </Card>
+          
+          <div className="mt-4 text-sm text-gray-500">
+            <p>Default admin login: ankurb@peace2hearts.com / admin123</p>
+          </div>
         </div>
       </div>
     </>

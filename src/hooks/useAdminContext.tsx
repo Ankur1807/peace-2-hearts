@@ -1,6 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+
+// Hardcoded admin credentials - in a real app, these should come from a secure backend
+const ADMIN_EMAIL = "ankurb@peace2hearts.com";
+const ADMIN_PASSWORD = "admin123"; // Simple password for demo purposes
 
 interface AdminContextType {
   isAdmin: boolean;
@@ -55,27 +58,19 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
 
   const adminLogin = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Call the admin-auth edge function
-      const { data, error } = await supabase.functions.invoke('admin-auth', {
-        body: { email, password }
-      });
-      
-      if (error) {
-        throw new Error(error.message || 'Authentication failed');
+      // Simple client-side authentication - replace with a real backend in production
+      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        // Set a session marker in localStorage
+        localStorage.setItem('p2h_admin_authenticated', 'true');
+        localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
+        
+        // Update state immediately
+        setIsAdmin(true);
+        
+        return { success: true };
+      } else {
+        throw new Error("Invalid email or password");
       }
-      
-      if (!data.success) {
-        throw new Error(data.error || 'Invalid credentials');
-      }
-
-      // Set a session marker in localStorage
-      localStorage.setItem('p2h_admin_authenticated', 'true');
-      localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
-      
-      // Update state immediately
-      setIsAdmin(true);
-      
-      return { success: true };
     } catch (error: any) {
       console.error('Authentication error:', error);
       return { 
