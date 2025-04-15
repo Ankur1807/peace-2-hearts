@@ -55,6 +55,7 @@ import AdminPricing from './pages/admin/AdminPricing';
 import AdminBookings from './pages/admin/AdminBookings';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminLogin from './pages/admin/AdminLogin';
+import { AdminProvider } from "@/hooks/useAdminContext";
 
 const queryClient = new QueryClient();
 
@@ -128,8 +129,14 @@ const App = () => {
                 <Route path="/sign-up" element={<SignUp />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 
-                {/* Admin Portal Routes */}
-                <Route path="/admin/login" element={<AdminLogin />} />
+                {/* Admin Portal Routes - Wrap AdminLogin with AdminProvider */}
+                <Route path="/admin/login" element={
+                  <AdminProvider>
+                    <AdminLogin />
+                  </AdminProvider>
+                } />
+                
+                {/* The rest of the admin routes are already wrapped by AdminProvider in AdminLayout */}
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="consultants" element={<AdminConsultants />} />
