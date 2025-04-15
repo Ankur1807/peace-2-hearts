@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 interface AdminContextType {
   isAdmin: boolean;
   isAdminChecking: boolean;
-  adminLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  adminLogin: (apiKey: string) => Promise<{ success: boolean; error?: string }>;
   adminLogout: () => Promise<void>;
 }
 
@@ -31,40 +31,30 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
 
   useEffect(() => {
     checkAdminStatus();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkAdminStatus();
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
 
   const checkAdminStatus = async () => {
     try {
       setIsAdminChecking(true);
+      const storedKey = localStorage.getItem('admin_api_key');
       
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
+      if (!storedKey) {
         setIsAdmin(false);
         return;
       }
 
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
+      const { data, error } = await supabase.functions.invoke('admin-auth', {
+        body: { apiKey: storedKey }
+      });
 
-      if (error) {
+      if (error || !data?.success) {
         console.error('Error checking admin status:', error);
         setIsAdmin(false);
+        localStorage.removeItem('admin_api_key');
         return;
       }
 
-      setIsAdmin(data?.role === 'admin');
+      setIsAdmin(true);
     } catch (error) {
       console.error("Error checking admin status:", error);
       setIsAdmin(false);
@@ -73,26 +63,18 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
     }
   };
 
-  const adminLogin = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const adminLogin = async (apiKey: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+      const { data, error } = await supabase.functions.invoke('admin-auth', {
+        body: { apiKey }
       });
 
-      if (error) throw error;
-
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      if (adminError || adminData?.role !== 'admin') {
-        await supabase.auth.signOut();
-        throw new Error('Unauthorized access');
+      if (error || !data?.success) {
+        throw new Error('Invalid API key');
       }
 
+      localStorage.setItem('admin_api_key', apiKey);
+      setIsAdmin(true);
       return { success: true };
     } catch (error: any) {
       console.error('Authentication error:', error);
@@ -104,7 +86,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
   };
 
   const adminLogout = async (): Promise<void> => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('admin_api_key');
     setIsAdmin(false);
   };
 

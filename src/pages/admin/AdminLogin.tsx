@@ -11,8 +11,7 @@ import { useAdmin } from "@/hooks/useAdminContext";
 import Logo from "@/components/navigation/Logo";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [apiKey, setApiKey] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -24,12 +23,12 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-      const result = await adminLogin(email, password);
+      const result = await adminLogin(apiKey);
       
       if (result.success) {
         navigate("/admin");
       } else {
-        throw new Error(result.error || "Invalid credentials");
+        throw new Error(result.error || "Invalid API key");
       }
     } catch (err: any) {
       console.error("Login error:", err);
@@ -56,7 +55,7 @@ const AdminLogin = () => {
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl text-center">Admin Portal</CardTitle>
               <CardDescription className="text-center">
-                Enter your credentials to access the admin area
+                Enter your API key to access the admin area
               </CardDescription>
             </CardHeader>
             
@@ -69,25 +68,13 @@ const AdminLogin = () => {
                 )}
                 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="apiKey">API Key</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@example.com"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
+                    id="apiKey"
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your API key"
                     required
                   />
                 </div>
@@ -99,7 +86,7 @@ const AdminLogin = () => {
                   className="w-full"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Logging in..." : "Login"}
+                  {isLoading ? "Verifying..." : "Login"}
                 </Button>
               </CardFooter>
             </form>
