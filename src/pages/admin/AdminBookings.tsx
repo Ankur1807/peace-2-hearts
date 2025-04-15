@@ -1,4 +1,3 @@
-
 import { SEO } from '@/components/SEO';
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -20,9 +19,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, ChevronDown } from "lucide-react";
 import { formatDate } from "@/utils/formatUtils";
 
 interface Booking {
@@ -42,11 +47,6 @@ const AdminBookings = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const { toast } = useToast();
-
-  useEffect(() => {
-    fetchBookings();
-  }, []);
 
   const fetchBookings = async () => {
     try {
@@ -77,10 +77,8 @@ const AdminBookings = () => {
 
   const getFilteredBookings = () => {
     return bookings.filter(booking => {
-      // Apply status filter
       const statusMatch = statusFilter === "all" ? true : booking.status === statusFilter;
       
-      // Apply search filter
       const searchLower = searchQuery.toLowerCase();
       const searchMatch = searchQuery
         ? booking.client_name?.toLowerCase().includes(searchLower) ||
@@ -106,6 +104,37 @@ const AdminBookings = () => {
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  const updateBookingStatus = async (bookingId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('consultations')
+        .update({ status: newStatus })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      setBookings(bookings.map(booking => 
+        booking.id === bookingId ? { ...booking, status: newStatus } : booking
+      ));
+
+      toast({
+        title: "Status Updated",
+        description: "Booking status has been successfully updated",
+      });
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update booking status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
 
   const filteredBookings = getFilteredBookings();
 
@@ -173,7 +202,7 @@ const AdminBookings = () => {
                       <TableHead>Date</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Booked On</TableHead>
-                      <TableHead></TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -184,7 +213,7 @@ const AdminBookings = () => {
                           <TableCell>
                             <div>
                               <div>{booking.client_name || "Unknown"}</div>
-                              <div className="text-xs text-gray-500">{booking.client_email}</div>
+                              <div className="text-sm text-gray-500">{booking.client_email}</div>
                             </div>
                           </TableCell>
                           <TableCell>{booking.consultation_type}</TableCell>
@@ -196,9 +225,27 @@ const AdminBookings = () => {
                           </TableCell>
                           <TableCell>{formatDate(new Date(booking.created_at))}</TableCell>
                           <TableCell>
-                            <Button variant="ghost" size="sm">
-                              View
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                                  Update Status <ChevronDown className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, "scheduled")}>
+                                  Scheduled
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, "confirmed")}>
+                                  Confirmed
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, "pending")}>
+                                  Pending
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, "completed")}>
+                                  Completed
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
                       ))
@@ -221,4 +268,3 @@ const AdminBookings = () => {
 };
 
 export default AdminBookings;
-
