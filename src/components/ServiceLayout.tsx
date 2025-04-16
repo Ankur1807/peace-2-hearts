@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
-import { Button } from './ui/button';
 import { FractalButton } from './FractalButton';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -13,7 +12,7 @@ interface ServiceLayoutProps {
   howItWorks: string[];
   image: string;
   children?: ReactNode;
-  serviceType?: string; // Add this prop to allow passing the service type
+  serviceType?: string;
 }
 
 const ServiceLayout = ({ 
@@ -25,7 +24,6 @@ const ServiceLayout = ({
   children, 
   serviceType 
 }: ServiceLayoutProps) => {
-  // Create the booking URL with service type parameter if available
   const bookingUrl = serviceType 
     ? `/book-consultation?service=${serviceType}` 
     : '/book-consultation';
@@ -35,7 +33,6 @@ const ServiceLayout = ({
       <Navigation />
       
       <main>
-        {/* Hero Section */}
         <section className="py-16 md:py-24 wave-pattern">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center gap-12">
@@ -62,7 +59,6 @@ const ServiceLayout = ({
           </div>
         </section>
         
-        {/* For Whom Section */}
         <section className="py-16 bg-softGray">
           <div className="container mx-auto px-4">
             <h2 className="section-title text-3xl mb-8 text-center">Who Can Benefit</h2>
@@ -79,7 +75,6 @@ const ServiceLayout = ({
           </div>
         </section>
         
-        {/* How It Works Section */}
         <section className="py-16">
           <div className="container mx-auto px-4">
             <h2 className="section-title text-3xl mb-8 text-center">How It Works</h2>
@@ -101,26 +96,27 @@ const ServiceLayout = ({
           </div>
         </section>
         
-        {/* Additional Content */}
         {children}
         
-        {/* CTA Section */}
-        <section className="py-16 bg-peacefulBlue/10">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="section-title text-3xl mb-4">Ready to Take the First Step?</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto mb-8">
-              Our professional team is here to support you through every step of your journey.
-            </p>
-            <Link to={bookingUrl}>
-              <FractalButton 
-                className="text-lg font-bold bg-white text-peacefulBlue hover:bg-white/90 rounded-full px-8 py-5 shadow-lg" 
-                fractalType="primary" 
-                pulseEffect={true}
-              >
-                Book Your Consultation Now
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </FractalButton>
-            </Link>
+        <section className="py-16 bg-gradient-to-r from-peacefulBlue to-softGreen text-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-xl mx-auto text-center">
+              <h2 className="text-3xl md:text-4xl font-lora font-semibold mb-4">
+                Schedule a Consultation
+              </h2>
+              <p className="text-lg mb-8 text-white/90">
+                Take the first step toward finding clarity and support in your relationship journey. 
+                Our initial consultation helps us understand your needs and create a personalized support plan.
+              </p>
+              <Link to={bookingUrl}>
+                <FractalButton 
+                  className="rounded-full px-8 py-4 text-lg" 
+                  fractalType="cta"
+                >
+                  Book Your Consultation Today
+                </FractalButton>
+              </Link>
+            </div>
           </div>
         </section>
       </main>
