@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { Consultant, createConsultant } from "@/utils/consultants";
 
 interface UseConsultantFormProps {
@@ -37,6 +38,7 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
@@ -62,21 +64,30 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
     });
   };
 
+  const checkAdminSession = (): boolean => {
+    const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
+    const authTime = parseInt(localStorage.getItem('p2h_admin_auth_time') || '0', 10);
+    // Extend session validity from 1 hour to 24 hours
+    const sessionDuration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    const isAuthValid = adminAuthenticated && (Date.now() - authTime < sessionDuration);
+    
+    return isAuthValid;
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
     
-    // Ensure admin is still authenticated
-    const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
-    const authTime = parseInt(localStorage.getItem('p2h_admin_auth_time') || '0', 10);
-    const isAuthValid = adminAuthenticated && (Date.now() - authTime < 60 * 60 * 1000);
-    
-    if (!isAuthValid) {
+    // Check if admin session is still valid
+    if (!checkAdminSession()) {
       toast({
         title: "Session expired",
         description: "Your session has expired. Please sign in again.",
         variant: "destructive",
       });
+      
+      // Redirect to login page
+      navigate("/admin/login");
       return;
     }
     

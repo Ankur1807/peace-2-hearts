@@ -39,9 +39,10 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
         throw new Error(data.error || 'Invalid email or password');
       }
 
-      // Set a session marker in localStorage
+      // Set session marker in localStorage with 24-hour expiration
       localStorage.setItem('p2h_admin_authenticated', 'true');
       localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
+      console.log("Admin session established, valid for 24 hours");
       
       onAuthenticated();
     } catch (err: any) {
