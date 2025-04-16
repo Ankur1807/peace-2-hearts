@@ -65,7 +65,6 @@ const Footer = () => {
             <p className="text-white/90 mb-4 ml-1">
               Your emotional well-being matters—let's explore solutions together.
             </p>
-            {/* Social media icons removed */}
           </div>
           
           {/* Quick Links column */}
