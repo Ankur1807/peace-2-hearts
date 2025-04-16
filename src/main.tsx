@@ -13,6 +13,7 @@ import { fetchInitialServices } from './utils/pricing/serviceInitializer';
 fetchInitialServices()
   .catch(err => console.error('Error initializing services:', err));
 
+// Initialize Google Analytics
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Failed to find the root element');
 
