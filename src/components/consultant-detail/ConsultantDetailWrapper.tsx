@@ -1,15 +1,12 @@
 
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConsultantHeader } from "./ConsultantHeader";
-import { AboutTab } from "./AboutTab";
 import { ExpertiseTab } from "./ExpertiseTab";
-import { BookingTab } from "./BookingTab";
 import { ConsultantBreadcrumb } from "./ConsultantBreadcrumb";
 import { Consultant } from "@/utils/consultants";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Copy } from "lucide-react";
+import { Copy, Clock, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
 interface ConsultantDetailWrapperProps {
@@ -57,7 +54,27 @@ export function ConsultantDetailWrapper({
       </Card>
 
       <div className="space-y-8">
-        <AboutTab consultant={consultant} />
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Availability & Schedule</h3>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-medium">Available Days</p>
+                <p className="text-gray-600">
+                  {consultant.available_days?.join(", ") || "Monday - Friday"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Clock className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-medium">Working Hours</p>
+                <p className="text-gray-600">{consultant.available_hours || "9:00 AM - 5:00 PM"}</p>
+              </div>
+            </div>
+          </div>
+        </Card>
         
         <ExpertiseTab 
           consultant={consultant}

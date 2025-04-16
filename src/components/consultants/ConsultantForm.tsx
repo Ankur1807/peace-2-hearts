@@ -18,6 +18,7 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
     handleInputChange,
     handleFileChange,
     handleSelectChange,
+    handleDayToggle,
     handleSubmit,
   } = useConsultantForm({ onSuccess, onCancel });
 
@@ -35,6 +36,7 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
         onInputChange={handleInputChange}
         onFileChange={handleFileChange}
         onSelectChange={handleSelectChange}
+        onDayToggle={handleDayToggle}
       />
       
       <div className="flex justify-end space-x-4 pt-4">

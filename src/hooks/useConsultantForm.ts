@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +15,7 @@ export interface ConsultantFormData {
   bio: string;
   qualifications: string;
   available_days: string[];
+  available_hours: string;
   is_available: boolean;
   profile_id: string;
   profile_picture: File | null;
@@ -25,13 +25,14 @@ export interface ConsultantFormData {
 export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProps) => {
   const [formData, setFormData] = useState<ConsultantFormData>({
     name: "",
-    specialization: "legal", // Default to legal expert
+    specialization: "legal",
     hourly_rate: 1000,
     bio: "",
     qualifications: "",
     available_days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    available_hours: "9:00-17:00",
     is_available: true,
-    profile_id: crypto.randomUUID(), // Generate a random UUID
+    profile_id: crypto.randomUUID(),
     profile_picture: null,
     experience: 0
   });
@@ -64,10 +65,27 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
     });
   };
 
+  const handleDayToggle = (day: string) => {
+    setFormData(prev => {
+      if (prev.available_days.includes(day)) {
+        return {
+          ...prev,
+          available_days: prev.available_days.filter(d => d !== day)
+        };
+      }
+      return {
+        ...prev,
+        available_days: [...prev.available_days, day].sort((a, b) => {
+          const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+          return days.indexOf(a) - days.indexOf(b);
+        })
+      };
+    });
+  };
+
   const checkAdminSession = (): boolean => {
     const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
     const authTime = parseInt(localStorage.getItem('p2h_admin_auth_time') || '0', 10);
-    // Extend session validity from 1 hour to 24 hours
     const sessionDuration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
     const isAuthValid = adminAuthenticated && (Date.now() - authTime < sessionDuration);
     
@@ -78,7 +96,6 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
     event.preventDefault();
     setError(null);
     
-    // Check if admin session is still valid
     if (!checkAdminSession()) {
       toast({
         title: "Session expired",
@@ -86,7 +103,6 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
         variant: "destructive",
       });
       
-      // Redirect to login page
       navigate("/admin/login");
       return;
     }
@@ -131,6 +147,7 @@ export const useConsultantForm = ({ onSuccess, onCancel }: UseConsultantFormProp
     handleInputChange,
     handleFileChange,
     handleSelectChange,
+    handleDayToggle,
     handleSubmit,
     onCancel
   };

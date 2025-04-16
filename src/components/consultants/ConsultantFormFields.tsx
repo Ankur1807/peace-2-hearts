@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ConsultantFormData } from "@/hooks/useConsultantForm";
 
 interface ConsultantFormFieldsProps {
@@ -11,6 +12,7 @@ interface ConsultantFormFieldsProps {
   onInputChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onSelectChange: (name: string, value: string) => void;
+  onDayToggle: (day: string) => void;
 }
 
 const ConsultantFormFields = ({
@@ -18,8 +20,11 @@ const ConsultantFormFields = ({
   isSubmitting,
   onInputChange,
   onFileChange,
-  onSelectChange
+  onSelectChange,
+  onDayToggle
 }: ConsultantFormFieldsProps) => {
+  const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
   return (
     <>
       <div className="space-y-2">
@@ -64,6 +69,36 @@ const ConsultantFormFields = ({
             <SelectItem value="mental_health">Mental Health Expert</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Available Days</Label>
+        <div className="grid grid-cols-2 gap-4">
+          {weekDays.map((day) => (
+            <div key={day} className="flex items-center space-x-2">
+              <Checkbox
+                id={`day-${day}`}
+                checked={formData.available_days.includes(day)}
+                onCheckedChange={() => onDayToggle(day)}
+                disabled={isSubmitting}
+              />
+              <Label htmlFor={`day-${day}`} className="cursor-pointer">{day}</Label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="available_hours">Working Hours</Label>
+        <Input
+          id="available_hours"
+          name="available_hours"
+          value={formData.available_hours}
+          onChange={onInputChange}
+          placeholder="e.g., 9:00-17:00"
+          disabled={isSubmitting}
+        />
+        <p className="text-xs text-gray-500">Enter hours in 24-hour format (e.g., 9:00-17:00)</p>
       </div>
       
       <div className="space-y-2">
