@@ -6,6 +6,7 @@ export interface Consultant {
   hourly_rate: number;
   profile_id: string;
   available_days?: string[] | null;
+  available_hours?: string | null;
   bio?: string | null;
   qualifications?: string | null;
   profile_picture_url?: string | null;
