@@ -1,36 +1,16 @@
+import React from 'react';
 
-import React, { useEffect } from 'react';
-
+// Google Analytics is now implemented directly in the HTML head
+// This component remains as a placeholder for potential future analytics enhancements
 const GoogleAnalytics = () => {
-  useEffect(() => {
-    // Add Google Analytics script
-    const script1 = document.createElement('script');
-    script1.async = true;
-    script1.src = "https://www.googletagmanager.com/gtag/js?id=G-BJD6KFHSGF";
-    document.head.appendChild(script1);
-    
-    // Initialize gtag
-    window.dataLayer = window.dataLayer || [];
-    function gtag(...args: any[]) {
-      window.dataLayer.push(arguments);
-    }
-    gtag('js', new Date());
-    gtag('config', 'G-BJD6KFHSGF');
-
-    // Cleanup function
-    return () => {
-      document.head.removeChild(script1);
-    };
-  }, []);
-
   return null;
 };
 
-// Add gtag to window object
+// Keep the global type declaration for consistency
 declare global {
   interface Window {
     dataLayer: any[];
-    gtag?: (...args: any[]) => void;
+    gtag: (...args: any[]) => void;
   }
 }
 
