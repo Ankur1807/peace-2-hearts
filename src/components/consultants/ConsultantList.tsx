@@ -1,4 +1,3 @@
-
 import { Switch } from "@/components/ui/switch";
 import { 
   Table, 
@@ -9,11 +8,22 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Consultant, updateConsultantAvailability } from "@/utils/consultants";
+import { Consultant, updateConsultantAvailability, deleteConsultant } from "@/utils/consultants";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ConsultantListProps {
   consultants: Consultant[];
@@ -58,6 +68,26 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
       .join('')
       .toUpperCase()
       .substring(0, 2);
+  };
+
+  const handleDelete = async (consultantId: string) => {
+    try {
+      await deleteConsultant(consultantId);
+      // Remove consultant from the list by updating parent state
+      const updatedConsultants = consultants.filter(c => c.id !== consultantId);
+      onConsultantUpdated(updatedConsultants[0]); // Trigger parent update
+      
+      toast({
+        title: "Success",
+        description: "Consultant deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete consultant",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -118,13 +148,38 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
                 onCheckedChange={(checked) => handleAvailabilityChange(consultant.id, checked)}
               />
             </TableCell>
-            <TableCell>
+            <TableCell className="space-x-2">
               <Button variant="ghost" size="sm" asChild>
                 <Link to={`/consultants/${consultant.id}`}>
                   <Eye className="h-4 w-4 mr-1" />
                   View
                 </Link>
               </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-destructive">
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Consultant</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this consultant? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDelete(consultant.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </TableCell>
           </TableRow>
         ))}

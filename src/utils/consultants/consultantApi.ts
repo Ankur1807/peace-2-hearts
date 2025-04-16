@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Consultant, CreateConsultantData } from "./types";
 import { upsertConsultantProfile } from "./profileManager";
@@ -152,6 +151,30 @@ export const getConsultantById = async (consultantId: string): Promise<Consultan
     return data;
   } catch (error) {
     console.error("Error in getConsultantById:", error);
+    throw error;
+  }
+};
+
+/**
+ * Deletes a consultant and their associated profile
+ */
+export const deleteConsultant = async (consultantId: string): Promise<void> => {
+  console.log("deleteConsultant called with ID:", consultantId);
+  try {
+    // First delete the consultant record
+    const { error: consultantError } = await supabase
+      .from('consultants')
+      .delete()
+      .eq('id', consultantId);
+    
+    if (consultantError) {
+      console.error("Error deleting consultant:", consultantError);
+      throw new Error("Unable to delete consultant. Please try again later.");
+    }
+    
+    console.log("Consultant deleted successfully");
+  } catch (error) {
+    console.error("Error in deleteConsultant:", error);
     throw error;
   }
 };
