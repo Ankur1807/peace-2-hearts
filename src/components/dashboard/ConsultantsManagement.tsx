@@ -106,7 +106,7 @@ const ConsultantsManagement = () => {
                 Add Consultant
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl">
+            <DialogContent className="max-w-3xl max-h-[90vh]">
               <DialogHeader>
                 <DialogTitle>Add New Consultant</DialogTitle>
               </DialogHeader>

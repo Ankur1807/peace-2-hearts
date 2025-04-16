@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Consultant } from "@/utils/consultants/types";
 import { useConsultantForm } from "@/hooks/useConsultantForm";
 import ConsultantFormFields from "./ConsultantFormFields";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ConsultantFormProps {
   onSuccess: (consultant: Consultant) => void;
@@ -29,15 +30,19 @@ const ConsultantForm = ({ onSuccess, onCancel }: ConsultantFormProps) => {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-
-      <ConsultantFormFields
-        formData={formData}
-        isSubmitting={isSubmitting}
-        onInputChange={handleInputChange}
-        onFileChange={handleFileChange}
-        onSelectChange={handleSelectChange}
-        onDayToggle={handleDayToggle}
-      />
+      
+      <ScrollArea className="h-[60vh] pr-4">
+        <div className="space-y-6 pr-2">
+          <ConsultantFormFields
+            formData={formData}
+            isSubmitting={isSubmitting}
+            onInputChange={handleInputChange}
+            onFileChange={handleFileChange}
+            onSelectChange={handleSelectChange}
+            onDayToggle={handleDayToggle}
+          />
+        </div>
+      </ScrollArea>
       
       <div className="flex justify-end space-x-4 pt-4">
         <Button 
