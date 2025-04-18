@@ -106,64 +106,70 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   }, [serviceCategory, setSelectedServices, selectedServices]);
 
-  useEffect(() => {
-    console.log("Current selected services in ConsultationBookingForm:", selectedServices);
-    console.log("Current pricing data:", Object.fromEntries(pricing || new Map()));
-  }, [selectedServices, pricing]);
-
   // Handle payment form submission
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     processPayment();
   };
 
-  if (showPaymentStep) {
-    return (
-      <Card className="p-6 md:p-8">
-        <form onSubmit={handlePaymentSubmit} className="space-y-6">
-          <PaymentStep 
-            consultationType={selectedServices.join(', ')}
-            onNextStep={processPayment}
-            onPrevStep={() => setShowPaymentStep(false)}
-            onSubmit={handlePaymentSubmit}
-            isProcessing={isProcessing}
-            totalPrice={totalPrice}
-          />
-        </form>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="p-6 md:p-8">
-      <h2 className="text-2xl font-lora font-semibold mb-6">Book Your Consultation</h2>
+    <div className="relative">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 right-0 w-1/3 h-64 bg-gradient-to-bl from-peacefulBlue/10 to-transparent rounded-full filter blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-1/3 h-64 bg-gradient-to-tr from-vividPink/10 to-transparent rounded-full filter blur-3xl"></div>
       
-      {bookingError && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md text-red-600">
-          <p className="font-medium">Error: {bookingError}</p>
-        </div>
+      {showPaymentStep ? (
+        <Card className="backdrop-blur-sm bg-white/80 p-6 md:p-8 border border-gray-100 shadow-xl rounded-xl relative z-10">
+          <form onSubmit={handlePaymentSubmit} className="space-y-6">
+            <PaymentStep 
+              consultationType={selectedServices.join(', ')}
+              onNextStep={processPayment}
+              onPrevStep={() => setShowPaymentStep(false)}
+              onSubmit={handlePaymentSubmit}
+              isProcessing={isProcessing}
+              totalPrice={totalPrice}
+            />
+          </form>
+        </Card>
+      ) : (
+        <Card className="backdrop-blur-sm bg-white/80 p-6 md:p-8 border border-gray-100 shadow-xl rounded-xl relative z-10">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-lora font-semibold mb-3 text-gray-800 bg-clip-text text-transparent bg-gradient-to-r from-peacefulBlue to-vividPink">
+              Book Your Consultation
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Take the first step towards peace and clarity in your relationship journey with our expert guidance.
+            </p>
+          </div>
+          
+          {bookingError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md text-red-600">
+              <p className="font-medium">Error: {bookingError}</p>
+            </div>
+          )}
+          
+          <BookingForm
+            serviceCategory={serviceCategory}
+            setServiceCategory={setServiceCategory}
+            selectedServices={selectedServices}
+            handleServiceSelection={handleServiceSelection}
+            handlePackageSelection={handlePackageSelection}
+            date={date}
+            setDate={setDate}
+            timeSlot={timeSlot}
+            setTimeSlot={setTimeSlot}
+            timeframe={timeframe}
+            setTimeframe={setTimeframe}
+            personalDetails={personalDetails}
+            handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
+            isProcessing={isProcessing}
+            pricing={pricing}
+            totalPrice={totalPrice}
+            onSubmit={proceedToPayment}
+          />
+        </Card>
       )}
-      
-      <BookingForm
-        serviceCategory={serviceCategory}
-        setServiceCategory={setServiceCategory}
-        selectedServices={selectedServices}
-        handleServiceSelection={handleServiceSelection}
-        handlePackageSelection={handlePackageSelection}
-        date={date}
-        setDate={setDate}
-        timeSlot={timeSlot}
-        setTimeSlot={setTimeSlot}
-        timeframe={timeframe}
-        setTimeframe={setTimeframe}
-        personalDetails={personalDetails}
-        handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
-        isProcessing={isProcessing}
-        pricing={pricing}
-        totalPrice={totalPrice}
-        onSubmit={proceedToPayment}
-      />
-    </Card>
+    </div>
   );
 };
 

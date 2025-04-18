@@ -7,6 +7,7 @@ import PersonalDetailsFields from './PersonalDetailsFields';
 import PricingSection from './form/PricingSection';
 import FormActions from './FormActions';
 import { isFormValid } from './form/ValidationHelper';
+import { Card } from '@/components/ui/card';
 
 interface BookingFormProps {
   serviceCategory: string;
@@ -48,33 +49,59 @@ const BookingForm: React.FC<BookingFormProps> = ({
   onSubmit
 }) => {
   return (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      onSubmit(e);
-    }} className="space-y-6">
-      <ServiceSection
-        serviceCategory={serviceCategory}
-        setServiceCategory={setServiceCategory}
-        selectedServices={selectedServices}
-        handleServiceSelection={handleServiceSelection}
-        handlePackageSelection={handlePackageSelection}
-        pricing={pricing}
-      />
-      
-      <DateTimeSection
-        serviceCategory={serviceCategory}
-        date={date}
-        setDate={setDate}
-        timeSlot={timeSlot}
-        setTimeSlot={setTimeSlot}
-        timeframe={timeframe}
-        setTimeframe={setTimeframe}
-      />
-      
-      <PersonalDetailsFields 
-        personalDetails={personalDetails}
-        handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
-      />
+    <form 
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(e);
+      }}
+      className="space-y-8"
+    >
+      <div className="grid grid-cols-1 gap-8">
+        <Card className="overflow-hidden border-0 shadow-lg">
+          <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
+            <h3 className="text-xl font-semibold text-white">Select Your Services</h3>
+          </div>
+          <div className="p-6">
+            <ServiceSection
+              serviceCategory={serviceCategory}
+              setServiceCategory={setServiceCategory}
+              selectedServices={selectedServices}
+              handleServiceSelection={handleServiceSelection}
+              handlePackageSelection={handlePackageSelection}
+              pricing={pricing}
+            />
+          </div>
+        </Card>
+        
+        <Card className="overflow-hidden border-0 shadow-lg">
+          <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
+            <h3 className="text-xl font-semibold text-white">Choose Your Time</h3>
+          </div>
+          <div className="p-6">
+            <DateTimeSection
+              serviceCategory={serviceCategory}
+              date={date}
+              setDate={setDate}
+              timeSlot={timeSlot}
+              setTimeSlot={setTimeSlot}
+              timeframe={timeframe}
+              setTimeframe={setTimeframe}
+            />
+          </div>
+        </Card>
+        
+        <Card className="overflow-hidden border-0 shadow-lg">
+          <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
+            <h3 className="text-xl font-semibold text-white">Your Information</h3>
+          </div>
+          <div className="p-6">
+            <PersonalDetailsFields 
+              personalDetails={personalDetails}
+              handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
+            />
+          </div>
+        </Card>
+      </div>
       
       <PricingSection
         selectedServices={selectedServices}

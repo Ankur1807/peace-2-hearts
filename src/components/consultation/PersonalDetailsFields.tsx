@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { PersonalDetails } from '@/utils/types';
 
@@ -15,62 +15,73 @@ const PersonalDetailsFields: React.FC<PersonalDetailsFieldsProps> = ({
   handlePersonalDetailsFieldChange
 }) => {
   return (
-    <>
+    <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="first-name">First Name</Label>
-          <Input 
-            id="first-name" 
+          <Label htmlFor="firstName" className="text-gray-700">First Name</Label>
+          <Input
+            id="firstName"
             value={personalDetails.firstName}
             onChange={(e) => handlePersonalDetailsFieldChange('firstName', e.target.value)}
-            required 
+            className="border-gray-300 focus:border-peacefulBlue"
+            placeholder="Enter your first name"
+            required
           />
         </div>
-        
         <div className="space-y-2">
-          <Label htmlFor="last-name">Last Name</Label>
-          <Input 
-            id="last-name" 
+          <Label htmlFor="lastName" className="text-gray-700">Last Name</Label>
+          <Input
+            id="lastName"
             value={personalDetails.lastName}
             onChange={(e) => handlePersonalDetailsFieldChange('lastName', e.target.value)}
-            required 
+            className="border-gray-300 focus:border-peacefulBlue"
+            placeholder="Enter your last name"
+            required
+          />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-gray-700">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={personalDetails.email}
+            onChange={(e) => handlePersonalDetailsFieldChange('email', e.target.value)}
+            className="border-gray-300 focus:border-peacefulBlue"
+            placeholder="your.email@example.com"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="phone" className="text-gray-700">Phone Number</Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={personalDetails.phone}
+            onChange={(e) => handlePersonalDetailsFieldChange('phone', e.target.value)}
+            className="border-gray-300 focus:border-peacefulBlue"
+            placeholder="+91 98765 43210"
+            required
           />
         </div>
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="email">Email Address</Label>
-        <Input 
-          id="email" 
-          type="email" 
-          value={personalDetails.email}
-          onChange={(e) => handlePersonalDetailsFieldChange('email', e.target.value)}
-          required 
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="phone">Phone Number</Label>
-        <Input 
-          id="phone" 
-          type="tel" 
-          value={personalDetails.phone}
-          onChange={(e) => handlePersonalDetailsFieldChange('phone', e.target.value)}
-          required 
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="message">Brief Description (Optional)</Label>
-        <Textarea 
-          id="message" 
-          placeholder="Please provide a brief overview of your situation to help us prepare for your consultation."
-          rows={4}
+        <Label htmlFor="message" className="text-gray-700">Message (Optional)</Label>
+        <Textarea
+          id="message"
           value={personalDetails.message}
           onChange={(e) => handlePersonalDetailsFieldChange('message', e.target.value)}
+          placeholder="Briefly describe your situation to help our experts prepare for your session..."
+          className="min-h-[120px] border-gray-300 focus:border-peacefulBlue"
         />
+        <p className="text-xs text-gray-500 mt-1">
+          Your privacy is important to us. This information will only be shared with your assigned counselor or legal advisor.
+        </p>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup } from '@/components/ui/radio-group';
+import ServiceCheckbox from './service-selection/ServiceCheckbox';
+import ServiceOption from './service-selection/ServiceOption';
 
 interface ServiceOption {
   id: string;
@@ -25,23 +26,23 @@ interface ServiceSelectionOptionsProps {
 }
 
 const mentalHealthServices: ServiceOption[] = [
-  { id: 'mental-health-counselling', label: 'Mental Health Counselling' },
-  { id: 'family-therapy', label: 'Family Therapy' },
-  { id: 'premarital-counselling-individual', label: 'Premarital Counselling - Individual' },
-  { id: 'premarital-counselling-couple', label: 'Premarital Counselling - Couple' },
-  { id: 'couples-counselling', label: 'Couples Counselling' },
-  { id: 'sexual-health-counselling-individual', label: 'Sexual Health Counselling - Individual' },
-  { id: 'sexual-health-counselling-couple', label: 'Sexual Health Counselling - Couple' },
-  { id: 'test-service', label: 'Test Service (₹11)' }
+  { id: 'mental-health-counselling', label: 'Mental Health Counselling', description: 'Speak with a therapist about anxiety, depression, or stress related to relationships.' },
+  { id: 'family-therapy', label: 'Family Therapy', description: 'Strengthen family bonds by addressing conflicts and fostering understanding.' },
+  { id: 'premarital-counselling-individual', label: 'Premarital Counselling - Individual', description: 'Prepare for a strong marriage through guided personal reflection.' },
+  { id: 'premarital-counselling-couple', label: 'Premarital Counselling - Couple', description: 'Build a foundation for marriage together through guided discussions.' },
+  { id: 'couples-counselling', label: 'Couples Counselling', description: 'Professional guidance to strengthen communication and mutual understanding.' },
+  { id: 'sexual-health-counselling-individual', label: 'Sexual Health Counselling - Individual', description: 'Personal support for addressing intimacy concerns.' },
+  { id: 'sexual-health-counselling-couple', label: 'Sexual Health Counselling - Couple', description: 'Specialized support for enhancing relationship satisfaction together.' },
+  { id: 'test-service', label: 'Test Service (₹11)', description: 'For testing payment gateway functionality.' }
 ];
 
 const legalServices: ServiceOption[] = [
-  { id: 'pre-marriage-legal', label: 'Pre-marriage Legal Consultation' },
-  { id: 'mediation', label: 'Mediation Services' },
-  { id: 'divorce', label: 'Divorce Consultation' },
-  { id: 'custody', label: 'Child Custody Consultation' },
-  { id: 'maintenance', label: 'Maintenance Consultation' },
-  { id: 'general-legal', label: 'General Legal Consultation' }
+  { id: 'pre-marriage-legal', label: 'Pre-marriage Legal Consultation', description: 'Guidance on rights, agreements, and legal aspects before marriage.' },
+  { id: 'mediation', label: 'Mediation Services', description: 'Facilitating peaceful resolutions to legal disputes through collaborative dialogue.' },
+  { id: 'divorce', label: 'Divorce Consultation', description: 'Expert insights into legal aspects of divorce to make informed decisions.' },
+  { id: 'custody', label: 'Child Custody Consultation', description: 'Support for understanding and advocating in custody decisions for children.' },
+  { id: 'maintenance', label: 'Maintenance Consultation', description: 'Advice on alimony, financial support, and agreements for separated partners.' },
+  { id: 'general-legal', label: 'General Legal Consultation', description: 'Broad legal insights tailored to your unique relationship challenges.' }
 ];
 
 const holisticPackages: HolisticPackage[] = [
@@ -72,30 +73,27 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
   // For holistic package selection
   if (serviceCategory === 'holistic') {
     return (
-      <div className="space-y-3">
-        <Label>Package Selection</Label>
+      <div className="space-y-4">
+        <Label className="text-lg font-medium text-gray-800">Package Selection</Label>
         <RadioGroup 
           onValueChange={handlePackageSelection} 
-          className="space-y-3"
+          className="space-y-4"
         >
           {holisticPackages.map(pkg => {
             // Show package price if available
             const price = pricing?.get(pkg.id);
-            const priceDisplay = price ? ` - ₹${price.toLocaleString('en-IN')}` : '';
+            const isSelected = pkg.services.every(service => selectedServices.includes(service)) &&
+                              pkg.services.length === selectedServices.length;
             
             return (
-              <div key={pkg.id} className="flex items-start space-x-2">
-                <RadioGroupItem value={pkg.id} id={pkg.id} />
-                <div className="grid gap-1">
-                  <label
-                    htmlFor={pkg.id}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {pkg.label}{priceDisplay}
-                  </label>
-                  <p className="text-xs text-muted-foreground">{pkg.description}</p>
-                </div>
-              </div>
+              <ServiceOption
+                key={pkg.id}
+                id={pkg.id}
+                title={pkg.label + (price ? ` - ₹${price.toLocaleString('en-IN')}` : '')}
+                description={pkg.description}
+                isSelected={isSelected}
+                onClick={() => handlePackageSelection(pkg.id)}
+              />
             );
           })}
         </RadioGroup>
@@ -109,47 +107,35 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
     : legalServices;
     
   return (
-    <div className="space-y-3">
-      <Label>Service Types</Label>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div className="space-y-4">
+      <Label className="text-lg font-medium text-gray-800">Service Types</Label>
+      <div className="grid grid-cols-1 gap-4">
         {servicesToDisplay.map(service => {
           const isChecked = selectedServices.includes(service.id);
           // Get price from the pricing map if available
           const price = pricing?.get(service.id);
-          const priceDisplay = price ? ` - ₹${price.toLocaleString('en-IN')}` : '';
           
           console.log(`Service ${service.id} isChecked:`, isChecked);
           
           return (
-            <div key={service.id} className="flex items-start space-x-2">
-              <Checkbox
-                id={service.id}
-                checked={isChecked}
-                onCheckedChange={(checked) => {
-                  console.log(`Checkbox ${service.id} change:`, checked);
-                  handleServiceSelection(service.id, checked === true);
-                }}
-                className="mt-1"
-              />
-              <div className="grid gap-1">
-                <label
-                  htmlFor={service.id}
-                  className="text-sm font-medium leading-none cursor-pointer"
-                  onClick={() => {
-                    console.log(`Label clicked for ${service.id}, current state:`, !isChecked);
-                    handleServiceSelection(service.id, !isChecked);
-                  }}
-                >
-                  {service.label}{priceDisplay}
-                </label>
-              </div>
-            </div>
+            <ServiceCheckbox
+              key={service.id}
+              id={service.id}
+              label={service.label}
+              description={service.description}
+              isSelected={isChecked}
+              price={price}
+              onChange={(checked) => {
+                console.log(`ServiceCheckbox ${service.id} onChange:`, checked);
+                handleServiceSelection(service.id, checked);
+              }}
+            />
           );
         })}
       </div>
       
       {selectedServices.length === 0 && (
-        <p className="text-sm text-muted-foreground">Please select at least one service</p>
+        <p className="text-sm text-muted-foreground mt-2">Please select at least one service</p>
       )}
     </div>
   );

@@ -23,7 +23,9 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
   setTimeframe
 }) => {
   return (
-    <>
+    <div className="p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">
+      <h3 className="text-xl font-semibold mb-4 text-gray-800">Schedule Your Session</h3>
+      
       {serviceCategory === 'holistic' ? (
         <TimeframeSelector
           timeframe={timeframe}
@@ -35,9 +37,10 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
           setDate={setDate}
           timeSlot={timeSlot}
           setTimeSlot={setTimeSlot}
+          serviceCategory={serviceCategory}
         />
       )}
-    </>
+    </div>
   );
 };
 

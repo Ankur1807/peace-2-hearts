@@ -1,48 +1,40 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { formatPrice } from '@/utils/pricing/fetchPricing';
-import { AlertCircle } from 'lucide-react';
 
 interface FormActionsProps {
   isFormValid: boolean;
   isProcessing: boolean;
   totalPrice: number;
-  onSubmit?: () => void;
 }
 
 const FormActions: React.FC<FormActionsProps> = ({ 
   isFormValid, 
-  isProcessing, 
-  totalPrice, 
-  onSubmit 
+  isProcessing,
+  totalPrice
 }) => {
-  const buttonText = isProcessing 
-    ? "Processing..." 
-    : totalPrice > 0 
-      ? `Proceed to Payment (${formatPrice(totalPrice)})`
-      : "Proceed to Booking";
-
-  const isDisabled = !isFormValid || isProcessing;
-
   return (
-    <div className="pt-6">
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6">
+      <div>
+        <p className="text-sm text-gray-500">
+          By proceeding, you agree to our <a href="/terms" className="text-peacefulBlue hover:underline">Terms of Service</a> and <a href="/privacy-policy" className="text-peacefulBlue hover:underline">Privacy Policy</a>.
+        </p>
+      </div>
       <Button 
         type="submit" 
-        className="w-full bg-peacefulBlue hover:bg-peacefulBlue/90"
-        disabled={isDisabled}
-        onClick={onSubmit}
+        className="bg-peacefulBlue hover:bg-peacefulBlue/90 shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
+        disabled={!isFormValid || isProcessing}
       >
-        {buttonText}
-      </Button>
-      {totalPrice === 0 && isFormValid && (
-        <div className="mt-3 flex items-center gap-2 border border-amber-300 bg-amber-50 p-3 rounded-md">
-          <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
-          <p className="text-sm text-amber-600">
-            Pricing information is currently unavailable. Your booking will be processed, and we'll contact you regarding payment.
-          </p>
+        <div className="flex items-center gap-2">
+          <span>
+            {isProcessing ? 'Processing...' : totalPrice > 0 ? 'Proceed to Payment' : 'Book Consultation'}
+          </span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
+            <path d="M5 12h14"/>
+            <path d="m12 5 7 7-7 7"/>
+          </svg>
         </div>
-      )}
+      </Button>
     </div>
   );
 };

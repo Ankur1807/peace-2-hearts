@@ -26,18 +26,23 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
   
   return (
     <div className="space-y-6">
-      <ServiceCategorySelector 
-        serviceCategory={serviceCategory}
-        setServiceCategory={setServiceCategory}
-      />
+      <div className="p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">
+        <h3 className="text-xl font-semibold mb-4 text-gray-800">Choose Your Service Category</h3>
+        <ServiceCategorySelector 
+          serviceCategory={serviceCategory}
+          setServiceCategory={setServiceCategory}
+        />
+      </div>
       
-      <ServiceSelectionOptions 
-        serviceCategory={serviceCategory}
-        selectedServices={selectedServices}
-        handleServiceSelection={handleServiceSelection}
-        handlePackageSelection={handlePackageSelection}
-        pricing={pricing}
-      />
+      <div className="p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">
+        <ServiceSelectionOptions 
+          serviceCategory={serviceCategory}
+          selectedServices={selectedServices}
+          handleServiceSelection={handleServiceSelection}
+          handlePackageSelection={handlePackageSelection}
+          pricing={pricing}
+        />
+      </div>
     </div>
   );
 };

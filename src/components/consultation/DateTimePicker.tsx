@@ -1,7 +1,7 @@
 
-import React from 'react';
-import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { format, addDays } from 'date-fns';
+import { CalendarIcon, Clock } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -14,24 +14,59 @@ interface DateTimePickerProps {
   setDate: (date: Date | undefined) => void;
   timeSlot: string;
   setTimeSlot: (timeSlot: string) => void;
+  serviceCategory: string;
 }
 
 const DateTimePicker: React.FC<DateTimePickerProps> = ({
   date,
   setDate,
   timeSlot,
-  setTimeSlot
+  setTimeSlot,
+  serviceCategory
 }) => {
+  // Get tomorrow as the minimum selectable date
+  const tomorrow = useMemo(() => addDays(new Date(), 1), []);
+  
+  // Get available time slots based on service category
+  const availableTimeSlots = useMemo(() => {
+    if (serviceCategory === 'legal') {
+      // Legal consultations: 5 PM - 8 PM
+      return [
+        { value: '5-pm', label: '5:00 PM' },
+        { value: '6-pm', label: '6:00 PM' },
+        { value: '7-pm', label: '7:00 PM' },
+        { value: '8-pm', label: '8:00 PM' },
+      ];
+    } else {
+      // Mental health: 11 AM - 8 PM
+      return [
+        { value: '11-am', label: '11:00 AM' },
+        { value: '12-pm', label: '12:00 PM' },
+        { value: '1-pm', label: '1:00 PM' },
+        { value: '2-pm', label: '2:00 PM' },
+        { value: '3-pm', label: '3:00 PM' },
+        { value: '4-pm', label: '4:00 PM' },
+        { value: '5-pm', label: '5:00 PM' },
+        { value: '6-pm', label: '6:00 PM' },
+        { value: '7-pm', label: '7:00 PM' },
+        { value: '8-pm', label: '8:00 PM' },
+      ];
+    }
+  }, [serviceCategory]);
+
   return (
-    <>
+    <div className="space-y-6">
       <div className="space-y-2">
-        <Label>Preferred Date</Label>
+        <Label className="flex items-center gap-2 text-lg font-medium text-gray-800">
+          <CalendarIcon className="h-5 w-5 text-peacefulBlue" /> 
+          Preferred Date
+        </Label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               className={cn(
-                "w-full justify-start text-left font-normal",
+                "w-full justify-start text-left font-normal border-gray-300 hover:border-peacefulBlue",
                 !date && "text-muted-foreground"
               )}
             >
@@ -47,41 +82,40 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
               initialFocus
               className="pointer-events-auto"
               disabled={(date) => 
-                date < new Date(new Date().setHours(0, 0, 0, 0))
+                // Disable past dates and today
+                date < tomorrow
               }
+              fromDate={tomorrow}
             />
           </PopoverContent>
         </Popover>
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="time">Preferred Time</Label>
+        <Label htmlFor="time" className="flex items-center gap-2 text-lg font-medium text-gray-800">
+          <Clock className="h-5 w-5 text-peacefulBlue" />
+          Preferred Time
+        </Label>
         <Select value={timeSlot} onValueChange={setTimeSlot}>
-          <SelectTrigger id="time">
+          <SelectTrigger id="time" className="border-gray-300 hover:border-peacefulBlue">
             <SelectValue placeholder="Select a time" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="7-am">7:00 AM</SelectItem>
-            <SelectItem value="8-am">8:00 AM</SelectItem>
-            <SelectItem value="9-am">9:00 AM</SelectItem>
-            <SelectItem value="10-am">10:00 AM</SelectItem>
-            <SelectItem value="11-am">11:00 AM</SelectItem>
-            <SelectItem value="12-pm">12:00 PM</SelectItem>
-            <SelectItem value="1-pm">1:00 PM</SelectItem>
-            <SelectItem value="2-pm">2:00 PM</SelectItem>
-            <SelectItem value="3-pm">3:00 PM</SelectItem>
-            <SelectItem value="4-pm">4:00 PM</SelectItem>
-            <SelectItem value="5-pm">5:00 PM</SelectItem>
-            <SelectItem value="6-pm">6:00 PM</SelectItem>
-            <SelectItem value="7-pm">7:00 PM</SelectItem>
-            <SelectItem value="8-pm">8:00 PM</SelectItem>
-            <SelectItem value="9-pm">9:00 PM</SelectItem>
+            {availableTimeSlots.map((slot) => (
+              <SelectItem key={slot.value} value={slot.value}>
+                {slot.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
+        <p className="text-sm text-muted-foreground mt-1">
+          {serviceCategory === 'legal' 
+            ? 'Legal consultations available from 5 PM - 8 PM' 
+            : 'Mental health consultations available from 11 AM - 8 PM'}
+        </p>
       </div>
-    </>
+    </div>
   );
 };
 
 export default DateTimePicker;
-
