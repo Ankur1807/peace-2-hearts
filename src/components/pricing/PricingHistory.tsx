@@ -10,7 +10,7 @@ import { RefreshCw } from 'lucide-react';
 
 interface PriceHistoryItem {
   id: string;
-  item_id: string;
+  entity_id: string;
   item_name: string;
   item_type: string;
   old_price: number | null;

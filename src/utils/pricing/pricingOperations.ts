@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -206,7 +205,7 @@ export async function removePricingItem(id: string) {
 // Define interface for the price history item
 interface PriceHistoryItem {
   id: string;
-  item_id: string;
+  entity_id: string;
   item_name: string;
   item_type: string;
   old_price: number | null;
@@ -220,21 +219,17 @@ interface PriceHistoryItem {
  */
 export async function fetchPricingHistory() {
   try {
-    // Use the correct foreign key reference name based on SQL setup
     const { data, error } = await supabase
       .from('pricing_history')
       .select(`
         id,
-        item_id,
+        entity_id,
+        entity_type,
         old_price,
         new_price,
         changed_by,
         created_at,
-        pricing_items (
-          name,
-          type,
-          category
-        )
+        pricing_items(name, type, category)
       `)
       .order('created_at', { ascending: false });
     
@@ -243,12 +238,17 @@ export async function fetchPricingHistory() {
       throw error;
     }
     
+    // Check if data is null (which shouldn't happen, but TypeScript wants us to check)
+    if (!data) {
+      return [];
+    }
+    
     // Properly transform the data to match our PriceHistoryItem interface
     const transformedData = data.map(record => ({
       id: record.id,
-      item_id: record.item_id,
+      entity_id: record.entity_id,
       item_name: record.pricing_items?.name || 'Unknown',
-      item_type: record.pricing_items?.type || 'Unknown',
+      item_type: record.pricing_items?.type || record.entity_type || 'Unknown',
       old_price: record.old_price,
       new_price: record.new_price,
       changed_by: record.changed_by,
