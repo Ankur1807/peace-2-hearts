@@ -17,7 +17,6 @@ const ConsultationInitializer: React.FC<ConsultationInitializerProps> = ({
   bookingState
 }) => {
   const { setServiceCategory, setSelectedServices } = bookingState;
-  const [isDevelopment, setIsDevelopment] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [initializingPayment, setInitializingPayment] = useState(true);
   const [initialized, setInitialized] = useState(false);
@@ -51,7 +50,6 @@ const ConsultationInitializer: React.FC<ConsultationInitializerProps> = ({
   useEffect(() => {
     if (initialized) return; // Only run once on initial load
     
-    setIsDevelopment(process.env.NODE_ENV === 'development');
     initializeBookingFromStorage(bookingState);
     
     // Pre-select service category from URL if provided
@@ -82,15 +80,6 @@ const ConsultationInitializer: React.FC<ConsultationInitializerProps> = ({
 
   return (
     <>
-      {isDevelopment && (
-        <ConsultationAlert
-          title="Development Mode"
-          description="This is a development environment. Bookings will create consultants if none exist."
-          variant="default"
-          className="mb-6"
-        />
-      )}
-
       {initializingPayment && (
         <ConsultationAlert
           title="Loading Payment Gateway"
