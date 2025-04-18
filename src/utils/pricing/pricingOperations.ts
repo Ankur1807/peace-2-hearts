@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -219,41 +220,54 @@ interface PriceHistoryItem {
  */
 export async function fetchPricingHistory() {
   try {
-    const { data, error } = await supabase
+    // First, fetch the pricing history records
+    const { data: historyData, error: historyError } = await supabase
       .from('pricing_history')
-      .select(`
-        id,
-        entity_id,
-        entity_type,
-        old_price,
-        new_price,
-        changed_by,
-        created_at,
-        pricing_items(name, type, category)
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
     
-    if (error) {
-      console.error('Error fetching pricing history:', error);
-      throw error;
+    if (historyError) {
+      console.error('Error fetching pricing history:', historyError);
+      throw historyError;
     }
     
-    // Check if data is null (which shouldn't happen, but TypeScript wants us to check)
-    if (!data) {
+    if (!historyData) {
       return [];
     }
     
-    // Properly transform the data to match our PriceHistoryItem interface
-    const transformedData = data.map(record => ({
-      id: record.id,
-      entity_id: record.entity_id,
-      item_name: record.pricing_items?.name || 'Unknown',
-      item_type: record.pricing_items?.type || record.entity_type || 'Unknown',
-      old_price: record.old_price,
-      new_price: record.new_price,
-      changed_by: record.changed_by,
-      created_at: record.created_at
-    }));
+    // Now fetch all pricing items to get their names
+    const { data: pricingItems, error: itemsError } = await supabase
+      .from('pricing_items')
+      .select('id, name, type');
+      
+    if (itemsError) {
+      console.error('Error fetching pricing items:', itemsError);
+      // Continue with the history data we have
+    }
+    
+    // Create a mapping of pricing item IDs to their names and types
+    const itemsMap = new Map();
+    if (pricingItems) {
+      pricingItems.forEach(item => {
+        itemsMap.set(item.id, { name: item.name, type: item.type });
+      });
+    }
+    
+    // Transform the history data, looking up item names from our map
+    const transformedData = historyData.map(record => {
+      const itemInfo = itemsMap.get(record.entity_id);
+      
+      return {
+        id: record.id,
+        entity_id: record.entity_id,
+        item_name: itemInfo ? itemInfo.name : 'Unknown',
+        item_type: itemInfo ? itemInfo.type : record.entity_type || 'Unknown',
+        old_price: record.old_price,
+        new_price: record.new_price,
+        changed_by: record.changed_by,
+        created_at: record.created_at
+      };
+    });
     
     return transformedData as PriceHistoryItem[];
   } catch (error) {
