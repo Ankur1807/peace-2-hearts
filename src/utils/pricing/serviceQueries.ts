@@ -9,7 +9,7 @@ import { ServicePrice } from '@/utils/pricingTypes';
 export const fetchAllServices = async () => {
   console.log('Fetching all services');
   try {
-    // Add a timestamp parameter to prevent caching issues
+    // Add a cache-busting timestamp parameter
     const timestamp = new Date().getTime();
     
     const { data, error } = await supabase
@@ -24,7 +24,10 @@ export const fetchAllServices = async () => {
       throw error;
     }
     
+    // Log the data for debugging
     console.log(`Retrieved ${data?.length || 0} services from database`);
+    console.log('Sample data:', data?.[0]);
+    
     return data || [];
   } catch (error) {
     console.error('Error in fetchAllServices:', error);
@@ -40,7 +43,7 @@ export const fetchAllServices = async () => {
 export const fetchServiceById = async (id: string) => {
   console.log(`Fetching service with ID: ${id}`);
   try {
-    // Add a timestamp parameter to prevent caching issues
+    // Add a cache-busting timestamp parameter
     const timestamp = new Date().getTime();
     
     const { data, error } = await supabase
@@ -54,6 +57,7 @@ export const fetchServiceById = async (id: string) => {
       throw error;
     }
     
+    console.log('Retrieved service:', data);
     return data as ServicePrice;
   } catch (error) {
     console.error('Error in fetchServiceById:', error);

@@ -23,10 +23,11 @@ export const usePricingServices = () => {
   const fetchServices = async () => {
     try {
       setLoading(true);
+      console.log('Fetching all services');
+      
       let data: ServicePrice[];
       
       try {
-        console.log('Fetching all services');
         data = await fetchAllServices();
         
         if (data.length === 0) {
@@ -72,27 +73,36 @@ export const usePricingServices = () => {
 
   const handleSave = async (id: string) => {
     try {
+      // Set updating state to true
       setUpdating(true);
       
-      if (!editedPrice.trim() || isNaN(Number(editedPrice)) || Number(editedPrice) <= 0) {
+      // Validate the price
+      if (!editedPrice.trim() || isNaN(Number(editedPrice)) || Number(editedPrice) < 0) {
         toast({
           title: 'Invalid Price',
-          description: 'Please enter a valid price.',
+          description: 'Please enter a valid positive price.',
           variant: 'destructive',
         });
         return;
       }
 
-      console.log(`Saving price update for service ID ${id}: ${editedPrice}`);
-      await updateServicePrice(id, Number(editedPrice));
+      const newPrice = Number(editedPrice);
+
+      console.log(`Saving price update for service ID ${id}: ${newPrice}`);
+      
+      // Update the price in Supabase
+      await updateServicePrice(id, newPrice);
 
       toast({
         title: 'Price Updated',
         description: 'Service price has been successfully updated.',
       });
 
+      // Reset edit mode
       setEditMode(null);
-      await fetchServices(); // Refresh services after update
+      
+      // Refresh the services list to get the updated data
+      await fetchServices();
     } catch (error: any) {
       handleOperationError(error, 'update price');
     } finally {
@@ -130,6 +140,7 @@ export const usePricingServices = () => {
         description: 'New service has been successfully added.',
       });
 
+      await fetchServices(); // Refresh services after adding
       return true;
     } catch (error: any) {
       handleOperationError(error, 'add service');
@@ -150,6 +161,7 @@ export const usePricingServices = () => {
         description: 'Service has been successfully deleted.',
       });
 
+      await fetchServices(); // Refresh services after deletion
       return true;
     } catch (error: any) {
       handleOperationError(error, 'delete service');

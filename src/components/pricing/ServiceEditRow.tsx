@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Edit, Save, X, Trash2 } from 'lucide-react';
+import { Edit, Save, X, Trash2, Loader2 } from 'lucide-react';
 
 interface ServiceEditRowProps {
   service: ServicePrice;
@@ -34,9 +34,10 @@ const ServiceEditRow = ({
   disabled = false,
 }: ServiceEditRowProps) => {
   const isEditing = editMode === service.id;
+  const isDisabled = disabled || (editMode !== null && !isEditing);
   
   return (
-    <TableRow>
+    <TableRow key={service.id} className={isEditing ? 'bg-muted/20' : ''}>
       <TableCell className="font-medium capitalize">
         {service.category.replace('-', ' ')}
       </TableCell>
@@ -51,6 +52,7 @@ const ServiceEditRow = ({
             className="w-24"
             min="0"
             autoFocus
+            disabled={disabled}
           />
         ) : (
           `₹${service.price.toLocaleString()}`
@@ -61,7 +63,7 @@ const ServiceEditRow = ({
           <Switch
             checked={service.is_active}
             onCheckedChange={() => onToggleStatus(service.id, service.is_active)}
-            disabled={disabled || isEditing}
+            disabled={isDisabled}
           />
           <span className={service.is_active ? 'text-green-600' : 'text-red-600'}>
             {service.is_active ? 'Active' : 'Inactive'}
@@ -76,13 +78,19 @@ const ServiceEditRow = ({
                 size="sm"
                 variant="outline"
                 onClick={() => onSave(service.id)}
+                disabled={disabled}
               >
-                <Save className="h-4 w-4 mr-1" /> Save
+                {disabled ? (
+                  <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Saving</>
+                ) : (
+                  <><Save className="h-4 w-4 mr-1" /> Save</>
+                )}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={onCancel}
+                disabled={disabled}
               >
                 <X className="h-4 w-4 mr-1" /> Cancel
               </Button>
@@ -93,7 +101,7 @@ const ServiceEditRow = ({
                 size="sm"
                 variant="outline"
                 onClick={() => onEdit(service.id, service.price)}
-                disabled={disabled}
+                disabled={isDisabled}
               >
                 <Edit className="h-4 w-4 mr-1" /> Edit
               </Button>
@@ -103,7 +111,7 @@ const ServiceEditRow = ({
                     size="sm"
                     variant="outline"
                     className="text-red-500 hover:bg-red-50 hover:text-red-600"
-                    disabled={disabled}
+                    disabled={isDisabled}
                   >
                     <Trash2 className="h-4 w-4 mr-1" /> Delete
                   </Button>

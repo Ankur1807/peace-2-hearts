@@ -29,7 +29,7 @@ export const updateServicePrice = async (id: string, price: number) => {
       throw error;
     }
     
-    console.log('Service price updated:', data);
+    console.log('Service price updated successfully:', data);
     return data;
   } catch (error) {
     console.error('Exception in updateServicePrice:', error);
@@ -64,7 +64,7 @@ export const toggleServiceActive = async (id: string, currentStatus: boolean) =>
       throw error;
     }
     
-    console.log('Service active status toggled:', data);
+    console.log('Service active status toggled successfully:', data);
     return data;
   } catch (error) {
     console.error('Exception in toggleServiceActive:', error);
@@ -103,7 +103,7 @@ export const createService = async (data: NewServiceFormValues) => {
       throw error;
     }
     
-    console.log('New service created:', newService);
+    console.log('New service created successfully:', newService);
     return newService;
   } catch (error) {
     console.error('Exception in createService:', error);
@@ -131,7 +131,7 @@ export const removeService = async (id: string) => {
       throw error;
     }
     
-    console.log('Service removed:', data);
+    console.log('Service removed successfully:', data);
     return data;
   } catch (error) {
     console.error('Exception in removeService:', error);
