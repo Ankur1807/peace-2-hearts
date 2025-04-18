@@ -8,9 +8,10 @@ import { PackagePrice } from '@/utils/pricingTypes';
 interface PackageEditFormProps {
   pkg: PackagePrice;
   onSave: (price: number) => Promise<void>;
+  disabled?: boolean;
 }
 
-const PackageEditForm: React.FC<PackageEditFormProps> = ({ pkg, onSave }) => {
+const PackageEditForm: React.FC<PackageEditFormProps> = ({ pkg, onSave, disabled = false }) => {
   const [editMode, setEditMode] = useState(false);
   const [editedPrice, setEditedPrice] = useState(pkg.price.toString());
   const [isSaving, setIsSaving] = useState(false);
@@ -43,6 +44,7 @@ const PackageEditForm: React.FC<PackageEditFormProps> = ({ pkg, onSave }) => {
           size="sm"
           variant="outline"
           onClick={() => setEditMode(true)}
+          disabled={disabled}
         >
           <Edit className="h-4 w-4 mr-1" /> Edit
         </Button>
@@ -58,13 +60,14 @@ const PackageEditForm: React.FC<PackageEditFormProps> = ({ pkg, onSave }) => {
         onChange={(e) => setEditedPrice(e.target.value)}
         className="w-24"
         min="0"
+        disabled={isSaving || disabled}
       />
       <div className="flex space-x-2">
         <Button
           size="sm"
           variant="outline"
           onClick={handleSave}
-          disabled={isSaving}
+          disabled={isSaving || disabled}
         >
           <Save className="h-4 w-4 mr-1" /> {isSaving ? 'Saving...' : 'Save'}
         </Button>
@@ -72,7 +75,7 @@ const PackageEditForm: React.FC<PackageEditFormProps> = ({ pkg, onSave }) => {
           size="sm"
           variant="outline"
           onClick={handleCancel}
-          disabled={isSaving}
+          disabled={isSaving || disabled}
         >
           <X className="h-4 w-4 mr-1" /> Cancel
         </Button>
