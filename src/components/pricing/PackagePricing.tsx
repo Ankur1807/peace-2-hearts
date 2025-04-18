@@ -262,7 +262,7 @@ const PackagePricing = () => {
         )}
         
         {syncNeeded && (
-          <Alert variant="warning" className="mb-4">
+          <Alert variant="default" className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Inconsistent pricing detected for the same package. Click "Sync Package Prices" to fix this issue.
