@@ -79,3 +79,9 @@ export const getTimeSlotLabel = (timeSlot: string): string => {
   
   return timeSlotMap[timeSlot] || timeSlot.replace('-', ' - ');
 };
+
+// Add the missing function that's being imported in PricingSection.tsx
+export const getServiceLabel = (serviceId: string): string => {
+  // This is essentially an alias to getConsultationTypeLabel
+  return getConsultationTypeLabel(serviceId);
+};
