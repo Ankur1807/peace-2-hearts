@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { getPricingForPublicDisplay } from '@/utils/pricing/pricingService';
+import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing/fetchPricing';
 
 export function usePricingState() {
   const [pricing, setPricing] = useState<Map<string, number>>(new Map());
@@ -32,14 +32,20 @@ export function usePricingState() {
           'pre-marriage-clarity'
         ];
         
-        // Get all ids we need for pricing
-        const allIds = [...mentalHealthIds, ...legalIds, ...packageIds];
+        const [mentalHealthPricing, legalPricing, packagePricing] = await Promise.all([
+          fetchServicePricing(mentalHealthIds),
+          fetchServicePricing(legalIds),
+          fetchPackagePricing(packageIds)
+        ]);
         
-        // Fetch pricing data for all services at once
-        const pricingData = await getPricingForPublicDisplay(allIds);
+        const combinedPricing = new Map<string, number>();
         
-        console.log("Initialized pricing data:", Object.fromEntries(pricingData));
-        setPricing(pricingData);
+        mentalHealthPricing.forEach((price, id) => combinedPricing.set(id, price));
+        legalPricing.forEach((price, id) => combinedPricing.set(id, price));
+        packagePricing.forEach((price, id) => combinedPricing.set(id, price));
+        
+        console.log("Initialized pricing data:", Object.fromEntries(combinedPricing));
+        setPricing(combinedPricing);
       } catch (error) {
         console.error("Error initializing pricing data:", error);
       }

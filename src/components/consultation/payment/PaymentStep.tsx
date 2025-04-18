@@ -1,70 +1,68 @@
 
 import React, { useState } from 'react';
 import OrderSummary from './OrderSummary';
-import PaymentMethods from './PaymentMethods';
-import PaymentActions from './PaymentActions';
 import PaymentTerms from './PaymentTerms';
+import PaymentActions from './PaymentActions';
 import PaymentLoader from './PaymentLoader';
-import { usePaymentValidation } from '@/hooks/consultation/usePaymentValidation';
 
-interface PaymentStepProps {
+type PaymentStepProps = {
   consultationType: string;
-  onPrevStep: () => void;
   onNextStep: () => void;
+  onPrevStep: () => void;
   onSubmit: (e: React.FormEvent) => void;
   isProcessing: boolean;
   totalPrice: number;
-  discountAmount?: number;
-  originalPrice?: number;
-  appliedDiscountCode?: string | null;
-}
+};
 
-const PaymentStep: React.FC<PaymentStepProps> = ({ 
-  consultationType, 
-  onPrevStep, 
+const PaymentStep: React.FC<PaymentStepProps> = ({
+  consultationType,
   onNextStep,
+  onPrevStep,
   onSubmit,
   isProcessing,
-  totalPrice,
-  discountAmount = 0,
-  originalPrice,
-  appliedDiscountCode
+  totalPrice
 }) => {
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const { razorpayLoaded } = usePaymentValidation();
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  
+
+  // Log price information for debugging
+  console.log("PaymentStep received totalPrice:", totalPrice);
+  console.log("PaymentStep consultation type:", consultationType);
+
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-6">Complete Your Payment</h2>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-lora font-semibold mb-6">Payment Information</h2>
+      
+      <PaymentLoader 
+        onRazorpayLoad={setRazorpayLoaded} 
+        onLoadError={setLoadError} 
+        loadError={loadError}
+      />
       
       <OrderSummary 
         consultationType={consultationType} 
         totalPrice={totalPrice}
-        discountAmount={discountAmount}
-        originalPrice={originalPrice}
-        appliedDiscountCode={appliedDiscountCode}
       />
       
-      {!razorpayLoaded && (
-        <PaymentLoader 
-          onRazorpayLoad={(loaded) => {}}
-          onLoadError={setLoadError}
-          loadError={loadError}
-        />
-      )}
+      <PaymentTerms 
+        acceptTerms={acceptTerms}
+        setAcceptTerms={setAcceptTerms}
+      />
       
-      <PaymentMethods />
-      
-      <PaymentTerms acceptTerms={acceptTerms} setAcceptTerms={setAcceptTerms} />
-      
-      <PaymentActions
+      <PaymentActions 
         onPrevStep={onPrevStep}
         isProcessing={isProcessing}
         acceptTerms={acceptTerms}
         razorpayLoaded={razorpayLoaded}
         totalPrice={totalPrice}
       />
+      
+      {!razorpayLoaded && !loadError && (
+        <div className="text-center text-amber-600 text-sm mt-2">
+          Payment gateway is loading. Please wait...
+        </div>
+      )}
     </div>
   );
 };

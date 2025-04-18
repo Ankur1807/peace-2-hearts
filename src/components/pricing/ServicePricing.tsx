@@ -1,54 +1,47 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, RefreshCw } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
-import PricingItemsList from './PricingItemsList';
-import AddPricingItemForm from './AddPricingItemForm';
-import { usePricingItems } from '@/hooks/usePricingItems';
-import { NewPricingItemFormValues } from './AddPricingItemForm';
+import ServiceList from './ServiceList';
+import AddServiceForm from './AddServiceForm';
+import { usePricingServices } from '@/hooks/usePricingServices';
+import { NewServiceFormValues } from './AddServiceForm';
 
 const ServicePricing = () => {
-  const [openNewItemDialog, setOpenNewItemDialog] = useState(false);
+  const [openNewServiceDialog, setOpenNewServiceDialog] = useState(false);
   const {
-    items,
+    services,
     loading,
-    updating,
     editMode,
     editedPrice,
     setEditedPrice,
-    fetchItems,
+    fetchServices,
     handleEdit,
     handleCancel,
     handleSave,
-    toggleItemStatus,
-    addNewItem,
-    deleteItem
-  } = usePricingItems('service');
+    toggleServiceStatus,
+    addNewService,
+    deleteService
+  } = usePricingServices();
 
   useEffect(() => {
-    console.log('ServicePricing: Initializing');
-    fetchItems(true); // Force refresh on initial load
+    fetchServices();
   }, []);
 
-  const handleRefreshClick = () => {
-    fetchItems(true); // Force refresh when button is clicked
+  const onSubmitNewService = async (data: NewServiceFormValues) => {
+    const success = await addNewService(data);
+    if (success) {
+      setOpenNewServiceDialog(false);
+      fetchServices();
+    }
   };
 
-  const onSubmitNewItem = async (data: NewPricingItemFormValues) => {
-    // Ensure all required fields are present and match the NewPricingItemData interface
-    const itemData = {
-      name: data.name,
-      item_id: data.item_id,
-      price: data.price,
-      category: data.category,
-      type: 'service' as const // Force type to be service
-    };
-    
-    const success = await addNewItem(itemData);
+  const handleDeleteService = async (id: string) => {
+    const success = await deleteService(id);
     if (success) {
-      setOpenNewItemDialog(false);
+      fetchServices();
     }
   };
 
@@ -57,29 +50,28 @@ const ServicePricing = () => {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Service Pricing</CardTitle>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={handleRefreshClick} disabled={loading || updating}>
-            <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
+          <Button variant="outline" onClick={() => fetchServices()} disabled={loading}>
+            <RefreshCw className="h-4 w-4 mr-1" /> Refresh
           </Button>
-          <Dialog open={openNewItemDialog} onOpenChange={setOpenNewItemDialog}>
+          <Dialog open={openNewServiceDialog} onOpenChange={setOpenNewServiceDialog}>
             <DialogTrigger asChild>
-              <Button disabled={updating}>
+              <Button>
                 <Plus className="h-4 w-4 mr-1" /> Add Service
               </Button>
             </DialogTrigger>
-            <AddPricingItemForm onSubmit={onSubmitNewItem} />
+            <AddServiceForm onSubmit={onSubmitNewService} />
           </Dialog>
         </div>
       </CardHeader>
       <CardContent>
-        <PricingItemsList
-          items={items}
+        <ServiceList
+          services={services}
           loading={loading}
-          updating={updating}
           onEdit={handleEdit}
           onSave={handleSave}
           onCancel={handleCancel}
-          onToggleStatus={toggleItemStatus}
-          onDelete={deleteItem}
+          onToggleStatus={toggleServiceStatus}
+          onDelete={handleDeleteService}
           editMode={editMode}
           editedPrice={editedPrice}
           setEditedPrice={setEditedPrice}

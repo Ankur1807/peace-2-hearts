@@ -9,7 +9,6 @@ interface ConsultationBookingFormProps {
 }
 
 const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ bookingState }) => {
-  // Extract all state from bookingState
   const {
     date, 
     setDate,
@@ -25,23 +24,13 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     bookingError,
     personalDetails,
     handlePersonalDetailsChange,
+    handleConfirmBooking,
     pricing,
     totalPrice,
     showPaymentStep,
     proceedToPayment,
     setShowPaymentStep,
-    processPayment,
-    
-    // Extract discount-related properties
-    discountCode,
-    setDiscountCode,
-    validateAndApplyDiscount,
-    removeDiscount,
-    isValidatingDiscount,
-    appliedDiscountCode,
-    discountAmount,
-    originalPrice,
-    finalizeDiscount
+    processPayment
   } = bookingState;
 
   // Log pricing information for debugging
@@ -110,7 +99,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     const subServiceParam = urlParams.get('subservice');
 
     // Only run this effect once when component mounts or when serviceCategory changes,
-    // but not on every render when selectedServices.length changes
+    // but not on every render when selectedServices changes
     if (subServiceParam && selectedServices.length === 0) {
       // If we have a URL parameter but no selected services, select it
       console.log("Setting service from URL parameter:", subServiceParam);
@@ -122,22 +111,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
   // Handle payment form submission
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Finalize discount before processing payment
-    if (finalizeDiscount) {
-      finalizeDiscount().then(() => {
-        processPayment();
-      });
-    } else {
-      processPayment();
-    }
-  };
-
-  // Validate discount with selected services
-  const handleApplyDiscount = async () => {
-    if (validateAndApplyDiscount) {
-      return await validateAndApplyDiscount(selectedServices);
-    }
-    return false;
+    processPayment();
   };
 
   // Format selected services for display
@@ -159,14 +133,11 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
           <form onSubmit={handlePaymentSubmit} className="space-y-6">
             <PaymentStep 
               consultationType={getFormattedConsultationType()}
-              onNextStep={() => {}}
+              onNextStep={processPayment}
               onPrevStep={() => setShowPaymentStep(false)}
               onSubmit={handlePaymentSubmit}
               isProcessing={isProcessing}
               totalPrice={totalPrice}
-              discountAmount={discountAmount}
-              originalPrice={originalPrice}
-              appliedDiscountCode={appliedDiscountCode}
             />
           </form>
         </Card>
@@ -205,15 +176,6 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
             pricing={pricing}
             totalPrice={totalPrice}
             onSubmit={proceedToPayment}
-            // Pass discount props
-            discountCode={discountCode}
-            setDiscountCode={setDiscountCode}
-            validateAndApplyDiscount={handleApplyDiscount}
-            removeDiscount={removeDiscount}
-            isValidatingDiscount={isValidatingDiscount}
-            appliedDiscountCode={appliedDiscountCode}
-            discountAmount={discountAmount}
-            originalPrice={originalPrice}
           />
         </Card>
       )}

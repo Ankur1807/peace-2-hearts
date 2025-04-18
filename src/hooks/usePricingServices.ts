@@ -15,29 +15,23 @@ import { addInitialServices } from '@/utils/pricing/serviceInitializer';
 export const usePricingServices = () => {
   const [services, setServices] = useState<ServicePrice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
   const [editMode, setEditMode] = useState<string | null>(null);
   const [editedPrice, setEditedPrice] = useState<string>('');
   const { toast } = useToast();
 
-  const fetchServices = async (forceRefresh: boolean = false) => {
+  const fetchServices = async () => {
     try {
       setLoading(true);
-      console.log('Fetching all services, forceRefresh:', forceRefresh);
-      
       let data: ServicePrice[];
       
       try {
         data = await fetchAllServices();
         
         if (data.length === 0) {
-          console.log('No services found, initializing...');
           await addInitialServices();
           data = await fetchAllServices();
         }
         
-        console.log('Services fetched successfully:', data.length);
-        console.log('Sample prices:', data.map(s => `${s.service_name}: ${s.price}`).join(', '));
         setServices(data);
       } catch (error: any) {
         if (error.code === 'PGRST116') {
@@ -74,48 +68,31 @@ export const usePricingServices = () => {
 
   const handleSave = async (id: string) => {
     try {
-      // Set updating state to true
-      setUpdating(true);
-      
-      // Validate the price
-      if (!editedPrice.trim() || isNaN(Number(editedPrice)) || Number(editedPrice) < 0) {
+      if (!editedPrice.trim() || isNaN(Number(editedPrice)) || Number(editedPrice) <= 0) {
         toast({
           title: 'Invalid Price',
-          description: 'Please enter a valid positive price.',
+          description: 'Please enter a valid price.',
           variant: 'destructive',
         });
-        setUpdating(false);
         return;
       }
 
-      const newPrice = Number(editedPrice);
-      console.log(`Saving price update for service ID ${id}: ${newPrice}`);
-      
-      // Update the price in Supabase
-      const updatedService = await updateServicePrice(id, newPrice);
-      console.log('Update response:', updatedService);
+      await updateServicePrice(id, Number(editedPrice));
 
-      // Reset edit mode before showing toast and refreshing
-      setEditMode(null);
-      
       toast({
         title: 'Price Updated',
         description: 'Service price has been successfully updated.',
       });
-      
-      // Refresh the services list to get the updated data
-      await fetchServices(true);
+
+      setEditMode(null);
+      fetchServices();
     } catch (error: any) {
       handleOperationError(error, 'update price');
-    } finally {
-      setUpdating(false);
     }
   };
 
   const toggleServiceStatus = async (id: string, currentStatus: boolean) => {
     try {
-      setUpdating(true);
-      console.log(`Toggling service status for ID ${id} from ${currentStatus} to ${!currentStatus}`);
       await toggleServiceActive(id, currentStatus);
       
       toast({
@@ -123,18 +100,14 @@ export const usePricingServices = () => {
         description: `Service ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
       });
 
-      await fetchServices(true); // Refresh services after update
+      fetchServices();
     } catch (error: any) {
       handleOperationError(error, 'update status');
-    } finally {
-      setUpdating(false);
     }
   };
 
   const addNewService = async (data: NewServiceFormValues) => {
     try {
-      setUpdating(true);
-      console.log('Adding new service:', data);
       await createService(data);
       
       toast({
@@ -142,20 +115,15 @@ export const usePricingServices = () => {
         description: 'New service has been successfully added.',
       });
 
-      await fetchServices(true); // Refresh services after adding
       return true;
     } catch (error: any) {
       handleOperationError(error, 'add service');
       return false;
-    } finally {
-      setUpdating(false);
     }
   };
 
   const deleteService = async (id: string) => {
     try {
-      setUpdating(true);
-      console.log(`Deleting service with ID ${id}`);
       await removeService(id);
       
       toast({
@@ -163,13 +131,10 @@ export const usePricingServices = () => {
         description: 'Service has been successfully deleted.',
       });
 
-      await fetchServices(true); // Refresh services after deletion
       return true;
     } catch (error: any) {
       handleOperationError(error, 'delete service');
       return false;
-    } finally {
-      setUpdating(false);
     }
   };
 
@@ -194,7 +159,6 @@ export const usePricingServices = () => {
   return {
     services,
     loading,
-    updating,
     editMode,
     editedPrice,
     setEditedPrice,
