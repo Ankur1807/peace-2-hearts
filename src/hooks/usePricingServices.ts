@@ -15,6 +15,7 @@ import { addInitialServices } from '@/utils/pricing/serviceInitializer';
 export const usePricingServices = () => {
   const [services, setServices] = useState<ServicePrice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [editMode, setEditMode] = useState<string | null>(null);
   const [editedPrice, setEditedPrice] = useState<string>('');
   const { toast } = useToast();
@@ -25,13 +26,16 @@ export const usePricingServices = () => {
       let data: ServicePrice[];
       
       try {
+        console.log('Fetching all services');
         data = await fetchAllServices();
         
         if (data.length === 0) {
+          console.log('No services found, initializing...');
           await addInitialServices();
           data = await fetchAllServices();
         }
         
+        console.log('Services fetched successfully:', data.length);
         setServices(data);
       } catch (error: any) {
         if (error.code === 'PGRST116') {
@@ -68,6 +72,8 @@ export const usePricingServices = () => {
 
   const handleSave = async (id: string) => {
     try {
+      setUpdating(true);
+      
       if (!editedPrice.trim() || isNaN(Number(editedPrice)) || Number(editedPrice) <= 0) {
         toast({
           title: 'Invalid Price',
@@ -77,6 +83,7 @@ export const usePricingServices = () => {
         return;
       }
 
+      console.log(`Saving price update for service ID ${id}: ${editedPrice}`);
       await updateServicePrice(id, Number(editedPrice));
 
       toast({
@@ -85,14 +92,18 @@ export const usePricingServices = () => {
       });
 
       setEditMode(null);
-      fetchServices();
+      await fetchServices(); // Refresh services after update
     } catch (error: any) {
       handleOperationError(error, 'update price');
+    } finally {
+      setUpdating(false);
     }
   };
 
   const toggleServiceStatus = async (id: string, currentStatus: boolean) => {
     try {
+      setUpdating(true);
+      console.log(`Toggling service status for ID ${id} from ${currentStatus} to ${!currentStatus}`);
       await toggleServiceActive(id, currentStatus);
       
       toast({
@@ -100,14 +111,18 @@ export const usePricingServices = () => {
         description: `Service ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
       });
 
-      fetchServices();
+      await fetchServices(); // Refresh services after update
     } catch (error: any) {
       handleOperationError(error, 'update status');
+    } finally {
+      setUpdating(false);
     }
   };
 
   const addNewService = async (data: NewServiceFormValues) => {
     try {
+      setUpdating(true);
+      console.log('Adding new service:', data);
       await createService(data);
       
       toast({
@@ -119,11 +134,15 @@ export const usePricingServices = () => {
     } catch (error: any) {
       handleOperationError(error, 'add service');
       return false;
+    } finally {
+      setUpdating(false);
     }
   };
 
   const deleteService = async (id: string) => {
     try {
+      setUpdating(true);
+      console.log(`Deleting service with ID ${id}`);
       await removeService(id);
       
       toast({
@@ -135,6 +154,8 @@ export const usePricingServices = () => {
     } catch (error: any) {
       handleOperationError(error, 'delete service');
       return false;
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -159,6 +180,7 @@ export const usePricingServices = () => {
   return {
     services,
     loading,
+    updating,
     editMode,
     editedPrice,
     setEditedPrice,

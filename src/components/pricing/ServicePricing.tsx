@@ -14,6 +14,7 @@ const ServicePricing = () => {
   const {
     services,
     loading,
+    updating,
     editMode,
     editedPrice,
     setEditedPrice,
@@ -27,6 +28,7 @@ const ServicePricing = () => {
   } = usePricingServices();
 
   useEffect(() => {
+    console.log('ServicePricing: Initializing');
     fetchServices();
   }, []);
 
@@ -50,12 +52,12 @@ const ServicePricing = () => {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Service Pricing</CardTitle>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => fetchServices()} disabled={loading}>
-            <RefreshCw className="h-4 w-4 mr-1" /> Refresh
+          <Button variant="outline" onClick={() => fetchServices()} disabled={loading || updating}>
+            <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
           <Dialog open={openNewServiceDialog} onOpenChange={setOpenNewServiceDialog}>
             <DialogTrigger asChild>
-              <Button>
+              <Button disabled={updating}>
                 <Plus className="h-4 w-4 mr-1" /> Add Service
               </Button>
             </DialogTrigger>
@@ -67,6 +69,7 @@ const ServicePricing = () => {
         <ServiceList
           services={services}
           loading={loading}
+          updating={updating}
           onEdit={handleEdit}
           onSave={handleSave}
           onCancel={handleCancel}

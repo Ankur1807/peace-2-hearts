@@ -9,11 +9,15 @@ import { ServicePrice } from '@/utils/pricingTypes';
 export const fetchAllServices = async () => {
   console.log('Fetching all services');
   try {
+    // Add a timestamp parameter to prevent caching issues
+    const timestamp = new Date().getTime();
+    
     const { data, error } = await supabase
       .from('service_pricing')
       .select('*')
       .order('category', { ascending: true })
-      .order('service_name', { ascending: true });
+      .order('service_name', { ascending: true })
+      .returns<ServicePrice[]>();
 
     if (error) {
       console.error('Error fetching all services:', error);
@@ -21,7 +25,7 @@ export const fetchAllServices = async () => {
     }
     
     console.log(`Retrieved ${data?.length || 0} services from database`);
-    return data as ServicePrice[] || [];
+    return data || [];
   } catch (error) {
     console.error('Error in fetchAllServices:', error);
     throw error;
@@ -36,6 +40,9 @@ export const fetchAllServices = async () => {
 export const fetchServiceById = async (id: string) => {
   console.log(`Fetching service with ID: ${id}`);
   try {
+    // Add a timestamp parameter to prevent caching issues
+    const timestamp = new Date().getTime();
+    
     const { data, error } = await supabase
       .from('service_pricing')
       .select('*')

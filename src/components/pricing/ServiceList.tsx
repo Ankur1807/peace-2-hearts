@@ -7,6 +7,7 @@ import ServiceEditRow from './ServiceEditRow';
 interface ServiceListProps {
   services: ServicePrice[];
   loading: boolean;
+  updating: boolean;
   onEdit: (id: string, currentPrice: number) => void;
   onSave: (id: string) => void;
   onCancel: () => void;
@@ -20,6 +21,7 @@ interface ServiceListProps {
 const ServiceList = ({
   services,
   loading,
+  updating,
   onEdit,
   onSave,
   onCancel,
@@ -68,6 +70,7 @@ const ServiceList = ({
                 onCancel={onCancel}
                 onToggleStatus={onToggleStatus}
                 onDelete={onDelete}
+                disabled={updating && editMode !== service.id}
               />
             ))
           )}

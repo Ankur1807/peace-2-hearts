@@ -18,6 +18,7 @@ interface ServiceEditRowProps {
   onCancel: () => void;
   onToggleStatus: (id: string, currentStatus: boolean) => void;
   onDelete: (id: string) => void;
+  disabled?: boolean;
 }
 
 const ServiceEditRow = ({
@@ -30,7 +31,10 @@ const ServiceEditRow = ({
   onCancel,
   onToggleStatus,
   onDelete,
+  disabled = false,
 }: ServiceEditRowProps) => {
+  const isEditing = editMode === service.id;
+  
   return (
     <TableRow>
       <TableCell className="font-medium capitalize">
@@ -39,13 +43,14 @@ const ServiceEditRow = ({
       <TableCell>{service.service_name}</TableCell>
       <TableCell>{service.service_id}</TableCell>
       <TableCell>
-        {editMode === service.id ? (
+        {isEditing ? (
           <Input
             type="number"
             value={editedPrice}
             onChange={(e) => setEditedPrice(e.target.value)}
             className="w-24"
             min="0"
+            autoFocus
           />
         ) : (
           `₹${service.price.toLocaleString()}`
@@ -56,6 +61,7 @@ const ServiceEditRow = ({
           <Switch
             checked={service.is_active}
             onCheckedChange={() => onToggleStatus(service.id, service.is_active)}
+            disabled={disabled || isEditing}
           />
           <span className={service.is_active ? 'text-green-600' : 'text-red-600'}>
             {service.is_active ? 'Active' : 'Inactive'}
@@ -64,7 +70,7 @@ const ServiceEditRow = ({
       </TableCell>
       <TableCell>
         <div className="flex space-x-2">
-          {editMode === service.id ? (
+          {isEditing ? (
             <>
               <Button
                 size="sm"
@@ -87,6 +93,7 @@ const ServiceEditRow = ({
                 size="sm"
                 variant="outline"
                 onClick={() => onEdit(service.id, service.price)}
+                disabled={disabled}
               >
                 <Edit className="h-4 w-4 mr-1" /> Edit
               </Button>
@@ -96,6 +103,7 @@ const ServiceEditRow = ({
                     size="sm"
                     variant="outline"
                     className="text-red-500 hover:bg-red-50 hover:text-red-600"
+                    disabled={disabled}
                   >
                     <Trash2 className="h-4 w-4 mr-1" /> Delete
                   </Button>
