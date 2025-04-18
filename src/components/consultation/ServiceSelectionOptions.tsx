@@ -111,27 +111,29 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {servicesToDisplay.map(service => {
           const isChecked = selectedServices.includes(service.id);
+          // Get price from the pricing map if available
           const price = pricing?.get(service.id);
           const priceDisplay = price ? ` - ₹${price.toLocaleString('en-IN')}` : '';
           
           return (
-            <div key={service.id} className="flex items-center space-x-2">
+            <div key={service.id} className="flex items-start space-x-2">
               <Checkbox
                 id={service.id}
                 checked={isChecked}
                 onCheckedChange={(checked) => {
-                  if (checked === true || checked === false) {
-                    handleServiceSelection(service.id, checked);
-                  }
+                  handleServiceSelection(service.id, typeof checked === 'boolean' ? checked : false);
                 }}
+                className="mt-1"
               />
-              <label
-                htmlFor={service.id}
-                className="text-sm font-medium leading-none cursor-pointer"
-                onClick={() => handleServiceSelection(service.id, !isChecked)}
-              >
-                {service.label}{priceDisplay}
-              </label>
+              <div className="grid gap-1">
+                <label
+                  htmlFor={service.id}
+                  className="text-sm font-medium leading-none cursor-pointer"
+                  onClick={() => handleServiceSelection(service.id, !isChecked)}
+                >
+                  {service.label}{priceDisplay}
+                </label>
+              </div>
             </div>
           );
         })}

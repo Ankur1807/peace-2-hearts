@@ -99,75 +99,116 @@ export function useConsultationState() {
     setState(prev => ({ ...prev, personalDetails: details }));
   }, []);
 
-  // Fetch pricing data when services change
+  // Load initial pricing data for all services
   useEffect(() => {
-    const loadPricing = async () => {
+    const loadInitialPricing = async () => {
+      try {
+        // Load pricing for common services so they're available before selection
+        const mentalHealthIds = [
+          'mental-health-counselling', 
+          'family-therapy', 
+          'premarital-counselling-individual',
+          'premarital-counselling-couple',
+          'couples-counselling'
+        ];
+        
+        const legalIds = [
+          'pre-marriage-legal',
+          'mediation',
+          'divorce',
+          'custody',
+          'maintenance',
+          'general-legal'
+        ];
+        
+        const packageIds = [
+          'divorce-prevention',
+          'pre-marriage-clarity'
+        ];
+        
+        // Fetch all types of pricing
+        const [mentalHealthPricing, legalPricing, packagePricing] = await Promise.all([
+          fetchServicePricing(mentalHealthIds),
+          fetchServicePricing(legalIds),
+          fetchPackagePricing(packageIds)
+        ]);
+        
+        // Combine all pricing into a single map
+        const combinedPricing = new Map<string, number>();
+        
+        // Add mental health service pricing
+        mentalHealthPricing.forEach((price, id) => {
+          combinedPricing.set(id, price);
+        });
+        
+        // Add legal service pricing
+        legalPricing.forEach((price, id) => {
+          combinedPricing.set(id, price);
+        });
+        
+        // Add package pricing
+        packagePricing.forEach((price, id) => {
+          combinedPricing.set(id, price);
+        });
+        
+        console.log("Initialized pricing data:", Object.fromEntries(combinedPricing));
+        
+        // Update state with the combined pricing
+        setState(prev => ({
+          ...prev,
+          pricing: combinedPricing
+        }));
+      } catch (error) {
+        console.error("Error initializing pricing data:", error);
+      }
+    };
+    
+    // Load initial pricing when component mounts
+    loadInitialPricing();
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Update total price when selected services or pricing changes
+  useEffect(() => {
+    const updateTotalPrice = () => {
       if (state.selectedServices.length === 0) {
-        setState(prev => ({ ...prev, totalPrice: 0, pricing: new Map() }));
+        setState(prev => ({ ...prev, totalPrice: 0 }));
         return;
       }
       
-      try {
-        let pricingMap: Map<string, number>;
-        
-        if (state.serviceCategory === 'holistic') {
-          // Check if it matches a pre-defined package
-          const packageName = getPackageName(state.selectedServices);
-          if (packageName === "Divorce Prevention Package") {
-            console.log('Fetching Divorce Prevention Package pricing');
-            pricingMap = await fetchPackagePricing(['divorce-prevention']);
-          } else if (packageName === "Pre-Marriage Clarity Package") {
-            console.log('Fetching Pre-Marriage Clarity Package pricing');
-            pricingMap = await fetchPackagePricing(['pre-marriage-clarity']);
-          } else {
-            // If not a pre-defined package, get individual service prices
-            console.log('Fetching individual service prices for holistic services');
-            pricingMap = await fetchServicePricing(state.selectedServices);
-          }
-        } else {
-          // For regular services, get individual prices
-          console.log('Fetching individual service prices for category:', state.serviceCategory);
-          pricingMap = await fetchServicePricing(state.selectedServices);
-        }
-        
-        console.log('Retrieved pricing map:', Object.fromEntries(pricingMap));
-        
-        // Calculate total price
-        let total = 0;
-        if (state.serviceCategory === 'holistic') {
-          const packageName = getPackageName(state.selectedServices);
-          if (packageName === "Divorce Prevention Package") {
-            total = pricingMap.get('divorce-prevention') || 0;
-            console.log('Using Divorce Prevention Package price:', total);
-          } else if (packageName === "Pre-Marriage Clarity Package") {
-            total = pricingMap.get('pre-marriage-clarity') || 0;
-            console.log('Using Pre-Marriage Clarity Package price:', total);
-          } else {
-            // Sum individual services
-            state.selectedServices.forEach(serviceId => {
-              const price = pricingMap.get(serviceId) || 0;
-              total += price;
-              console.log(`Adding ${price} for ${serviceId} to total`);
-            });
-          }
+      let total = 0;
+      
+      if (state.serviceCategory === 'holistic') {
+        // Check if it matches a pre-defined package
+        const packageName = getPackageName(state.selectedServices);
+        if (packageName === "Divorce Prevention Package") {
+          total = state.pricing.get('divorce-prevention') || 0;
+          console.log('Using Divorce Prevention Package price:', total);
+        } else if (packageName === "Pre-Marriage Clarity Package") {
+          total = state.pricing.get('pre-marriage-clarity') || 0;
+          console.log('Using Pre-Marriage Clarity Package price:', total);
         } else {
           // Sum individual services
           state.selectedServices.forEach(serviceId => {
-            const price = pricingMap.get(serviceId) || 0;
+            const price = state.pricing.get(serviceId) || 0;
             total += price;
             console.log(`Adding ${price} for ${serviceId} to total`);
           });
         }
-        
-        console.log('Final calculated total price:', total);
-        setState(prev => ({ ...prev, pricing: pricingMap, totalPrice: total }));
-      } catch (error) {
-        console.error("Error fetching pricing:", error);
+      } else {
+        // Sum individual services
+        state.selectedServices.forEach(serviceId => {
+          const price = state.pricing.get(serviceId) || 0;
+          total += price;
+          console.log(`Adding ${price} for ${serviceId} to total`);
+        });
       }
+      
+      console.log('Final calculated total price:', total);
+      setState(prev => ({ ...prev, totalPrice: total }));
     };
     
-    loadPricing();
-  }, [state.selectedServices, state.serviceCategory]);
+    updateTotalPrice();
+  }, [state.selectedServices, state.serviceCategory, state.pricing]);
 
   return {
     state,

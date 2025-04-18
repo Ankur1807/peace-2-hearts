@@ -53,7 +53,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
       id: 'pre-marriage-clarity', 
       label: 'Pre-Marriage Clarity Package', 
       description: '3 sessions (1 legal + 2 mental health)',
-      services: ['pre-marriage-legal', 'premarital-counselling', 'mental-health-counselling'] 
+      services: ['pre-marriage-legal', 'premarital-counselling-individual', 'mental-health-counselling'] 
     }
   ];
 
@@ -100,10 +100,10 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   }, [serviceCategory, setSelectedServices, selectedServices]);
 
-  // Add debugging log for selected services
   useEffect(() => {
     console.log("Current selected services in ConsultationBookingForm:", selectedServices);
-  }, [selectedServices]);
+    console.log("Current pricing data:", Object.fromEntries(pricing || new Map()));
+  }, [selectedServices, pricing]);
 
   // Handle payment form submission
   const handlePaymentSubmit = (e: React.FormEvent) => {
