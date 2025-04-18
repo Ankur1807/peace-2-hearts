@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback } from 'react';
 import { getPackageName } from './consultationHelpers';
 import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing/fetchPricing';

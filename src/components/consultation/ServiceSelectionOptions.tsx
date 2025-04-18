@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup } from '@/components/ui/radio-group';
@@ -32,7 +31,6 @@ const mentalHealthServices: ServiceOption[] = [
   { id: 'premarital-counselling-couple', label: 'Premarital Counselling - Couple', description: 'Build a foundation for marriage together through guided discussions.' },
   { id: 'couples-counselling', label: 'Couples Counselling', description: 'Professional guidance to strengthen communication and mutual understanding.' },
   { id: 'sexual-health-counselling-individual', label: 'Sexual Health Counselling - Individual', description: 'Personal support for addressing intimacy concerns.' },
-  { id: 'sexual-health-counselling-couple', label: 'Sexual Health Counselling - Couple', description: 'Specialized support for enhancing relationship satisfaction together.' },
   { id: 'test-service', label: 'Test Service (₹11)', description: 'For testing payment gateway functionality.' }
 ];
 
