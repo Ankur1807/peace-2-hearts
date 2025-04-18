@@ -1,9 +1,13 @@
 
 import React from 'react';
-import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { getTimeSlotLabel } from '@/utils/consultationLabels';
+import { Calendar } from '@/components/ui/calendar';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface DateTimePickerProps {
   date: Date | undefined;
@@ -11,8 +15,8 @@ interface DateTimePickerProps {
   timeSlot: string;
   setTimeSlot: (timeSlot: string) => void;
   serviceCategory: string;
-  availableTimeSlots?: string[];
-  minDate?: Date;
+  availableTimeSlots: string[];
+  minDate: Date;
 }
 
 const DateTimePicker: React.FC<DateTimePickerProps> = ({
@@ -24,66 +28,69 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   availableTimeSlots,
   minDate
 }) => {
-  // Use provided time slots or default ones
-  const timeSlots = availableTimeSlots || [
-    '9-am', '10-am', '11-am', '12-pm', '1-pm', '2-pm', 
-    '3-pm', '4-pm', '5-pm', '6-pm', '7-pm', '8-pm'
-  ];
-
+  // Format time slot for display
+  const formatTimeSlot = (slot: string) => {
+    const [hour, period] = slot.split('-');
+    return `${hour}:00 ${period.toUpperCase()}`;
+  };
+  
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="date" className="block text-sm font-medium text-gray-700">
-          Select Date
-        </Label>
-        <div className="border rounded-lg overflow-hidden shadow-sm">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={setDate}
-            className="bg-white p-3 rounded-lg"
-            disabled={{ before: minDate || new Date() }}
-          />
-        </div>
+        <Label htmlFor="date" className="text-lg font-medium">Choose a Date</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              id="date"
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !date && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date ? format(date, "PPP") : <span>Select your preferred date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={setDate}
+              disabled={(date) => {
+                // Disable dates in the past or today
+                return date < minDate;
+              }}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
       </div>
-      
-      {date && (
-        <div className="space-y-2">
-          <Label htmlFor="time-slot" className="block text-sm font-medium text-gray-700">
-            Select Time Slot
-          </Label>
-          <ToggleGroup 
-            type="single" 
-            variant="outline" 
-            value={timeSlot} 
-            onValueChange={(value) => value && setTimeSlot(value)}
-            className="flex flex-wrap gap-2"
-          >
-            {timeSlots.map((slot) => (
-              <ToggleGroupItem 
-                key={slot} 
-                value={slot}
-                aria-label={`Select ${getTimeSlotLabel(slot)}`}
-                className="rounded-md border border-gray-200 px-3 py-2 text-sm font-medium transition-colors data-[state=on]:bg-peacefulBlue data-[state=on]:text-white"
-              >
-                {getTimeSlotLabel(slot)}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
-      )}
 
-      {!date && (
-        <p className="text-sm text-muted-foreground">
-          Please select a date to see available time slots
-        </p>
-      )}
-      
-      {date && !timeSlot && (
-        <p className="text-sm text-muted-foreground">
-          Please select a time slot
-        </p>
-      )}
+      <div className="space-y-2">
+        <Label className="text-lg font-medium">Choose a Time</Label>
+        <RadioGroup 
+          value={timeSlot} 
+          onValueChange={setTimeSlot} 
+          className="grid grid-cols-2 md:grid-cols-3 gap-2"
+        >
+          {availableTimeSlots.map((slot) => (
+            <div key={slot} className="flex items-center space-x-2">
+              <RadioGroupItem value={slot} id={`time-${slot}`} />
+              <Label
+                htmlFor={`time-${slot}`}
+                className="cursor-pointer"
+              >
+                {formatTimeSlot(slot)}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+        
+        {!timeSlot && (
+          <p className="text-sm text-red-500">Please select a time slot</p>
+        )}
+      </div>
     </div>
   );
 };

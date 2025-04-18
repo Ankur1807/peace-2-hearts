@@ -88,23 +88,21 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   }, [holisticPackages, setSelectedServices]);
 
-  // Only reset services when the category changes AND the selectedServices array is not empty
-  // This prevents clearing pre-selected services when the component first mounts
+  // Fixed the useEffect that was causing infinite updates
   useEffect(() => {
     // Get the current URL params to check if we came from a specific service page
     const urlParams = new URLSearchParams(window.location.search);
     const subServiceParam = urlParams.get('subservice');
 
-    // Only reset if changing categories AND we don't have a specific service in the URL
-    if (!subServiceParam && selectedServices.length > 0) {
-      console.log("Resetting services due to category change (no URL param)");
-      setSelectedServices([]);
-    } else if (subServiceParam && selectedServices.length === 0) {
-      // If we have a URL parameter but no selected services, select it again
+    // Only run this effect once when component mounts or when serviceCategory changes,
+    // but not on every render when selectedServices changes
+    if (subServiceParam && selectedServices.length === 0) {
+      // If we have a URL parameter but no selected services, select it
       console.log("Setting service from URL parameter:", subServiceParam);
       setSelectedServices([subServiceParam]);
     }
-  }, [serviceCategory, setSelectedServices, selectedServices]);
+    // Removed selectedServices from dependency array to prevent infinite loop
+  }, [serviceCategory, setSelectedServices]); 
 
   // Handle payment form submission
   const handlePaymentSubmit = (e: React.FormEvent) => {

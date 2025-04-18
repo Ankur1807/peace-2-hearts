@@ -51,10 +51,10 @@ const ServiceCheckbox: React.FC<ServiceCheckboxProps> = ({
     >
       <div className="flex items-start space-x-3">
         <Checkbox 
-          id={id} 
-          checked={isSelected}
+          id={id}
+          className="mt-1 h-5 w-5 rounded-sm border-2 border-peacefulBlue"
+          checked={isSelected} 
           onCheckedChange={handleCheckboxChange}
-          className="mt-1 h-5 w-5 rounded-sm border-2 border-peacefulBlue" 
           onClick={(e) => e.stopPropagation()}
         />
         <div className="grid gap-1.5">
