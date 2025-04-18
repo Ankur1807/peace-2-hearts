@@ -32,3 +32,21 @@ export interface PriceHistoryItem {
   changed_by: string | null;
   created_at: string;
 }
+
+export interface DiscountCode {
+  id: string;
+  code: string;
+  discount_type: string;
+  discount_value: number;
+  description: string | null;
+  applicable_services: string[] | null;
+  min_purchase_amount: number | null;
+  max_discount_amount: number | null;
+  usage_limit: number | null;
+  usage_count: number;
+  start_date: string | null;
+  expiry_date: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+

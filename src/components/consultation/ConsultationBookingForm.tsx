@@ -1,3 +1,4 @@
+
 import React, { useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
@@ -30,7 +31,18 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     showPaymentStep,
     proceedToPayment,
     setShowPaymentStep,
-    processPayment
+    processPayment,
+    
+    // Discount-related properties
+    discountCode,
+    setDiscountCode,
+    validateAndApplyDiscount,
+    removeDiscount,
+    isValidatingDiscount,
+    appliedDiscountCode,
+    discountAmount,
+    originalPrice,
+    finalizeDiscount
   } = bookingState;
 
   // Log pricing information for debugging
@@ -111,7 +123,22 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
   // Handle payment form submission
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    processPayment();
+    // Finalize discount before processing payment
+    if (finalizeDiscount) {
+      finalizeDiscount().then(() => {
+        processPayment();
+      });
+    } else {
+      processPayment();
+    }
+  };
+
+  // Validate discount with selected services
+  const handleApplyDiscount = async () => {
+    if (validateAndApplyDiscount) {
+      return await validateAndApplyDiscount(selectedServices);
+    }
+    return false;
   };
 
   // Format selected services for display
@@ -133,11 +160,14 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
           <form onSubmit={handlePaymentSubmit} className="space-y-6">
             <PaymentStep 
               consultationType={getFormattedConsultationType()}
-              onNextStep={processPayment}
+              onNextStep={handlePaymentSubmit}
               onPrevStep={() => setShowPaymentStep(false)}
               onSubmit={handlePaymentSubmit}
               isProcessing={isProcessing}
               totalPrice={totalPrice}
+              discountAmount={discountAmount}
+              originalPrice={originalPrice}
+              appliedDiscountCode={appliedDiscountCode}
             />
           </form>
         </Card>
@@ -176,6 +206,15 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
             pricing={pricing}
             totalPrice={totalPrice}
             onSubmit={proceedToPayment}
+            // Pass discount props
+            discountCode={discountCode}
+            setDiscountCode={setDiscountCode}
+            validateAndApplyDiscount={handleApplyDiscount}
+            removeDiscount={removeDiscount}
+            isValidatingDiscount={isValidatingDiscount}
+            appliedDiscountCode={appliedDiscountCode}
+            discountAmount={discountAmount}
+            originalPrice={originalPrice}
           />
         </Card>
       )}

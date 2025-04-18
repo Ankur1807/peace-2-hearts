@@ -5,6 +5,7 @@ import ServiceSection from './form/ServiceSection';
 import DateTimeSection from './form/DateTimeSection';
 import PersonalDetailsFields from './PersonalDetailsFields';
 import PricingSection from './form/PricingSection';
+import DiscountSection from './form/DiscountSection';
 import FormActions from './FormActions';
 import { isFormValid } from './form/ValidationHelper';
 import { Card } from '@/components/ui/card';
@@ -27,6 +28,16 @@ interface BookingFormProps {
   pricing: Map<string, number>;
   totalPrice: number;
   onSubmit: (e: React.FormEvent) => void;
+  
+  // Discount related props
+  discountCode?: string;
+  setDiscountCode?: (code: string) => void;
+  validateAndApplyDiscount?: () => Promise<boolean>;
+  removeDiscount?: () => void;
+  isValidatingDiscount?: boolean;
+  appliedDiscountCode?: string | null;
+  discountAmount?: number;
+  originalPrice?: number;
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
@@ -46,7 +57,17 @@ const BookingForm: React.FC<BookingFormProps> = ({
   isProcessing,
   pricing,
   totalPrice,
-  onSubmit
+  onSubmit,
+  
+  // Discount props with defaults
+  discountCode = '',
+  setDiscountCode = () => {},
+  validateAndApplyDiscount = async () => false,
+  removeDiscount = () => {},
+  isValidatingDiscount = false,
+  appliedDiscountCode = null,
+  discountAmount = 0,
+  originalPrice = totalPrice
 }) => {
   return (
     <form 
@@ -103,11 +124,28 @@ const BookingForm: React.FC<BookingFormProps> = ({
         </Card>
       </div>
       
+      {/* Price Summary Section */}
       <PricingSection
         selectedServices={selectedServices}
         pricing={pricing}
         totalPrice={totalPrice}
       />
+      
+      {/* Discount Section - New */}
+      {selectedServices.length > 0 && (
+        <DiscountSection
+          discountCode={discountCode}
+          setDiscountCode={setDiscountCode}
+          validateAndApplyDiscount={validateAndApplyDiscount}
+          removeDiscount={removeDiscount}
+          isValidatingDiscount={isValidatingDiscount}
+          appliedDiscountCode={appliedDiscountCode}
+          discountAmount={discountAmount}
+          originalPrice={originalPrice}
+          totalPrice={totalPrice}
+          selectedServices={selectedServices}
+        />
+      )}
       
       <FormActions 
         isFormValid={isFormValid(
