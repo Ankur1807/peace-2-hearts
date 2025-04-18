@@ -20,10 +20,10 @@ export const usePricingServices = () => {
   const [editedPrice, setEditedPrice] = useState<string>('');
   const { toast } = useToast();
 
-  const fetchServices = async () => {
+  const fetchServices = async (forceRefresh: boolean = false) => {
     try {
       setLoading(true);
-      console.log('Fetching all services');
+      console.log('Fetching all services, forceRefresh:', forceRefresh);
       
       let data: ServicePrice[];
       
@@ -37,6 +37,7 @@ export const usePricingServices = () => {
         }
         
         console.log('Services fetched successfully:', data.length);
+        console.log('Sample prices:', data.map(s => `${s.service_name}: ${s.price}`).join(', '));
         setServices(data);
       } catch (error: any) {
         if (error.code === 'PGRST116') {
@@ -83,26 +84,27 @@ export const usePricingServices = () => {
           description: 'Please enter a valid positive price.',
           variant: 'destructive',
         });
+        setUpdating(false);
         return;
       }
 
       const newPrice = Number(editedPrice);
-
       console.log(`Saving price update for service ID ${id}: ${newPrice}`);
       
       // Update the price in Supabase
-      await updateServicePrice(id, newPrice);
+      const updatedService = await updateServicePrice(id, newPrice);
+      console.log('Update response:', updatedService);
 
+      // Reset edit mode before showing toast and refreshing
+      setEditMode(null);
+      
       toast({
         title: 'Price Updated',
         description: 'Service price has been successfully updated.',
       });
-
-      // Reset edit mode
-      setEditMode(null);
       
       // Refresh the services list to get the updated data
-      await fetchServices();
+      await fetchServices(true);
     } catch (error: any) {
       handleOperationError(error, 'update price');
     } finally {
@@ -121,7 +123,7 @@ export const usePricingServices = () => {
         description: `Service ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
       });
 
-      await fetchServices(); // Refresh services after update
+      await fetchServices(true); // Refresh services after update
     } catch (error: any) {
       handleOperationError(error, 'update status');
     } finally {
@@ -140,7 +142,7 @@ export const usePricingServices = () => {
         description: 'New service has been successfully added.',
       });
 
-      await fetchServices(); // Refresh services after adding
+      await fetchServices(true); // Refresh services after adding
       return true;
     } catch (error: any) {
       handleOperationError(error, 'add service');
@@ -161,7 +163,7 @@ export const usePricingServices = () => {
         description: 'Service has been successfully deleted.',
       });
 
-      await fetchServices(); // Refresh services after deletion
+      await fetchServices(true); // Refresh services after deletion
       return true;
     } catch (error: any) {
       handleOperationError(error, 'delete service');

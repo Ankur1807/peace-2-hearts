@@ -26,7 +26,11 @@ export const fetchAllServices = async () => {
     
     // Log the data for debugging
     console.log(`Retrieved ${data?.length || 0} services from database`);
-    console.log('Sample data:', data?.[0]);
+    if (data && data.length > 0) {
+      console.log('First service:', data[0]);
+      console.log('All service IDs:', data.map(s => s.id));
+      console.log('All service prices:', data.map(s => s.price));
+    }
     
     return data || [];
   } catch (error) {

@@ -12,9 +12,22 @@ export const updateServicePrice = async (id: string, price: number) => {
   console.log(`Updating service price for ID ${id} to ${price}`);
   
   try {
-    // Add a timestamp to prevent caching issues
-    const timestamp = new Date().toISOString();
+    // First, verify the service exists
+    const { data: existingService, error: checkError } = await supabase
+      .from('service_pricing')
+      .select('id, price')
+      .eq('id', id)
+      .single();
+      
+    if (checkError) {
+      console.error('Error checking service existence:', checkError);
+      throw checkError;
+    }
     
+    console.log('Found existing service:', existingService);
+    
+    // Update with the new price
+    const timestamp = new Date().toISOString();
     const { data, error } = await supabase
       .from('service_pricing')
       .update({ 

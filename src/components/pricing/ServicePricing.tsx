@@ -29,21 +29,24 @@ const ServicePricing = () => {
 
   useEffect(() => {
     console.log('ServicePricing: Initializing');
-    fetchServices();
+    fetchServices(true); // Force refresh on initial load
   }, []);
+
+  const handleRefreshClick = () => {
+    fetchServices(true); // Force refresh when button is clicked
+  };
 
   const onSubmitNewService = async (data: NewServiceFormValues) => {
     const success = await addNewService(data);
     if (success) {
       setOpenNewServiceDialog(false);
-      fetchServices();
     }
   };
 
   const handleDeleteService = async (id: string) => {
     const success = await deleteService(id);
     if (success) {
-      fetchServices();
+      fetchServices(true); // Force refresh after deletion
     }
   };
 
@@ -52,7 +55,7 @@ const ServicePricing = () => {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Service Pricing</CardTitle>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => fetchServices()} disabled={loading || updating}>
+          <Button variant="outline" onClick={handleRefreshClick} disabled={loading || updating}>
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
           <Dialog open={openNewServiceDialog} onOpenChange={setOpenNewServiceDialog}>
