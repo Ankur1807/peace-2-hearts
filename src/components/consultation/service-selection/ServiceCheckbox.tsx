@@ -23,6 +23,7 @@ const ServiceCheckbox: React.FC<ServiceCheckboxProps> = ({
   // Handle click on the entire component
   const handleContainerClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     onChange(!isSelected);
   }, [isSelected, onChange]);
 
@@ -60,6 +61,7 @@ const ServiceCheckbox: React.FC<ServiceCheckboxProps> = ({
           <label 
             htmlFor={id} 
             className="font-medium cursor-pointer text-gray-800 text-lg"
+            onClick={(e) => e.stopPropagation()}
           >
             {label}
             <span className="text-peacefulBlue font-medium ml-1">{priceDisplay}</span>

@@ -1,13 +1,9 @@
 
-import React, { useMemo } from 'react';
-import { format, addDays } from 'date-fns';
-import { CalendarIcon, Clock } from 'lucide-react';
+import React from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { getTimeSlotLabel } from '@/utils/consultationLabels';
 
 interface DateTimePickerProps {
   date: Date | undefined;
@@ -15,6 +11,8 @@ interface DateTimePickerProps {
   timeSlot: string;
   setTimeSlot: (timeSlot: string) => void;
   serviceCategory: string;
+  availableTimeSlots?: string[];
+  minDate?: Date;
 }
 
 const DateTimePicker: React.FC<DateTimePickerProps> = ({
@@ -22,98 +20,70 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   setDate,
   timeSlot,
   setTimeSlot,
-  serviceCategory
+  serviceCategory,
+  availableTimeSlots,
+  minDate
 }) => {
-  // Get tomorrow as the minimum selectable date
-  const tomorrow = useMemo(() => addDays(new Date(), 1), []);
-  
-  // Get available time slots based on service category
-  const availableTimeSlots = useMemo(() => {
-    if (serviceCategory === 'legal') {
-      // Legal consultations: 5 PM - 8 PM
-      return [
-        { value: '5-pm', label: '5:00 PM' },
-        { value: '6-pm', label: '6:00 PM' },
-        { value: '7-pm', label: '7:00 PM' },
-        { value: '8-pm', label: '8:00 PM' },
-      ];
-    } else {
-      // Mental health: 11 AM - 8 PM
-      return [
-        { value: '11-am', label: '11:00 AM' },
-        { value: '12-pm', label: '12:00 PM' },
-        { value: '1-pm', label: '1:00 PM' },
-        { value: '2-pm', label: '2:00 PM' },
-        { value: '3-pm', label: '3:00 PM' },
-        { value: '4-pm', label: '4:00 PM' },
-        { value: '5-pm', label: '5:00 PM' },
-        { value: '6-pm', label: '6:00 PM' },
-        { value: '7-pm', label: '7:00 PM' },
-        { value: '8-pm', label: '8:00 PM' },
-      ];
-    }
-  }, [serviceCategory]);
+  // Use provided time slots or default ones
+  const timeSlots = availableTimeSlots || [
+    '9-am', '10-am', '11-am', '12-pm', '1-pm', '2-pm', 
+    '3-pm', '4-pm', '5-pm', '6-pm', '7-pm', '8-pm'
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="space-y-2">
-        <Label className="flex items-center gap-2 text-lg font-medium text-gray-800">
-          <CalendarIcon className="h-5 w-5 text-peacefulBlue" /> 
-          Preferred Date
+        <Label htmlFor="date" className="block text-sm font-medium text-gray-700">
+          Select Date
         </Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal border-gray-300 hover:border-peacefulBlue",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, "PPP") : <span>Select a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              initialFocus
-              className="pointer-events-auto"
-              disabled={(date) => 
-                // Disable past dates and today
-                date < tomorrow
-              }
-              fromDate={tomorrow}
-            />
-          </PopoverContent>
-        </Popover>
+        <div className="border rounded-lg overflow-hidden shadow-sm">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={setDate}
+            className="bg-white p-3 rounded-lg"
+            disabled={{ before: minDate || new Date() }}
+          />
+        </div>
       </div>
       
-      <div className="space-y-2">
-        <Label htmlFor="time" className="flex items-center gap-2 text-lg font-medium text-gray-800">
-          <Clock className="h-5 w-5 text-peacefulBlue" />
-          Preferred Time
-        </Label>
-        <Select value={timeSlot} onValueChange={setTimeSlot}>
-          <SelectTrigger id="time" className="border-gray-300 hover:border-peacefulBlue">
-            <SelectValue placeholder="Select a time" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableTimeSlots.map((slot) => (
-              <SelectItem key={slot.value} value={slot.value}>
-                {slot.label}
-              </SelectItem>
+      {date && (
+        <div className="space-y-2">
+          <Label htmlFor="time-slot" className="block text-sm font-medium text-gray-700">
+            Select Time Slot
+          </Label>
+          <ToggleGroup 
+            type="single" 
+            variant="outline" 
+            value={timeSlot} 
+            onValueChange={(value) => value && setTimeSlot(value)}
+            className="flex flex-wrap gap-2"
+          >
+            {timeSlots.map((slot) => (
+              <ToggleGroupItem 
+                key={slot} 
+                value={slot}
+                aria-label={`Select ${getTimeSlotLabel(slot)}`}
+                className="rounded-md border border-gray-200 px-3 py-2 text-sm font-medium transition-colors data-[state=on]:bg-peacefulBlue data-[state=on]:text-white"
+              >
+                {getTimeSlotLabel(slot)}
+              </ToggleGroupItem>
             ))}
-          </SelectContent>
-        </Select>
-        <p className="text-sm text-muted-foreground mt-1">
-          {serviceCategory === 'legal' 
-            ? 'Legal consultations available from 5 PM - 8 PM' 
-            : 'Mental health consultations available from 11 AM - 8 PM'}
+          </ToggleGroup>
+        </div>
+      )}
+
+      {!date && (
+        <p className="text-sm text-muted-foreground">
+          Please select a date to see available time slots
         </p>
-      </div>
+      )}
+      
+      {date && !timeSlot && (
+        <p className="text-sm text-muted-foreground">
+          Please select a time slot
+        </p>
+      )}
     </div>
   );
 };

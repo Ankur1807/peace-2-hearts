@@ -96,10 +96,10 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     const subServiceParam = urlParams.get('subservice');
 
     // Only reset if changing categories AND we don't have a specific service in the URL
-    if (!subServiceParam) {
+    if (!subServiceParam && selectedServices.length > 0) {
       console.log("Resetting services due to category change (no URL param)");
       setSelectedServices([]);
-    } else if (selectedServices.length === 0) {
+    } else if (subServiceParam && selectedServices.length === 0) {
       // If we have a URL parameter but no selected services, select it again
       console.log("Setting service from URL parameter:", subServiceParam);
       setSelectedServices([subServiceParam]);

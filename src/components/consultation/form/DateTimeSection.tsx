@@ -22,6 +22,27 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
   timeframe,
   setTimeframe
 }) => {
+  // Get the time slots based on service category
+  const getAvailableTimeSlots = () => {
+    // For legal consultations: 5 PM - 8 PM
+    if (serviceCategory === 'legal') {
+      return ['5-pm', '6-pm', '7-pm', '8-pm'];
+    }
+    // For mental health: 11 AM - 8 PM
+    else if (serviceCategory === 'mental-health') {
+      return ['11-am', '12-pm', '1-pm', '2-pm', '3-pm', '4-pm', '5-pm', '6-pm', '7-pm', '8-pm'];
+    }
+    // Default time slots
+    return ['9-am', '10-am', '11-am', '12-pm', '1-pm', '2-pm', '3-pm', '4-pm', '5-pm', '6-pm', '7-pm', '8-pm'];
+  };
+
+  // Calculate minimum date (tomorrow)
+  const getMinDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  };
+
   return (
     <div className="p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">
       <h3 className="text-xl font-semibold mb-4 text-gray-800">Schedule Your Session</h3>
@@ -38,6 +59,8 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
           timeSlot={timeSlot}
           setTimeSlot={setTimeSlot}
           serviceCategory={serviceCategory}
+          availableTimeSlots={getAvailableTimeSlots()}
+          minDate={getMinDate()}
         />
       )}
     </div>
