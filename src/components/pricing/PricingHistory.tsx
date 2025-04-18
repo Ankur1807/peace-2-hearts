@@ -1,23 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { fetchPricingHistory } from '@/utils/pricing/pricingOperations';
+import type { PriceHistoryItem } from '@/utils/pricing/pricingOperations';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
-
-interface PriceHistoryItem {
-  id: string;
-  entity_id: string;
-  item_name: string;
-  item_type: string;
-  old_price: number | null;
-  new_price: number;
-  changed_by: string | null;
-  created_at: string;
-}
 
 const PricingHistory = () => {
   const [history, setHistory] = useState<PriceHistoryItem[]>([]);
