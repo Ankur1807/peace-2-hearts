@@ -27,7 +27,11 @@ export const updateServicePrice = async (id: string, price: number) => {
       throw error;
     }
     
-    console.log('Service price updated:', data);
+    console.log('Service price updated successfully:', data);
+    
+    // This extra delay helps ensure the update is processed by the database
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
     return data;
   } catch (err) {
     console.error('Exception in updateServicePrice:', err);
@@ -60,7 +64,11 @@ export const toggleServiceActive = async (id: string, currentStatus: boolean) =>
       throw error;
     }
     
-    console.log('Service active status toggled:', data);
+    console.log('Service active status toggled successfully:', data);
+    
+    // This extra delay helps ensure the update is processed by the database
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
     return data;
   } catch (err) {
     console.error('Exception in toggleServiceActive:', err);
@@ -98,7 +106,7 @@ export const createService = async (data: NewServiceFormValues) => {
       throw error;
     }
     
-    console.log('New service created:', newService);
+    console.log('New service created successfully:', newService);
     return newService;
   } catch (err) {
     console.error('Exception in createService:', err);
@@ -126,10 +134,102 @@ export const removeService = async (id: string) => {
       throw error;
     }
     
-    console.log('Service removed:', data);
+    console.log('Service removed successfully:', data);
     return data;
   } catch (err) {
     console.error('Exception in removeService:', err);
+    throw err;
+  }
+};
+
+/**
+ * Updates a package price
+ * @param id - The ID of the package to update
+ * @param price - The new price
+ * @returns The updated package data
+ */
+export const updatePackagePrice = async (id: string, price: number) => {
+  console.log(`Updating package price for ID ${id} to ${price}`);
+  
+  try {
+    const timestamp = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('package_pricing')
+      .update({ 
+        price, 
+        updated_at: timestamp 
+      })
+      .eq('id', id)
+      .select();
+
+    if (error) {
+      console.error('Error updating package price:', error);
+      throw error;
+    }
+    
+    console.log('Package price updated successfully:', data);
+    
+    // This extra delay helps ensure the update is processed by the database
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    return data;
+  } catch (err) {
+    console.error('Exception in updatePackagePrice:', err);
+    throw err;
+  }
+};
+
+/**
+ * Synchronizes package IDs to ensure consistency
+ * @param packageName - The name of the package to synchronize
+ * @param packageId - The ID to use for the package
+ * @param price - The price to set for the package
+ */
+export const syncPackageIds = async (packageName: string, packageId: string, price: number) => {
+  console.log(`Synchronizing package IDs for ${packageName} with ID ${packageId} and price ${price}`);
+  
+  try {
+    // Find all entries with the given package name
+    const { data: packageData, error: fetchError } = await supabase
+      .from('package_pricing')
+      .select('*')
+      .ilike('package_name', packageName);
+      
+    if (fetchError) {
+      console.error('Error fetching packages:', fetchError);
+      throw fetchError;
+    }
+    
+    console.log(`Found ${packageData?.length || 0} packages with name ${packageName}:`, packageData);
+    
+    if (packageData && packageData.length > 0) {
+      // Update all matching packages to have the same ID and price
+      for (const pkg of packageData) {
+        const timestamp = new Date().toISOString();
+        
+        const { data, error } = await supabase
+          .from('package_pricing')
+          .update({ 
+            package_id: packageId,
+            price: price,
+            updated_at: timestamp 
+          })
+          .eq('id', pkg.id)
+          .select();
+          
+        if (error) {
+          console.error(`Error updating package ${pkg.id}:`, error);
+        } else {
+          console.log(`Updated package ${pkg.id}:`, data);
+        }
+      }
+      
+      console.log('Package synchronization complete');
+    }
+    
+    return packageData;
+  } catch (err) {
+    console.error('Exception in syncPackageIds:', err);
     throw err;
   }
 };

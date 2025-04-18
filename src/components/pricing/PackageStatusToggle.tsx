@@ -13,11 +13,15 @@ const PackageStatusToggle: React.FC<PackageStatusToggleProps> = ({
   onChange,
   disabled = false,
 }) => {
+  const handleChange = async () => {
+    await onChange();
+  };
+
   return (
     <div className="flex items-center space-x-2">
       <Switch
         checked={isActive}
-        onCheckedChange={onChange}
+        onCheckedChange={handleChange}
         disabled={disabled}
       />
       <span className={isActive ? 'text-green-600' : 'text-red-600'}>

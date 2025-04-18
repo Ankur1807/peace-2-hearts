@@ -5,7 +5,14 @@
  */
 
 import { fetchAllServices, fetchServiceById } from './serviceQueries';
-import { updateServicePrice, toggleServiceActive, createService, removeService } from './serviceCommands';
+import { 
+  updateServicePrice, 
+  toggleServiceActive, 
+  createService, 
+  removeService,
+  updatePackagePrice,
+  syncPackageIds
+} from './serviceCommands';
 import { fetchInitialServices, addInitialServices } from './serviceInitializer';
 
 export {
@@ -16,5 +23,7 @@ export {
   toggleServiceActive,
   createService,
   removeService,
-  addInitialServices
+  addInitialServices,
+  updatePackagePrice,
+  syncPackageIds
 };

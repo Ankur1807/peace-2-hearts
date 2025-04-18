@@ -32,6 +32,7 @@ export const usePricingServices = () => {
           data = await fetchAllServices();
         }
         
+        console.log('Fetched services data:', data);
         setServices(data);
       } catch (error: any) {
         if (error.code === 'PGRST116') {
@@ -80,7 +81,7 @@ export const usePricingServices = () => {
       const numericPrice = Number(editedPrice);
       console.log(`Saving price ${numericPrice} for service ID ${id}`);
       
-      await updateServicePrice(id, numericPrice);
+      const updatedServices = await updateServicePrice(id, numericPrice);
 
       toast({
         title: 'Price Updated',
@@ -89,8 +90,10 @@ export const usePricingServices = () => {
 
       setEditMode(null);
       
-      // Important: fetch services again to refresh the data from the database
-      await fetchServices();
+      // Add a slight delay before refreshing to ensure the database has processed the update
+      setTimeout(async () => {
+        await fetchServices();
+      }, 500);
     } catch (error: any) {
       handleOperationError(error, 'update price');
     }
@@ -105,8 +108,10 @@ export const usePricingServices = () => {
         description: `Service ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
       });
 
-      // Important: fetch services again to refresh the data from the database
-      await fetchServices();
+      // Add a slight delay before refreshing to ensure the database has processed the update
+      setTimeout(async () => {
+        await fetchServices();
+      }, 500);
     } catch (error: any) {
       handleOperationError(error, 'update status');
     }
@@ -121,8 +126,10 @@ export const usePricingServices = () => {
         description: 'New service has been successfully added.',
       });
 
-      // Important: fetch services again to refresh the data
-      await fetchServices();
+      // Add a slight delay before refreshing to ensure the database has processed the update
+      setTimeout(async () => {
+        await fetchServices();
+      }, 500);
       return true;
     } catch (error: any) {
       handleOperationError(error, 'add service');
@@ -139,8 +146,10 @@ export const usePricingServices = () => {
         description: 'Service has been successfully deleted.',
       });
 
-      // Important: fetch services again to refresh the data
-      await fetchServices();
+      // Add a slight delay before refreshing to ensure the database has processed the update
+      setTimeout(async () => {
+        await fetchServices();
+      }, 500);
       return true;
     } catch (error: any) {
       handleOperationError(error, 'delete service');
