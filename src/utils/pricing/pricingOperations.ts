@@ -220,6 +220,7 @@ interface PriceHistoryItem {
  */
 export async function fetchPricingHistory() {
   try {
+    // Use the correct foreign key reference name based on SQL setup
     const { data, error } = await supabase
       .from('pricing_history')
       .select(`
@@ -229,7 +230,7 @@ export async function fetchPricingHistory() {
         new_price,
         changed_by,
         created_at,
-        pricing_items!pricing_history_item_id_fkey (
+        pricing_items (
           name,
           type,
           category
@@ -242,7 +243,8 @@ export async function fetchPricingHistory() {
       throw error;
     }
     
-    return data.map(record => ({
+    // Properly transform the data to match our PriceHistoryItem interface
+    const transformedData = data.map(record => ({
       id: record.id,
       item_id: record.item_id,
       item_name: record.pricing_items?.name || 'Unknown',
@@ -251,7 +253,9 @@ export async function fetchPricingHistory() {
       new_price: record.new_price,
       changed_by: record.changed_by,
       created_at: record.created_at
-    })) as PriceHistoryItem[];
+    }));
+    
+    return transformedData as PriceHistoryItem[];
   } catch (error) {
     console.error('Error in fetchPricingHistory:', error);
     return [];

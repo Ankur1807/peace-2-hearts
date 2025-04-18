@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { NewPricingItemData } from '@/utils/pricing/pricingOperations';
 
+// Ensure this schema matches the NewPricingItemData interface
 const pricingItemSchema = z.object({
   name: z.string().min(3, { message: "Name must be at least 3 characters" }),
   item_id: z.string().min(3, { message: "Item ID must be at least 3 characters" }),

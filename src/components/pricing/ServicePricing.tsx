@@ -37,11 +37,16 @@ const ServicePricing = () => {
   };
 
   const onSubmitNewItem = async (data: NewPricingItemFormValues) => {
-    // Ensure all required fields are present
-    const success = await addNewItem({
-      ...data,
-      type: 'service' // Ensure type is always service for ServicePricing
-    });
+    // Ensure all required fields are present and match the NewPricingItemData interface
+    const itemData = {
+      name: data.name,
+      item_id: data.item_id,
+      price: data.price,
+      category: data.category,
+      type: 'service' as const // Force type to be service
+    };
+    
+    const success = await addNewItem(itemData);
     if (success) {
       setOpenNewItemDialog(false);
     }
