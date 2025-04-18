@@ -26,7 +26,16 @@ export async function fetchPricingHistory(): Promise<PriceHistoryItem[]> {
       
     if (itemsError) {
       console.error('Error fetching pricing items:', itemsError);
-      return historyData;
+      return historyData.map(record => ({
+        id: record.id,
+        entity_id: record.entity_id,
+        item_name: 'Unknown',
+        item_type: record.entity_type || 'Unknown',
+        old_price: record.old_price,
+        new_price: record.new_price,
+        changed_by: record.changed_by,
+        created_at: record.created_at
+      }));
     }
     
     // Create a mapping of pricing item IDs to their names and types
