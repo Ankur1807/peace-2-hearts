@@ -77,7 +77,10 @@ export const usePricingServices = () => {
         return;
       }
 
-      await updateServicePrice(id, Number(editedPrice));
+      const numericPrice = Number(editedPrice);
+      console.log(`Saving price ${numericPrice} for service ID ${id}`);
+      
+      await updateServicePrice(id, numericPrice);
 
       toast({
         title: 'Price Updated',
@@ -85,7 +88,9 @@ export const usePricingServices = () => {
       });
 
       setEditMode(null);
-      fetchServices();
+      
+      // Important: fetch services again to refresh the data from the database
+      await fetchServices();
     } catch (error: any) {
       handleOperationError(error, 'update price');
     }
@@ -100,7 +105,8 @@ export const usePricingServices = () => {
         description: `Service ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
       });
 
-      fetchServices();
+      // Important: fetch services again to refresh the data from the database
+      await fetchServices();
     } catch (error: any) {
       handleOperationError(error, 'update status');
     }
@@ -115,6 +121,8 @@ export const usePricingServices = () => {
         description: 'New service has been successfully added.',
       });
 
+      // Important: fetch services again to refresh the data
+      await fetchServices();
       return true;
     } catch (error: any) {
       handleOperationError(error, 'add service');
@@ -131,6 +139,8 @@ export const usePricingServices = () => {
         description: 'Service has been successfully deleted.',
       });
 
+      // Important: fetch services again to refresh the data
+      await fetchServices();
       return true;
     } catch (error: any) {
       handleOperationError(error, 'delete service');

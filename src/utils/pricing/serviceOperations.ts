@@ -1,15 +1,16 @@
 
 /**
- * This file is maintained for backward compatibility.
+ * This file consolidates all service operations into a single module.
  * It re-exports all service operations from their respective modules.
  */
 
-import { fetchAllServices } from './serviceQueries';
+import { fetchAllServices, fetchServiceById } from './serviceQueries';
 import { updateServicePrice, toggleServiceActive, createService, removeService } from './serviceCommands';
 import { fetchInitialServices, addInitialServices } from './serviceInitializer';
 
 export {
   fetchAllServices,
+  fetchServiceById,
   fetchInitialServices,
   updateServicePrice,
   toggleServiceActive,

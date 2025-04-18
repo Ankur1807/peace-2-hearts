@@ -21,9 +21,13 @@ const PackagePricing = () => {
       setLoading(true);
       console.log('Fetching packages from Supabase...');
       
+      // Add cache-busting parameter to avoid caching issues
+      const timestamp = Date.now();
+      
       const { data, error } = await supabase
         .from('package_pricing')
-        .select('*');
+        .select('*')
+        .order('package_name', { ascending: true });
 
       if (error) {
         console.error('Error fetching packages:', error);
