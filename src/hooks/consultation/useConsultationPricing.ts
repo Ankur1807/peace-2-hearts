@@ -1,13 +1,46 @@
 
 import { useEffect, useState, useCallback } from 'react';
-import { getPackageName } from './consultationHelpers';
-import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing/fetchPricing';
+import { getPricingForPublicDisplay, getPackagePrice } from '@/utils/pricing/pricingService';
 import { useToast } from '@/hooks/use-toast';
 
 interface UseConsultationPricingProps {
   selectedServices: string[];
   serviceCategory: string;
 }
+
+// Helper function to get package name based on selected services
+const getPackageName = (services: string[]) => {
+  // Sort services to ensure consistent comparison
+  const sortedServices = [...services].sort();
+  
+  // Divorce Prevention Package services
+  const divorcePrevention = [
+    'couples-counselling',
+    'general-legal',
+    'mediation',
+    'mental-health-counselling'
+  ].sort();
+  
+  // Pre-Marriage Clarity Package services
+  const preMarriageClarity = [
+    'mental-health-counselling',
+    'pre-marriage-legal',
+    'premarital-counselling-individual'
+  ].sort();
+
+  // Check if selected services match a package
+  if (sortedServices.length === divorcePrevention.length && 
+      JSON.stringify(sortedServices) === JSON.stringify(divorcePrevention)) {
+    return "divorce-prevention";
+  }
+  
+  if (sortedServices.length === preMarriageClarity.length && 
+      JSON.stringify(sortedServices) === JSON.stringify(preMarriageClarity)) {
+    return "pre-marriage-clarity";
+  }
+  
+  return null;
+};
 
 export function useConsultationPricing({ selectedServices, serviceCategory }: UseConsultationPricingProps) {
   const [pricing, setPricing] = useState<Map<string, number>>(new Map());
@@ -29,56 +62,41 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
     console.log('Updating pricing for services:', selectedServices, 'in category:', serviceCategory);
     
     try {
-      let pricingMap: Map<string, number> = new Map();
+      // Determine if we're dealing with a package
+      const packageId = serviceCategory === 'holistic' ? getPackageName(selectedServices) : null;
       
-      if (serviceCategory === 'holistic') {
-        // Check if it matches a pre-defined package
-        const packageName = getPackageName(selectedServices);
-        if (packageName === "Divorce Prevention Package") {
-          console.log('Fetching Divorce Prevention Package pricing');
-          pricingMap = await fetchPackagePricing(['divorce-prevention'], skipCache);
-        } else if (packageName === "Pre-Marriage Clarity Package") {
-          console.log('Fetching Pre-Marriage Clarity Package pricing');
-          pricingMap = await fetchPackagePricing(['pre-marriage-clarity'], skipCache);
-        } else {
-          // If not a pre-defined package, get individual service prices
-          console.log('Fetching individual service prices for holistic services');
-          pricingMap = await fetchServicePricing(selectedServices);
-        }
-      } else {
-        // For regular services, get individual prices
-        console.log('Fetching individual service prices for category:', serviceCategory);
-        pricingMap = await fetchServicePricing(selectedServices);
-      }
-      
-      console.log('Pricing data retrieved:', Object.fromEntries(pricingMap));
-      
-      // Calculate total price
+      // Pricing map to be populated
+      let pricingMap = new Map<string, number>();
       let total = 0;
-      if (serviceCategory === 'holistic') {
-        const packageName = getPackageName(selectedServices);
-        if (packageName === "Divorce Prevention Package") {
-          total = pricingMap.get('divorce-prevention') || 0;
-          console.log('Using Divorce Prevention Package price:', total);
-        } else if (packageName === "Pre-Marriage Clarity Package") {
-          total = pricingMap.get('pre-marriage-clarity') || 0;
-          console.log('Using Pre-Marriage Clarity Package price:', total);
+      
+      // If we're dealing with a package, get its price
+      if (packageId) {
+        console.log('Fetching package pricing for:', packageId);
+        const packagePrice = await getPackagePrice(packageId);
+        
+        if (packagePrice > 0) {
+          pricingMap.set(packageId, packagePrice);
+          total = packagePrice;
         } else {
-          // Sum individual services
-          console.log('Calculating total from individual services for holistic');
+          // If package price is not available, get individual service prices
+          console.log('Package price not found, fetching individual service prices');
+          pricingMap = await getPricingForPublicDisplay(selectedServices);
+          
+          // Calculate total from individual services
           selectedServices.forEach(serviceId => {
             const price = pricingMap.get(serviceId) || 0;
             total += price;
-            console.log(`Adding ${price} for ${serviceId}`);
           });
         }
       } else {
-        // Sum individual services
-        console.log('Calculating total from individual services');
+        // For regular services, get individual prices
+        console.log('Fetching individual service prices');
+        pricingMap = await getPricingForPublicDisplay(selectedServices);
+        
+        // Calculate total from individual services
         selectedServices.forEach(serviceId => {
           const price = pricingMap.get(serviceId) || 0;
           total += price;
-          console.log(`Adding ${price} for ${serviceId}`);
         });
       }
       

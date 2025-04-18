@@ -1,52 +1,45 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, RefreshCw } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
-import ServiceList from './ServiceList';
-import AddServiceForm from './AddServiceForm';
-import { usePricingServices } from '@/hooks/usePricingServices';
-import { NewServiceFormValues } from './AddServiceForm';
+import PricingItemsList from './PricingItemsList';
+import AddPricingItemForm from './AddPricingItemForm';
+import { usePricingItems } from '@/hooks/usePricingItems';
+import { NewPricingItemFormValues } from './AddPricingItemForm';
 
 const ServicePricing = () => {
-  const [openNewServiceDialog, setOpenNewServiceDialog] = useState(false);
+  const [openNewItemDialog, setOpenNewItemDialog] = useState(false);
   const {
-    services,
+    items,
     loading,
     updating,
     editMode,
     editedPrice,
     setEditedPrice,
-    fetchServices,
+    fetchItems,
     handleEdit,
     handleCancel,
     handleSave,
-    toggleServiceStatus,
-    addNewService,
-    deleteService
-  } = usePricingServices();
+    toggleItemStatus,
+    addNewItem,
+    deleteItem
+  } = usePricingItems('service');
 
   useEffect(() => {
     console.log('ServicePricing: Initializing');
-    fetchServices(true); // Force refresh on initial load
+    fetchItems(true); // Force refresh on initial load
   }, []);
 
   const handleRefreshClick = () => {
-    fetchServices(true); // Force refresh when button is clicked
+    fetchItems(true); // Force refresh when button is clicked
   };
 
-  const onSubmitNewService = async (data: NewServiceFormValues) => {
-    const success = await addNewService(data);
+  const onSubmitNewItem = async (data: NewPricingItemFormValues) => {
+    const success = await addNewItem(data);
     if (success) {
-      setOpenNewServiceDialog(false);
-    }
-  };
-
-  const handleDeleteService = async (id: string) => {
-    const success = await deleteService(id);
-    if (success) {
-      fetchServices(true); // Force refresh after deletion
+      setOpenNewItemDialog(false);
     }
   };
 
@@ -58,26 +51,26 @@ const ServicePricing = () => {
           <Button variant="outline" onClick={handleRefreshClick} disabled={loading || updating}>
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
-          <Dialog open={openNewServiceDialog} onOpenChange={setOpenNewServiceDialog}>
+          <Dialog open={openNewItemDialog} onOpenChange={setOpenNewItemDialog}>
             <DialogTrigger asChild>
               <Button disabled={updating}>
                 <Plus className="h-4 w-4 mr-1" /> Add Service
               </Button>
             </DialogTrigger>
-            <AddServiceForm onSubmit={onSubmitNewService} />
+            <AddPricingItemForm onSubmit={onSubmitNewItem} />
           </Dialog>
         </div>
       </CardHeader>
       <CardContent>
-        <ServiceList
-          services={services}
+        <PricingItemsList
+          items={items}
           loading={loading}
           updating={updating}
           onEdit={handleEdit}
           onSave={handleSave}
           onCancel={handleCancel}
-          onToggleStatus={toggleServiceStatus}
-          onDelete={handleDeleteService}
+          onToggleStatus={toggleItemStatus}
+          onDelete={deleteItem}
           editMode={editMode}
           editedPrice={editedPrice}
           setEditedPrice={setEditedPrice}

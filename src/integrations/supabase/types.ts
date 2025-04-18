@@ -336,6 +336,48 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_items: {
+        Row: {
+          category: string
+          components: string[] | null
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          item_id: string
+          name: string
+          price: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          components?: string[] | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          item_id: string
+          name: string
+          price: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          components?: string[] | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          item_id?: string
+          name?: string
+          price?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
