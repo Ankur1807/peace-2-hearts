@@ -14,6 +14,15 @@ interface UseConsultationPaymentProps {
 }
 
 export function useConsultationPayment(props: UseConsultationPaymentProps) {
+  // Add debug logging here to check props
+  if (props.state) {
+    console.log("useConsultationPayment state:", {
+      selectedServices: props.state.selectedServices,
+      totalPrice: props.state.totalPrice,
+      pricing: props.state.pricing ? Object.fromEntries(props.state.pricing) : "No pricing map"
+    });
+  }
+  
   const { proceedToPayment, processPayment } = usePaymentFlow(props);
   
   return {

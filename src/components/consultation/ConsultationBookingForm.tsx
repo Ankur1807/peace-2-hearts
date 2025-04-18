@@ -1,4 +1,3 @@
-
 import React, { useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
@@ -33,6 +32,11 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     setShowPaymentStep,
     processPayment
   } = bookingState;
+
+  // Log pricing information for debugging
+  console.log("ConsultationBookingForm pricing data:", Object.fromEntries(pricing));
+  console.log("ConsultationBookingForm totalPrice:", totalPrice);
+  console.log("ConsultationBookingForm selectedServices:", selectedServices);
 
   const handlePersonalDetailsFieldChange = (field: string, value: string) => {
     handlePersonalDetailsChange({
@@ -110,6 +114,14 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     processPayment();
   };
 
+  // Format selected services for display
+  const getFormattedConsultationType = () => {
+    if (!selectedServices || selectedServices.length === 0) {
+      return "Consultation";
+    }
+    return selectedServices.join(', ');
+  };
+
   return (
     <div className="relative">
       {/* Decorative background elements */}
@@ -120,7 +132,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
         <Card className="backdrop-blur-sm bg-white/80 p-6 md:p-8 border border-gray-100 shadow-xl rounded-xl relative z-10">
           <form onSubmit={handlePaymentSubmit} className="space-y-6">
             <PaymentStep 
-              consultationType={selectedServices.join(', ')}
+              consultationType={getFormattedConsultationType()}
               onNextStep={processPayment}
               onPrevStep={() => setShowPaymentStep(false)}
               onSubmit={handlePaymentSubmit}

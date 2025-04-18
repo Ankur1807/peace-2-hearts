@@ -26,6 +26,10 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // Log price information for debugging
+  console.log("PaymentStep received totalPrice:", totalPrice);
+  console.log("PaymentStep consultation type:", consultationType);
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-lora font-semibold mb-6">Payment Information</h2>

@@ -18,6 +18,13 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
   razorpayLoaded,
   totalPrice
 }) => {
+  // Generate appropriate button text based on state
+  const getButtonText = () => {
+    if (!razorpayLoaded) return "Loading Payment...";
+    if (isProcessing) return "Processing...";
+    return totalPrice > 0 ? `Pay ${formatPrice(totalPrice)}` : "Pay Now";
+  };
+
   return (
     <div className="pt-6 flex justify-between">
       <Button type="button" variant="outline" onClick={onPrevStep}>
@@ -28,7 +35,7 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
         className="bg-peacefulBlue hover:bg-peacefulBlue/90"
         disabled={isProcessing || !acceptTerms || !razorpayLoaded}
       >
-        {!razorpayLoaded ? "Loading Payment..." : isProcessing ? "Processing..." : `Pay ${formatPrice(totalPrice)}`}
+        {getButtonText()}
       </Button>
     </div>
   );

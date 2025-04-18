@@ -9,14 +9,21 @@ type OrderSummaryProps = {
 };
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ consultationType, totalPrice }) => {
+  // Get the appropriate label for the consultation type
+  const consultationLabel = consultationType.includes(',') 
+    ? 'Multiple Services' 
+    : getConsultationTypeLabel(consultationType);
+
   return (
     <div className="mb-6">
       <div className="bg-gray-50 p-4 rounded-lg mb-6">
         <h3 className="font-semibold mb-3">Order Summary</h3>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span>{consultationType.includes(',') ? 'Multiple Services' : getConsultationTypeLabel(consultationType)}</span>
-            <span className="font-medium">{formatPrice(totalPrice)}</span>
+            <span>{consultationLabel}</span>
+            <span className="font-medium">
+              {totalPrice > 0 ? formatPrice(totalPrice) : "Price not available"}
+            </span>
           </div>
           <div className="text-sm text-gray-600">60-minute consultation</div>
         </div>
@@ -25,7 +32,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ consultationType, totalPric
       <div className="border-t border-b py-4 mb-6">
         <div className="flex justify-between font-semibold">
           <span>Total</span>
-          <span>{formatPrice(totalPrice)}</span>
+          <span>{totalPrice > 0 ? formatPrice(totalPrice) : "Price not available"}</span>
         </div>
       </div>
     </div>
