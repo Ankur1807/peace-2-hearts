@@ -1,4 +1,3 @@
-
 import React, { useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
@@ -10,6 +9,7 @@ interface ConsultationBookingFormProps {
 }
 
 const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ bookingState }) => {
+  // Extract all state from bookingState
   const {
     date, 
     setDate,
@@ -25,7 +25,6 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     bookingError,
     personalDetails,
     handlePersonalDetailsChange,
-    handleConfirmBooking,
     pricing,
     totalPrice,
     showPaymentStep,
@@ -33,7 +32,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     setShowPaymentStep,
     processPayment,
     
-    // Discount-related properties
+    // Extract discount-related properties
     discountCode,
     setDiscountCode,
     validateAndApplyDiscount,
@@ -111,7 +110,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     const subServiceParam = urlParams.get('subservice');
 
     // Only run this effect once when component mounts or when serviceCategory changes,
-    // but not on every render when selectedServices changes
+    // but not on every render when selectedServices.length changes
     if (subServiceParam && selectedServices.length === 0) {
       // If we have a URL parameter but no selected services, select it
       console.log("Setting service from URL parameter:", subServiceParam);
@@ -160,7 +159,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
           <form onSubmit={handlePaymentSubmit} className="space-y-6">
             <PaymentStep 
               consultationType={getFormattedConsultationType()}
-              onNextStep={handlePaymentSubmit}
+              onNextStep={() => {}}
               onPrevStep={() => setShowPaymentStep(false)}
               onSubmit={handlePaymentSubmit}
               isProcessing={isProcessing}

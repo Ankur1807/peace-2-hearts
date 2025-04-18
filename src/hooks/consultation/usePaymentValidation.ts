@@ -1,5 +1,10 @@
 
 export function usePaymentValidation() {
+  // Check if Razorpay script is loaded
+  const isRazorpayLoaded = () => {
+    return typeof window !== 'undefined' && window.Razorpay !== undefined;
+  };
+
   const validatePersonalDetails = (personalDetails: any) => {
     return Boolean(
       personalDetails.firstName && 
@@ -18,6 +23,7 @@ export function usePaymentValidation() {
   };
   
   return {
+    razorpayLoaded: isRazorpayLoaded(),
     validatePersonalDetails,
     validateServiceSelection,
     validatePaymentAmount

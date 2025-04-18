@@ -5,15 +5,15 @@ import Script from '@/components/Script';
 import { isRazorpayAvailable, loadRazorpayScript } from '@/utils/payment/razorpayService';
 
 type PaymentLoaderProps = {
-  onRazorpayLoad: (loaded: boolean) => void;
-  onLoadError: (error: string | null) => void;
-  loadError: string | null;
+  onRazorpayLoad?: (loaded: boolean) => void;
+  onLoadError?: (error: string | null) => void;
+  loadError?: string | null;
 };
 
 const PaymentLoader: React.FC<PaymentLoaderProps> = ({ 
-  onRazorpayLoad,
-  onLoadError,
-  loadError
+  onRazorpayLoad = () => {},
+  onLoadError = () => {},
+  loadError = null
 }) => {
   const [isLoading, setIsLoading] = useState(true);
 

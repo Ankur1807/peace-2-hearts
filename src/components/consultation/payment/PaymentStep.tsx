@@ -32,6 +32,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
 }) => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const { razorpayLoaded } = usePaymentValidation();
+  const [loadError, setLoadError] = useState<string | null>(null);
   
   return (
     <div>
@@ -45,7 +46,13 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         appliedDiscountCode={appliedDiscountCode}
       />
       
-      {!razorpayLoaded && <PaymentLoader />}
+      {!razorpayLoaded && (
+        <PaymentLoader 
+          onRazorpayLoad={(loaded) => {}}
+          onLoadError={setLoadError}
+          loadError={loadError}
+        />
+      )}
       
       <PaymentMethods />
       

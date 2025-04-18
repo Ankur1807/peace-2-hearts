@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { PersonalDetails } from '@/utils/types';
@@ -30,6 +31,16 @@ export function useConsultationBooking() {
     pricing,
     totalPrice,
     setTotalPrice,
+    // Discount state
+    discountCode,
+    setDiscountCode,
+    validateAndApplyDiscount,
+    removeDiscount,
+    isValidatingDiscount,
+    appliedDiscountCode,
+    discountAmount,
+    originalPrice,
+    finalizeDiscount
   } = consultationState;
   
   // Other state that's managed locally in this hook
@@ -119,7 +130,18 @@ export function useConsultationBooking() {
     handleConfirmBooking,
     processPayment,
     proceedToPayment,
-    setShowPaymentStep
+    setShowPaymentStep,
+    
+    // Discount related properties
+    discountCode,
+    setDiscountCode,
+    validateAndApplyDiscount,
+    removeDiscount,
+    isValidatingDiscount,
+    appliedDiscountCode,
+    discountAmount,
+    originalPrice,
+    finalizeDiscount
   };
 }
 
