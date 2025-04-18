@@ -66,6 +66,9 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
   handlePackageSelection,
   pricing
 }) => {
+  console.log("ServiceSelectionOptions rendered with selectedServices:", selectedServices);
+  console.log("ServiceSelectionOptions pricing:", Object.fromEntries(pricing || new Map()));
+  
   // For holistic package selection
   if (serviceCategory === 'holistic') {
     return (
@@ -115,13 +118,16 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
           const price = pricing?.get(service.id);
           const priceDisplay = price ? ` - ₹${price.toLocaleString('en-IN')}` : '';
           
+          console.log(`Service ${service.id} isChecked:`, isChecked);
+          
           return (
             <div key={service.id} className="flex items-start space-x-2">
               <Checkbox
                 id={service.id}
                 checked={isChecked}
                 onCheckedChange={(checked) => {
-                  handleServiceSelection(service.id, typeof checked === 'boolean' ? checked : false);
+                  console.log(`Checkbox ${service.id} change:`, checked);
+                  handleServiceSelection(service.id, checked === true);
                 }}
                 className="mt-1"
               />
@@ -129,7 +135,10 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
                 <label
                   htmlFor={service.id}
                   className="text-sm font-medium leading-none cursor-pointer"
-                  onClick={() => handleServiceSelection(service.id, !isChecked)}
+                  onClick={() => {
+                    console.log(`Label clicked for ${service.id}, current state:`, !isChecked);
+                    handleServiceSelection(service.id, !isChecked);
+                  }}
                 >
                   {service.label}{priceDisplay}
                 </label>

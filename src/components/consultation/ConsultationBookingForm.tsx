@@ -65,19 +65,25 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
       if (checked) {
         // Add the service if it's not already in the list
         if (!prevServices.includes(serviceId)) {
-          return [...prevServices, serviceId];
+          const newServices = [...prevServices, serviceId];
+          console.log("New selected services:", newServices);
+          return newServices;
         }
         return prevServices;
       } else {
         // Remove the service
-        return prevServices.filter(id => id !== serviceId);
+        const newServices = prevServices.filter(id => id !== serviceId);
+        console.log("New selected services after removal:", newServices);
+        return newServices;
       }
     });
   }, [setSelectedServices]);
 
   const handlePackageSelection = useCallback((packageId: string) => {
+    console.log(`Package ${packageId} selected`);
     const selectedPackage = holisticPackages.find(pkg => pkg.id === packageId);
     if (selectedPackage) {
+      console.log(`Setting services from package:`, selectedPackage.services);
       setSelectedServices(selectedPackage.services);
     }
   }, [holisticPackages, setSelectedServices]);

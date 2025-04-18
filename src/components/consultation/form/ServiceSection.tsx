@@ -22,9 +22,10 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
 }) => {
   // Log pricing data for debugging
   console.log("ServiceSection received pricing data:", Object.fromEntries(pricing || new Map()));
+  console.log("ServiceSection received selectedServices:", selectedServices);
   
   return (
-    <>
+    <div className="space-y-6">
       <ServiceCategorySelector 
         serviceCategory={serviceCategory}
         setServiceCategory={setServiceCategory}
@@ -37,7 +38,7 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
         handlePackageSelection={handlePackageSelection}
         pricing={pricing}
       />
-    </>
+    </div>
   );
 };
 
