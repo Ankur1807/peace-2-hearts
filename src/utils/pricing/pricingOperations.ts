@@ -203,6 +203,18 @@ export async function removePricingItem(id: string) {
   }
 }
 
+// Define interface for the price history item
+interface PriceHistoryItem {
+  id: string;
+  item_id: string;
+  item_name: string;
+  item_type: string;
+  old_price: number | null;
+  new_price: number;
+  changed_by: string | null;
+  created_at: string;
+}
+
 /**
  * Fetches pricing history
  */
@@ -212,12 +224,12 @@ export async function fetchPricingHistory() {
       .from('pricing_history')
       .select(`
         id,
+        item_id,
         old_price,
         new_price,
         changed_by,
         created_at,
-        item_id,
-        pricing_items (
+        pricing_items!pricing_history_item_id_fkey (
           name,
           type,
           category
@@ -239,9 +251,9 @@ export async function fetchPricingHistory() {
       new_price: record.new_price,
       changed_by: record.changed_by,
       created_at: record.created_at
-    }));
+    })) as PriceHistoryItem[];
   } catch (error) {
     console.error('Error in fetchPricingHistory:', error);
-    throw error;
+    return [];
   }
 }

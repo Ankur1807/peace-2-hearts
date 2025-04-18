@@ -37,9 +37,11 @@ const PackagePricing = () => {
   };
 
   const onSubmitNewItem = async (data: NewPricingItemFormValues) => {
+    // Ensure all required fields are present
     const success = await addNewItem({
       ...data,
-      category: 'package', // Force category to be package for packages
+      type: 'package', // Force type to be package
+      category: 'package' // Force category to be package for packages
     });
     if (success) {
       setOpenNewItemDialog(false);
