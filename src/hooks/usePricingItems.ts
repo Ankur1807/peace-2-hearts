@@ -8,7 +8,8 @@ import {
   updatePricingItemPrice,
   togglePricingItemStatus,
   createPricingItem,
-  removePricingItem
+  removePricingItem,
+  checkAdminPermission
 } from '@/utils/pricing/pricingOperations';
 
 export const usePricingItems = (itemType?: 'service' | 'package') => {
@@ -17,12 +18,22 @@ export const usePricingItems = (itemType?: 'service' | 'package') => {
   const [updating, setUpdating] = useState(false);
   const [editMode, setEditMode] = useState<string | null>(null);
   const [editedPrice, setEditedPrice] = useState<string>('');
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const { toast } = useToast();
+
+  const checkAdminStatus = async () => {
+    const adminStatus = await checkAdminPermission();
+    setIsAdmin(adminStatus);
+    return adminStatus;
+  };
 
   const fetchItems = async (forceRefresh: boolean = false) => {
     try {
       setLoading(true);
       console.log(`Fetching ${itemType || 'all'} items, forceRefresh: ${forceRefresh}`);
+      
+      // Check admin status
+      await checkAdminStatus();
       
       const data = await fetchPricingItems(itemType, forceRefresh);
       setItems(data);
@@ -52,6 +63,15 @@ export const usePricingItems = (itemType?: 'service' | 'package') => {
   };
 
   const handleEdit = (id: string, currentPrice: number) => {
+    if (!isAdmin) {
+      toast({
+        title: 'Permission Denied',
+        description: 'You need admin privileges to edit pricing items.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setEditMode(id);
     setEditedPrice(currentPrice.toString());
   };
@@ -187,8 +207,10 @@ export const usePricingItems = (itemType?: 'service' | 'package') => {
     updating,
     editMode,
     editedPrice,
+    isAdmin,
     setEditedPrice,
     fetchItems,
+    checkAdminStatus,
     handleEdit,
     handleCancel,
     handleSave,

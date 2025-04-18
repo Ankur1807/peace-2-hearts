@@ -26,6 +26,37 @@ export interface NewPricingItemData {
 }
 
 /**
+ * Checks if user has admin permissions
+ */
+export async function checkAdminPermission() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      console.log('No active session found');
+      return false;
+    }
+    
+    // Check if the user is in the admin_users table
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('id, role')
+      .eq('id', session.user.id)
+      .single();
+    
+    if (error) {
+      console.error('Error checking admin permission:', error);
+      return false;
+    }
+    
+    return !!data && data.role === 'admin';
+  } catch (error) {
+    console.error('Error in checkAdminPermission:', error);
+    return false;
+  }
+}
+
+/**
  * Fetches all pricing items with optional filters
  */
 export async function fetchPricingItems(type?: 'service' | 'package', forceRefresh = false) {
@@ -90,6 +121,12 @@ export async function updatePricingItemPrice(id: string, price: number) {
   console.log(`Updating pricing item ${id} price to ${price}`);
   
   try {
+    // Check admin permission first
+    const isAdmin = await checkAdminPermission();
+    if (!isAdmin) {
+      throw new Error('You do not have permission to update pricing items');
+    }
+    
     // First verify the item exists
     const { data: existingItem, error: checkError } = await supabase
       .from('pricing_items')
@@ -133,6 +170,12 @@ export async function togglePricingItemStatus(id: string, currentStatus: boolean
   console.log(`Toggling pricing item ${id} active status from ${currentStatus} to ${!currentStatus}`);
   
   try {
+    // Check admin permission first
+    const isAdmin = await checkAdminPermission();
+    if (!isAdmin) {
+      throw new Error('You do not have permission to update pricing items');
+    }
+    
     const { data, error } = await supabase
       .from('pricing_items')
       .update({ is_active: !currentStatus })
@@ -159,6 +202,12 @@ export async function createPricingItem(itemData: NewPricingItemData) {
   console.log('Creating new pricing item:', itemData);
   
   try {
+    // Check admin permission first
+    const isAdmin = await checkAdminPermission();
+    if (!isAdmin) {
+      throw new Error('You do not have permission to create pricing items');
+    }
+    
     const { data, error } = await supabase
       .from('pricing_items')
       .insert([itemData])
@@ -184,6 +233,12 @@ export async function removePricingItem(id: string) {
   console.log(`Removing pricing item with ID ${id}`);
   
   try {
+    // Check admin permission first
+    const isAdmin = await checkAdminPermission();
+    if (!isAdmin) {
+      throw new Error('You do not have permission to delete pricing items');
+    }
+    
     const { data, error } = await supabase
       .from('pricing_items')
       .delete()
