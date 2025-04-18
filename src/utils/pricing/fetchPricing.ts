@@ -52,11 +52,12 @@ export async function fetchServicePricing(serviceIds?: string[]): Promise<Map<st
 /**
  * Fetch pricing for packages
  * @param packageIds - Optional array of package IDs to fetch
+ * @param skipCache - Whether to skip using cached data
  * @returns Map of package_id to price
  */
-export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<string, number>> {
+export async function fetchPackagePricing(packageIds?: string[], skipCache: boolean = false): Promise<Map<string, number>> {
   try {
-    console.log('Fetching package pricing for:', packageIds);
+    console.log('Fetching package pricing for:', packageIds, 'skipCache:', skipCache);
     
     if (!packageIds || packageIds.length === 0) {
       return new Map<string, number>();
@@ -65,43 +66,46 @@ export async function fetchPackagePricing(packageIds?: string[]): Promise<Map<st
     // Create a map of package_id to price
     const pricingMap = new Map<string, number>();
     
-    // First try to get package pricing from the service_pricing table
+    // Add cache-busting parameter when needed
+    const cacheParam = skipCache ? `?_t=${Date.now()}` : '';
+    
+    // First try to get package pricing from the package_pricing table
     try {
-      const packageData = await fetchPackagePricingFromServiceTable(packageIds);
+      const packageData = await fetchPackagePricingFromPackageTable(packageIds);
       
       if (packageData && packageData.length > 0) {
-        console.log('Found package pricing in service_pricing table:', packageData);
+        console.log('Found package pricing in package_pricing table:', packageData);
         
         // Map the data to our pricing map
-        const servicePricingMap = mapPackagePricing(packageData, packageIds);
+        const packagePricingMap = mapPackagePricing(packageData, packageIds);
         
         // Merge into the main pricing map
-        servicePricingMap.forEach((price, id) => {
+        packagePricingMap.forEach((price, id) => {
           pricingMap.set(id, price);
         });
       }
-    } catch (serviceTableError) {
-      console.error('Error fetching from service_pricing table:', serviceTableError);
+    } catch (packageTableError) {
+      console.log('Failed to access package_pricing table:', packageTableError);
     }
     
-    // If no pricing found, try fallback to dedicated package_pricing table
+    // If no data found in package_pricing, try the service_pricing table
     if (pricingMap.size === 0) {
       try {
-        const packageData = await fetchPackagePricingFromPackageTable(packageIds);
+        const packageData = await fetchPackagePricingFromServiceTable(packageIds);
         
         if (packageData && packageData.length > 0) {
-          console.log('Found package pricing in package_pricing table:', packageData);
+          console.log('Found package pricing in service_pricing table:', packageData);
           
           // Map the data to our pricing map
-          const packagePricingMap = mapPackagePricing(packageData, packageIds);
+          const servicePricingMap = mapPackagePricing(packageData, packageIds);
           
           // Merge into the main pricing map
-          packagePricingMap.forEach((price, id) => {
+          servicePricingMap.forEach((price, id) => {
             pricingMap.set(id, price);
           });
         }
-      } catch (packageTableError) {
-        console.log('Failed to access package_pricing table:', packageTableError);
+      } catch (serviceTableError) {
+        console.error('Error fetching from service_pricing table:', serviceTableError);
       }
     }
     

@@ -13,12 +13,20 @@ interface PackageEditFormProps {
 const PackageEditForm: React.FC<PackageEditFormProps> = ({ pkg, onSave }) => {
   const [editMode, setEditMode] = useState(false);
   const [editedPrice, setEditedPrice] = useState(pkg.price.toString());
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
     const price = Number(editedPrice);
     if (!isNaN(price) && price > 0) {
-      await onSave(price);
-      setEditMode(false);
+      try {
+        setIsSaving(true);
+        await onSave(price);
+        setEditMode(false);
+      } catch (error) {
+        console.error('Error saving price:', error);
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -56,13 +64,15 @@ const PackageEditForm: React.FC<PackageEditFormProps> = ({ pkg, onSave }) => {
           size="sm"
           variant="outline"
           onClick={handleSave}
+          disabled={isSaving}
         >
-          <Save className="h-4 w-4 mr-1" /> Save
+          <Save className="h-4 w-4 mr-1" /> {isSaving ? 'Saving...' : 'Save'}
         </Button>
         <Button
           size="sm"
           variant="outline"
           onClick={handleCancel}
+          disabled={isSaving}
         >
           <X className="h-4 w-4 mr-1" /> Cancel
         </Button>

@@ -91,7 +91,7 @@ export async function fetchPackagePricingFromServiceTable(packageIds?: string[])
  * @returns Raw package pricing data or empty array if table doesn't exist
  */
 export async function fetchPackagePricingFromPackageTable(packageIds?: string[]) {
-  console.log('Attempting to fetch from package_pricing table for:', packageIds);
+  console.log('Fetching from package_pricing table for:', packageIds);
   
   if (!packageIds || packageIds.length === 0) {
     return [];
@@ -100,6 +100,9 @@ export async function fetchPackagePricingFromPackageTable(packageIds?: string[])
   const expandedIds = expandClientToDbPackageIds(packageIds);
   
   try {
+    // Add a timestamp parameter to prevent caching
+    const timestamp = new Date().getTime();
+    
     const { data, error } = await supabase
       .from('package_pricing')
       .select('package_id, price, is_active')

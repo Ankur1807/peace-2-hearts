@@ -23,6 +23,8 @@ const PackagePricing = () => {
         throw error;
       }
 
+      // Log what we received from the database for debugging
+      console.log('Fetched package pricing data:', data);
       setPackages(data || []);
     } catch (error: any) {
       toast({
@@ -37,11 +39,14 @@ const PackagePricing = () => {
 
   const handleEditPrice = async (id: string, price: number) => {
     try {
+      const timestamp = new Date().toISOString();
+      console.log(`Updating package ID ${id} with new price: ${price} at ${timestamp}`);
+      
       const { error } = await supabase
         .from('package_pricing')
         .update({ 
           price, 
-          updated_at: new Date().toISOString() 
+          updated_at: timestamp
         })
         .eq('id', id);
 
@@ -52,7 +57,8 @@ const PackagePricing = () => {
         description: 'Package price has been successfully updated.',
       });
 
-      fetchPackages();
+      // Immediately refresh package data after update
+      await fetchPackages();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -64,11 +70,12 @@ const PackagePricing = () => {
 
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     try {
+      const timestamp = new Date().toISOString();
       const { error } = await supabase
         .from('package_pricing')
         .update({ 
           is_active: !currentStatus, 
-          updated_at: new Date().toISOString() 
+          updated_at: timestamp
         })
         .eq('id', id);
 
@@ -79,7 +86,8 @@ const PackagePricing = () => {
         description: `Package ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
       });
 
-      fetchPackages();
+      // Immediately refresh package data after update
+      await fetchPackages();
     } catch (error: any) {
       toast({
         title: 'Error',

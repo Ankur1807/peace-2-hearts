@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useCallback } from 'react';
 import { getPackageName } from './consultationHelpers';
 import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing/fetchPricing';
@@ -16,7 +17,7 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
   const { toast } = useToast();
   
   // Load pricing data when services change
-  const updatePricing = useCallback(async () => {
+  const updatePricing = useCallback(async (skipCache = false) => {
     if (selectedServices.length === 0) {
       setTotalPrice(0);
       setPricingError(null);
@@ -35,10 +36,10 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
         const packageName = getPackageName(selectedServices);
         if (packageName === "Divorce Prevention Package") {
           console.log('Fetching Divorce Prevention Package pricing');
-          pricingMap = await fetchPackagePricing(['divorce-prevention']);
+          pricingMap = await fetchPackagePricing(['divorce-prevention'], skipCache);
         } else if (packageName === "Pre-Marriage Clarity Package") {
           console.log('Fetching Pre-Marriage Clarity Package pricing');
-          pricingMap = await fetchPackagePricing(['pre-marriage-clarity']);
+          pricingMap = await fetchPackagePricing(['pre-marriage-clarity'], skipCache);
         } else {
           // If not a pre-defined package, get individual service prices
           console.log('Fetching individual service prices for holistic services');
@@ -108,5 +109,11 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
     updatePricing();
   }, [updatePricing]);
   
-  return { pricing, totalPrice, isLoading, pricingError, updatePricing };
+  return { 
+    pricing, 
+    totalPrice, 
+    isLoading, 
+    pricingError, 
+    updatePricing: () => updatePricing(true) // Use the skip cache version when manually refreshing
+  };
 }
