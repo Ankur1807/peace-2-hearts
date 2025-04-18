@@ -5,7 +5,7 @@ import { sendBookingConfirmationEmail } from '@/utils/emailService';
 import { getPackageName } from './consultationHelpers';
 
 interface UseConsultationActionsProps {
-  state: any;
+  state: any; // Using any for simplicity, but in a real app, define a proper type
   setReferenceId: (id: string | null) => void;
   setSubmitted: (submitted: boolean) => void;
   setBookingError: (error: string | null) => void;

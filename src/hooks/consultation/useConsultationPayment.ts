@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { usePaymentFlow } from './usePaymentFlow';
 
 interface UseConsultationPaymentProps {
-  state: any;
+  state: any; // Using any for simplicity, but in a real app, define a proper interface
   toast: any;
   setIsProcessing?: (isProcessing: boolean) => void;
   setShowPaymentStep?: (show: boolean) => void;

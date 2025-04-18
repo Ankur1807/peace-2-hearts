@@ -6,7 +6,7 @@ import { usePaymentValidation } from './usePaymentValidation';
 import { useRazorpayPayment } from './useRazorpayPayment';
 
 interface UsePaymentFlowProps {
-  state: any;
+  state: any; // Using any for simplicity, but in a real app, define a proper type
   toast: any;
   setIsProcessing?: (isProcessing: boolean) => void;
   setShowPaymentStep?: (show: boolean) => void;

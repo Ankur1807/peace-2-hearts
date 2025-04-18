@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { PersonalDetails } from '@/utils/types';
@@ -11,22 +10,50 @@ import { useConsultationPayment } from './consultation/useConsultationPayment';
 export function useConsultationBooking() {
   const { toast } = useToast();
   
-  // Use focused hooks to manage different aspects of the consultation process
-  const { 
-    state, 
-    setDate, 
-    setServiceCategory, 
-    setSelectedServices, 
-    setTimeSlot, 
-    setTimeframe,
-    setSubmitted,
-    setIsProcessing,
-    setReferenceId,
-    setBookingError,
-    setShowPaymentStep,
-    handlePersonalDetailsChange
-  } = useConsultationState();
+  // Get all state from the consultation state hook
+  const consultationState = useConsultationState();
   
+  // Destructure the state for easier access
+  const {
+    date,
+    setDate,
+    serviceCategory,
+    setServiceCategory,
+    selectedServices,
+    setSelectedServices,
+    timeSlot,
+    setTimeSlot,
+    timeframe,
+    setTimeframe,
+    personalDetails,
+    handlePersonalDetailsChange,
+    pricing,
+    totalPrice,
+    setTotalPrice,
+  } = consultationState;
+  
+  // Other state that's managed locally in this hook
+  const [submitted, setSubmitted] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [referenceId, setReferenceId] = useState<string | null>(null);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [showPaymentStep, setShowPaymentStep] = useState(false);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  
+  // Combine all state into a single object for passing to child hooks
+  const state = {
+    ...consultationState,
+    submitted,
+    isProcessing,
+    referenceId,
+    bookingError,
+    showPaymentStep,
+    paymentCompleted,
+    orderId
+  };
+  
+  // Use actions hook with the consolidated state
   const { 
     handleConfirmBooking, 
     processServiceBookings 
@@ -39,6 +66,7 @@ export function useConsultationBooking() {
     toast
   });
   
+  // Use payment hook with the consolidated state
   const { 
     proceedToPayment 
   } = useConsultationPayment({
@@ -59,12 +87,34 @@ export function useConsultationBooking() {
 
   // Return all state and functions
   return {
-    ...state,
+    // State from useConsultationState
+    date,
+    serviceCategory,
+    selectedServices,
+    timeSlot,
+    timeframe,
+    personalDetails,
+    pricing,
+    totalPrice,
+    
+    // Local state
+    submitted,
+    isProcessing,
+    referenceId,
+    bookingError,
+    showPaymentStep,
+    paymentCompleted,
+    orderId,
+    
+    // State setters
     setDate,
     setServiceCategory,
     setSelectedServices,
     setTimeSlot,
     setTimeframe,
+    setTotalPrice,
+    
+    // Actions
     handlePersonalDetailsChange,
     handleConfirmBooking,
     processPayment,
