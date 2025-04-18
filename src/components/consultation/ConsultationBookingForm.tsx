@@ -130,8 +130,8 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
           </form>
         </Card>
       ) : (
-        <Card className="backdrop-blur-sm bg-white/80 p-6 md:p-8 border border-gray-100 shadow-xl rounded-xl relative z-10">
-          <div className="text-center mb-8">
+        <Card className="backdrop-blur-sm bg-white/90 p-6 md:p-8 border border-gray-100 shadow-xl rounded-xl relative z-10">
+          <div className="mb-8">
             <h2 className="text-3xl md:text-4xl font-lora font-semibold mb-3 text-gray-800 bg-clip-text text-transparent bg-gradient-to-r from-peacefulBlue to-vividPink">
               Book Your Consultation
             </h2>
