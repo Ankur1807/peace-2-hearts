@@ -9,14 +9,14 @@ interface BookingFormContainerProps {
 
 const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingState }) => {
   return (
-    <div className="ocean-pattern py-16 md:py-24">
+    <div className="ocean-pattern py-12 md:py-16">
       <div className="container mx-auto px-4 max-w-4xl relative">
         {/* Decorative elements */}
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-peacefulBlue/10 rounded-full filter blur-3xl"></div>
         <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-vividPink/10 rounded-full filter blur-3xl"></div>
         
         <div className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-lora font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-peacefulBlue to-vividPink">
+          <h1 className="text-4xl md:text-5xl font-lora font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-peacefulBlue to-vividPink">
             Book Your Consultation
           </h1>
           <p className="text-gray-700 text-lg max-w-2xl mx-auto">
