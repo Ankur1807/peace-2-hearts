@@ -7,7 +7,8 @@ interface ServiceOptionProps {
   title: string;
   description?: string;
   isSelected: boolean;
-  onChange: (checked: boolean) => void;
+  onChange?: (checked: boolean) => void;
+  onClick?: () => void;  // Added onClick prop to support existing usage
   price?: number;
 }
 
@@ -17,12 +18,19 @@ const ServiceOption: React.FC<ServiceOptionProps> = ({
   description, 
   isSelected, 
   onChange,
+  onClick,
   price 
 }) => {
   // Use a separate handler to avoid creating a new function on every render
   const handleChange = React.useCallback((checked: boolean) => {
-    onChange(checked);
-  }, [onChange]);
+    if (onChange) {
+      onChange(checked);
+    }
+    // If onClick is provided and the checkbox is being checked, call onClick
+    if (onClick && checked) {
+      onClick();
+    }
+  }, [onChange, onClick]);
 
   // Log to debug selection issues
   console.log(`Service ${id} isChecked:`, isSelected);

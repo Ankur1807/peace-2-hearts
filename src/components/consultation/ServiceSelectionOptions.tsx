@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup } from '@/components/ui/radio-group';
@@ -90,7 +91,7 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
                 title={pkg.label + (price ? ` - ₹${price.toLocaleString('en-IN')}` : '')}
                 description={pkg.description}
                 isSelected={isSelected}
-                onClick={() => handlePackageSelection(pkg.id)}
+                onChange={() => isSelected ? null : handlePackageSelection(pkg.id)}
               />
             );
           })}

@@ -57,7 +57,9 @@ const MentalHealthServices: React.FC<MentalHealthServicesProps> = ({
           title={option.title}
           description={option.description}
           isSelected={consultationType === option.id}
-          onClick={() => handleBoxClick(option.id)}
+          onChange={(checked) => {
+            if (checked) handleBoxClick(option.id);
+          }}
         />
       ))}
     </RadioGroup>

@@ -54,7 +54,9 @@ const LegalServices: React.FC<LegalServicesProps> = ({
           title={option.title}
           description={option.description}
           isSelected={consultationType === option.id}
-          onClick={() => handleBoxClick(option.id)}
+          onChange={(checked) => {
+            if (checked) handleBoxClick(option.id);
+          }}
         />
       ))}
     </RadioGroup>
