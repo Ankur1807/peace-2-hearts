@@ -5,6 +5,7 @@ import PaymentActions from './PaymentActions';
 import PaymentTerms from './PaymentTerms';
 import RazorpayCard from './RazorpayCard';
 import PaymentLoader from './PaymentLoader';
+import { getPackageName } from '@/utils/consultation/packageUtils'; // Add this import
 
 interface PaymentStepProps {
   consultationType: string;
