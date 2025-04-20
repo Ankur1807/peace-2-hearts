@@ -1,12 +1,12 @@
 
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PackagePrice } from '@/utils/pricingTypes';
+import { ServicePrice } from '@/utils/pricingTypes';
 import PackageEditForm from './PackageEditForm';
 import PackageStatusToggle from './PackageStatusToggle';
 
 interface PackageTableProps {
-  packages: PackagePrice[];
+  packages: ServicePrice[];
   loading: boolean;
   updating?: boolean;
   onEditPrice: (id: string, price: number) => Promise<void>;
@@ -48,8 +48,8 @@ const PackageTable: React.FC<PackageTableProps> = ({
         ) : (
           packages.map((pkg) => (
             <TableRow key={pkg.id}>
-              <TableCell className="font-medium">{pkg.package_name}</TableCell>
-              <TableCell>{pkg.package_id}</TableCell>
+              <TableCell className="font-medium">{pkg.service_name}</TableCell>
+              <TableCell>{pkg.service_id}</TableCell>
               <TableCell>
                 {pkg.services?.map((service) => (
                   <span key={service} className="inline-block bg-slate-100 px-2 py-1 rounded text-xs mr-1 mb-1">

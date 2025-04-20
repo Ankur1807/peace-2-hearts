@@ -2,11 +2,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { PackagePrice } from '@/utils/pricingTypes';
+import { ServicePrice } from '@/utils/pricingTypes';
 import { syncPackageIds, updatePackagePrice } from '@/utils/pricing/serviceOperations';
 
 export const usePackagePricing = () => {
-  const [packages, setPackages] = useState<PackagePrice[]>([]);
+  const [packages, setPackages] = useState<ServicePrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [syncNeeded, setSyncNeeded] = useState(false);
@@ -18,9 +18,10 @@ export const usePackagePricing = () => {
       console.log('Fetching packages from Supabase...');
       
       const { data, error } = await supabase
-        .from('package_pricing')
+        .from('service_pricing')
         .select('*')
-        .order('package_name', { ascending: true });
+        .eq('type', 'package')
+        .order('service_name', { ascending: true });
 
       if (error) {
         console.error('Error fetching packages:', error);
@@ -33,12 +34,12 @@ export const usePackagePricing = () => {
       }
 
       if (data) {
-        const packageGroups = new Map<string, PackagePrice[]>();
+        const packageGroups = new Map<string, ServicePrice[]>();
         data.forEach(pkg => {
-          if (!packageGroups.has(pkg.package_name)) {
-            packageGroups.set(pkg.package_name, []);
+          if (!packageGroups.has(pkg.service_name)) {
+            packageGroups.set(pkg.service_name, []);
           }
-          packageGroups.get(pkg.package_name)!.push(pkg);
+          packageGroups.get(pkg.service_name)!.push(pkg);
         });
         
         let inconsistencyFound = false;

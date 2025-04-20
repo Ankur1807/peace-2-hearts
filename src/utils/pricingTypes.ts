@@ -1,4 +1,3 @@
-
 // Type definitions for pricing-related database tables
 
 export interface ServicePrice {
@@ -8,20 +7,10 @@ export interface ServicePrice {
   price: number;
   currency: string;
   category: string;
+  type: 'service' | 'package';
+  services: string[] | null;
   is_active: boolean;
   scenario?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PackagePrice {
-  id: string;
-  package_id: string;
-  package_name: string;
-  price: number;
-  currency: string;
-  services: string[];
-  is_active: boolean;
   created_at: string;
   updated_at: string;
 }

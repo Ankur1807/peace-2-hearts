@@ -226,42 +226,6 @@ export type Database = {
         }
         Relationships: []
       }
-      package_pricing: {
-        Row: {
-          created_at: string
-          currency: string
-          id: string
-          is_active: boolean
-          package_id: string
-          package_name: string
-          price: number
-          services: string[]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          currency?: string
-          id?: string
-          is_active?: boolean
-          package_id: string
-          package_name: string
-          price: number
-          services: string[]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          currency?: string
-          id?: string
-          is_active?: boolean
-          package_id?: string
-          package_name?: string
-          price?: number
-          services?: string[]
-          updated_at?: string
-        }
-        Relationships: []
-      }
       payments: {
         Row: {
           amount: number
@@ -336,48 +300,6 @@ export type Database = {
         }
         Relationships: []
       }
-      pricing_items: {
-        Row: {
-          category: string
-          components: string[] | null
-          created_at: string
-          currency: string
-          id: string
-          is_active: boolean
-          item_id: string
-          name: string
-          price: number
-          type: string
-          updated_at: string
-        }
-        Insert: {
-          category: string
-          components?: string[] | null
-          created_at?: string
-          currency?: string
-          id?: string
-          is_active?: boolean
-          item_id: string
-          name: string
-          price: number
-          type: string
-          updated_at?: string
-        }
-        Update: {
-          category?: string
-          components?: string[] | null
-          created_at?: string
-          currency?: string
-          id?: string
-          is_active?: boolean
-          item_id?: string
-          name?: string
-          price?: number
-          type?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
@@ -413,6 +335,8 @@ export type Database = {
           scenario: string
           service_id: string
           service_name: string
+          services: string[] | null
+          type: string
           updated_at: string
         }
         Insert: {
@@ -425,6 +349,8 @@ export type Database = {
           scenario?: string
           service_id: string
           service_name: string
+          services?: string[] | null
+          type?: string
           updated_at?: string
         }
         Update: {
@@ -437,6 +363,8 @@ export type Database = {
           scenario?: string
           service_id?: string
           service_name?: string
+          services?: string[] | null
+          type?: string
           updated_at?: string
         }
         Relationships: []
