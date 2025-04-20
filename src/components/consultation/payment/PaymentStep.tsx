@@ -10,6 +10,7 @@ interface PaymentStepProps {
   consultationType: string;
   selectedServices?: string[];
   totalPrice: number;
+  pricing?: Map<string, number>;
   isProcessing: boolean;
   onPrevStep: () => void;
   onNextStep: () => void;
@@ -20,6 +21,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   consultationType,
   selectedServices = [],
   totalPrice,
+  pricing,
   isProcessing,
   onPrevStep,
   onSubmit
@@ -41,7 +43,19 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   // For debugging
   React.useEffect(() => {
     console.log(`PaymentStep component totalPrice: ${totalPrice}`);
-  }, [totalPrice]);
+    console.log(`PaymentStep pricing data:`, pricing ? Object.fromEntries(pricing) : 'No pricing data');
+    
+    // Check if we have package pricing
+    if (selectedServices && selectedServices.length > 0) {
+      const packageName = getPackageName(selectedServices);
+      if (packageName) {
+        const packageId = packageName === "Divorce Prevention Package" 
+          ? 'divorce-prevention' 
+          : 'pre-marriage-clarity';
+        console.log(`PaymentStep package: ${packageName}, packageId: ${packageId}, price: ${pricing?.get(packageId) || 'not found'}`);
+      }
+    }
+  }, [totalPrice, pricing, selectedServices]);
 
   if (isProcessing) {
     return <PaymentLoader 
@@ -64,6 +78,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         consultationType={consultationType} 
         totalPrice={totalPrice}
         selectedServices={selectedServices}
+        pricing={pricing}
       />
       
       <RazorpayCard />

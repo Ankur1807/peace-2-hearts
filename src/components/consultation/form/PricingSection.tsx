@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { getServiceLabel } from '@/utils/consultationLabels';
 import { getPackageName } from '@/utils/consultation/packageUtils';
 
@@ -21,6 +21,18 @@ const PricingSection: React.FC<PricingSectionProps> = ({
   
   // Check if the selected services match a package
   const packageName = getPackageName(selectedServices);
+  const packageId = packageName === "Divorce Prevention Package" 
+    ? 'divorce-prevention' 
+    : packageName === "Pre-Marriage Clarity Package" ? 'pre-marriage-clarity' : null;
+  
+  // Get appropriate package price if it's a package
+  const packagePrice = packageId && pricing ? pricing.get(packageId) || totalPrice : totalPrice;
+  
+  // For debugging
+  useEffect(() => {
+    console.log(`PricingSection rendered with packageName: ${packageName}, packageId: ${packageId}, packagePrice: ${packagePrice}, totalPrice: ${totalPrice}`);
+    console.log('Available pricing:', pricing ? Object.fromEntries(pricing) : 'No pricing data');
+  }, [packageName, packageId, packagePrice, totalPrice, pricing]);
   
   return (
     <div className="p-6 bg-gradient-to-r from-peacefulBlue/5 to-white rounded-lg border border-peacefulBlue/20 shadow-md">
@@ -36,12 +48,16 @@ const PricingSection: React.FC<PricingSectionProps> = ({
         Consultation Summary
       </h3>
       
-      {packageName ? (
+      {packageName && (
         // If it's a package, show the package name and price
         <div className="space-y-2 mb-6">
           <div className="flex justify-between items-center py-2 border-b border-gray-100">
             <span className="text-gray-700 font-medium">{packageName}</span>
-            <span className="font-medium">₹{totalPrice.toLocaleString('en-IN')}</span>
+            <span className="font-medium">
+              {packagePrice > 0 
+                ? `₹${packagePrice.toLocaleString('en-IN')}` 
+                : "Price unavailable"}
+            </span>
           </div>
           <div className="text-sm text-gray-600 mt-2">
             <p>This package includes:</p>
@@ -52,7 +68,9 @@ const PricingSection: React.FC<PricingSectionProps> = ({
             </ul>
           </div>
         </div>
-      ) : (
+      )}
+      
+      {!packageName && selectedServices.length > 0 && (
         // If it's individual services, show each service and its price
         <div className="space-y-2 mb-6">
           {selectedServices.map(serviceId => {
@@ -60,7 +78,11 @@ const PricingSection: React.FC<PricingSectionProps> = ({
             return (
               <div key={serviceId} className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-700">{getServiceLabel(serviceId)}</span>
-                <span className="font-medium">₹{price.toLocaleString('en-IN')}</span>
+                <span className="font-medium">
+                  {price > 0 
+                    ? `₹${price.toLocaleString('en-IN')}`
+                    : "Price unavailable"}
+                </span>
               </div>
             );
           })}
@@ -69,7 +91,11 @@ const PricingSection: React.FC<PricingSectionProps> = ({
       
       <div className="flex justify-between items-center pt-4 border-t border-gray-300">
         <span className="text-lg font-semibold text-gray-800">Total</span>
-        <span className="text-xl font-bold text-peacefulBlue">₹{totalPrice.toLocaleString('en-IN')}</span>
+        <span className="text-xl font-bold text-peacefulBlue">
+          {totalPrice > 0 
+            ? `₹${totalPrice.toLocaleString('en-IN')}`
+            : "Price unavailable"}
+        </span>
       </div>
     </div>
   );

@@ -28,6 +28,11 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
     return `Pay ${formatPrice(totalPrice)}`;
   };
 
+  // For debugging
+  React.useEffect(() => {
+    console.log(`PaymentActions rendered with totalPrice: ${totalPrice}, isProcessing: ${isProcessing}, acceptTerms: ${acceptTerms}, razorpayLoaded: ${razorpayLoaded}`);
+  }, [totalPrice, isProcessing, acceptTerms, razorpayLoaded]);
+
   return (
     <div className="pt-6 flex justify-between">
       <Button type="button" variant="outline" onClick={onPrevStep}>

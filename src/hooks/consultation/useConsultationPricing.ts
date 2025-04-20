@@ -65,12 +65,43 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
         
         console.log(`Fetching package price for ${packageId}`);
         const packagePricing = await fetchPackagePricing([packageId], skipCache);
+        
+        // Get the package price
         finalPrice = packagePricing.get(packageId) || 0;
         
         console.log(`Package price for ${packageId}: ${finalPrice}`);
         
-        // Also fetch individual service prices for display purposes
-        pricingMap = await fetchServicePricing(selectedServices);
+        if (finalPrice > 0) {
+          // Add the package price to the pricing map
+          pricingMap.set(packageId, finalPrice);
+          
+          // Also fetch individual service prices for display purposes
+          const servicePricing = await fetchServicePricing(selectedServices);
+          
+          // Combine the maps
+          pricingMap = new Map([...pricingMap, ...servicePricing]);
+        } else {
+          console.warn(`No price found for package ${packageId}, attempting to calculate from services`);
+          
+          // Calculate from individual services as fallback
+          pricingMap = await fetchServicePricing(selectedServices);
+          
+          // Sum up individual service prices
+          selectedServices.forEach(serviceId => {
+            const price = pricingMap.get(serviceId) || 0;
+            finalPrice += price;
+            console.log(`Adding ${price} for ${serviceId} (fallback calculation)`);
+          });
+          
+          // Apply package discount
+          if (finalPrice > 0) {
+            finalPrice = Math.round(finalPrice * 0.85); // 15% discount
+            console.log(`Applied 15% package discount: ${finalPrice}`);
+            
+            // Add the calculated package price
+            pricingMap.set(packageId, finalPrice);
+          }
+        }
       } else {
         // Just individual services
         pricingMap = await fetchServicePricing(selectedServices);
@@ -109,7 +140,7 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
   }, [selectedServices, serviceCategory, toast]);
   
   useEffect(() => {
-    // Only fetch if we have services 
+    // Only fetch if we have services or haven't done the initial fetch yet
     if (selectedServices.length > 0 || !initialFetchDone.current) {
       updatePricing();
     }
@@ -118,7 +149,16 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
   // For debugging
   useEffect(() => {
     console.log(`Current totalPrice: ${totalPrice}, Selected services: ${selectedServices.join(', ')}`);
-  }, [totalPrice, selectedServices]);
+    
+    // Log the package name if applicable
+    const packageName = getPackageName(selectedServices);
+    if (packageName) {
+      const packageId = packageName === "Divorce Prevention Package" 
+        ? 'divorce-prevention' 
+        : 'pre-marriage-clarity';
+      console.log(`Selected package: ${packageName} (${packageId}), Price: ${pricing.get(packageId) || 'not found'}`);
+    }
+  }, [totalPrice, selectedServices, pricing]);
   
   return { 
     pricing, 

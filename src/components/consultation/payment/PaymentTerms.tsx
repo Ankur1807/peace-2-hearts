@@ -2,12 +2,11 @@
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from 'react-router-dom';
-import { Shield } from 'lucide-react';
 
-type PaymentTermsProps = {
+interface PaymentTermsProps {
   acceptTerms: boolean;
-  setAcceptTerms: (accepted: boolean) => void;
-};
+  setAcceptTerms: (checked: boolean) => void;
+}
 
 const PaymentTerms: React.FC<PaymentTermsProps> = ({ acceptTerms, setAcceptTerms }) => {
   return (
@@ -39,13 +38,6 @@ const PaymentTerms: React.FC<PaymentTermsProps> = ({ acceptTerms, setAcceptTerms
             Shipping & Delivery Policy
           </Link>
         </label>
-      </div>
-      
-      <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-        <Shield className="h-5 w-5 text-gray-500 mr-3" />
-        <p className="text-sm text-gray-600">
-          All payment information is encrypted and secure. Your card details are never stored on our servers.
-        </p>
       </div>
     </div>
   );

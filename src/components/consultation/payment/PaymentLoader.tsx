@@ -1,34 +1,29 @@
 
-import React, { useState, useEffect } from 'react';
-import { AlertCircle } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 import Script from '@/components/Script';
-import { isRazorpayAvailable, loadRazorpayScript } from '@/utils/payment/razorpayService';
+import { loadRazorpayScript, isRazorpayAvailable } from '@/utils/payment/razorpayService';
 
-type PaymentLoaderProps = {
+interface PaymentLoaderProps {
   onRazorpayLoad: (loaded: boolean) => void;
   onLoadError: (error: string | null) => void;
   loadError: string | null;
-};
+}
 
 const PaymentLoader: React.FC<PaymentLoaderProps> = ({ 
   onRazorpayLoad,
   onLoadError,
   loadError
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const checkAndLoadRazorpay = async () => {
       try {
-        // Check if already loaded
         if (isRazorpayAvailable()) {
-          console.log("Razorpay already available in window");
+          console.log("Razorpay already available");
           onRazorpayLoad(true);
-          setIsLoading(false);
           return;
         }
-
-        // Try to load the script
+        
         const loaded = await loadRazorpayScript();
         console.log("Razorpay script load result:", loaded);
         onRazorpayLoad(loaded);
@@ -36,21 +31,17 @@ const PaymentLoader: React.FC<PaymentLoaderProps> = ({
         if (!loaded) {
           onLoadError("Failed to load payment gateway. Please refresh and try again.");
         }
-        
-        setIsLoading(false);
       } catch (err) {
         console.error("Error loading Razorpay:", err);
         onLoadError("Error initializing payment gateway. Please refresh and try again.");
-        onRazorpayLoad(false);
-        setIsLoading(false);
       }
     };
-
+    
     checkAndLoadRazorpay();
   }, [onRazorpayLoad, onLoadError]);
-
+  
   return (
-    <>
+    <div className="flex flex-col items-center justify-center p-12">
       <Script 
         src="https://checkout.razorpay.com/v1/checkout.js"
         id="razorpay-script"
@@ -61,21 +52,27 @@ const PaymentLoader: React.FC<PaymentLoaderProps> = ({
         }}
       />
       
-      {loadError && (
-        <div className="flex items-center p-4 mb-4 bg-red-50 rounded-lg border border-red-200">
-          <AlertCircle className="h-5 w-5 text-red-500 mr-3" />
-          <p className="text-sm text-red-600">
-            {loadError}
-          </p>
-        </div>
-      )}
-      
-      {isLoading && !loadError && (
-        <div className="text-center text-amber-600 text-sm mt-2 mb-4">
-          Payment gateway is loading. Please wait...
-        </div>
-      )}
-    </>
+      <div className="flex flex-col items-center space-y-4">
+        {loadError ? (
+          <>
+            <div className="text-red-500 text-center mb-4">
+              <p className="font-semibold">{loadError}</p>
+              <p className="text-sm mt-1">Please try again or contact support if the issue persists.</p>
+            </div>
+          </>
+        ) : (
+          <>
+            <Loader2 className="h-12 w-12 text-peacefulBlue animate-spin" />
+            <h3 className="text-xl font-semibold text-gray-700">
+              Preparing Your Payment
+            </h3>
+            <p className="text-gray-500 text-center max-w-md">
+              Please wait while we initialize the secure payment gateway...
+            </p>
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 

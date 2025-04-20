@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 import BookingForm from './BookingForm';
 import PaymentStep from './payment/PaymentStep';
+import { getPackageName } from '@/utils/consultation/packageUtils';
 
 interface ConsultationBookingFormProps {
   bookingState: ConsultationBookingHook;
@@ -35,9 +36,20 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
   } = bookingState;
 
   // Log pricing information for debugging
-  console.log("ConsultationBookingForm pricing data:", Object.fromEntries(pricing));
-  console.log("ConsultationBookingForm totalPrice:", totalPrice);
-  console.log("ConsultationBookingForm selectedServices:", selectedServices);
+  useEffect(() => {
+    console.log("ConsultationBookingForm pricing data:", Object.fromEntries(pricing));
+    console.log("ConsultationBookingForm totalPrice:", totalPrice);
+    console.log("ConsultationBookingForm selectedServices:", selectedServices);
+    
+    // Check for package pricing
+    const packageName = getPackageName(selectedServices);
+    if (packageName) {
+      const packageId = packageName === "Divorce Prevention Package" 
+        ? 'divorce-prevention' 
+        : 'pre-marriage-clarity';
+      console.log(`Selected package: ${packageName}, packageId: ${packageId}, price: ${pricing.get(packageId) || 'not found in pricing map'}`);
+    }
+  }, [pricing, totalPrice, selectedServices]);
 
   const handlePersonalDetailsFieldChange = useCallback((field: string, value: string) => {
     handlePersonalDetailsChange({
@@ -94,19 +106,18 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   }, [holisticPackages, setSelectedServices]);
 
-  // Remove selectedServices from dependency array to prevent infinite loop
   useEffect(() => {
     // Get the current URL params to check if we came from a specific service page
     const urlParams = new URLSearchParams(window.location.search);
     const subServiceParam = urlParams.get('subservice');
 
-    // Only run once when the component mounts
+    // Only run once when the component mounts and we have no selected services yet
     if (subServiceParam && selectedServices.length === 0) {
       // If we have a URL parameter but no selected services, select it
       console.log("Setting service from URL parameter:", subServiceParam);
       setSelectedServices([subServiceParam]);
     }
-  }, [setSelectedServices]); // Removed selectedServices from dependency array
+  }, [setSelectedServices]); // Removed selectedServices from dependency array to prevent loop
 
   // Handle payment form submission
   const handlePaymentSubmit = useCallback((e: React.FormEvent) => {
@@ -140,6 +151,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
               onSubmit={handlePaymentSubmit}
               isProcessing={isProcessing}
               totalPrice={totalPrice}
+              pricing={pricing}
             />
           </form>
         </Card>

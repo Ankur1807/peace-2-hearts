@@ -13,13 +13,22 @@ interface PriceSummaryProps {
 
 const PriceSummary: React.FC<PriceSummaryProps> = ({ 
   services, 
+  pricing,
   totalPrice,
   currency = 'INR'
 }) => {
   const packageName = getPackageName(services);
+  const packageId = packageName === "Divorce Prevention Package" 
+    ? 'divorce-prevention' 
+    : packageName === "Pre-Marriage Clarity Package" ? 'pre-marriage-clarity' : null;
 
-  console.log(`PriceSummary rendered with services: ${services.join(', ')}, totalPrice: ${totalPrice}, packageName: ${packageName}`);
+  // Get package price from pricing map if available
+  const packagePrice = packageId && pricing && pricing.has(packageId) 
+    ? pricing.get(packageId)! 
+    : totalPrice;
 
+  console.log(`PriceSummary rendered with services: ${services.join(', ')}, totalPrice: ${totalPrice}, packageName: ${packageName}, packagePrice: ${packagePrice}`);
+  
   if (services.length === 0) {
     return null;
   }
@@ -41,7 +50,7 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
         <div className="mb-3 py-2">
           <div className="flex justify-between items-center text-gray-700">
             <span>{packageName}</span>
-            <span>{formatPrice(totalPrice, currency)}</span>
+            <span>{formatPrice(packagePrice, currency)}</span>
           </div>
         </div>
       )}

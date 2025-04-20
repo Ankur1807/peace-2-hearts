@@ -60,6 +60,7 @@ export async function fetchPackagePricing(packageIds?: string[], skipCache: bool
     
     // For each package ID, try to get the price directly
     for (const packageId of packageIds) {
+      // Make sure to use the correct database ID format
       const dbPackageId = packageId === 'divorce-prevention' 
         ? 'P2H-H-divorce-prevention-package' 
         : 'P2H-H-pre-marriage-clarity-solutions';
@@ -80,7 +81,23 @@ export async function fetchPackagePricing(packageIds?: string[], skipCache: bool
           console.log(`Found direct package price in database for ${packageId}: ${data.price}`);
           pricingMap.set(packageId, data.price);
         } else {
-          console.log(`No direct price found for package ${packageId}, will calculate from services`);
+          // If we can't find the exact ID, try a more flexible search
+          const { data: flexData, error: flexError } = await supabase
+            .from('service_pricing')
+            .select('service_id, price, is_active')
+            .eq('type', 'package')
+            .ilike('service_id', `%${packageId.replace(/-/g, '')}%`) // Remove hyphens for more flexible matching
+            .eq('is_active', true)
+            .maybeSingle();
+          
+          if (flexError) {
+            console.error(`Error in flexible search for package ${packageId}:`, flexError);
+          } else if (flexData && flexData.price) {
+            console.log(`Found package price with flexible search for ${packageId}: ${flexData.price}`);
+            pricingMap.set(packageId, flexData.price);
+          } else {
+            console.log(`No direct price found for package ${packageId}, will calculate from services`);
+          }
         }
       } catch (packageError) {
         console.error(`Error fetching package ${packageId}:`, packageError);
@@ -98,6 +115,17 @@ export async function fetchPackagePricing(packageIds?: string[], skipCache: bool
           if (packagePrice > 0) {
             pricingMap.set(packageId, packagePrice);
           }
+          
+          // Add fallback prices if calculation fails
+          if (!pricingMap.has(packageId) || pricingMap.get(packageId) === 0) {
+            if (packageId === 'divorce-prevention') {
+              console.log('Setting fallback price for divorce prevention package');
+              pricingMap.set(packageId, 8700);
+            } else if (packageId === 'pre-marriage-clarity') {
+              console.log('Setting fallback price for pre-marriage clarity package');
+              pricingMap.set(packageId, 3500);
+            }
+          }
         }
       }
     }
@@ -106,7 +134,19 @@ export async function fetchPackagePricing(packageIds?: string[], skipCache: bool
     return pricingMap;
   } catch (error) {
     console.error('Error in fetchPackagePricing:', error);
-    return new Map<string, number>();
+    
+    // Provide fallback prices in case of error
+    const fallbackMap = new Map<string, number>();
+    if (packageIds) {
+      if (packageIds.includes('divorce-prevention')) {
+        fallbackMap.set('divorce-prevention', 8700);
+      }
+      if (packageIds.includes('pre-marriage-clarity')) {
+        fallbackMap.set('pre-marriage-clarity', 3500);
+      }
+    }
+    
+    return fallbackMap;
   }
 }
 
