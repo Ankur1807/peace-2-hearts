@@ -11,6 +11,7 @@ export function expandClientToDbIds(clientIds: string[]): string[] {
   
   // Map of client IDs to database IDs
   const clientToDbMap: Record<string, string> = {
+    // Mental Health Services (P2H-MH)
     'mental-health-counselling': 'P2H-MH-mental-health-counselling',
     'family-therapy': 'P2H-MH-family-therapy',
     'premarital-counselling-individual': 'P2H-MH-premarital-counselling-individual',
@@ -18,12 +19,16 @@ export function expandClientToDbIds(clientIds: string[]): string[] {
     'couples-counselling': 'P2H-MH-couples-counselling',
     'sexual-health-counselling-individual': 'P2H-MH-sexual-health-counselling',
     'sexual-health-counselling-couple': 'P2H-MH-sexual-health-counselling',
+    
+    // Legal Services (P2H-L)
     'pre-marriage-legal': 'P2H-L-pre-marriage-legal-consultation',
     'mediation': 'P2H-L-mediation-services',
     'divorce': 'P2H-L-divorce-consultation',
     'custody': 'P2H-L-child-custody-consultation',
     'maintenance': 'P2H-L-maintenance-consultation',
     'general-legal': 'P2H-L-general-legal-consultation',
+    
+    // Test service
     'test-service': 'P2H-MH-test-service'
   };
   
@@ -43,7 +48,7 @@ export function expandClientToDbPackageIds(packageIds: string[]): string[] {
     return [];
   }
   
-  // Map of client package IDs to database package IDs
+  // Map of client package IDs to database package IDs (Holistic Packages P2H-H)
   const packageToDbMap: Record<string, string> = {
     'divorce-prevention': 'P2H-H-divorce-prevention-package',
     'pre-marriage-clarity': 'P2H-H-pre-marriage-clarity-solutions'

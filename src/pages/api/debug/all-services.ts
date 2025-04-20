@@ -1,20 +1,28 @@
 
-import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/integrations/supabase/client';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: Request) {
   try {
     const { data, error } = await supabase
       .from('service_pricing')
-      .select('*');
-    
+      .select('*')
+      .order('service_name', { ascending: true });
+
     if (error) {
-      return res.status(500).json({ error: error.message });
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
-    
-    return res.status(200).json(data);
-  } catch (err) {
-    console.error('Error in debug endpoint:', err);
-    return res.status(500).json({ error: 'Failed to fetch service data' });
+
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
