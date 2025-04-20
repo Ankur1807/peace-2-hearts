@@ -1,85 +1,124 @@
 
-import { 
-  getDbToClientServiceIdMap, 
-  getDbToClientPackageIdMap 
-} from './serviceIdMapper';
-
 /**
- * Map database service price data to client-side price map
- * @param data - Raw service pricing data
- * @param serviceIds - Optional list of requested service IDs
+ * Maps database service pricing data to a client-side pricing map
+ * @param data - Raw service pricing data from database
+ * @param requestedIds - Optional array of requested service IDs for validation
  * @returns Map of service_id to price
  */
-export function mapServicePricing(data: any[], serviceIds?: string[]): Map<string, number> {
+export function mapServicePricing(
+  data: Array<{ service_id: string; price: number }>,
+  requestedIds?: string[]
+): Map<string, number> {
+  // Create a map of service_id to price
   const pricingMap = new Map<string, number>();
-  const dbToClientServiceIdMap = getDbToClientServiceIdMap();
+  
+  // Define mapping from DB IDs to client IDs
+  const dbToClientMap: Record<string, string> = {
+    'P2H-MH-mental-health-counselling': 'mental-health-counselling',
+    'P2H-MH-family-therapy': 'family-therapy',
+    'P2H-MH-premarital-counselling-individual': 'premarital-counselling-individual',
+    'P2H-MH-premarital-counselling-couple': 'premarital-counselling-couple',
+    'P2H-MH-couples-counselling': 'couples-counselling',
+    'P2H-MH-sexual-health-counselling': 'sexual-health-counselling-individual',
+    'P2H-L-pre-marriage-legal-consultation': 'pre-marriage-legal',
+    'P2H-L-mediation-services': 'mediation',
+    'P2H-L-divorce-consultation': 'divorce',
+    'P2H-L-child-custody-consultation': 'custody',
+    'P2H-L-maintenance-consultation': 'maintenance',
+    'P2H-L-general-legal-consultation': 'general-legal',
+    'P2H-MH-test-service': 'test-service'
+  };
   
   if (!data || data.length === 0) {
-    console.warn('No active pricing data found for the requested services:', serviceIds);
+    console.log('No pricing data to map');
     return pricingMap;
   }
   
-  data.forEach((item) => {
-    if (item.price && item.price > 0) {
-      // Find which client ID this DB ID maps to
-      const clientId = dbToClientServiceIdMap[item.service_id] || item.service_id;
-      
-      // If we have a client ID mapping, use it
-      if (clientId) {
-        pricingMap.set(clientId, item.price);
-        console.log(`Set price for ${clientId} (from DB ID ${item.service_id}): ${item.price}`);
-      }
-      
-      // Also set the original service_id for direct matches
-      if (!serviceIds || serviceIds.includes(item.service_id)) {
-        pricingMap.set(item.service_id, item.price);
-        console.log(`Set price for original service ID ${item.service_id}: ${item.price}`);
-      }
+  // Add each service to the map
+  for (const item of data) {
+    // Map DB ID to client ID
+    const clientId = dbToClientMap[item.service_id.trim()];
+    
+    if (clientId) {
+      console.log(`Mapped DB ID ${item.service_id} to client ID ${clientId} with price ${item.price}`);
+      pricingMap.set(clientId, item.price);
     } else {
-      console.warn(`Service ${item.service_id} has invalid price: ${item.price}`);
+      // If we don't have a mapping, use the original ID as fallback
+      console.log(`No mapping for DB ID ${item.service_id}, using as-is with price ${item.price}`);
+      const simplifiedId = item.service_id.replace('P2H-MH-', '').replace('P2H-L-', '').replace('-consultation', '');
+      pricingMap.set(simplifiedId, item.price);
     }
-  });
+  }
+  
+  // If specific IDs were requested, check if any are missing
+  if (requestedIds && requestedIds.length > 0) {
+    requestedIds.forEach(id => {
+      if (!pricingMap.has(id)) {
+        console.warn(`No price found for requested service: ${id}`);
+      }
+    });
+  }
   
   console.log('Final pricing map:', Object.fromEntries(pricingMap));
   return pricingMap;
 }
 
 /**
- * Map database package price data to client-side price map
- * @param data - Raw package pricing data
- * @param packageIds - Optional list of requested package IDs
+ * Maps database package pricing data to a client-side pricing map
+ * @param data - Raw package pricing data from database
+ * @param requestedIds - Optional array of requested package IDs for validation
  * @returns Map of package_id to price
  */
-export function mapPackagePricing(data: any[], packageIds?: string[]): Map<string, number> {
+export function mapPackagePricing(
+  data: Array<{ package_id?: string; service_id?: string; price: number }>,
+  requestedIds?: string[]
+): Map<string, number> {
+  // Create a map of package_id to price
   const pricingMap = new Map<string, number>();
-  const dbToClientPackageIdMap = getDbToClientPackageIdMap();
+  
+  // Define mapping from DB IDs to client IDs
+  const dbToClientMap: Record<string, string> = {
+    'P2H-H-divorce-prevention-package': 'divorce-prevention',
+    'P2H-H-pre-marriage-clarity-solutions': 'pre-marriage-clarity'
+  };
   
   if (!data || data.length === 0) {
+    console.log('No package pricing data to map');
     return pricingMap;
   }
   
-  data.forEach((pkg) => {
-    const serviceId = pkg.service_id || pkg.package_id;
+  // Add each package to the map
+  for (const item of data) {
+    const dbId = item.package_id || item.service_id;
     
-    if (!serviceId) {
-      console.warn('Package missing ID:', pkg);
-      return;
+    if (!dbId) {
+      console.warn('Package item is missing both package_id and service_id:', item);
+      continue;
     }
     
-    // Find which client ID this DB ID maps to
-    const clientId = dbToClientPackageIdMap[serviceId] || serviceId;
+    // Map DB ID to client ID
+    const clientId = dbToClientMap[dbId.trim()];
     
     if (clientId) {
-      pricingMap.set(clientId, pkg.price);
-      console.log(`Set package price for ${clientId} (from ${serviceId}): ${pkg.price}`);
+      console.log(`Mapped DB ID ${dbId} to client ID ${clientId} with price ${item.price}`);
+      pricingMap.set(clientId, item.price);
+    } else {
+      // If we don't have a mapping, use the original ID as fallback
+      console.log(`No mapping for DB ID ${dbId}, using as-is with price ${item.price}`);
+      const simplifiedId = dbId.replace('P2H-H-', '').replace('-package', '').replace('-solutions', '');
+      pricingMap.set(simplifiedId, item.price);
     }
-    
-    // Also set the original ID for direct matches
-    if (!packageIds || packageIds.includes(serviceId)) {
-      pricingMap.set(serviceId, pkg.price);
-      console.log(`Set price for original package ID ${serviceId}: ${pkg.price}`);
-    }
-  });
+  }
   
+  // If specific IDs were requested, check if any are missing
+  if (requestedIds && requestedIds.length > 0) {
+    requestedIds.forEach(id => {
+      if (!pricingMap.has(id)) {
+        console.warn(`No price found for requested package: ${id}`);
+      }
+    });
+  }
+  
+  console.log('Final package pricing map:', Object.fromEntries(pricingMap));
   return pricingMap;
 }

@@ -86,10 +86,20 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       setPricing(pricingMap);
       setTotalPrice(total);
       
-      // Show warning if no prices found
+      // If no prices found despite having valid services, try a direct fetch from database
       if (total === 0 && selectedServices.length > 0) {
         const errorMsg = 'No pricing information available for selected services';
         console.warn(errorMsg);
+        
+        // Try to fetch all service data for debugging
+        try {
+          const allServiceResp = await fetch('/api/debug/all-services');
+          const allServices = await allServiceResp.json();
+          console.log('Available services in database:', allServices);
+        } catch (err) {
+          console.error('Could not fetch debug service data:', err);
+        }
+        
         setPricingError(errorMsg);
       }
     } catch (error) {

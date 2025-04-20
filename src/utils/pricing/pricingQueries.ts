@@ -17,7 +17,8 @@ export async function fetchServicePricingData(serviceIds?: string[]) {
   
   let query = supabase
     .from('service_pricing')
-    .select('service_id, price, is_active');
+    .select('service_id, price, is_active')
+    .eq('type', 'service');
   
   // Apply service_id filter if provided
   if (expandedIds.length > 0) {
@@ -45,7 +46,8 @@ export async function fetchServicePricingData(serviceIds?: string[]) {
 export async function fetchAllServiceData() {
   const { data, error } = await supabase
     .from('service_pricing')
-    .select('service_id, price, is_active');
+    .select('service_id, price, is_active')
+    .eq('type', 'service');
     
   if (error) {
     console.error('Error fetching all service data:', error);

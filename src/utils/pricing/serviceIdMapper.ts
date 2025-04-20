@@ -1,106 +1,56 @@
 
 /**
- * Maps client service IDs to database service IDs and vice versa
- */
-
-// Map of client service IDs to database service IDs
-export const clientToDbServiceIdMap: Record<string, string[]> = {
-  'mental-health-counselling': ['Mental-Health-Counselling'],
-  'family-therapy': ['Family-Therapy'],
-  'premarital-counselling-individual': ['Premarital-Counselling-Individual'],
-  'premarital-counselling-couple': ['Premarital-Counselling-couple'],
-  'couples-counselling': ['Couples-Counselling'],
-  'sexual-health-counselling-individual': ['Sexual-Health-Counselling-Individual'],
-  'sexual-health-counselling-couple': ['Sexual-Health-Counselling-couple'],
-  'pre-marriage-legal': ['Pre-marriage-Legal-Consultation'],
-  'divorce': ['Divorce-Consultation'],
-  'custody': ['Child-Custody-Consultation'],
-  'mediation': ['Mediation-Services'],
-  'maintenance': ['Maintenance-Consultation'],
-  'general-legal': ['General-Legal-Consultation']
-};
-
-// Map of client package IDs to database package IDs
-export const clientToDbPackageIdMap: Record<string, string[]> = {
-  'divorce-prevention': ['Divorce-Prevention-Package'],
-  'pre-marriage-clarity': ['Pre-Marriage-Package']
-};
-
-/**
- * Get database service IDs for client service IDs
- * @param clientIds - Client-side service IDs
- * @returns Expanded array of database service IDs
+ * Maps client-side service IDs to database service IDs
+ * @param clientIds - Array of client-side service IDs
+ * @returns Array of corresponding database service IDs
  */
 export function expandClientToDbIds(clientIds: string[]): string[] {
   if (!clientIds || clientIds.length === 0) {
     return [];
   }
   
-  let expandedIds: string[] = [];
+  // Map of client IDs to database IDs
+  const clientToDbMap: Record<string, string> = {
+    'mental-health-counselling': 'P2H-MH-mental-health-counselling',
+    'family-therapy': 'P2H-MH-family-therapy',
+    'premarital-counselling-individual': 'P2H-MH-premarital-counselling-individual',
+    'premarital-counselling-couple': 'P2H-MH-premarital-counselling-couple',
+    'couples-counselling': 'P2H-MH-couples-counselling',
+    'sexual-health-counselling-individual': 'P2H-MH-sexual-health-counselling',
+    'sexual-health-counselling-couple': 'P2H-MH-sexual-health-counselling',
+    'pre-marriage-legal': 'P2H-L-pre-marriage-legal-consultation',
+    'mediation': 'P2H-L-mediation-services',
+    'divorce': 'P2H-L-divorce-consultation',
+    'custody': 'P2H-L-child-custody-consultation',
+    'maintenance': 'P2H-L-maintenance-consultation',
+    'general-legal': 'P2H-L-general-legal-consultation',
+    'test-service': 'P2H-MH-test-service'
+  };
   
-  clientIds.forEach(id => {
-    if (clientToDbServiceIdMap[id]) {
-      expandedIds = [...expandedIds, ...clientToDbServiceIdMap[id]];
-    } else {
-      expandedIds.push(id);
-    }
-  });
-  
-  return expandedIds;
+  // Map the client IDs to database IDs, filtering out any that don't have a mapping
+  return clientIds
+    .map(id => clientToDbMap[id])
+    .filter(Boolean);
 }
 
 /**
- * Get database package IDs for client package IDs
- * @param clientIds - Client-side package IDs
- * @returns Expanded array of database package IDs
+ * Maps client-side package IDs to database package IDs
+ * @param packageIds - Array of client-side package IDs
+ * @returns Array of corresponding database package IDs
  */
-export function expandClientToDbPackageIds(clientIds: string[]): string[] {
-  if (!clientIds || clientIds.length === 0) {
+export function expandClientToDbPackageIds(packageIds: string[]): string[] {
+  if (!packageIds || packageIds.length === 0) {
     return [];
   }
   
-  let expandedIds: string[] = [];
+  // Map of client package IDs to database package IDs
+  const packageToDbMap: Record<string, string> = {
+    'divorce-prevention': 'P2H-H-divorce-prevention-package',
+    'pre-marriage-clarity': 'P2H-H-pre-marriage-clarity-solutions'
+  };
   
-  clientIds.forEach(id => {
-    if (clientToDbPackageIdMap[id]) {
-      expandedIds = [...expandedIds, ...clientToDbPackageIdMap[id]];
-    } else {
-      expandedIds.push(id);
-    }
-  });
-  
-  return expandedIds;
-}
-
-/**
- * Create a reverse mapping from database IDs to client IDs
- * @param idMap - Map of client IDs to database IDs
- * @returns Map of database IDs to client IDs
- */
-export function createReverseMapping(idMap: Record<string, string[]>): Record<string, string> {
-  const reverseMap: Record<string, string> = {};
-  
-  Object.entries(idMap).forEach(([clientId, dbIds]) => {
-    dbIds.forEach(dbId => {
-      reverseMap[dbId] = clientId;
-    });
-  });
-  
-  return reverseMap;
-}
-
-/**
- * Get client service ID for database service ID
- * @returns Map of database service IDs to client service IDs
- */
-export function getDbToClientServiceIdMap(): Record<string, string> {
-  return createReverseMapping(clientToDbServiceIdMap);
-}
-
-/**
- * Get client package ID for database package ID
- * @returns Map of database package IDs to client package IDs
- */
-export function getDbToClientPackageIdMap(): Record<string, string> {
-  return createReverseMapping(clientToDbPackageIdMap);
+  // Map the client package IDs to database package IDs, filtering out any that don't have a mapping
+  return packageIds
+    .map(id => packageToDbMap[id])
+    .filter(Boolean);
 }
