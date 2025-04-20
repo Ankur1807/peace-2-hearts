@@ -1,8 +1,8 @@
-
 import { 
   fetchServicePricingData,
   fetchAllServiceData
 } from './pricingQueries';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Calculate package price based on component services
