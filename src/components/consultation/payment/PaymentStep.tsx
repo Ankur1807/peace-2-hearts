@@ -44,17 +44,26 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
 
   // For debugging
   React.useEffect(() => {
-    console.log(`PaymentStep component totalPrice: ${totalPrice}`);
-    console.log(`PaymentStep pricing data:`, pricing ? Object.fromEntries(pricing) : 'No pricing data');
-    
     if (selectedServices && selectedServices.length > 0) {
-      const packageName = getPackageName(selectedServices);
-      if (packageName) {
-        const packageId = packageName === "Divorce Prevention Package" 
-          ? 'divorce-prevention' 
-          : 'pre-marriage-clarity';
-        console.log(`PaymentStep package: ${packageName}, packageId: ${packageId}, price: ${pricing?.get(packageId) || 'not found'}`);
+      // Check if it's a package ID directly
+      if (selectedServices[0] === 'divorce-prevention' || selectedServices[0] === 'pre-marriage-clarity') {
+        const packagePrice = pricing?.get(selectedServices[0]) || 0;
+        console.log(`Direct package selection: ${selectedServices[0]}, price: ${packagePrice}`);
+      } else {
+        // Check if the services match a package
+        const packageName = getPackageName(selectedServices);
+        if (packageName) {
+          const packageId = packageName === "Divorce Prevention Package" 
+            ? 'divorce-prevention' 
+            : 'pre-marriage-clarity';
+          console.log(`Package from services: ${packageName}, id: ${packageId}, price: ${pricing?.get(packageId) || 'not found'}`);
+        }
       }
+    }
+    
+    console.log(`PaymentStep component with totalPrice: ${totalPrice}`);
+    if (pricing) {
+      console.log('Available pricing:', Object.fromEntries(pricing));
     }
   }, [totalPrice, pricing, selectedServices]);
 

@@ -17,7 +17,7 @@ const PaymentTerms: React.FC<PaymentTermsProps> = ({ acceptTerms, setAcceptTerms
           id="terms" 
           checked={acceptTerms}
           onCheckedChange={(checked) => setAcceptTerms(checked === true)}
-          className="mt-1"
+          className="mt-1 border-2 border-peacefulBlue"
           required
         />
         <label

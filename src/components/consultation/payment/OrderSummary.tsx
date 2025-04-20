@@ -3,6 +3,7 @@ import React from 'react';
 import { getConsultationTypeLabel } from '@/utils/consultationLabels';
 import { formatPrice } from '@/utils/pricing/fetchPricing';
 import { getPackageName } from '@/utils/consultation/packageUtils';
+import { User } from 'lucide-react';
 
 type OrderSummaryProps = {
   consultationType: string;
@@ -25,7 +26,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     ? 'divorce-prevention' 
     : packageName === "Pre-Marriage Clarity Package" ? 'pre-marriage-clarity' : null;
   
-  // Get package price from pricing map if available (or fall back to totalPrice)
+  // Get package price from pricing map if available
   const displayPrice = packageId && pricing && pricing.has(packageId)
     ? pricing.get(packageId)!
     : totalPrice;
@@ -34,12 +35,16 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   const consultationLabel = packageName || 
                           (selectedServices.length > 0 ? getConsultationTypeLabel(selectedServices[0]) : 'Consultation');
 
-  console.log(`OrderSummary: packageName=${packageName}, packageId=${packageId}, displayPrice=${displayPrice}, totalPrice=${totalPrice}`);
-
+  // Log for debugging
+  console.log(`OrderSummary: packageName=${packageName}, packageId=${packageId}, displayPrice=${displayPrice}, totalPrice=${totalPrice}, pricing=${pricing ? JSON.stringify(Object.fromEntries(pricing)) : 'undefined'}`);
+  
   return (
     <div className="mb-6">
       <div className="bg-gray-50 p-4 rounded-lg mb-6">
-        <h3 className="font-semibold mb-3">Order Summary</h3>
+        <div className="flex items-center gap-2 mb-3">
+          <User className="h-5 w-5 text-peacefulBlue" />
+          <h3 className="font-semibold">Consultation Summary</h3>
+        </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-gray-800">{consultationLabel}</span>
@@ -54,7 +59,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="border-t border-b py-4 mb-6">
         <div className="flex justify-between font-semibold">
           <span>Total</span>
-          <span>{displayPrice > 0 ? formatPrice(displayPrice) : "Price not available"}</span>
+          <span className={displayPrice > 0 ? "text-lg" : "text-lg text-peacefulBlue"}>
+            {displayPrice > 0 ? formatPrice(displayPrice) : "Price unavailable"}
+          </span>
         </div>
       </div>
     </div>
