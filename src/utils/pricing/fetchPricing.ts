@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ServicePrice } from '@/utils/pricingTypes';
 import { 
@@ -12,6 +13,7 @@ import {
 } from './pricingMapper';
 import { calculatePackagePrice } from './pricingCalculator';
 import { formatPrice } from './priceFormatter';
+import { expandClientToDbPackageIds } from './serviceIdMapper';
 
 /**
  * Fetch pricing for services
@@ -125,72 +127,6 @@ export async function fetchPackagePricing(packageIds?: string[], skipCache: bool
   } catch (error) {
     console.error('Error in fetchPackagePricing:', error);
     return new Map<string, number>();
-  }
-}
-
-export async function fetchPackagePricingFromServiceTable(packageIds?: string[]) {
-  console.log('Fetching package pricing from service table for:', packageIds);
-  
-  if (!packageIds || packageIds.length === 0) {
-    return [];
-  }
-  
-  const expandedIds = expandClientToDbPackageIds(packageIds);
-  console.log('Expanded package IDs to search for:', expandedIds);
-  
-  try {
-    const { data, error } = await supabase
-      .from('service_pricing')
-      .select('service_id, price, is_active')
-      .eq('type', 'package')
-      .in('service_id', expandedIds)
-      .eq('is_active', true);
-    
-    if (error) {
-      console.error('Error fetching package pricing from service_pricing:', error);
-      throw error;
-    }
-    
-    console.log('Retrieved package pricing from service table:', data);
-    return data || [];
-  } catch (error) {
-    console.error('Failed to fetch package pricing:', error);
-    return [];
-  }
-}
-
-/**
- * Fetch package pricing from service_pricing table filtered by package type
- * @param packageIds - Array of package IDs to fetch
- * @returns Raw package pricing data
- */
-export async function fetchPackagePricingFromPackageTable(packageIds?: string[]) {
-  console.log('Fetching packages from service_pricing table for:', packageIds);
-  
-  if (!packageIds || packageIds.length === 0) {
-    return [];
-  }
-  
-  const expandedIds = expandClientToDbPackageIds(packageIds);
-  
-  try {
-    const { data, error } = await supabase
-      .from('service_pricing')
-      .select('service_id as package_id, price, is_active')
-      .eq('type', 'package')
-      .in('service_id', expandedIds)
-      .eq('is_active', true);
-    
-    if (error) {
-      console.error('Error fetching from service_pricing table (packages):', error);
-      return [];
-    }
-    
-    console.log('Retrieved package pricing:', data);
-    return data || [];
-  } catch (error) {
-    console.log('Failed to fetch packages:', error);
-    return [];
   }
 }
 
