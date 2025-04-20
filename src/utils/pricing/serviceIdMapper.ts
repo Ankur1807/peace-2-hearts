@@ -19,6 +19,7 @@ export function expandClientToDbIds(clientIds: string[]): string[] {
     'couples-counselling': 'P2H-MH-couples-counselling',
     'sexual-health-counselling-individual': 'P2H-MH-sexual-health-counselling',
     'sexual-health-counselling-couple': 'P2H-MH-sexual-health-counselling',
+    'test-service': 'P2H-MH-test-service',
     
     // Legal Services (P2H-L)
     'pre-marriage-legal': 'P2H-L-pre-marriage-legal-consultation',
@@ -26,10 +27,7 @@ export function expandClientToDbIds(clientIds: string[]): string[] {
     'divorce': 'P2H-L-divorce-consultation',
     'custody': 'P2H-L-child-custody-consultation',
     'maintenance': 'P2H-L-maintenance-consultation',
-    'general-legal': 'P2H-L-general-legal-consultation',
-    
-    // Test service
-    'test-service': 'P2H-MH-test-service'
+    'general-legal': 'P2H-L-general-legal-consultation'
   };
   
   // Map the client IDs to database IDs, filtering out any that don't have a mapping

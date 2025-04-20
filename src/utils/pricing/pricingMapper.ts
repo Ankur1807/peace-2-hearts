@@ -14,6 +14,7 @@ export function mapServicePricing(
     'P2H-MH-premarital-counselling-couple': 'premarital-counselling-couple',
     'P2H-MH-couples-counselling': 'couples-counselling',
     'P2H-MH-sexual-health-counselling': 'sexual-health-counselling-individual',
+    'P2H-MH-test-service': 'test-service',
     
     // Legal Services
     'P2H-L-pre-marriage-legal-consultation': 'pre-marriage-legal',
@@ -23,8 +24,9 @@ export function mapServicePricing(
     'P2H-L-maintenance-consultation': 'maintenance',
     'P2H-L-general-legal-consultation': 'general-legal',
     
-    // Test Service
-    'P2H-MH-test-service': 'test-service'
+    // Package IDs
+    'P2H-H-divorce-prevention-package': 'divorce-prevention',
+    'P2H-H-pre-marriage-clarity-solutions': 'pre-marriage-clarity'
   };
   
   // Add each service to the map
