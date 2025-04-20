@@ -6,7 +6,7 @@ import { AlertCircle } from 'lucide-react';
 
 interface PriceSummaryProps {
   services: string[];
-  pricing: Map<string, number>;
+  pricing?: Map<string, number>;
   totalPrice: number;
   currency?: string;
 }

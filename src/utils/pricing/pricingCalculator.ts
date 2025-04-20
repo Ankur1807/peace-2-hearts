@@ -18,7 +18,7 @@ export async function calculatePackagePrice(packageId: string): Promise<number> 
     serviceIds = ['couples-counselling', 'mental-health-counselling', 'mediation', 'general-legal'];
     console.log('Calculating divorce prevention package from services:', serviceIds);
   } else if (packageId === 'pre-marriage-clarity') {
-    serviceIds = ['pre-marriage-legal', 'premarital-counselling', 'mental-health-counselling'];
+    serviceIds = ['pre-marriage-legal', 'premarital-counselling-individual', 'mental-health-counselling'];
     console.log('Calculating pre-marriage clarity package from services:', serviceIds);
   } else {
     return 0;
@@ -39,6 +39,15 @@ export async function calculatePackagePrice(packageId: string): Promise<number> 
         console.error('Failed to fetch all services for debugging:', error);
       }
       
+      // Return hardcoded values if database prices are not available
+      if (packageId === 'divorce-prevention') {
+        console.log('Using hardcoded price for divorce prevention package: 8500');
+        return 8500; // Hardcoded fallback price
+      } else if (packageId === 'pre-marriage-clarity') {
+        console.log('Using hardcoded price for pre-marriage clarity package: 5000');
+        return 5000; // Hardcoded fallback price
+      }
+      
       return 0;
     }
     
@@ -48,19 +57,17 @@ export async function calculatePackagePrice(packageId: string): Promise<number> 
     
     // Map of client service IDs to database service IDs
     const clientToDbServiceIdMap: Record<string, string[]> = {
-      'mental-health-counselling': ['Mental-Health-Counselling'],
-      'family-therapy': ['Family-Therapy'],
-      'premarital-counselling': ['Premarital-Counselling'],
-      'couples-counselling': ['Couples-Counselling'],
-      'sexual-health-counselling': ['Sexual-Health-Counselling'],
-      'pre-marriage-legal': ['Pre-Marriage-Legal-Consultation'],
-      'divorce-legal': ['Divorce-Consultation'],
-      'custody-legal': ['Child-Custody-Consultation'],
-      'custody': ['Child-Custody-Consultation'],
-      'divorce': ['Divorce-Consultation'],
-      'mediation': ['Mediation-Services'],
-      'maintenance': ['Maintenance-Consultation'],
-      'general-legal': ['General-Legal-Consultation']
+      'mental-health-counselling': ['Mental-Health-Counselling', 'P2H-MH-mental-health-counselling'],
+      'family-therapy': ['Family-Therapy', 'P2H-MH-family-therapy'],
+      'premarital-counselling-individual': ['Premarital-Counselling', 'P2H-MH-premarital-counselling-individual'],
+      'couples-counselling': ['Couples-Counselling', 'P2H-MH-couples-counselling'],
+      'sexual-health-counselling-individual': ['Sexual-Health-Counselling', 'P2H-MH-sexual-health-counselling'],
+      'pre-marriage-legal': ['Pre-Marriage-Legal-Consultation', 'P2H-L-pre-marriage-legal-consultation'],
+      'divorce': ['Divorce-Consultation', 'P2H-L-divorce-consultation'],
+      'custody': ['Child-Custody-Consultation', 'P2H-L-child-custody-consultation'],
+      'mediation': ['Mediation-Services', 'P2H-L-mediation-services'],
+      'maintenance': ['Maintenance-Consultation', 'P2H-L-maintenance-consultation'],
+      'general-legal': ['General-Legal-Consultation', 'P2H-L-general-legal-consultation']
     };
     
     // Create reverse mapping for db to client IDs
@@ -100,11 +107,28 @@ export async function calculatePackagePrice(packageId: string): Promise<number> 
       console.log(`Set package price for ${packageId}: ${packageTotal} (after 15% discount)`);
     } else if (packageTotal > 0) {
       console.log(`Set partial package price for ${packageId}: ${packageTotal} (no discount applied)`);
+    } else {
+      // Fallback to hardcoded prices if calculation failed
+      if (packageId === 'divorce-prevention') {
+        packageTotal = 8500;
+        console.log('Using hardcoded price for divorce prevention package:', packageTotal);
+      } else if (packageId === 'pre-marriage-clarity') {
+        packageTotal = 5000;
+        console.log('Using hardcoded price for pre-marriage clarity package:', packageTotal);
+      }
     }
     
     return packageTotal;
   } catch (error) {
     console.error('Error calculating package price:', error);
+    
+    // Fallback to hardcoded prices on error
+    if (packageId === 'divorce-prevention') {
+      return 8500;
+    } else if (packageId === 'pre-marriage-clarity') {
+      return 5000;
+    }
+    
     return 0;
   }
 }
