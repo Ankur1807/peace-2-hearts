@@ -1,3 +1,4 @@
+
 import React, { useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
@@ -92,21 +93,20 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   }, [holisticPackages, setSelectedServices]);
 
-  // Fixed the useEffect that was causing infinite updates
+  // FIXED: Remove dependency on selectedServices to prevent infinite loop
   useEffect(() => {
     // Get the current URL params to check if we came from a specific service page
     const urlParams = new URLSearchParams(window.location.search);
     const subServiceParam = urlParams.get('subservice');
 
-    // Only run this effect once when component mounts or when serviceCategory changes,
-    // but not on every render when selectedServices changes
+    // Only run once when the component mounts
     if (subServiceParam && selectedServices.length === 0) {
       // If we have a URL parameter but no selected services, select it
       console.log("Setting service from URL parameter:", subServiceParam);
       setSelectedServices([subServiceParam]);
     }
-    // Removed selectedServices from dependency array to prevent infinite loop
-  }, [serviceCategory, setSelectedServices]); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setSelectedServices]); // FIXED: removed selectedServices from dependency array
 
   // Handle payment form submission
   const handlePaymentSubmit = (e: React.FormEvent) => {

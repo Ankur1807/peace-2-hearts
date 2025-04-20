@@ -23,11 +23,10 @@ const ServiceCheckbox: React.FC<ServiceCheckboxProps> = ({
   // Handle click on the entire component
   const handleContainerClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
     onChange(!isSelected);
   }, [isSelected, onChange]);
 
-  // Handle checkbox change directly
+  // Handle checkbox change directly - FIXED: removed stopPropagation to avoid event conflicts
   const handleCheckboxChange = useCallback((checked: boolean | "indeterminate") => {
     if (typeof checked === 'boolean') {
       onChange(checked);
@@ -55,13 +54,13 @@ const ServiceCheckbox: React.FC<ServiceCheckboxProps> = ({
           className="mt-1 h-5 w-5 rounded-sm border-2 border-peacefulBlue"
           checked={isSelected} 
           onCheckedChange={handleCheckboxChange}
-          onClick={(e) => e.stopPropagation()}
+          // FIXED: Removed the onClick handler that was stopping propagation
         />
         <div className="grid gap-1.5">
           <label 
             htmlFor={id} 
             className="font-medium cursor-pointer text-gray-800 text-lg"
-            onClick={(e) => e.stopPropagation()}
+            // FIXED: Removed the onClick handler that was stopping propagation
           >
             {label}
             <span className="text-peacefulBlue font-medium ml-1">{priceDisplay}</span>

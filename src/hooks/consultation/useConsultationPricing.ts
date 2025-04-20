@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { getPackageName } from './consultationHelpers';
 import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing/fetchPricing';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +15,10 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [pricingError, setPricingError] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  // Use a ref to track if we've already done the initial price fetch
+  // This prevents infinite update loops
+  const initialFetchDone = useRef(false);
   
   // Load pricing data when services change
   const updatePricing = useCallback(async (skipCache = false) => {
@@ -90,16 +94,6 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       if (total === 0 && selectedServices.length > 0) {
         const errorMsg = 'No pricing information available for selected services';
         console.warn(errorMsg);
-        
-        // Try to fetch all service data for debugging
-        try {
-          const allServiceResp = await fetch('/api/debug/all-services');
-          const allServices = await allServiceResp.json();
-          console.log('Available services in database:', allServices);
-        } catch (err) {
-          console.error('Could not fetch debug service data:', err);
-        }
-        
         setPricingError(errorMsg);
       }
     } catch (error) {
@@ -116,7 +110,11 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
   }, [selectedServices, serviceCategory, toast]);
   
   useEffect(() => {
-    updatePricing();
+    // Only fetch if we have services or this is the first fetch
+    if (selectedServices.length > 0 || !initialFetchDone.current) {
+      updatePricing();
+      initialFetchDone.current = true;
+    }
   }, [updatePricing]);
   
   return { 

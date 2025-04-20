@@ -15,6 +15,7 @@ export function useBookingState() {
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
 
+  // Use useCallback for this function to prevent unnecessary re-renders
   const setSelectedServicesWithLog = useCallback((
     services: string[] | ((prev: string[]) => string[])
   ) => {
@@ -25,7 +26,7 @@ export function useBookingState() {
       console.log("Updating selected services:", updatedServices);
       return updatedServices;
     });
-  }, []);
+  }, []); // Empty dependency array to ensure this function never changes
 
   return {
     date,
