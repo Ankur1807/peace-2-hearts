@@ -49,13 +49,11 @@ export function expandClientToDbPackageIds(packageIds: string[]): string[] {
   }
   
   // Map of client package IDs to database package IDs (Holistic Packages P2H-H)
-  const packageToDbMap: Record<string, string> = {
-    'divorce-prevention': 'P2H-H-divorce-prevention-package',
-    'pre-marriage-clarity': 'P2H-H-pre-marriage-clarity-solutions'
+  const packageToDbMap: Record<string, string[]> = {
+    'divorce-prevention': ['P2H-H-divorce-prevention-package', 'P2H-H-divorce-prevention-package\r\n'],
+    'pre-marriage-clarity': ['P2H-H-pre-marriage-clarity-solutions']
   };
   
-  // Map the client package IDs to database package IDs, filtering out any that don't have a mapping
-  return packageIds
-    .map(id => packageToDbMap[id])
-    .filter(Boolean);
+  // Map the client package IDs to all possible database package IDs
+  return packageIds.flatMap(id => packageToDbMap[id] || []);
 }

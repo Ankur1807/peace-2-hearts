@@ -58,47 +58,46 @@ export async function fetchPackagePricing(packageIds?: string[], skipCache: bool
     // Create a map of package_id to price
     const pricingMap = new Map<string, number>();
     
-    // Add cache-busting parameter when needed
-    const cacheParam = skipCache ? `?_t=${Date.now()}` : '';
-    
-    // First try to get package pricing from the package_pricing table
-    try {
-      const expandedIds = expandClientToDbPackageIds(packageIds);
+    // For each package ID, try to get the price directly
+    for (const packageId of packageIds) {
+      const dbPackageId = packageId === 'divorce-prevention' 
+        ? 'P2H-H-divorce-prevention-package' 
+        : 'P2H-H-pre-marriage-clarity-solutions';
       
-      if (expandedIds.length > 0) {
+      try {
+        // Use ILIKE for case-insensitive search with wildcards
         const { data, error } = await supabase
           .from('service_pricing')
           .select('service_id, price, is_active')
           .eq('type', 'package')
-          .in('service_id', expandedIds)
-          .eq('is_active', true);
-          
+          .ilike('service_id', `%${dbPackageId}%`)
+          .eq('is_active', true)
+          .maybeSingle();
+        
         if (error) {
-          console.error('Error fetching from service_pricing table (packages):', error);
-        } else if (data && data.length > 0) {
-          console.log('Found package pricing in service_pricing table:', data);
-          
-          // Map the data to our pricing map
-          const packagePricingMap = mapPackagePricing(data, packageIds);
-          
-          // Merge into the main pricing map
-          packagePricingMap.forEach((price, id) => {
-            pricingMap.set(id, price);
-          });
+          console.error(`Error fetching package ${packageId}:`, error);
+        } else if (data && data.price) {
+          console.log(`Found direct package price in database for ${packageId}: ${data.price}`);
+          pricingMap.set(packageId, data.price);
+        } else {
+          console.log(`No direct price found for package ${packageId}, will calculate from services`);
         }
+      } catch (packageError) {
+        console.error(`Error fetching package ${packageId}:`, packageError);
       }
-    } catch (packageTableError) {
-      console.log('Failed to fetch package pricing:', packageTableError);
     }
     
     // If we still don't have pricing information for the requested packages,
     // calculate based on component services as a last resort
-    if (pricingMap.size === 0 && packageIds && packageIds.length > 0) {
+    if (pricingMap.size < packageIds.length) {
       for (const packageId of packageIds) {
-        const packagePrice = await calculatePackagePrice(packageId);
-        
-        if (packagePrice > 0) {
-          pricingMap.set(packageId, packagePrice);
+        if (!pricingMap.has(packageId)) {
+          console.log(`Calculating price for ${packageId} from component services`);
+          const packagePrice = await calculatePackagePrice(packageId);
+          
+          if (packagePrice > 0) {
+            pricingMap.set(packageId, packagePrice);
+          }
         }
       }
     }

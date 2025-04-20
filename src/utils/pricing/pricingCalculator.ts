@@ -25,6 +25,28 @@ export async function calculatePackagePrice(packageId: string): Promise<number> 
   }
   
   try {
+    // First try to get direct package price from database
+    const packageDbId = packageId === 'divorce-prevention' 
+      ? 'P2H-H-divorce-prevention-package' 
+      : 'P2H-H-pre-marriage-clarity-solutions';
+    
+    // Query the database for the package directly
+    const { data: packageData, error: packageError } = await supabase
+      .from('service_pricing')
+      .select('price')
+      .eq('type', 'package')
+      .ilike('service_id', `%${packageDbId}%`)  // Use ILIKE for case-insensitive search with wildcards
+      .eq('is_active', true)
+      .single();
+    
+    if (packageData && packageData.price) {
+      console.log(`Found direct package price in database for ${packageId}: ${packageData.price}`);
+      return packageData.price;
+    }
+    
+    // If package not found directly, calculate from component services
+    console.log('Package not found directly, calculating from component services');
+    
     // Fetch prices for component services
     const servicesData = await fetchServicePricingData(serviceIds);
     
@@ -71,7 +93,7 @@ export async function calculatePackagePrice(packageId: string): Promise<number> 
     // Populate the services price map
     servicesData.forEach((item) => {
       if (item.price && item.price > 0) {
-        const clientId = dbToClientServiceIdMap[item.service_id] || item.service_id;
+        const clientId = dbToClientServiceIdMap[item.service_id.trim()] || item.service_id;
         servicesPriceMap.set(clientId, item.price);
         console.log(`Adding price mapping: ${clientId} => ${item.price}`);
       }

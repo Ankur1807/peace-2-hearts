@@ -46,8 +46,7 @@ export async function fetchServicePricingData(serviceIds?: string[]) {
 export async function fetchAllServiceData() {
   const { data, error } = await supabase
     .from('service_pricing')
-    .select('service_id, price, is_active')
-    .eq('type', 'service');
+    .select('service_id, price, is_active, type');
     
   if (error) {
     console.error('Error fetching all service data:', error);
@@ -72,11 +71,12 @@ export async function fetchPackagePricingFromServiceTable(packageIds?: string[])
   const expandedIds = expandClientToDbPackageIds(packageIds);
   console.log('Expanded package IDs to search for:', expandedIds);
   
+  // Use a more flexible approach to find package IDs with potential whitespace or newlines
   const { data, error } = await supabase
     .from('service_pricing')
     .select('service_id, price, is_active')
     .eq('type', 'package')
-    .in('service_id', expandedIds)
+    .or(expandedIds.map(id => `service_id.ilike.%${id.replace(/\r\n/g, '')}%`).join(','))
     .eq('is_active', true);
   
   if (error) {
@@ -100,23 +100,30 @@ export async function fetchPackagePricingFromPackageTable(packageIds?: string[])
     return [];
   }
   
-  const expandedIds = expandClientToDbPackageIds(packageIds);
-  
   try {
-    const { data, error } = await supabase
-      .from('service_pricing')
-      .select('service_id as package_id, price, is_active')
-      .eq('type', 'package')
-      .in('service_id', expandedIds)
-      .eq('is_active', true);
+    // For each package ID, try a more flexible search approach
+    const results = [];
     
-    if (error) {
-      console.error('Error fetching from service_pricing table (packages):', error);
-      return [];
+    for (const packageId of packageIds) {
+      const baseId = packageId === 'divorce-prevention' 
+        ? 'P2H-H-divorce-prevention-package' 
+        : 'P2H-H-pre-marriage-clarity-solutions';
+      
+      const { data, error } = await supabase
+        .from('service_pricing')
+        .select('service_id as package_id, price, is_active')
+        .eq('type', 'package')
+        .ilike('service_id', `%${baseId}%`) // Case-insensitive search
+        .eq('is_active', true)
+        .maybeSingle();
+      
+      if (!error && data) {
+        results.push(data);
+      }
     }
     
-    console.log('Retrieved package pricing:', data);
-    return data || [];
+    console.log('Retrieved package pricing:', results);
+    return results;
   } catch (error) {
     console.log('Failed to fetch packages:', error);
     return [];
