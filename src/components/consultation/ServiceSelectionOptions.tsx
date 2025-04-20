@@ -1,8 +1,7 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Label } from '@/components/ui/label';
-import { RadioGroup } from '@/components/ui/radio-group';
-import ServiceCheckbox from './service-selection/ServiceCheckbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import ServiceOption from './service-selection/ServiceOption';
 
 interface ServiceOption {
@@ -59,7 +58,7 @@ const holisticPackages: HolisticPackage[] = [
   }
 ];
 
-// Fixed: Added memoization to prevent unnecessary re-renders
+// Modified to use memoization to prevent unnecessary re-renders
 const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.memo(({
   serviceCategory,
   selectedServices,
@@ -76,24 +75,24 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
       <div className="space-y-4">
         <Label className="text-lg font-medium text-gray-800">Package Selection</Label>
         <RadioGroup 
-          onValueChange={handlePackageSelection} 
+          onValueChange={(value) => handlePackageSelection(value)}
           className="space-y-4"
+          value={selectedServices.length > 0 ? selectedServices[0] : undefined}
         >
           {holisticPackages.map(pkg => {
             // Show package price if available
             const price = pricing?.get(pkg.id);
-            const isSelected = pkg.services.every(service => selectedServices.includes(service)) &&
-                              pkg.services.length === selectedServices.length;
             
             return (
-              <ServiceOption
-                key={pkg.id}
-                id={pkg.id}
-                title={pkg.label + (price ? ` - ₹${price.toLocaleString('en-IN')}` : '')}
-                description={pkg.description}
-                isSelected={isSelected}
-                onChange={() => isSelected ? null : handlePackageSelection(pkg.id)}
-              />
+              <div key={pkg.id} className="flex items-start space-x-2">
+                <RadioGroupItem value={pkg.id} id={pkg.id} />
+                <Label htmlFor={pkg.id} className="flex flex-col">
+                  <span className="font-medium">
+                    {pkg.label}{price ? ` - ₹${price.toLocaleString('en-IN')}` : ''}
+                  </span>
+                  <span className="text-sm text-gray-500">{pkg.description}</span>
+                </Label>
+              </div>
             );
           })}
         </RadioGroup>
@@ -106,36 +105,37 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
     ? mentalHealthServices 
     : legalServices;
     
+  // Modified to use RadioGroup instead of checkboxes for single selection
   return (
     <div className="space-y-4">
       <Label className="text-lg font-medium text-gray-800">Service Types</Label>
-      <div className="grid grid-cols-1 gap-4">
+      <RadioGroup 
+        onValueChange={(value) => handleServiceSelection(value, true)}
+        className="space-y-4"
+        value={selectedServices.length > 0 ? selectedServices[0] : undefined}
+      >
         {servicesToDisplay.map(service => {
-          const isChecked = selectedServices.includes(service.id);
           // Get price from the pricing map if available
           const price = pricing?.get(service.id);
           
-          console.log(`Service ${service.id} isChecked:`, isChecked);
-          
           return (
-            <ServiceCheckbox
-              key={service.id}
-              id={service.id}
-              label={service.label}
-              description={service.description}
-              isSelected={isChecked}
-              price={price}
-              onChange={(checked) => {
-                console.log(`ServiceCheckbox ${service.id} onChange:`, checked);
-                handleServiceSelection(service.id, checked);
-              }}
-            />
+            <div key={service.id} className="flex items-start space-x-2">
+              <RadioGroupItem value={service.id} id={service.id} />
+              <Label htmlFor={service.id} className="flex flex-col">
+                <span className="font-medium">
+                  {service.label}{price ? ` - ₹${price.toLocaleString('en-IN')}` : ''}
+                </span>
+                {service.description && (
+                  <span className="text-sm text-gray-500">{service.description}</span>
+                )}
+              </Label>
+            </div>
           );
         })}
-      </div>
+      </RadioGroup>
       
       {selectedServices.length === 0 && (
-        <p className="text-sm text-muted-foreground mt-2">Please select at least one service</p>
+        <p className="text-sm text-muted-foreground mt-2">Please select a service</p>
       )}
     </div>
   );

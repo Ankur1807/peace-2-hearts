@@ -28,6 +28,8 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
   const handleCategoryChange = (category: string) => {
     console.log("Changing service category to:", category);
     setServiceCategory(category);
+    // Clear selected services when category changes
+    handleServiceSelection('', false);
   };
   
   return (

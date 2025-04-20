@@ -26,7 +26,6 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     bookingError,
     personalDetails,
     handlePersonalDetailsChange,
-    handleConfirmBooking,
     pricing,
     totalPrice,
     showPaymentStep,
@@ -74,35 +73,29 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   ];
 
-  // Handle service selection without creating a new function on each render
+  // Modified to handle single service selection
   const handleServiceSelection = useCallback((serviceId: string, checked: boolean) => {
     console.log(`Service ${serviceId} selection changed to ${checked}`);
     
-    setSelectedServices(prevServices => {
-      if (checked) {
-        // Add the service if it's not already in the list
-        if (!prevServices.includes(serviceId)) {
-          const newServices = [...prevServices, serviceId];
-          console.log("New selected services:", newServices);
-          return newServices;
-        }
-        return prevServices;
-      } else {
-        // Remove the service
-        const newServices = prevServices.filter(id => id !== serviceId);
-        console.log("New selected services after removal:", newServices);
-        return newServices;
-      }
-    });
+    if (checked && serviceId) {
+      // Replace current selection with the new service
+      setSelectedServices([serviceId]);
+      console.log("New selected service:", serviceId);
+    } else {
+      // Clear selection if unchecked or empty
+      setSelectedServices([]);
+      console.log("Cleared service selection");
+    }
   }, [setSelectedServices]);
 
-  // Handle package selection with useCallback to prevent recreations
+  // Handle package selection
   const handlePackageSelection = useCallback((packageId: string) => {
     console.log(`Package ${packageId} selected`);
     const selectedPackage = holisticPackages.find(pkg => pkg.id === packageId);
     if (selectedPackage) {
-      console.log(`Setting services from package:`, selectedPackage.services);
-      setSelectedServices(selectedPackage.services);
+      // For package selection in the radio group, we just use the package ID
+      setSelectedServices([packageId]);
+      console.log(`Selected package: ${packageId}`);
     }
   }, [holisticPackages, setSelectedServices]);
 
@@ -131,7 +124,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     if (!selectedServices || selectedServices.length === 0) {
       return "Consultation";
     }
-    return selectedServices.join(', ');
+    return selectedServices[0]; // Only show the first (and only) selected service
   }, [selectedServices]);
 
   return (

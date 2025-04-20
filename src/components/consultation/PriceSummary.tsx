@@ -3,6 +3,7 @@ import React from 'react';
 import { formatPrice } from '@/utils/pricing/priceFormatter';
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import { AlertCircle } from 'lucide-react';
+import { getConsultationTypeLabel } from '@/utils/consultationLabels';
 
 interface PriceSummaryProps {
   services: string[];
@@ -17,6 +18,7 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
   totalPrice,
   currency = 'INR'
 }) => {
+  // For holistic packages
   const packageName = getPackageName(services);
   const packageId = packageName === "Divorce Prevention Package" 
     ? 'divorce-prevention' 
@@ -26,6 +28,10 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
   const packagePrice = packageId && pricing && pricing.has(packageId) 
     ? pricing.get(packageId)! 
     : totalPrice;
+
+  const serviceId = services.length > 0 ? services[0] : '';
+  const servicePrice = serviceId && pricing && pricing.has(serviceId) ? pricing.get(serviceId)! : totalPrice;
+  const serviceName = serviceId ? getConsultationTypeLabel(serviceId) : '';
 
   console.log(`PriceSummary rendered with services: ${services.join(', ')}, totalPrice: ${totalPrice}, packageName: ${packageName}, packagePrice: ${packagePrice}`);
   
@@ -58,8 +64,8 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
       {!packageName && totalPrice > 0 && services.length > 0 && (
         <div className="mb-3 py-2">
           <div className="flex justify-between items-center text-gray-700">
-            <span>{services.length > 1 ? "Multiple Services" : "Consultation"}</span>
-            <span>{formatPrice(totalPrice, currency)}</span>
+            <span>{serviceName || "Consultation"}</span>
+            <span>{formatPrice(servicePrice, currency)}</span>
           </div>
         </div>
       )}

@@ -17,7 +17,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   selectedServices = [],
   pricing
 }) => {
-  // Check if it's a package
+  // For holistic packages
   const packageName = selectedServices.length > 0 ? getPackageName(selectedServices) : null;
   
   // Get the appropriate package ID if it's a package
@@ -30,10 +30,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     ? pricing.get(packageId)!
     : totalPrice;
   
-  // Get the appropriate label
-  const consultationLabel = packageName || (consultationType.includes(',') 
-    ? 'Multiple Services' 
-    : getConsultationTypeLabel(consultationType));
+  // Get the appropriate label - package name, service name, or generic label
+  const consultationLabel = packageName || 
+                          (selectedServices.length > 0 ? getConsultationTypeLabel(selectedServices[0]) : 'Consultation');
 
   console.log(`OrderSummary: packageName=${packageName}, packageId=${packageId}, displayPrice=${displayPrice}, totalPrice=${totalPrice}`);
 
