@@ -52,48 +52,46 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
     
     try {
       let pricingMap: Map<string, number> = new Map();
+      let packagePrice = 0;
       
-      if (serviceCategory === 'holistic') {
-        // Check if it matches a pre-defined package
-        const packageName = getPackageName(selectedServices);
+      // Check if selected services match a package
+      const packageName = getPackageName(selectedServices);
+      const isPackage = packageName !== null;
+      
+      if (isPackage || serviceCategory === 'holistic') {
+        // First try to fetch package pricing
+        let packageId = '';
+        
         if (packageName === "Divorce Prevention Package") {
-          console.log('Fetching Divorce Prevention Package pricing');
-          pricingMap = await fetchPackagePricing(['divorce-prevention'], skipCache);
+          packageId = 'divorce-prevention';
         } else if (packageName === "Pre-Marriage Clarity Package") {
-          console.log('Fetching Pre-Marriage Clarity Package pricing');
-          pricingMap = await fetchPackagePricing(['pre-marriage-clarity'], skipCache);
-        } else {
-          // If not a pre-defined package, get individual service prices
-          console.log('Fetching individual service prices for holistic services');
-          pricingMap = await fetchServicePricing(selectedServices);
+          packageId = 'pre-marriage-clarity';
         }
-      } else {
-        // For regular services, get individual prices
-        console.log('Fetching individual service prices for category:', serviceCategory);
-        pricingMap = await fetchServicePricing(selectedServices);
+        
+        if (packageId) {
+          console.log(`Fetching ${packageName} pricing`);
+          const packagePricingMap = await fetchPackagePricing([packageId], skipCache);
+          packagePrice = packagePricingMap.get(packageId) || 0;
+          
+          if (packagePrice > 0) {
+            console.log(`Found package price for ${packageId}: ${packagePrice}`);
+          }
+        }
       }
+      
+      // Always fetch individual service prices for display purposes
+      console.log('Fetching individual service prices');
+      pricingMap = await fetchServicePricing(selectedServices);
       
       console.log('Pricing data retrieved:', Object.fromEntries(pricingMap));
       
       // Calculate total price
       let total = 0;
-      if (serviceCategory === 'holistic') {
-        const packageName = getPackageName(selectedServices);
-        if (packageName === "Divorce Prevention Package") {
-          total = pricingMap.get('divorce-prevention') || 0;
-          console.log('Using Divorce Prevention Package price:', total);
-        } else if (packageName === "Pre-Marriage Clarity Package") {
-          total = pricingMap.get('pre-marriage-clarity') || 0;
-          console.log('Using Pre-Marriage Clarity Package price:', total);
-        } else {
-          // Sum individual services
-          console.log('Calculating total from individual services for holistic');
-          selectedServices.forEach(serviceId => {
-            const price = pricingMap.get(serviceId) || 0;
-            total += price;
-            console.log(`Adding ${price} for ${serviceId}`);
-          });
-        }
+      
+      // If we have a package price, use it
+      if (packagePrice > 0) {
+        total = packagePrice;
+        console.log(`Using package price: ${total}`);
       } else {
         // Sum individual services
         console.log('Calculating total from individual services');
@@ -108,7 +106,7 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       setPricing(pricingMap);
       setTotalPrice(total);
       
-      // If no prices found despite having valid services, try a direct fetch from database
+      // If no prices found despite having valid services, show error
       if (total === 0 && selectedServices.length > 0) {
         const errorMsg = 'No pricing information available for selected services';
         console.warn(errorMsg);
@@ -132,7 +130,6 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
     // Only fetch if we have services 
     if (selectedServices.length > 0 || !initialFetchDone.current) {
       updatePricing();
-      initialFetchDone.current = true;
     }
   }, [updatePricing]);
   
@@ -141,6 +138,7 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
     totalPrice, 
     isLoading, 
     pricingError, 
-    updatePricing: () => updatePricing(true) // Use the skip cache version when manually refreshing
+    updatePricing: () => updatePricing(true), // Use the skip cache version when manually refreshing
+    setTotalPrice // Export this so we can update it directly if needed
   };
 }

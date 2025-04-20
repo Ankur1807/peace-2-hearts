@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { getServiceLabel } from '@/utils/consultationLabels';
+import { getPackageName } from '@/utils/consultation/packageUtils';
 
 interface PricingSectionProps {
   selectedServices: string[];
@@ -17,7 +18,10 @@ const PricingSection: React.FC<PricingSectionProps> = ({
   if (selectedServices.length === 0) {
     return null;
   }
-
+  
+  // Check if the selected services match a package
+  const packageName = getPackageName(selectedServices);
+  
   return (
     <div className="p-6 bg-gradient-to-r from-peacefulBlue/5 to-white rounded-lg border border-peacefulBlue/20 shadow-md">
       <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
@@ -32,17 +36,36 @@ const PricingSection: React.FC<PricingSectionProps> = ({
         Consultation Summary
       </h3>
       
-      <div className="space-y-2 mb-6">
-        {selectedServices.map(serviceId => {
-          const price = pricing?.get(serviceId) || 0;
-          return (
-            <div key={serviceId} className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-700">{getServiceLabel(serviceId)}</span>
-              <span className="font-medium">₹{price.toLocaleString('en-IN')}</span>
-            </div>
-          );
-        })}
-      </div>
+      {packageName ? (
+        // If it's a package, show the package name and price
+        <div className="space-y-2 mb-6">
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-gray-700 font-medium">{packageName}</span>
+            <span className="font-medium">₹{totalPrice.toLocaleString('en-IN')}</span>
+          </div>
+          <div className="text-sm text-gray-600 mt-2">
+            <p>This package includes:</p>
+            <ul className="list-disc pl-5 mt-1">
+              {selectedServices.map(serviceId => (
+                <li key={serviceId}>{getServiceLabel(serviceId)}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : (
+        // If it's individual services, show each service and its price
+        <div className="space-y-2 mb-6">
+          {selectedServices.map(serviceId => {
+            const price = pricing?.get(serviceId) || 0;
+            return (
+              <div key={serviceId} className="flex justify-between items-center py-2 border-b border-gray-100">
+                <span className="text-gray-700">{getServiceLabel(serviceId)}</span>
+                <span className="font-medium">₹{price.toLocaleString('en-IN')}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
       
       <div className="flex justify-between items-center pt-4 border-t border-gray-300">
         <span className="text-lg font-semibold text-gray-800">Total</span>

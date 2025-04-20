@@ -35,6 +35,15 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
         </div>
       )}
       
+      {packageName && totalPrice > 0 && (
+        <div className="mb-3 py-2">
+          <div className="flex justify-between items-center text-gray-700">
+            <span>{packageName}</span>
+            <span>{formatPrice(totalPrice, currency)}</span>
+          </div>
+        </div>
+      )}
+      
       <div className="flex justify-between items-center pt-3 font-semibold">
         <span>Total</span>
         <span className="text-lg">

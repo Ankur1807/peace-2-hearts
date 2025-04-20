@@ -1,68 +1,57 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import OrderSummary from './OrderSummary';
-import PaymentTerms from './PaymentTerms';
 import PaymentActions from './PaymentActions';
+import PaymentTerms from './PaymentTerms';
+import RazorpayCard from './RazorpayCard';
 import PaymentLoader from './PaymentLoader';
 
-type PaymentStepProps = {
+interface PaymentStepProps {
   consultationType: string;
-  onNextStep: () => void;
-  onPrevStep: () => void;
-  onSubmit: (e: React.FormEvent) => void;
-  isProcessing: boolean;
+  selectedServices?: string[];
   totalPrice: number;
-};
+  isProcessing: boolean;
+  onPrevStep: () => void;
+  onNextStep: () => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
 
 const PaymentStep: React.FC<PaymentStepProps> = ({
   consultationType,
-  onNextStep,
-  onPrevStep,
-  onSubmit,
+  selectedServices = [],
+  totalPrice,
   isProcessing,
-  totalPrice
+  onPrevStep,
+  onSubmit
 }) => {
-  const [acceptTerms, setAcceptTerms] = useState(false);
-  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  // Log price information for debugging
-  console.log("PaymentStep received totalPrice:", totalPrice);
-  console.log("PaymentStep consultation type:", consultationType);
+  if (isProcessing) {
+    return <PaymentLoader />;
+  }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-lora font-semibold mb-6">Payment Information</h2>
-      
-      <PaymentLoader 
-        onRazorpayLoad={setRazorpayLoaded} 
-        onLoadError={setLoadError} 
-        loadError={loadError}
-      />
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-semibold mb-2 text-gray-800">Complete Your Payment</h2>
+        <p className="text-gray-600">
+          You're almost done! Please review your order and complete the payment.
+        </p>
+      </div>
       
       <OrderSummary 
         consultationType={consultationType} 
         totalPrice={totalPrice}
+        selectedServices={selectedServices}
       />
       
-      <PaymentTerms 
-        acceptTerms={acceptTerms}
-        setAcceptTerms={setAcceptTerms}
-      />
+      <RazorpayCard />
       
-      <PaymentActions 
-        onPrevStep={onPrevStep}
-        isProcessing={isProcessing}
-        acceptTerms={acceptTerms}
-        razorpayLoaded={razorpayLoaded}
+      <PaymentTerms />
+      
+      <PaymentActions
+        onPrevious={onPrevStep}
+        onSubmit={onSubmit}
         totalPrice={totalPrice}
       />
-      
-      {!razorpayLoaded && !loadError && (
-        <div className="text-center text-amber-600 text-sm mt-2">
-          Payment gateway is loading. Please wait...
-        </div>
-      )}
     </div>
   );
 };

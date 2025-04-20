@@ -2,17 +2,22 @@
 import React from 'react';
 import { getConsultationTypeLabel } from '@/utils/consultationLabels';
 import { formatPrice } from '@/utils/pricing/fetchPricing';
+import { getPackageName } from '@/utils/consultation/packageUtils';
 
 type OrderSummaryProps = {
   consultationType: string;
   totalPrice: number;
+  selectedServices?: string[];
 };
 
-const OrderSummary: React.FC<OrderSummaryProps> = ({ consultationType, totalPrice }) => {
-  // Get the appropriate label for the consultation type
-  const consultationLabel = consultationType.includes(',') 
+const OrderSummary: React.FC<OrderSummaryProps> = ({ consultationType, totalPrice, selectedServices = [] }) => {
+  // Check if it's a package
+  const packageName = selectedServices.length > 0 ? getPackageName(selectedServices) : null;
+  
+  // Get the appropriate label
+  const consultationLabel = packageName || (consultationType.includes(',') 
     ? 'Multiple Services' 
-    : getConsultationTypeLabel(consultationType);
+    : getConsultationTypeLabel(consultationType));
 
   return (
     <div className="mb-6">

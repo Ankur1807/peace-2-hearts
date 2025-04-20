@@ -134,6 +134,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
           <form onSubmit={handlePaymentSubmit} className="space-y-6">
             <PaymentStep 
               consultationType={getFormattedConsultationType()}
+              selectedServices={selectedServices}
               onNextStep={processPayment}
               onPrevStep={() => setShowPaymentStep(false)}
               onSubmit={handlePaymentSubmit}
