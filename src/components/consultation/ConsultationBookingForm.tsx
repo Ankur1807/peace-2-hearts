@@ -94,7 +94,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   }, [holisticPackages, setSelectedServices]);
 
-  // Remove dependency on selectedServices to prevent infinite loop
+  // Remove selectedServices from dependency array to prevent infinite loop
   useEffect(() => {
     // Get the current URL params to check if we came from a specific service page
     const urlParams = new URLSearchParams(window.location.search);

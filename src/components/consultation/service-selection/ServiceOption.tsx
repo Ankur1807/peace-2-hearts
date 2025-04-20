@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import ServiceCheckbox from './ServiceCheckbox';
 
 interface ServiceOptionProps {
@@ -22,8 +22,8 @@ const ServiceOption: React.FC<ServiceOptionProps> = memo(({
   onClick,
   price 
 }) => {
-  // Use a separate handler to avoid creating a new function on every render
-  const handleChange = React.useCallback((checked: boolean) => {
+  // Use useCallback to avoid creating new functions on every render
+  const handleChange = useCallback((checked: boolean) => {
     if (onChange) {
       onChange(checked);
     }

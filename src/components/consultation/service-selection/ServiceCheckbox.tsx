@@ -25,12 +25,15 @@ const ServiceCheckbox: React.FC<ServiceCheckboxProps> = memo(({
   const handleContainerClick = useCallback((e: React.MouseEvent) => {
     // Prevent default to avoid issues with nested elements
     e.preventDefault();
-    onChange(!isSelected);
+    // Only trigger change if not already in the desired state
+    if (onChange) {
+      onChange(!isSelected);
+    }
   }, [isSelected, onChange]);
 
   // Handle checkbox change directly
   const handleCheckboxChange = useCallback((checked: boolean | "indeterminate") => {
-    if (typeof checked === 'boolean') {
+    if (typeof checked === 'boolean' && onChange) {
       onChange(checked);
     }
   }, [onChange]);
@@ -56,11 +59,15 @@ const ServiceCheckbox: React.FC<ServiceCheckboxProps> = memo(({
           className="mt-1 h-5 w-5 rounded-sm border-2 border-peacefulBlue"
           checked={isSelected} 
           onCheckedChange={handleCheckboxChange}
+          // Stop propagation to prevent double-triggering with container click
+          onClick={(e) => e.stopPropagation()}
         />
         <div className="grid gap-1.5">
           <label 
             htmlFor={id} 
             className="font-medium cursor-pointer text-gray-800 text-lg"
+            // Stop propagation to prevent double-triggering with container click
+            onClick={(e) => e.stopPropagation()}
           >
             {label}
             <span className="text-peacefulBlue font-medium ml-1">{priceDisplay}</span>
