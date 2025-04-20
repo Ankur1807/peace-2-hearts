@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import OrderSummary from './OrderSummary';
 import PaymentActions from './PaymentActions';
 import PaymentTerms from './PaymentTerms';
@@ -24,8 +24,24 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   onPrevStep,
   onSubmit
 }) => {
+  const [razorpayLoaded, setRazorpayLoaded] = useState<boolean>(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
+  
+  const handleRazorpayLoad = (loaded: boolean) => {
+    setRazorpayLoaded(loaded);
+  };
+  
+  const handleLoadError = (error: string | null) => {
+    setLoadError(error);
+  };
+
   if (isProcessing) {
-    return <PaymentLoader />;
+    return <PaymentLoader 
+      onRazorpayLoad={handleRazorpayLoad} 
+      onLoadError={handleLoadError}
+      loadError={loadError}
+    />;
   }
 
   return (
@@ -45,12 +61,18 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       
       <RazorpayCard />
       
-      <PaymentTerms />
+      <PaymentTerms 
+        acceptTerms={acceptTerms}
+        setAcceptTerms={setAcceptTerms}
+      />
       
       <PaymentActions
-        onPrevious={onPrevStep}
+        onPrevStep={onPrevStep}
         onSubmit={onSubmit}
         totalPrice={totalPrice}
+        isProcessing={isProcessing}
+        acceptTerms={acceptTerms}
+        razorpayLoaded={razorpayLoaded}
       />
     </div>
   );

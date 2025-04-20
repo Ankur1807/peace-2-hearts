@@ -5,6 +5,7 @@ import { formatPrice } from '@/utils/pricing/fetchPricing';
 
 type PaymentActionsProps = {
   onPrevStep: () => void;
+  onSubmit: (e: React.FormEvent) => void;
   isProcessing: boolean;
   acceptTerms: boolean;
   razorpayLoaded: boolean;
@@ -13,6 +14,7 @@ type PaymentActionsProps = {
 
 const PaymentActions: React.FC<PaymentActionsProps> = ({
   onPrevStep,
+  onSubmit,
   isProcessing,
   acceptTerms,
   razorpayLoaded,
