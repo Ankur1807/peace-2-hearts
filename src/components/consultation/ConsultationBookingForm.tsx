@@ -62,7 +62,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   ];
 
-  // Improved service selection handler using useCallback to prevent recreations
+  // Handle service selection without creating a new function on each render
   const handleServiceSelection = useCallback((serviceId: string, checked: boolean) => {
     console.log(`Service ${serviceId} selection changed to ${checked}`);
     
@@ -84,6 +84,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     });
   }, [setSelectedServices]);
 
+  // Handle package selection with useCallback to prevent recreations
   const handlePackageSelection = useCallback((packageId: string) => {
     console.log(`Package ${packageId} selected`);
     const selectedPackage = holisticPackages.find(pkg => pkg.id === packageId);
