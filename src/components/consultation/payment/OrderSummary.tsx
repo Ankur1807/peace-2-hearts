@@ -26,17 +26,30 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     ? 'divorce-prevention' 
     : packageName === "Pre-Marriage Clarity Package" ? 'pre-marriage-clarity' : null;
   
-  // Get package price from pricing map if available
-  const displayPrice = packageId && pricing && pricing.has(packageId)
-    ? pricing.get(packageId)!
-    : totalPrice;
+  // Get service price if it's a single service (not a package)
+  const singleServiceId = selectedServices.length === 1 ? selectedServices[0] : null;
+  const singleServicePrice = singleServiceId && pricing && pricing.has(singleServiceId) 
+    ? pricing.get(singleServiceId) 
+    : null;
+  
+  // Determine the price to display - priority: package price > single service price > total price
+  let displayPrice = totalPrice;
+  
+  if (packageId && pricing && pricing.has(packageId)) {
+    displayPrice = pricing.get(packageId)!;
+  } else if (singleServicePrice !== null) {
+    displayPrice = singleServicePrice;
+  }
   
   // Get the appropriate label - package name, service name, or generic label
   const consultationLabel = packageName || 
                           (selectedServices.length > 0 ? getConsultationTypeLabel(selectedServices[0]) : 'Consultation');
 
   // Log for debugging
-  console.log(`OrderSummary: packageName=${packageName}, packageId=${packageId}, displayPrice=${displayPrice}, totalPrice=${totalPrice}, pricing=${pricing ? JSON.stringify(Object.fromEntries(pricing)) : 'undefined'}`);
+  console.log(`OrderSummary: packageName=${packageName}, packageId=${packageId}, singleServiceId=${singleServiceId}, displayPrice=${displayPrice}, totalPrice=${totalPrice}`);
+  if (pricing) {
+    console.log('Pricing map:', Object.fromEntries(pricing));
+  }
   
   return (
     <div className="mb-6">

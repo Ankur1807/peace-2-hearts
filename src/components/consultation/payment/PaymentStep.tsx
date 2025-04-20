@@ -42,13 +42,64 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
     }
   });
 
+  // Check if we have a single service selection and update the price to use
+  const [effectivePrice, setEffectivePrice] = React.useState<number>(totalPrice);
+  
+  React.useEffect(() => {
+    let newPrice = totalPrice;
+    
+    // If we have a single service selected
+    if (selectedServices.length === 1 && pricing) {
+      const serviceId = selectedServices[0];
+      
+      // Check if it's a direct package ID
+      if (serviceId === 'divorce-prevention' || serviceId === 'pre-marriage-clarity') {
+        const packagePrice = pricing.get(serviceId);
+        if (packagePrice && packagePrice > 0) {
+          console.log(`Using direct package price for ${serviceId}: ${packagePrice}`);
+          newPrice = packagePrice;
+        }
+      } 
+      // Check if it's a regular service
+      else if (pricing.has(serviceId)) {
+        const servicePrice = pricing.get(serviceId);
+        if (servicePrice && servicePrice > 0) {
+          console.log(`Using service price for ${serviceId}: ${servicePrice}`);
+          newPrice = servicePrice;
+        }
+      }
+    }
+    
+    // Check if services match a package
+    const packageName = getPackageName(selectedServices);
+    if (packageName && pricing) {
+      const packageId = packageName === "Divorce Prevention Package" 
+        ? 'divorce-prevention' 
+        : 'pre-marriage-clarity';
+      const packagePrice = pricing.get(packageId);
+      if (packagePrice && packagePrice > 0) {
+        console.log(`Using package price for ${packageName}: ${packagePrice}`);
+        newPrice = packagePrice;
+      }
+    }
+    
+    if (newPrice !== effectivePrice) {
+      console.log(`Updating effective price from ${effectivePrice} to ${newPrice}`);
+      setEffectivePrice(newPrice);
+    }
+  }, [selectedServices, pricing, totalPrice, effectivePrice]);
+
   // For debugging
   React.useEffect(() => {
     if (selectedServices && selectedServices.length > 0) {
+      const serviceId = selectedServices[0];
+      const servicePrice = pricing?.get(serviceId);
+      console.log(`Selected service: ${serviceId}, price from map: ${servicePrice || 'not found'}`);
+      
       // Check if it's a package ID directly
-      if (selectedServices[0] === 'divorce-prevention' || selectedServices[0] === 'pre-marriage-clarity') {
-        const packagePrice = pricing?.get(selectedServices[0]) || 0;
-        console.log(`Direct package selection: ${selectedServices[0]}, price: ${packagePrice}`);
+      if (serviceId === 'divorce-prevention' || serviceId === 'pre-marriage-clarity') {
+        const packagePrice = pricing?.get(serviceId) || 0;
+        console.log(`Direct package selection: ${serviceId}, price: ${packagePrice}`);
       } else {
         // Check if the services match a package
         const packageName = getPackageName(selectedServices);
@@ -61,11 +112,11 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       }
     }
     
-    console.log(`PaymentStep component with totalPrice: ${totalPrice}`);
+    console.log(`PaymentStep component with totalPrice: ${totalPrice}, effectivePrice: ${effectivePrice}`);
     if (pricing) {
       console.log('Available pricing:', Object.fromEntries(pricing));
     }
-  }, [totalPrice, pricing, selectedServices]);
+  }, [totalPrice, pricing, selectedServices, effectivePrice]);
 
   if (isProcessing) {
     return <PaymentLoader 
@@ -87,7 +138,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       
       <OrderSummary 
         consultationType={consultationType} 
-        totalPrice={totalPrice}
+        totalPrice={effectivePrice}
         selectedServices={selectedServices}
         pricing={pricing}
       />
@@ -102,13 +153,15 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       <PaymentActions
         onPrevStep={onPrevStep}
         onSubmit={onSubmit}
-        totalPrice={totalPrice}
+        totalPrice={effectivePrice}
+        selectedServices={selectedServices}
+        pricing={pricing}
         isProcessing={isProcessing}
         acceptTerms={acceptTerms}
         razorpayLoaded={razorpayLoaded}
       />
 
-      {totalPrice <= 0 && (
+      {effectivePrice <= 0 && (
         <PaymentErrorMessage message="Unable to calculate price. Please try selecting your services again or contact support." />
       )}
       

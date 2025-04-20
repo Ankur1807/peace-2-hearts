@@ -107,12 +107,23 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
         pricingMap = await fetchServicePricing(selectedServices);
         
         // Calculate total price from individual services
-        console.log('Calculating total from individual services');
+        console.log('Calculating total from individual services:', selectedServices);
         selectedServices.forEach(serviceId => {
           const price = pricingMap.get(serviceId) || 0;
           finalPrice += price;
           console.log(`Adding ${price} for ${serviceId}`);
         });
+        
+        // Make sure we add the direct service price to the pricing map
+        if (selectedServices.length === 1) {
+          const serviceId = selectedServices[0];
+          const price = pricingMap.get(serviceId) || 0;
+          if (price > 0) {
+            console.log(`Setting direct price for single service ${serviceId}: ${price}`);
+          } else {
+            console.warn(`No price found for service ${serviceId} in pricing map`);
+          }
+        }
       }
       
       console.log('Final calculated price:', finalPrice);
@@ -149,6 +160,11 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
   // For debugging
   useEffect(() => {
     console.log(`Current totalPrice: ${totalPrice}, Selected services: ${selectedServices.join(', ')}`);
+    
+    if (selectedServices.length === 1) {
+      const serviceId = selectedServices[0];
+      console.log(`Single service selected: ${serviceId}, Price: ${pricing.get(serviceId) || 'not found'}`);
+    }
     
     // Log the package name if applicable
     const packageName = getPackageName(selectedServices);
