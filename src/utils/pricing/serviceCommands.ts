@@ -1,19 +1,9 @@
 
 /**
  * This file consolidates all service operations into a single module.
- * It re-exports all service operations from their respective modules.
+ * It provides functions for managing service pricing data.
  */
 
-import { fetchAllServices, fetchServiceById } from './serviceQueries';
-import { 
-  updateServicePrice, 
-  toggleServiceActive, 
-  createService, 
-  removeService,
-  updatePackagePrice,
-  syncPackageIds
-} from './serviceCommands';
-import { fetchInitialServices, addInitialServices } from './serviceInitializer';
 import { supabase } from '@/integrations/supabase/client';
 import { expandClientToDbPackageIds } from './serviceIdMapper';
 
@@ -93,13 +83,99 @@ export async function syncPackageIds(packageName: string, clientId: string, pric
   }
 }
 
-export {
-  fetchAllServices,
-  fetchServiceById,
-  fetchInitialServices,
-  updateServicePrice,
-  toggleServiceActive,
-  createService,
-  removeService,
-  addInitialServices
-};
+// Update service price
+export async function updateServicePrice(id: string, price: number) {
+  console.log(`Updating service price for ID ${id} to ${price}`);
+  
+  try {
+    const { error } = await supabase
+      .from('service_pricing')
+      .update({ 
+        price, 
+        updated_at: new Date().toISOString() 
+      })
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error updating service price:', error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Failed to update service price:', error);
+    throw error;
+  }
+}
+
+// Toggle service active status
+export async function toggleServiceActive(id: string, currentStatus: boolean) {
+  console.log(`Toggling service active status for ID ${id} from ${currentStatus} to ${!currentStatus}`);
+  
+  try {
+    const { error } = await supabase
+      .from('service_pricing')
+      .update({ 
+        is_active: !currentStatus, 
+        updated_at: new Date().toISOString() 
+      })
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error toggling service active status:', error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Failed to toggle service active status:', error);
+    throw error;
+  }
+}
+
+// Create a new service
+export async function createService(serviceData: any) {
+  console.log(`Creating new service:`, serviceData);
+  
+  try {
+    const { error } = await supabase
+      .from('service_pricing')
+      .insert([{
+        ...serviceData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }]);
+    
+    if (error) {
+      console.error('Error creating service:', error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Failed to create service:', error);
+    throw error;
+  }
+}
+
+// Remove a service
+export async function removeService(id: string) {
+  console.log(`Removing service with ID ${id}`);
+  
+  try {
+    const { error } = await supabase
+      .from('service_pricing')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error removing service:', error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Failed to remove service:', error);
+    throw error;
+  }
+}

@@ -37,10 +37,7 @@ export const usePackagePricing = () => {
         const packageGroups = new Map<string, ServicePrice[]>();
         
         // Cast data to ServicePrice[] to ensure type safety
-        const typedData = data.map(pkg => ({
-          ...pkg,
-          type: pkg.type === 'package' ? 'package' : 'service' // Ensure type is correctly typed
-        })) as ServicePrice[];
+        const typedData = data as ServicePrice[];
         
         typedData.forEach(pkg => {
           if (!packageGroups.has(pkg.service_name)) {

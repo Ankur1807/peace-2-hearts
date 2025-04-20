@@ -1,16 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { ServicePrice } from '@/utils/pricingTypes';
-import { 
-  fetchServicePricingData, 
-  fetchAllServiceData,
-  fetchPackagePricingFromServiceTable, 
-  fetchPackagePricingFromPackageTable 
-} from './pricingQueries';
-import { 
-  mapServicePricing, 
-  mapPackagePricing 
-} from './pricingMapper';
+import { fetchServicePricingData, fetchAllServiceData } from './pricingQueries';
+import { mapServicePricing, mapPackagePricing } from './pricingMapper';
 import { calculatePackagePrice } from './pricingCalculator';
 import { formatPrice } from './priceFormatter';
 import { expandClientToDbPackageIds } from './serviceIdMapper';
@@ -72,42 +63,32 @@ export async function fetchPackagePricing(packageIds?: string[], skipCache: bool
     
     // First try to get package pricing from the package_pricing table
     try {
-      const packageData = await fetchPackagePricingFromPackageTable(packageIds);
+      const expandedIds = expandClientToDbPackageIds(packageIds);
       
-      if (packageData && packageData.length > 0) {
-        console.log('Found package pricing in package_pricing table:', packageData);
-        
-        // Map the data to our pricing map
-        const packagePricingMap = mapPackagePricing(packageData, packageIds);
-        
-        // Merge into the main pricing map
-        packagePricingMap.forEach((price, id) => {
-          pricingMap.set(id, price);
-        });
-      }
-    } catch (packageTableError) {
-      console.log('Failed to access package_pricing table:', packageTableError);
-    }
-    
-    // If no data found in package_pricing, try the service_pricing table
-    if (pricingMap.size === 0) {
-      try {
-        const packageData = await fetchPackagePricingFromServiceTable(packageIds);
-        
-        if (packageData && packageData.length > 0) {
-          console.log('Found package pricing in service_pricing table:', packageData);
+      if (expandedIds.length > 0) {
+        const { data, error } = await supabase
+          .from('service_pricing')
+          .select('service_id, price, is_active')
+          .eq('type', 'package')
+          .in('service_id', expandedIds)
+          .eq('is_active', true);
+          
+        if (error) {
+          console.error('Error fetching from service_pricing table (packages):', error);
+        } else if (data && data.length > 0) {
+          console.log('Found package pricing in service_pricing table:', data);
           
           // Map the data to our pricing map
-          const servicePricingMap = mapPackagePricing(packageData, packageIds);
+          const packagePricingMap = mapPackagePricing(data, packageIds);
           
           // Merge into the main pricing map
-          servicePricingMap.forEach((price, id) => {
+          packagePricingMap.forEach((price, id) => {
             pricingMap.set(id, price);
           });
         }
-      } catch (serviceTableError) {
-        console.error('Error fetching from service_pricing table:', serviceTableError);
       }
+    } catch (packageTableError) {
+      console.log('Failed to fetch package pricing:', packageTableError);
     }
     
     // If we still don't have pricing information for the requested packages,
