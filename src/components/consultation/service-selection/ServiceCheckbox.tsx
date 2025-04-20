@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 
@@ -12,7 +12,8 @@ interface ServiceCheckboxProps {
   onChange: (checked: boolean) => void;
 }
 
-const ServiceCheckbox: React.FC<ServiceCheckboxProps> = ({
+// Use memo to prevent unnecessary re-renders
+const ServiceCheckbox: React.FC<ServiceCheckboxProps> = memo(({
   id,
   label,
   description,
@@ -22,11 +23,12 @@ const ServiceCheckbox: React.FC<ServiceCheckboxProps> = ({
 }) => {
   // Handle click on the entire component
   const handleContainerClick = useCallback((e: React.MouseEvent) => {
+    // Prevent default to avoid issues with nested elements
     e.preventDefault();
     onChange(!isSelected);
   }, [isSelected, onChange]);
 
-  // Handle checkbox change directly - FIXED: removed stopPropagation to avoid event conflicts
+  // Handle checkbox change directly
   const handleCheckboxChange = useCallback((checked: boolean | "indeterminate") => {
     if (typeof checked === 'boolean') {
       onChange(checked);
@@ -54,13 +56,11 @@ const ServiceCheckbox: React.FC<ServiceCheckboxProps> = ({
           className="mt-1 h-5 w-5 rounded-sm border-2 border-peacefulBlue"
           checked={isSelected} 
           onCheckedChange={handleCheckboxChange}
-          // FIXED: Removed the onClick handler that was stopping propagation
         />
         <div className="grid gap-1.5">
           <label 
             htmlFor={id} 
             className="font-medium cursor-pointer text-gray-800 text-lg"
-            // FIXED: Removed the onClick handler that was stopping propagation
           >
             {label}
             <span className="text-peacefulBlue font-medium ml-1">{priceDisplay}</span>
@@ -72,6 +72,9 @@ const ServiceCheckbox: React.FC<ServiceCheckboxProps> = ({
       </div>
     </div>
   );
-};
+});
+
+// Add display name for React DevTools
+ServiceCheckbox.displayName = "ServiceCheckbox";
 
 export default ServiceCheckbox;

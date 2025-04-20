@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import ServiceCheckbox from './ServiceCheckbox';
 
 interface ServiceOptionProps {
@@ -12,7 +12,8 @@ interface ServiceOptionProps {
   price?: number;
 }
 
-const ServiceOption: React.FC<ServiceOptionProps> = ({ 
+// Use React.memo to prevent unnecessary re-renders of this component
+const ServiceOption: React.FC<ServiceOptionProps> = memo(({ 
   id, 
   title, 
   description, 
@@ -32,11 +33,9 @@ const ServiceOption: React.FC<ServiceOptionProps> = ({
     }
   }, [onChange, onClick]);
 
-  // Log to debug selection issues
-  console.log(`Service ${id} isChecked:`, isSelected);
-
   return (
     <ServiceCheckbox
+      key={id}
       id={id}
       label={title}
       description={description}
@@ -45,6 +44,9 @@ const ServiceOption: React.FC<ServiceOptionProps> = ({
       onChange={handleChange}
     />
   );
-};
+});
+
+// Add display name for React DevTools
+ServiceOption.displayName = "ServiceOption";
 
 export default ServiceOption;

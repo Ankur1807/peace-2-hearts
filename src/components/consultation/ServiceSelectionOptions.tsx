@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup } from '@/components/ui/radio-group';
 import ServiceCheckbox from './service-selection/ServiceCheckbox';
@@ -59,7 +59,8 @@ const holisticPackages: HolisticPackage[] = [
   }
 ];
 
-const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
+// Fixed: Added memoization to prevent unnecessary re-renders
+const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.memo(({
   serviceCategory,
   selectedServices,
   handleServiceSelection,
@@ -138,6 +139,9 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = ({
       )}
     </div>
   );
-};
+});
+
+// Add display name for React DevTools
+ServiceSelectionOptions.displayName = "ServiceSelectionOptions";
 
 export default ServiceSelectionOptions;

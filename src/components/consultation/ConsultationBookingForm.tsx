@@ -39,12 +39,12 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
   console.log("ConsultationBookingForm totalPrice:", totalPrice);
   console.log("ConsultationBookingForm selectedServices:", selectedServices);
 
-  const handlePersonalDetailsFieldChange = (field: string, value: string) => {
+  const handlePersonalDetailsFieldChange = useCallback((field: string, value: string) => {
     handlePersonalDetailsChange({
       ...personalDetails,
       [field]: value
     });
-  };
+  }, [personalDetails, handlePersonalDetailsChange]);
 
   // Define holisticPackages here to make them available for handlePackageSelection
   const holisticPackages = [
@@ -94,7 +94,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     }
   }, [holisticPackages, setSelectedServices]);
 
-  // FIXED: Remove dependency on selectedServices to prevent infinite loop
+  // Remove dependency on selectedServices to prevent infinite loop
   useEffect(() => {
     // Get the current URL params to check if we came from a specific service page
     const urlParams = new URLSearchParams(window.location.search);
@@ -107,21 +107,21 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
       setSelectedServices([subServiceParam]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setSelectedServices]); // FIXED: removed selectedServices from dependency array
+  }, [setSelectedServices]); // Removed selectedServices from dependency array
 
   // Handle payment form submission
-  const handlePaymentSubmit = (e: React.FormEvent) => {
+  const handlePaymentSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     processPayment();
-  };
+  }, [processPayment]);
 
   // Format selected services for display
-  const getFormattedConsultationType = () => {
+  const getFormattedConsultationType = useCallback(() => {
     if (!selectedServices || selectedServices.length === 0) {
       return "Consultation";
     }
     return selectedServices.join(', ');
-  };
+  }, [selectedServices]);
 
   return (
     <div className="relative">
@@ -184,4 +184,4 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
   );
 };
 
-export default ConsultationBookingForm;
+export default React.memo(ConsultationBookingForm);

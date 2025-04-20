@@ -16,12 +16,30 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
   const [pricingError, setPricingError] = useState<string | null>(null);
   const { toast } = useToast();
   
+  // Use refs to track the previous values to prevent unnecessary updates
+  const prevSelectedServices = useRef<string[]>([]);
+  const prevServiceCategory = useRef<string>('');
+  
   // Use a ref to track if we've already done the initial price fetch
   // This prevents infinite update loops
   const initialFetchDone = useRef(false);
   
   // Load pricing data when services change
   const updatePricing = useCallback(async (skipCache = false) => {
+    // Check if there's any actual change in the services or category
+    const servicesChanged = 
+      selectedServices.length !== prevSelectedServices.current.length ||
+      selectedServices.some(s => !prevSelectedServices.current.includes(s)) ||
+      serviceCategory !== prevServiceCategory.current;
+      
+    if (!servicesChanged && initialFetchDone.current && !skipCache) {
+      return;
+    }
+    
+    // Update refs with current values
+    prevSelectedServices.current = [...selectedServices];
+    prevServiceCategory.current = serviceCategory;
+    
     if (selectedServices.length === 0) {
       setTotalPrice(0);
       setPricingError(null);
@@ -106,11 +124,12 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       });
     } finally {
       setIsLoading(false);
+      initialFetchDone.current = true;
     }
   }, [selectedServices, serviceCategory, toast]);
   
   useEffect(() => {
-    // Only fetch if we have services or this is the first fetch
+    // Only fetch if we have services 
     if (selectedServices.length > 0 || !initialFetchDone.current) {
       updatePricing();
       initialFetchDone.current = true;
