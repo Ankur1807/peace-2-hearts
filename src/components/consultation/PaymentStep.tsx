@@ -16,6 +16,7 @@ type PaymentStepProps = {
   onSubmit: (e: React.FormEvent) => void;
   isProcessing: boolean;
   totalPrice: number;
+  selectedServices?: string[];
 };
 
 const PaymentStep = ({
@@ -24,7 +25,8 @@ const PaymentStep = ({
   onPrevStep,
   onSubmit,
   isProcessing,
-  totalPrice
+  totalPrice,
+  selectedServices = []
 }: PaymentStepProps) => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
@@ -58,6 +60,11 @@ const PaymentStep = ({
 
     checkAndLoadRazorpay();
   }, []);
+  
+  // For debugging
+  useEffect(() => {
+    console.log(`PaymentStep rendered with price: ${totalPrice}`);
+  }, [totalPrice]);
 
   return (
     <div className="space-y-6">
@@ -88,7 +95,7 @@ const PaymentStep = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span>{consultationType.includes(',') ? 'Multiple Services' : getConsultationTypeLabel(consultationType)}</span>
-              <span className="font-medium">{formatPrice(totalPrice)}</span>
+              <span className="font-medium">{totalPrice > 0 ? formatPrice(totalPrice) : "Price not available"}</span>
             </div>
             <div className="text-sm text-gray-600">60-minute consultation</div>
           </div>
@@ -97,7 +104,7 @@ const PaymentStep = ({
         <div className="border-t border-b py-4 mb-6">
           <div className="flex justify-between font-semibold">
             <span>Total</span>
-            <span>{formatPrice(totalPrice)}</span>
+            <span>{totalPrice > 0 ? formatPrice(totalPrice) : "Price not available"}</span>
           </div>
         </div>
       </div>
@@ -147,15 +154,24 @@ const PaymentStep = ({
         <Button 
           type="submit" 
           className="bg-peacefulBlue hover:bg-peacefulBlue/90"
-          disabled={isProcessing || !acceptTerms || !razorpayLoaded}
+          disabled={isProcessing || !acceptTerms || !razorpayLoaded || totalPrice <= 0}
         >
-          {!razorpayLoaded ? "Loading Payment..." : isProcessing ? "Processing..." : `Pay ${formatPrice(totalPrice)}`}
+          {!razorpayLoaded ? "Loading Payment..." : 
+           isProcessing ? "Processing..." : 
+           totalPrice <= 0 ? "Price Not Available" : 
+           `Pay ${formatPrice(totalPrice)}`}
         </Button>
       </div>
       
       {!razorpayLoaded && !loadError && (
         <div className="text-center text-amber-600 text-sm mt-2">
           Payment gateway is loading. Please wait...
+        </div>
+      )}
+      
+      {totalPrice <= 0 && (
+        <div className="text-center text-amber-600 text-sm mt-2">
+          Unable to calculate price. Please try selecting your services again or contact support.
         </div>
       )}
     </div>

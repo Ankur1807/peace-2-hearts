@@ -24,7 +24,8 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
   const getButtonText = () => {
     if (!razorpayLoaded) return "Loading Payment...";
     if (isProcessing) return "Processing...";
-    return totalPrice > 0 ? `Pay ${formatPrice(totalPrice)}` : "Pay Now";
+    if (totalPrice <= 0) return "Price Not Available";
+    return `Pay ${formatPrice(totalPrice)}`;
   };
 
   return (
@@ -35,7 +36,11 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
       <Button 
         type="submit" 
         className="bg-peacefulBlue hover:bg-peacefulBlue/90"
-        disabled={isProcessing || !acceptTerms || !razorpayLoaded}
+        disabled={isProcessing || !acceptTerms || !razorpayLoaded || totalPrice <= 0}
+        onClick={(e) => {
+          console.log(`Payment button clicked with totalPrice: ${totalPrice}`);
+          onSubmit(e);
+        }}
       >
         {getButtonText()}
       </Button>

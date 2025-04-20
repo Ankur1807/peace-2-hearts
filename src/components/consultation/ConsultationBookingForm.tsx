@@ -106,14 +106,14 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
       console.log("Setting service from URL parameter:", subServiceParam);
       setSelectedServices([subServiceParam]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setSelectedServices]); // Removed selectedServices from dependency array
 
   // Handle payment form submission
   const handlePaymentSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
+    console.log(`Submitting payment with total price: ${totalPrice}`);
     processPayment();
-  }, [processPayment]);
+  }, [processPayment, totalPrice]);
 
   // Format selected services for display
   const getFormattedConsultationType = useCallback(() => {

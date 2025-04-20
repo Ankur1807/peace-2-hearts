@@ -30,11 +30,18 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   
   const handleRazorpayLoad = (loaded: boolean) => {
     setRazorpayLoaded(loaded);
+    console.log("Razorpay loaded state set to:", loaded);
   };
   
   const handleLoadError = (error: string | null) => {
     setLoadError(error);
+    console.log("Load error set to:", error);
   };
+
+  // For debugging
+  React.useEffect(() => {
+    console.log(`PaymentStep component totalPrice: ${totalPrice}`);
+  }, [totalPrice]);
 
   if (isProcessing) {
     return <PaymentLoader 
@@ -74,6 +81,12 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         acceptTerms={acceptTerms}
         razorpayLoaded={razorpayLoaded}
       />
+
+      {totalPrice <= 0 && (
+        <div className="text-center text-amber-600 text-sm mt-2">
+          Unable to calculate price. Please try selecting your services again or contact support.
+        </div>
+      )}
     </div>
   );
 };

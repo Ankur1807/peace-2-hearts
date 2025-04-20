@@ -25,7 +25,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ consultationType, totalPric
         <h3 className="font-semibold mb-3">Order Summary</h3>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span>{consultationLabel}</span>
+            <span className="text-gray-800">{consultationLabel}</span>
             <span className="font-medium">
               {totalPrice > 0 ? formatPrice(totalPrice) : "Price not available"}
             </span>

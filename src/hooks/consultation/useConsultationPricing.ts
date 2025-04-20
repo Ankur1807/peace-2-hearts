@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { getPackageName } from './consultationHelpers';
+import { getPackageName } from '@/utils/consultation/packageUtils';
 import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing/fetchPricing';
 import { useToast } from '@/hooks/use-toast';
 
@@ -52,62 +52,44 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
     
     try {
       let pricingMap: Map<string, number> = new Map();
-      let packagePrice = 0;
+      let finalPrice = 0;
       
       // Check if selected services match a package
       const packageName = getPackageName(selectedServices);
-      const isPackage = packageName !== null;
       
-      if (isPackage || serviceCategory === 'holistic') {
-        // First try to fetch package pricing
-        let packageId = '';
+      if (packageName) {
+        // This is a package, get package price
+        const packageId = packageName === "Divorce Prevention Package" 
+          ? 'divorce-prevention' 
+          : 'pre-marriage-clarity';
         
-        if (packageName === "Divorce Prevention Package") {
-          packageId = 'divorce-prevention';
-        } else if (packageName === "Pre-Marriage Clarity Package") {
-          packageId = 'pre-marriage-clarity';
-        }
+        console.log(`Fetching package price for ${packageId}`);
+        const packagePricing = await fetchPackagePricing([packageId], skipCache);
+        finalPrice = packagePricing.get(packageId) || 0;
         
-        if (packageId) {
-          console.log(`Fetching ${packageName} pricing`);
-          const packagePricingMap = await fetchPackagePricing([packageId], skipCache);
-          packagePrice = packagePricingMap.get(packageId) || 0;
-          
-          if (packagePrice > 0) {
-            console.log(`Found package price for ${packageId}: ${packagePrice}`);
-          }
-        }
-      }
-      
-      // Always fetch individual service prices for display purposes
-      console.log('Fetching individual service prices');
-      pricingMap = await fetchServicePricing(selectedServices);
-      
-      console.log('Pricing data retrieved:', Object.fromEntries(pricingMap));
-      
-      // Calculate total price
-      let total = 0;
-      
-      // If we have a package price, use it
-      if (packagePrice > 0) {
-        total = packagePrice;
-        console.log(`Using package price: ${total}`);
+        console.log(`Package price for ${packageId}: ${finalPrice}`);
+        
+        // Also fetch individual service prices for display purposes
+        pricingMap = await fetchServicePricing(selectedServices);
       } else {
-        // Sum individual services
+        // Just individual services
+        pricingMap = await fetchServicePricing(selectedServices);
+        
+        // Calculate total price from individual services
         console.log('Calculating total from individual services');
         selectedServices.forEach(serviceId => {
           const price = pricingMap.get(serviceId) || 0;
-          total += price;
+          finalPrice += price;
           console.log(`Adding ${price} for ${serviceId}`);
         });
       }
       
-      console.log('Calculated total price:', total);
+      console.log('Final calculated price:', finalPrice);
       setPricing(pricingMap);
-      setTotalPrice(total);
+      setTotalPrice(finalPrice);
       
       // If no prices found despite having valid services, show error
-      if (total === 0 && selectedServices.length > 0) {
+      if (finalPrice === 0 && selectedServices.length > 0) {
         const errorMsg = 'No pricing information available for selected services';
         console.warn(errorMsg);
         setPricingError(errorMsg);
@@ -132,6 +114,11 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       updatePricing();
     }
   }, [updatePricing]);
+  
+  // For debugging
+  useEffect(() => {
+    console.log(`Current totalPrice: ${totalPrice}, Selected services: ${selectedServices.join(', ')}`);
+  }, [totalPrice, selectedServices]);
   
   return { 
     pricing, 

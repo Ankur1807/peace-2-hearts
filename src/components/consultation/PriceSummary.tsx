@@ -18,6 +18,8 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
 }) => {
   const packageName = getPackageName(services);
 
+  console.log(`PriceSummary rendered with services: ${services.join(', ')}, totalPrice: ${totalPrice}, packageName: ${packageName}`);
+
   if (services.length === 0) {
     return null;
   }
@@ -44,6 +46,15 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
         </div>
       )}
       
+      {!packageName && totalPrice > 0 && services.length > 0 && (
+        <div className="mb-3 py-2">
+          <div className="flex justify-between items-center text-gray-700">
+            <span>{services.length > 1 ? "Multiple Services" : "Consultation"}</span>
+            <span>{formatPrice(totalPrice, currency)}</span>
+          </div>
+        </div>
+      )}
+      
       <div className="flex justify-between items-center pt-3 font-semibold">
         <span>Total</span>
         <span className="text-lg">
@@ -54,4 +65,4 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
   );
 };
 
-export default PriceSummary;
+export default React.memo(PriceSummary);
