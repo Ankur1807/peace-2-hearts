@@ -35,7 +35,14 @@ export const usePackagePricing = () => {
 
       if (data) {
         const packageGroups = new Map<string, ServicePrice[]>();
-        data.forEach(pkg => {
+        
+        // Cast data to ServicePrice[] to ensure type safety
+        const typedData = data.map(pkg => ({
+          ...pkg,
+          type: pkg.type as 'service' | 'package'  // Ensure type is correctly typed
+        })) as ServicePrice[];
+        
+        typedData.forEach(pkg => {
           if (!packageGroups.has(pkg.service_name)) {
             packageGroups.set(pkg.service_name, []);
           }
@@ -54,7 +61,7 @@ export const usePackagePricing = () => {
         });
         
         setSyncNeeded(inconsistencyFound);
-        setPackages(data);
+        setPackages(typedData);
       }
       
       if (showMessage && data) {
@@ -80,7 +87,7 @@ export const usePackagePricing = () => {
       console.log(`Updating package ID ${id} with new price: ${price}`);
       
       const { data: packageData } = await supabase
-        .from('package_pricing')
+        .from('service_pricing')
         .select('*')
         .eq('id', id)
         .single();
@@ -91,9 +98,9 @@ export const usePackagePricing = () => {
       
       await updatePackagePrice(id, price);
       
-      if (packageData.package_name.toLowerCase().includes('divorce prevention')) {
+      if (packageData.service_name.toLowerCase().includes('divorce prevention')) {
         await syncPackageIds('Divorce Prevention Package', 'divorce-prevention', price);
-      } else if (packageData.package_name.toLowerCase().includes('pre-marriage clarity')) {
+      } else if (packageData.service_name.toLowerCase().includes('pre-marriage clarity')) {
         await syncPackageIds('Pre-Marriage Clarity Package', 'pre-marriage-clarity', price);
       }
       
@@ -121,7 +128,7 @@ export const usePackagePricing = () => {
       const timestamp = new Date().toISOString();
       
       const { error } = await supabase
-        .from('package_pricing')
+        .from('service_pricing')
         .update({ 
           is_active: !currentStatus, 
           updated_at: timestamp

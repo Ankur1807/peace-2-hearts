@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Edit, Save, X } from 'lucide-react';
-import { PackagePrice } from '@/utils/pricingTypes';
+import { ServicePrice } from '@/utils/pricingTypes';
 
 interface PackageEditFormProps {
-  pkg: PackagePrice;
+  pkg: ServicePrice;
   onSave: (price: number) => Promise<void>;
   disabled?: boolean;
 }

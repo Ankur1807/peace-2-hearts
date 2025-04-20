@@ -73,6 +73,7 @@ export async function fetchPackagePricingFromServiceTable(packageIds?: string[])
   const { data, error } = await supabase
     .from('service_pricing')
     .select('service_id, price, is_active')
+    .eq('type', 'package')
     .in('service_id', expandedIds)
     .eq('is_active', true);
   
@@ -86,12 +87,12 @@ export async function fetchPackagePricingFromServiceTable(packageIds?: string[])
 }
 
 /**
- * Fetch package pricing from package_pricing table
+ * Fetch package pricing from service_pricing table filtered by package type
  * @param packageIds - Array of package IDs to fetch
- * @returns Raw package pricing data or empty array if table doesn't exist
+ * @returns Raw package pricing data
  */
 export async function fetchPackagePricingFromPackageTable(packageIds?: string[]) {
-  console.log('Fetching from package_pricing table for:', packageIds);
+  console.log('Fetching packages from service_pricing table for:', packageIds);
   
   if (!packageIds || packageIds.length === 0) {
     return [];
@@ -100,25 +101,22 @@ export async function fetchPackagePricingFromPackageTable(packageIds?: string[])
   const expandedIds = expandClientToDbPackageIds(packageIds);
   
   try {
-    // Add a timestamp parameter to prevent caching
-    const timestamp = new Date().getTime();
-    
     const { data, error } = await supabase
-      .from('package_pricing')
-      .select('package_id, price, is_active')
-      .in('package_id', expandedIds)
+      .from('service_pricing')
+      .select('service_id as package_id, price, is_active')
+      .eq('type', 'package')
+      .in('service_id', expandedIds)
       .eq('is_active', true);
     
     if (error) {
-      console.error('Error fetching from package_pricing table:', error);
+      console.error('Error fetching from service_pricing table (packages):', error);
       return [];
     }
     
-    console.log('Retrieved package pricing from package table:', data);
+    console.log('Retrieved package pricing:', data);
     return data || [];
   } catch (error) {
-    // The package_pricing table might not exist
-    console.log('Failed to fetch from package_pricing table (it might not exist):', error);
+    console.log('Failed to fetch packages:', error);
     return [];
   }
 }

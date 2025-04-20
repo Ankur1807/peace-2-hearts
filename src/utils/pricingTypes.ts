@@ -1,3 +1,4 @@
+
 // Type definitions for pricing-related database tables
 
 export interface ServicePrice {

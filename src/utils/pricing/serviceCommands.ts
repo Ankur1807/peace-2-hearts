@@ -1,4 +1,9 @@
 
+/**
+ * This file consolidates all service operations into a single module.
+ * It re-exports all service operations from their respective modules.
+ */
+
 import { supabase } from '@/integrations/supabase/client';
 import { NewServiceFormValues } from '@/components/pricing/AddServiceForm';
 
@@ -96,6 +101,7 @@ export const createService = async (data: NewServiceFormValues) => {
         currency: 'INR',
         is_active: true,
         scenario: 'regular',
+        type: 'service', // Set the type explicitly
         created_at: timestamp,
         updated_at: timestamp,
       }])
@@ -154,12 +160,13 @@ export const updatePackagePrice = async (id: string, price: number) => {
   try {
     const timestamp = new Date().toISOString();
     const { data, error } = await supabase
-      .from('package_pricing')
+      .from('service_pricing')
       .update({ 
         price, 
         updated_at: timestamp 
       })
       .eq('id', id)
+      .eq('type', 'package')
       .select();
 
     if (error) {
@@ -191,9 +198,10 @@ export const syncPackageIds = async (packageName: string, packageId: string, pri
   try {
     // Find all entries with the given package name
     const { data: packageData, error: fetchError } = await supabase
-      .from('package_pricing')
+      .from('service_pricing')
       .select('*')
-      .ilike('package_name', packageName);
+      .eq('type', 'package')
+      .ilike('service_name', packageName);
       
     if (fetchError) {
       console.error('Error fetching packages:', fetchError);
@@ -208,9 +216,9 @@ export const syncPackageIds = async (packageName: string, packageId: string, pri
         const timestamp = new Date().toISOString();
         
         const { data, error } = await supabase
-          .from('package_pricing')
+          .from('service_pricing')
           .update({ 
-            package_id: packageId,
+            service_id: packageId,
             price: price,
             updated_at: timestamp 
           })
@@ -233,3 +241,7 @@ export const syncPackageIds = async (packageName: string, packageId: string, pri
     throw err;
   }
 };
+
+// Re-export service operations from other modules
+export { fetchAllServices, fetchServiceById } from './serviceQueries';
+export { fetchInitialServices, addInitialServices } from './serviceInitializer';

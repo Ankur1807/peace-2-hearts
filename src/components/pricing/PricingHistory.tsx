@@ -42,42 +42,21 @@ const PricingHistory = () => {
       // Enhance history data with entity names
       const enhancedHistory = await Promise.all((historyData || []).map(async (record: any) => {
         try {
-          if (record.entity_type === 'service') {
-            const { data: serviceData, error: serviceError } = await supabase
-              .from('service_pricing')
-              .select('service_name')
-              .eq('id', record.entity_id)
-              .single();
+          // For both services and packages, query the service_pricing table
+          const { data: entityData, error: entityError } = await supabase
+            .from('service_pricing')
+            .select('service_name')
+            .eq('id', record.entity_id)
+            .single();
               
-            if (serviceError && serviceError.code !== 'PGRST116') {
-              console.error('Error fetching service name:', serviceError);
-            }
-              
-            return {
-              ...record,
-              entity_name: serviceData?.service_name || 'Unknown Service'
-            };
-          } else if (record.entity_type === 'package') {
-            const { data: packageData, error: packageError } = await supabase
-              .from('package_pricing')
-              .select('package_name')
-              .eq('id', record.entity_id)
-              .single();
-              
-            if (packageError && packageError.code !== 'PGRST116') {
-              console.error('Error fetching package name:', packageError);
-            }
-              
-            return {
-              ...record,
-              entity_name: packageData?.package_name || 'Unknown Package'
-            };
-          } else {
-            return {
-              ...record,
-              entity_name: 'Unknown Entity'
-            };
+          if (entityError && entityError.code !== 'PGRST116') {
+            console.error('Error fetching entity name:', entityError);
           }
+              
+          return {
+            ...record,
+            entity_name: entityData?.service_name || `Unknown ${record.entity_type}`
+          };
         } catch (err) {
           return {
             ...record,
