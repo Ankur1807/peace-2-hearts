@@ -24,18 +24,35 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
   acceptTerms,
   razorpayLoaded
 }) => {
-  // Determine the price to display based on selected services
-  let displayPrice = totalPrice;
+  // Get the effective price for this service
+  const [effectivePrice, setEffectivePrice] = React.useState<number>(totalPrice);
   
-  // If we have a single service selected, use its price from pricing map if available
-  if (selectedServices.length === 1 && pricing && pricing.has(selectedServices[0])) {
-    displayPrice = pricing.get(selectedServices[0])!;
-  }
+  // Calculate the actual price to display and use for payment
+  React.useEffect(() => {
+    let price = totalPrice;
+    
+    if (selectedServices.length === 1 && pricing) {
+      const serviceId = selectedServices[0];
+      
+      if (pricing.has(serviceId)) {
+        price = pricing.get(serviceId) || price;
+        console.log(`PaymentActions: Using price ${price} for service ${serviceId}`);
+      }
+    }
+    
+    if (price !== effectivePrice) {
+      console.log(`PaymentActions: Updating effective price from ${effectivePrice} to ${price}`);
+      setEffectivePrice(price);
+    }
+  }, [totalPrice, selectedServices, pricing, effectivePrice]);
   
   // Log debug info
   React.useEffect(() => {
-    console.log(`PaymentActions: displayPrice=${displayPrice}, totalPrice=${totalPrice}, selectedServices=${selectedServices}`);
-  }, [displayPrice, totalPrice, selectedServices]);
+    console.log(`PaymentActions: effectivePrice=${effectivePrice}, totalPrice=${totalPrice}, selectedServices=${selectedServices}`);
+    if (pricing) {
+      console.log(`PaymentActions: Available pricing:`, Object.fromEntries(pricing));
+    }
+  }, [effectivePrice, totalPrice, selectedServices, pricing]);
   
   return (
     <div className="pt-6 flex justify-between">
@@ -45,13 +62,13 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
       <Button 
         type="submit" 
         className="bg-peacefulBlue hover:bg-peacefulBlue/90"
-        disabled={isProcessing || !acceptTerms || !razorpayLoaded || displayPrice <= 0}
+        disabled={isProcessing || !acceptTerms || !razorpayLoaded || effectivePrice <= 0}
         onClick={onSubmit}
       >
         {!razorpayLoaded ? "Loading Payment..." : 
          isProcessing ? "Processing..." : 
-         displayPrice <= 0 ? "Price Not Available" : 
-         `Pay ${formatPrice(displayPrice)}`}
+         effectivePrice <= 0 ? "Price Not Available" : 
+         `Pay ${formatPrice(effectivePrice)}`}
       </Button>
     </div>
   );

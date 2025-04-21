@@ -42,31 +42,25 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
     }
   });
 
-  // Check if we have a single service selection and update the price to use
-  const [effectivePrice, setEffectivePrice] = React.useState<number>(totalPrice);
+  // Determine the actual price to use based on selected services
+  const [actualPrice, setActualPrice] = React.useState<number>(totalPrice);
   
   React.useEffect(() => {
-    let newPrice = totalPrice;
+    let finalPrice = totalPrice;
     
-    // If we have a single service selected
+    // If we have a single service selected and a pricing map
     if (selectedServices.length === 1 && pricing) {
       const serviceId = selectedServices[0];
       
-      // Check if it's a direct package ID
-      if (serviceId === 'divorce-prevention' || serviceId === 'pre-marriage-clarity') {
-        const packagePrice = pricing.get(serviceId);
-        if (packagePrice && packagePrice > 0) {
-          console.log(`Using direct package price for ${serviceId}: ${packagePrice}`);
-          newPrice = packagePrice;
-        }
+      // Check if it's a package ID directly
+      if ((serviceId === 'divorce-prevention' || serviceId === 'pre-marriage-clarity') && pricing.has(serviceId)) {
+        finalPrice = pricing.get(serviceId) || finalPrice;
+        console.log(`Using package price for ${serviceId}: ${finalPrice}`);
       } 
       // Check if it's a regular service
       else if (pricing.has(serviceId)) {
-        const servicePrice = pricing.get(serviceId);
-        if (servicePrice && servicePrice > 0) {
-          console.log(`Using service price for ${serviceId}: ${servicePrice}`);
-          newPrice = servicePrice;
-        }
+        finalPrice = pricing.get(serviceId) || finalPrice;
+        console.log(`Using service price for ${serviceId}: ${finalPrice}`);
       }
     }
     
@@ -76,47 +70,29 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       const packageId = packageName === "Divorce Prevention Package" 
         ? 'divorce-prevention' 
         : 'pre-marriage-clarity';
-      const packagePrice = pricing.get(packageId);
-      if (packagePrice && packagePrice > 0) {
-        console.log(`Using package price for ${packageName}: ${packagePrice}`);
-        newPrice = packagePrice;
+      
+      if (pricing.has(packageId)) {
+        finalPrice = pricing.get(packageId) || finalPrice;
+        console.log(`Using package price for ${packageName} (${packageId}): ${finalPrice}`);
       }
     }
     
-    if (newPrice !== effectivePrice) {
-      console.log(`Updating effective price from ${effectivePrice} to ${newPrice}`);
-      setEffectivePrice(newPrice);
+    // Only update if the price has actually changed
+    if (finalPrice !== actualPrice) {
+      console.log(`Updating actual price from ${actualPrice} to ${finalPrice}`);
+      setActualPrice(finalPrice);
     }
-  }, [selectedServices, pricing, totalPrice, effectivePrice]);
+  }, [selectedServices, pricing, totalPrice, actualPrice]);
 
   // For debugging
   React.useEffect(() => {
-    if (selectedServices && selectedServices.length > 0) {
-      const serviceId = selectedServices[0];
-      const servicePrice = pricing?.get(serviceId);
-      console.log(`Selected service: ${serviceId}, price from map: ${servicePrice || 'not found'}`);
-      
-      // Check if it's a package ID directly
-      if (serviceId === 'divorce-prevention' || serviceId === 'pre-marriage-clarity') {
-        const packagePrice = pricing?.get(serviceId) || 0;
-        console.log(`Direct package selection: ${serviceId}, price: ${packagePrice}`);
-      } else {
-        // Check if the services match a package
-        const packageName = getPackageName(selectedServices);
-        if (packageName) {
-          const packageId = packageName === "Divorce Prevention Package" 
-            ? 'divorce-prevention' 
-            : 'pre-marriage-clarity';
-          console.log(`Package from services: ${packageName}, id: ${packageId}, price: ${pricing?.get(packageId) || 'not found'}`);
-        }
-      }
-    }
+    console.log(`PaymentStep - totalPrice: ${totalPrice}, actualPrice: ${actualPrice}`);
+    console.log(`Selected services: ${selectedServices.join(', ')}`);
     
-    console.log(`PaymentStep component with totalPrice: ${totalPrice}, effectivePrice: ${effectivePrice}`);
     if (pricing) {
       console.log('Available pricing:', Object.fromEntries(pricing));
     }
-  }, [totalPrice, pricing, selectedServices, effectivePrice]);
+  }, [totalPrice, actualPrice, selectedServices, pricing]);
 
   if (isProcessing) {
     return <PaymentLoader 
@@ -138,7 +114,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       
       <OrderSummary 
         consultationType={consultationType} 
-        totalPrice={effectivePrice}
+        totalPrice={actualPrice}
         selectedServices={selectedServices}
         pricing={pricing}
       />
@@ -153,7 +129,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       <PaymentActions
         onPrevStep={onPrevStep}
         onSubmit={onSubmit}
-        totalPrice={effectivePrice}
+        totalPrice={actualPrice}
         selectedServices={selectedServices}
         pricing={pricing}
         isProcessing={isProcessing}
@@ -161,7 +137,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         razorpayLoaded={razorpayLoaded}
       />
 
-      {effectivePrice <= 0 && (
+      {actualPrice <= 0 && (
         <PaymentErrorMessage message="Unable to calculate price. Please try selecting your services again or contact support." />
       )}
       

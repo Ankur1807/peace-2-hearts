@@ -29,13 +29,42 @@ export function useRazorpayPayment({
   handleConfirmBooking
 }: RazorpayPaymentProps) {
   
+  // Helper function to calculate the actual amount to charge
+  const getEffectivePrice = () => {
+    if (!state.selectedServices || state.selectedServices.length === 0 || !state.pricing) {
+      return state.totalPrice;
+    }
+    
+    // First check if we have a direct service price
+    if (state.selectedServices.length === 1) {
+      const serviceId = state.selectedServices[0];
+      
+      if (state.pricing.has(serviceId)) {
+        const price = state.pricing.get(serviceId);
+        if (price && price > 0) {
+          console.log(`Using direct price for ${serviceId}: ${price}`);
+          return price;
+        }
+      }
+    }
+    
+    // If we don't have a direct price, use totalPrice
+    return state.totalPrice > 0 ? state.totalPrice : 0;
+  };
+  
   // Initialize Razorpay payment 
   const initializeRazorpayPayment = async (receiptId: string) => {
-    console.log("Starting payment process with amount:", state.totalPrice);
+    // Get the effective price to use for payment
+    const effectivePrice = getEffectivePrice();
+    console.log("Starting payment process with amount:", effectivePrice);
+    
+    if (effectivePrice <= 0) {
+      throw new Error("Cannot process payment with zero or negative amount");
+    }
       
     // Create an order through our edge function
     const orderResponse = await createRazorpayOrder({
-      amount: state.totalPrice,
+      amount: effectivePrice,
       receipt: receiptId,
       notes: {
         services: state.selectedServices.join(','),
@@ -64,6 +93,9 @@ export function useRazorpayPayment({
   
   // Configure and open Razorpay payment modal
   const openRazorpayCheckout = (order: any, razorpayKey: string, receiptId: string) => {
+    // Get the effective price for display
+    const effectivePrice = getEffectivePrice();
+    
     // Initialize Razorpay
     const options = {
       key: razorpayKey,
@@ -92,7 +124,7 @@ export function useRazorpayPayment({
           const paymentParams: SavePaymentParams = {
             paymentId: response.razorpay_payment_id,
             orderId: response.razorpay_order_id,
-            amount: state.totalPrice,
+            amount: effectivePrice, // Use the effective price here
             consultationId: receiptId // Using reference ID as consultation ID for now
           };
           
