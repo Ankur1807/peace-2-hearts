@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Lock, CreditCard } from 'lucide-react';
+import { CreditCard, Lock } from 'lucide-react';
 
 const RazorpayCard: React.FC = () => {
   return (
