@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -28,10 +28,22 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   availableTimeSlots,
   minDate
 }) => {
+  // Ref to control popover close
+  const popoverRef = useRef<{ close: () => void }>(null);
+
   // Format time slot for display
   const formatTimeSlot = (slot: string) => {
     const [hour, period] = slot.split('-');
     return `${hour}:00 ${period.toUpperCase()}`;
+  };
+  
+  // Handle date selection and close popover
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    setDate(selectedDate);
+    // Close the popover after date selection
+    if (popoverRef.current) {
+      popoverRef.current.close();
+    }
   };
   
   return (
@@ -52,16 +64,21 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
               {date ? format(date, "PPP") : <span>Select your preferred date</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent 
+            className="w-auto p-0" 
+            align="start"
+            ref={popoverRef}
+          >
             <Calendar
               mode="single"
               selected={date}
-              onSelect={setDate}
+              onSelect={handleDateSelect}
               disabled={(date) => {
                 // Disable dates in the past or today
                 return date < minDate;
               }}
               initialFocus
+              className={cn("p-3 pointer-events-auto")}
             />
           </PopoverContent>
         </Popover>
@@ -96,3 +113,4 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 };
 
 export default DateTimePicker;
+
