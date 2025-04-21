@@ -28,8 +28,8 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   availableTimeSlots,
   minDate
 }) => {
-  // Ref to control popover close
-  const popoverRef = useRef<{ close: () => void }>(null);
+  // Use state to control popover open/close
+  const [isCalendarOpen, setCalendarOpen] = React.useState(false);
 
   // Format time slot for display
   const formatTimeSlot = (slot: string) => {
@@ -41,16 +41,14 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   const handleDateSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate);
     // Close the popover after date selection
-    if (popoverRef.current) {
-      popoverRef.current.close();
-    }
+    setCalendarOpen(false);
   };
   
   return (
     <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="date" className="text-lg font-medium">Choose a Date</Label>
-        <Popover>
+        <Popover open={isCalendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
             <Button
               id="date"
@@ -67,7 +65,6 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <PopoverContent 
             className="w-auto p-0" 
             align="start"
-            ref={popoverRef}
           >
             <Calendar
               mode="single"
@@ -113,4 +110,3 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 };
 
 export default DateTimePicker;
-
