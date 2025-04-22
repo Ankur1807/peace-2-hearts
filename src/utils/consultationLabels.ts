@@ -1,4 +1,3 @@
-
 export const getConsultationTypeLabel = (type: string): string => {
   const types: Record<string, string> = {
     'legal': 'Legal Consultation',
@@ -15,8 +14,7 @@ export const getConsultationTypeLabel = (type: string): string => {
     'premarital-counselling-individual': 'Premarital Counselling - Individual',
     'premarital-counselling-couple': 'Premarital Counselling - Couple',
     'couples-counselling': 'Couples Counselling',
-    'sexual-health-counselling-individual': 'Sexual Health Counselling - Individual',
-    'sexual-health-counselling-couple': 'Sexual Health Counselling - Couple',
+    'sexual-health-counselling': 'Sexual Health Counselling',
     'pre-marriage-legal': 'Pre-marriage Legal Consultation',
     'mediation': 'Mediation Services',
     'maintenance': 'Maintenance Consultation',

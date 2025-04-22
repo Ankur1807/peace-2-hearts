@@ -30,7 +30,7 @@ const mentalHealthServices: ServiceOption[] = [
   { id: 'premarital-counselling-individual', label: 'Premarital Counselling - Individual', description: 'Prepare for a strong marriage through guided personal reflection.' },
   { id: 'premarital-counselling-couple', label: 'Premarital Counselling - Couple', description: 'Build a foundation for marriage together through guided discussions.' },
   { id: 'couples-counselling', label: 'Couples Counselling', description: 'Professional guidance to strengthen communication and mutual understanding.' },
-  { id: 'sexual-health-counselling-individual', label: 'Sexual Health Counselling - Individual', description: 'Personal support for addressing intimacy concerns.' },
+  { id: 'sexual-health-counselling', label: 'Sexual Health Counselling', description: 'Specialized support for addressing intimacy concerns and enhancing relationship satisfaction.' },
   { id: 'test-service', label: 'Test Service (₹11)', description: 'For testing payment gateway functionality.' }
 ];
 

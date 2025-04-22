@@ -13,7 +13,7 @@ export function mapServicePricing(
     'P2H-MH-premarital-counselling-individual': 'premarital-counselling-individual',
     'P2H-MH-premarital-counselling-couple': 'premarital-counselling-couple',
     'P2H-MH-couples-counselling': 'couples-counselling',
-    'P2H-MH-sexual-health-counselling': 'sexual-health-counselling-individual',
+    'P2H-MH-sexual-health-counselling': 'sexual-health-counselling',
     'P2H-MH-test-service': 'test-service',
     
     // Legal Services

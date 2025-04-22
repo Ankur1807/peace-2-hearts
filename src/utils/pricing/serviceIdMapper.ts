@@ -1,4 +1,3 @@
-
 /**
  * Maps client-side service IDs to database service IDs
  * @param clientIds - Array of client-side service IDs
@@ -17,8 +16,7 @@ export function expandClientToDbIds(clientIds: string[]): string[] {
     'premarital-counselling-individual': 'P2H-MH-premarital-counselling-individual',
     'premarital-counselling-couple': 'P2H-MH-premarital-counselling-couple',
     'couples-counselling': 'P2H-MH-couples-counselling',
-    'sexual-health-counselling-individual': 'P2H-MH-sexual-health-counselling',
-    'sexual-health-counselling-couple': 'P2H-MH-sexual-health-counselling',
+    'sexual-health-counselling': 'P2H-MH-sexual-health-counselling',
     'test-service': 'P2H-MH-test-service',
     
     // Legal Services (P2H-L)
