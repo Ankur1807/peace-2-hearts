@@ -43,3 +43,14 @@ export interface DiscountCode {
   created_at: string;
   updated_at: string;
 }
+
+// Added missing types
+export interface ServiceOption {
+  service_id: string;
+  service_name: string;
+  category: string;
+}
+
+export interface PriceChange extends PricingHistory {
+  entity_name?: string;
+}
