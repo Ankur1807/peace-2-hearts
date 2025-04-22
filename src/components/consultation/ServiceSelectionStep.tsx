@@ -35,7 +35,10 @@ const ServiceSelectionStep = ({
   // Function to handle clicking the entire box
   const handleBoxClick = (value: string) => {
     console.log("Service option clicked:", value);
-    setConsultationType(value);
+    // Prevent focus/scroll behavior with setTimeout
+    setTimeout(() => {
+      setConsultationType(value);
+    }, 0);
   };
 
   return (

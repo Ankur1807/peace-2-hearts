@@ -29,9 +29,15 @@ const ServiceCategoryButton: React.FC<ServiceCategoryButtonProps> = ({
     }
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    // Prevent default behavior which might cause scrolling
+    e.preventDefault();
+    onClick();
+  };
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       className={cn(
         "w-full p-4 rounded-xl transition-all duration-300 ease-in-out flex flex-col items-center gap-2",
         "border-2 hover:border-peacefulBlue",
