@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { AlertCircle } from 'lucide-react';
 
 const newServiceSchema = z.object({
   service_name: z.string().min(3, { message: "Service name must be at least 3 characters" }),
@@ -28,6 +29,8 @@ interface AddServiceFormProps {
 }
 
 const AddServiceForm = ({ onSubmit }: AddServiceFormProps) => {
+  const [error, setError] = React.useState<string | null>(null);
+
   const form = useForm<NewServiceFormValues>({
     resolver: zodResolver(newServiceSchema),
     defaultValues: {
@@ -40,6 +43,15 @@ const AddServiceForm = ({ onSubmit }: AddServiceFormProps) => {
       description: '',
     },
   });
+  
+  const handleSubmit = async (data: NewServiceFormValues) => {
+    setError(null);
+    try {
+      await onSubmit(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create service');
+    }
+  };
 
   return (
     <DialogContent className="sm:max-w-[600px]">
@@ -49,8 +61,16 @@ const AddServiceForm = ({ onSubmit }: AddServiceFormProps) => {
           Enter the details of the new service to add to the pricing list.
         </DialogDescription>
       </DialogHeader>
+      
+      {error && (
+        <div className="flex items-center p-3 border border-red-200 rounded-md bg-red-50 text-red-700">
+          <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+      
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="service_name"

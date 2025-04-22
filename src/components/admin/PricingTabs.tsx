@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { checkIsAdmin } from '@/utils/authUtils';
 
 // Importing our components
 import ServicePricing from '@/components/pricing/ServicePricing';
@@ -20,6 +21,7 @@ const PricingTabs = ({ defaultTab = 'services' }: PricingTabsProps) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
 
   // Check authentication status on component mount
@@ -35,9 +37,18 @@ const PricingTabs = ({ defaultTab = 'services' }: PricingTabsProps) => {
       if (data.session) {
         console.log('User is authenticated:', data.session.user);
         setIsAuthenticated(true);
+        
+        // Also check if user is admin
+        const adminStatus = await checkIsAdmin();
+        setIsAdmin(adminStatus);
+        console.log('User is admin:', adminStatus);
+        
+        // Refresh auth token to ensure it's not expired
+        await supabase.auth.refreshSession();
       } else {
         console.log('No active session found');
         setIsAuthenticated(false);
+        setIsAdmin(false);
         
         // Try to sign in with stored credentials if available
         await signInWithStoredCredentials();
@@ -45,6 +56,7 @@ const PricingTabs = ({ defaultTab = 'services' }: PricingTabsProps) => {
     } catch (error) {
       console.error('Error checking authentication status:', error);
       setIsAuthenticated(false);
+      setIsAdmin(false);
     } finally {
       setIsAuthenticating(false);
     }
@@ -58,16 +70,24 @@ const PricingTabs = ({ defaultTab = 'services' }: PricingTabsProps) => {
       if (adminApiKey) {
         // Use API key to authenticate
         try {
-          // For demo purposes, simulate authentication success
-          // In a real app, you'd validate the API key with a secure method
-          localStorage.setItem('p2h_admin_authenticated', 'true');
-          localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
-          setIsAuthenticated(true);
-          
-          toast({
-            title: "Authentication successful",
-            description: "You have been authenticated as an admin."
+          const { data, error } = await supabase.functions.invoke('admin-auth', {
+            body: { apiKey: adminApiKey }
           });
+          
+          if (!error && data?.success) {
+            localStorage.setItem('p2h_admin_authenticated', 'true');
+            localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
+            setIsAuthenticated(true);
+            setIsAdmin(true);
+            
+            toast({
+              title: "Authentication successful",
+              description: "You have been authenticated as an admin."
+            });
+          } else {
+            console.error('API key authentication failed:', error || data?.error);
+            localStorage.removeItem('admin_api_key');
+          }
         } catch (error) {
           console.error('Error authenticating with API key:', error);
           localStorage.removeItem('admin_api_key');
@@ -84,11 +104,42 @@ const PricingTabs = ({ defaultTab = 'services' }: PricingTabsProps) => {
     localStorage.removeItem('p2h_admin_auth_time');
     localStorage.removeItem('admin_api_key');
     setIsAuthenticated(false);
+    setIsAdmin(false);
     
     toast({
       title: "Signed out",
       description: "You have been signed out"
     });
+  };
+
+  const handleSignIn = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: 'admin@peace2hearts.com',
+        password: 'password123'
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data.session) {
+        setIsAuthenticated(true);
+        const adminStatus = await checkIsAdmin();
+        setIsAdmin(adminStatus);
+        
+        toast({
+          title: "Signed in",
+          description: "You have been signed in as admin"
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Authentication failed",
+        description: error.message || "Could not sign in",
+        variant: "destructive"
+      });
+    }
   };
 
   if (isAuthenticating) {
@@ -112,12 +163,21 @@ const PricingTabs = ({ defaultTab = 'services' }: PricingTabsProps) => {
               <span className="bg-red-100 text-red-800 px-2 py-1 rounded">Admin Access: Inactive</span>
             )}
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleSignOut}
-          >
-            Sign Out
-          </Button>
+          {isAuthenticated ? (
+            <Button 
+              variant="outline" 
+              onClick={handleSignOut}
+            >
+              Sign Out
+            </Button>
+          ) : (
+            <Button 
+              variant="default" 
+              onClick={handleSignIn}
+            >
+              Sign In
+            </Button>
+          )}
         </div>
       </div>
       
@@ -125,10 +185,17 @@ const PricingTabs = ({ defaultTab = 'services' }: PricingTabsProps) => {
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-8">
           <h2 className="text-lg font-medium text-amber-800 mb-2">Admin Authentication Required</h2>
           <p className="text-amber-700 mb-4">
-            You need administrator privileges to manage pricing. Please authenticate using the admin API key.
+            You need administrator privileges to manage pricing. Please sign in using the button above.
           </p>
           <p className="text-sm text-amber-600">
-            Note: If you have previously authenticated, try refreshing the page or signing in again.
+            Note: For testing, you can use admin@peace2hearts.com / password123
+          </p>
+        </div>
+      ) : !isAdmin ? (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-8">
+          <h2 className="text-lg font-medium text-amber-800 mb-2">Admin Privileges Required</h2>
+          <p className="text-amber-700 mb-4">
+            Your account doesn't have admin privileges. Please sign in with an admin account.
           </p>
         </div>
       ) : (

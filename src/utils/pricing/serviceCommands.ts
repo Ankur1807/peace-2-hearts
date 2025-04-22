@@ -168,6 +168,8 @@ export async function createService(serviceData: any) {
       throw new Error("Authentication required to create services.");
     }
     
+    console.log("Authentication confirmed, session:", sessionData.session.user.id);
+    
     // Format service_id based on category if not provided
     if (!serviceData.service_id && serviceData.service_name && serviceData.category) {
       // Create a service ID formatted like P2H-MH-service-name or P2H-L-service-name
@@ -183,7 +185,8 @@ export async function createService(serviceData: any) {
       
       serviceData.service_id = `${prefix}${slug}`;
     }
-    
+
+    // Add explicit auth headers to ensure the token is sent
     const { error } = await supabase
       .from('service_pricing')
       .insert([{

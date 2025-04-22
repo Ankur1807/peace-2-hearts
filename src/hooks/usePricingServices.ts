@@ -11,6 +11,7 @@ import {
   removeService 
 } from '@/utils/pricing/serviceOperations';
 import { addInitialServices } from '@/utils/pricing/serviceInitializer';
+import { supabase } from '@/integrations/supabase/client';
 
 export const usePricingServices = () => {
   const [services, setServices] = useState<ServicePrice[]>([]);
@@ -19,12 +20,29 @@ export const usePricingServices = () => {
   const [editedPrice, setEditedPrice] = useState<string>('');
   const { toast } = useToast();
 
+  const checkAuthStatus = async (): Promise<boolean> => {
+    const { data } = await supabase.auth.getSession();
+    return !!data.session;
+  };
+
   const fetchServices = async () => {
     try {
       setLoading(true);
       let data: ServicePrice[];
       
       try {
+        // First check if the user is authenticated
+        const isAuthenticated = await checkAuthStatus();
+        if (!isAuthenticated) {
+          toast({
+            title: 'Authentication Required',
+            description: 'You must be logged in as an admin to access pricing data.',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
+
         data = await fetchAllServices();
         
         if (data.length === 0) {
@@ -69,6 +87,17 @@ export const usePricingServices = () => {
 
   const handleSave = async (id: string) => {
     try {
+      // Check authentication first
+      const isAuthenticated = await checkAuthStatus();
+      if (!isAuthenticated) {
+        toast({
+          title: 'Authentication Required',
+          description: 'You must be logged in as an admin to update prices.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       if (!editedPrice.trim() || isNaN(Number(editedPrice)) || Number(editedPrice) <= 0) {
         toast({
           title: 'Invalid Price',
@@ -101,6 +130,17 @@ export const usePricingServices = () => {
 
   const toggleServiceStatus = async (id: string, currentStatus: boolean) => {
     try {
+      // Check authentication first
+      const isAuthenticated = await checkAuthStatus();
+      if (!isAuthenticated) {
+        toast({
+          title: 'Authentication Required',
+          description: 'You must be logged in as an admin to update service status.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       await toggleServiceActive(id, currentStatus);
       
       toast({
@@ -119,6 +159,18 @@ export const usePricingServices = () => {
 
   const addNewService = async (data: NewServiceFormValues) => {
     try {
+      // Check authentication first
+      const isAuthenticated = await checkAuthStatus();
+      if (!isAuthenticated) {
+        toast({
+          title: 'Authentication Required',
+          description: 'You must be logged in as an admin to add services.',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      console.log("Adding new service with data:", data);
       await createService(data);
       
       toast({
@@ -139,6 +191,17 @@ export const usePricingServices = () => {
 
   const deleteService = async (id: string) => {
     try {
+      // Check authentication first
+      const isAuthenticated = await checkAuthStatus();
+      if (!isAuthenticated) {
+        toast({
+          title: 'Authentication Required',
+          description: 'You must be logged in as an admin to delete services.',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
       await removeService(id);
       
       toast({
@@ -159,10 +222,18 @@ export const usePricingServices = () => {
 
   // Helper function to handle operation errors
   const handleOperationError = (error: any, operation: string) => {
+    console.error(`Error details for ${operation}:`, error);
+    
     if (error.code === 'PGRST116') {
       toast({
         title: 'Permission Denied',
         description: `You do not have permission to ${operation}. Please make sure you are logged in as an admin.`,
+        variant: 'destructive',
+      });
+    } else if (error.message?.includes('Authentication required')) {
+      toast({
+        title: 'Authentication Required',
+        description: `You must be logged in as an admin to ${operation}.`,
         variant: 'destructive',
       });
     } else {
