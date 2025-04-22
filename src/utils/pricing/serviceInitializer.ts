@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 // Initial service pricing data
@@ -121,8 +120,22 @@ const initialServices = [
  * Fetch initial service data
  * @returns Array of initial services
  */
-export function fetchInitialServices() {
+export function getInitialServicesData() {
   return initialServices;
+}
+
+/**
+ * Fetch initial services (Promise version to support catch)
+ * @returns Promise that resolves to the initial services
+ */
+export async function fetchInitialServices(): Promise<any> {
+  try {
+    // Return a Promise that resolves to the services data
+    return Promise.resolve(initialServices);
+  } catch (err) {
+    console.error('Error initializing services:', err);
+    throw err;
+  }
 }
 
 /**
