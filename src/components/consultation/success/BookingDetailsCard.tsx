@@ -1,5 +1,6 @@
 
-import { getServiceLabel } from '@/utils/consultationLabels';
+import PackageDetails from './PackageDetails';
+import ServiceDetails from './ServiceDetails';
 
 interface BookingDetailsCardProps {
   services: string[];
@@ -22,39 +23,17 @@ const BookingDetailsCard = ({
     <div className="mb-8 max-w-lg mx-auto text-left">
       <h3 className="text-xl font-semibold mb-3">Booking Details:</h3>
       <div className="bg-gray-50 p-6 rounded-lg">
-        {isHolisticPackage && packageName ? (
-          <>
-            <p className="font-medium mb-2">Package Selected:</p>
-            <p className="mb-4">{packageName}</p>
-            <p className="font-medium mb-2">Preferred Timeframe:</p>
-            <p>{timeframe}</p>
-          </>
+        {isHolisticPackage && packageName && timeframe ? (
+          <PackageDetails 
+            packageName={packageName} 
+            timeframe={timeframe} 
+          />
         ) : (
-          <>
-            <p className="font-medium mb-2">Services Selected:</p>
-            <ul className="list-disc pl-5 mb-4">
-              {services.map((service, index) => (
-                <li key={index}>{getServiceLabel(service)}</li>
-              ))}
-            </ul>
-            {date && (
-              <>
-                <p className="font-medium mb-2">Appointment Date:</p>
-                <p className="mb-2">{date.toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric'
-                })}</p>
-              </>
-            )}
-            {timeSlot && (
-              <>
-                <p className="font-medium mb-2">Time:</p>
-                <p>{timeSlot.replace('-', ':').toUpperCase()}</p>
-              </>
-            )}
-          </>
+          <ServiceDetails 
+            services={services}
+            date={date}
+            timeSlot={timeSlot}
+          />
         )}
       </div>
     </div>
