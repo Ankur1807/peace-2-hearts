@@ -47,6 +47,10 @@ const ServicesOverview: React.FC = () => {
     {
       title: "Maintenance Consultation",
       description: "Advice on alimony, financial support, and equitable agreements for separated or divorced partners."
+    },
+    {
+      title: "General Legal Consultation",
+      description: "Comprehensive legal advice tailored to your unique relationship challenges."
     }
   ];
 
