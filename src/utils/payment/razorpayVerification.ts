@@ -7,6 +7,7 @@ import { VerifyPaymentParams } from "./razorpayTypes";
 
 /**
  * Verifies a Razorpay payment via Supabase Edge Function
+ * @deprecated Use the verifyRazorpayPayment function from razorpayService.ts instead
  */
 export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promise<boolean> => {
   try {

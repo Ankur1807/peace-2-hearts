@@ -8,6 +8,7 @@ import { CreateOrderParams, OrderResponse } from "./razorpayTypes";
 
 /**
  * Creates a new Razorpay order via Supabase Edge Function
+ * @deprecated Use the createRazorpayOrder function from razorpayService.ts instead
  */
 export const createRazorpayOrder = async (params: CreateOrderParams): Promise<OrderResponse> => {
   try {
