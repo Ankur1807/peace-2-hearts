@@ -2,7 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import ServiceOption from './service-selection/ServiceOption';
+import { formatPrice } from '@/utils/pricing/priceFormatter';
 
 interface ServiceOption {
   id: string;
@@ -31,7 +31,7 @@ const mentalHealthServices: ServiceOption[] = [
   { id: 'premarital-counselling-couple', label: 'Premarital Counselling - Couple', description: 'Build a foundation for marriage together through guided discussions.' },
   { id: 'couples-counselling', label: 'Couples Counselling', description: 'Professional guidance to strengthen communication and mutual understanding.' },
   { id: 'sexual-health-counselling', label: 'Sexual Health Counselling', description: 'Specialized support for addressing intimacy concerns and enhancing relationship satisfaction.' },
-  { id: 'test-service', label: 'Test Service (₹11)', description: 'For testing payment gateway functionality.' }
+  { id: 'test-service', label: 'Test Service', description: 'For testing payment gateway functionality.' }
 ];
 
 const legalServices: ServiceOption[] = [
@@ -88,7 +88,7 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
                 <RadioGroupItem value={pkg.id} id={pkg.id} />
                 <Label htmlFor={pkg.id} className="flex flex-col">
                   <span className="font-medium">
-                    {pkg.label}{price ? ` - ₹${price.toLocaleString('en-IN')}` : ''}
+                    {pkg.label}{price ? ` - ${formatPrice(price)}` : ''}
                   </span>
                   <span className="text-sm text-gray-500">{pkg.description}</span>
                 </Label>
@@ -117,13 +117,14 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
         {servicesToDisplay.map(service => {
           // Get price from the pricing map if available
           const price = pricing?.get(service.id);
+          console.log(`Service: ${service.id}, Price: ${price}`);
           
           return (
             <div key={service.id} className="flex items-start space-x-2">
               <RadioGroupItem value={service.id} id={service.id} />
               <Label htmlFor={service.id} className="flex flex-col">
                 <span className="font-medium">
-                  {service.label}{price ? ` - ₹${price.toLocaleString('en-IN')}` : ''}
+                  {service.label}{price !== undefined ? ` - ${formatPrice(price)}` : ''}
                 </span>
                 {service.description && (
                   <span className="text-sm text-gray-500">{service.description}</span>

@@ -1,55 +1,93 @@
+
 /**
- * Maps client-side service IDs to database service IDs
- * @param clientIds - Array of client-side service IDs
- * @returns Array of corresponding database service IDs
+ * Maps client-side service IDs to database IDs and vice versa
+ * This helps translate between the client-friendly IDs and database IDs
+ */
+
+// Map of client-friendly service IDs to database service IDs
+const serviceIdMap: Record<string, string[]> = {
+  'mental-health-counselling': ['P2H-MH-mental-health-counselling', 'mental-health-counselling'],
+  'family-therapy': ['P2H-MH-family-therapy', 'family-therapy'],
+  'premarital-counselling-individual': ['P2H-MH-premarital-counselling-individual', 'premarital-individual'],
+  'premarital-counselling-couple': ['P2H-MH-premarital-counselling-couple', 'premarital-couple'],
+  'couples-counselling': ['P2H-MH-couples-counselling', 'couples-counselling'],
+  'sexual-health-counselling': ['P2H-MH-sexual-health-counselling', 'sexual-health-counselling'],
+  'test-service': ['P2H-MH-test-service', 'test-service'],
+  
+  // Legal services
+  'pre-marriage-legal': ['P2H-L-pre-marriage-legal', 'pre-marriage-legal'],
+  'mediation': ['P2H-L-mediation', 'mediation'],
+  'divorce': ['P2H-L-divorce', 'divorce'],
+  'custody': ['P2H-L-custody', 'custody'],
+  'maintenance': ['P2H-L-maintenance', 'maintenance'],
+  'general-legal': ['P2H-L-general-legal', 'general-legal']
+};
+
+// Map of client-friendly package IDs to database package IDs
+const packageIdMap: Record<string, string[]> = {
+  'divorce-prevention': ['P2H-H-divorce-prevention-package', 'divorce-prevention-package'],
+  'pre-marriage-clarity': ['P2H-H-pre-marriage-clarity-solutions', 'pre-marriage-clarity-solutions'] 
+};
+
+/**
+ * Expand a client-side service ID to include all possible database IDs
+ * @param clientId Client-side service ID
+ * @returns Array of possible database service IDs
  */
 export function expandClientToDbIds(clientIds: string[]): string[] {
-  if (!clientIds || clientIds.length === 0) {
-    return [];
-  }
+  const dbIds: string[] = [];
   
-  // Map of client IDs to database IDs
-  const clientToDbMap: Record<string, string> = {
-    // Mental Health Services (P2H-MH)
-    'mental-health-counselling': 'P2H-MH-mental-health-counselling',
-    'family-therapy': 'P2H-MH-family-therapy',
-    'premarital-counselling-individual': 'P2H-MH-premarital-counselling-individual',
-    'premarital-counselling-couple': 'P2H-MH-premarital-counselling-couple',
-    'couples-counselling': 'P2H-MH-couples-counselling',
-    'sexual-health-counselling': 'P2H-MH-sexual-health-counselling',
-    'test-service': 'P2H-MH-test-service',
-    
-    // Legal Services (P2H-L)
-    'pre-marriage-legal': 'P2H-L-pre-marriage-legal-consultation',
-    'mediation': 'P2H-L-mediation-services',
-    'divorce': 'P2H-L-divorce-consultation',
-    'custody': 'P2H-L-child-custody-consultation',
-    'maintenance': 'P2H-L-maintenance-consultation',
-    'general-legal': 'P2H-L-general-legal-consultation'
-  };
+  clientIds.forEach(clientId => {
+    if (serviceIdMap[clientId]) {
+      dbIds.push(...serviceIdMap[clientId]);
+    } else {
+      // If there's no mapping, include the original ID as a fallback
+      dbIds.push(clientId);
+    }
+  });
   
-  // Map the client IDs to database IDs, filtering out any that don't have a mapping
-  return clientIds
-    .map(id => clientToDbMap[id])
-    .filter(Boolean);
+  return dbIds;
 }
 
 /**
- * Maps client-side package IDs to database package IDs
- * @param packageIds - Array of client-side package IDs
- * @returns Array of corresponding database package IDs
+ * Expand a client-side package ID to include all possible database IDs
+ * @param clientId Client-side package ID
+ * @returns Array of possible database package IDs
  */
-export function expandClientToDbPackageIds(packageIds: string[]): string[] {
-  if (!packageIds || packageIds.length === 0) {
-    return [];
+export function expandClientToDbPackageIds(clientIds: string[]): string[] {
+  const dbIds: string[] = [];
+  
+  clientIds.forEach(clientId => {
+    if (packageIdMap[clientId]) {
+      dbIds.push(...packageIdMap[clientId]);
+    } else {
+      // If there's no mapping, include the original ID as a fallback
+      dbIds.push(clientId);
+    }
+  });
+  
+  return dbIds;
+}
+
+/**
+ * Match a database service ID to its client-side ID
+ * @param dbId Database service ID
+ * @returns Client-side service ID or null if not found
+ */
+export function matchDbToClientId(dbId: string): string | null {
+  // Check all service ID mappings
+  for (const [clientId, dbIds] of Object.entries(serviceIdMap)) {
+    if (dbIds.some(id => dbId.includes(id))) {
+      return clientId;
+    }
   }
   
-  // Map of client package IDs to database package IDs (Holistic Packages P2H-H)
-  const packageToDbMap: Record<string, string[]> = {
-    'divorce-prevention': ['P2H-H-divorce-prevention-package', 'P2H-H-divorce-prevention-package\r\n'],
-    'pre-marriage-clarity': ['P2H-H-pre-marriage-clarity-solutions']
-  };
+  // Check package ID mappings
+  for (const [clientId, dbIds] of Object.entries(packageIdMap)) {
+    if (dbIds.some(id => dbId.includes(id))) {
+      return clientId;
+    }
+  }
   
-  // Map the client package IDs to all possible database package IDs
-  return packageIds.flatMap(id => packageToDbMap[id] || []);
+  return null;
 }
