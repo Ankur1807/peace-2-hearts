@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { CheckCircle2, MailIcon } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -115,7 +116,8 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
       <h1 className="text-3xl font-lora font-semibold mb-4">Booking Confirmed!</h1>
       
       <p className="text-lg text-gray-700 mb-8 max-w-xl mx-auto">
-        Thank you for booking a consultation with Peace2Hearts. We have received your request and will reach out to you shortly to confirm your appointment.
+        Thank you for completing the payment and booking a consultation with Peace2Hearts. 
+        We have received your request and will contact you shortly to confirm your appointment.
       </p>
       
       {referenceId && (
@@ -178,7 +180,7 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-1 bg-peacefulBlue h-2 w-2 rounded-full flex-shrink-0"></span>
-            <span>A day before your appointment, you will receive connection details for your video consultation.</span>
+            <span>An hour before your appointment, you will receive connection details for your video consultation.</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-1 bg-peacefulBlue h-2 w-2 rounded-full flex-shrink-0"></span>
