@@ -1,5 +1,5 @@
 
-import { getServiceName } from '@/utils/consultationLabels';
+import { getServiceLabel } from '@/utils/consultationLabels';
 
 interface BookingDetailsCardProps {
   services: string[];
@@ -34,7 +34,7 @@ const BookingDetailsCard = ({
             <p className="font-medium mb-2">Services Selected:</p>
             <ul className="list-disc pl-5 mb-4">
               {services.map((service, index) => (
-                <li key={index}>{getServiceName(service)}</li>
+                <li key={index}>{getServiceLabel(service)}</li>
               ))}
             </ul>
             {date && (
