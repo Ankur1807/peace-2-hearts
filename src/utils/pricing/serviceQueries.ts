@@ -2,54 +2,50 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ServicePrice } from '@/utils/pricingTypes';
 
-/**
- * Fetches all services from the database
- * @returns Array of service pricing data
- */
-export const fetchAllServices = async () => {
-  console.log('Fetching all services');
+// Fetch all services from the database
+export async function fetchAllServices(): Promise<ServicePrice[]> {
   try {
+    console.log('Fetching all services from Supabase...');
+    
     const { data, error } = await supabase
       .from('service_pricing')
       .select('*')
       .order('category', { ascending: true })
       .order('service_name', { ascending: true });
-
+    
     if (error) {
-      console.error('Error fetching all services:', error);
+      console.error('Error fetching services:', error);
       throw error;
     }
     
-    console.log(`Retrieved ${data?.length || 0} services from database`);
-    return data as ServicePrice[] || [];
+    if (!data) {
+      return [];
+    }
+    
+    return data as ServicePrice[];
   } catch (error) {
-    console.error('Error in fetchAllServices:', error);
+    console.error('Exception fetching services:', error);
     throw error;
   }
-};
+}
 
-/**
- * Fetches service by ID
- * @param id - The service ID to fetch
- * @returns The service data
- */
-export const fetchServiceById = async (id: string) => {
-  console.log(`Fetching service with ID: ${id}`);
+// Fetch a specific service by ID
+export async function fetchServiceById(id: string): Promise<ServicePrice | null> {
   try {
     const { data, error } = await supabase
       .from('service_pricing')
       .select('*')
       .eq('id', id)
       .single();
-
+    
     if (error) {
-      console.error('Error fetching service by ID:', error);
+      console.error(`Error fetching service with ID ${id}:`, error);
       throw error;
     }
     
     return data as ServicePrice;
   } catch (error) {
-    console.error('Error in fetchServiceById:', error);
+    console.error(`Exception fetching service with ID ${id}:`, error);
     throw error;
   }
-};
+}

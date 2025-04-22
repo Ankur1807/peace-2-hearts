@@ -12,6 +12,12 @@ export async function updatePackagePrice(id: string, price: number) {
   console.log(`Updating package price for ID ${id} to ${price}`);
   
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      throw new Error("Authentication required to update services.");
+    }
+    
     const { error } = await supabase
       .from('service_pricing')
       .update({ 
@@ -37,6 +43,12 @@ export async function syncPackageIds(packageName: string, clientId: string, pric
   console.log(`Syncing prices for all "${packageName}" packages to ${price}`);
   
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      throw new Error("Authentication required to update services.");
+    }
+    
     // Get expanded DB ID from client ID
     const expandedIds = expandClientToDbPackageIds([clientId]);
     if (expandedIds.length === 0) {
@@ -88,6 +100,12 @@ export async function updateServicePrice(id: string, price: number) {
   console.log(`Updating service price for ID ${id} to ${price}`);
   
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      throw new Error("Authentication required to update services.");
+    }
+    
     const { error } = await supabase
       .from('service_pricing')
       .update({ 
@@ -113,6 +131,12 @@ export async function toggleServiceActive(id: string, currentStatus: boolean) {
   console.log(`Toggling service active status for ID ${id} from ${currentStatus} to ${!currentStatus}`);
   
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      throw new Error("Authentication required to update services.");
+    }
+    
     const { error } = await supabase
       .from('service_pricing')
       .update({ 
@@ -138,12 +162,37 @@ export async function createService(serviceData: any) {
   console.log(`Creating new service:`, serviceData);
   
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      throw new Error("Authentication required to create services.");
+    }
+    
+    // Format service_id based on category if not provided
+    if (!serviceData.service_id && serviceData.service_name && serviceData.category) {
+      // Create a service ID formatted like P2H-MH-service-name or P2H-L-service-name
+      const prefix = serviceData.category === 'mental-health' ? 'P2H-MH-' : 
+                    serviceData.category === 'legal' ? 'P2H-L-' : 
+                    serviceData.category === 'holistic' ? 'P2H-H-' : 'P2H-';
+      
+      // Create a slug from the service name
+      const slug = serviceData.service_name
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-');
+      
+      serviceData.service_id = `${prefix}${slug}`;
+    }
+    
     const { error } = await supabase
       .from('service_pricing')
       .insert([{
         ...serviceData,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        type: serviceData.type || 'service',
+        currency: serviceData.currency || 'INR',
+        is_active: serviceData.is_active !== undefined ? serviceData.is_active : true,
       }]);
     
     if (error) {
@@ -163,6 +212,12 @@ export async function removeService(id: string) {
   console.log(`Removing service with ID ${id}`);
   
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      throw new Error("Authentication required to delete services.");
+    }
+    
     const { error } = await supabase
       .from('service_pricing')
       .delete()
