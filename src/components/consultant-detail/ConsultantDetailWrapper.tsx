@@ -91,8 +91,12 @@ export function ConsultantDetailWrapper({
                 This expert may be matched to your case based on your needs. To begin, please book a session through our main service page.
               </p>
               <div className={isMobile ? "w-full" : "inline-block"}>
-                <FractalButton asChild fractalType="cta">
-                  <Link to="/book-consultation" className="w-full inline-block">
+                <FractalButton 
+                  asChild 
+                  fractalType="cta" 
+                  className="w-full flex items-center justify-center"
+                >
+                  <Link to="/book-consultation" className="w-full text-center">
                     Book sessions with experts such as {consultant.name || "our consultants"}
                   </Link>
                 </FractalButton>
