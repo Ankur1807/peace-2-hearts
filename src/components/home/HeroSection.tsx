@@ -13,7 +13,7 @@ const HeroSection = () => {
               variant="cta" 
               mandalaType="lotus"
               href="/book-consultation"
-              className="text-lg"
+              className="text-xl md:text-2xl px-10 py-6"
             >
               Speak to an Expert
             </MandalaButton>
@@ -21,7 +21,7 @@ const HeroSection = () => {
               variant="secondary" 
               mandalaType="simple"
               href="/services"
-              className="text-lg"
+              className="text-xl md:text-2xl px-10 py-6"
             >
               Start Exploring Support Options
             </MandalaButton>
@@ -33,4 +33,3 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
-
