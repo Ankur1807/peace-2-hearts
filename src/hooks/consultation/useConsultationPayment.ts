@@ -3,6 +3,15 @@ import { useCallback } from 'react';
 import { usePaymentFlow } from './usePaymentFlow';
 import { useToast } from '@/hooks/use-toast';
 
+interface UseConsultationPaymentProps {
+  state: any;
+  toast: any;
+  setIsProcessing: (isProcessing: boolean) => void;
+  setShowPaymentStep: (show: boolean) => void;
+  handleConfirmBooking: () => Promise<void>;
+  setReferenceId: (id: string) => void;
+}
+
 export function useConsultationPayment({
   state,
   toast,
@@ -10,7 +19,7 @@ export function useConsultationPayment({
   setShowPaymentStep,
   handleConfirmBooking,
   setReferenceId
-}) {
+}: UseConsultationPaymentProps) {
   const { proceedToPayment, processPayment } = usePaymentFlow({
     state,
     toast,
