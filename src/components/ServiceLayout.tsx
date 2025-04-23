@@ -1,9 +1,7 @@
-
 import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
 import { FractalButton } from './FractalButton';
-import { MandalaButton } from './MandalaButton';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
@@ -43,13 +41,10 @@ const ServiceLayout = ({
                 <p className="text-gray-600 text-lg">{description}</p>
                 <div className="pt-4">
                   <Link to={bookingUrl}>
-                    <MandalaButton
-                      variant="cta"
-                      mandalaType="lotus"
-                      className="rounded-full px-8 py-4 text-lg"
-                    >
-                      Book a Consultation <ArrowRight className="ml-2 h-4 w-4" />
-                    </MandalaButton>
+                    <FractalButton className="hero-btn rounded-full px-6 py-3" fractalType="primary">
+                      Book a Consultation
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </FractalButton>
                   </Link>
                 </div>
               </div>
@@ -114,13 +109,12 @@ const ServiceLayout = ({
                 Our initial consultation helps us understand your needs and create a personalized support plan.
               </p>
               <Link to={bookingUrl}>
-                <MandalaButton 
-                  variant="cta"
-                  mandalaType="lotus"
-                  className="rounded-full px-8 py-4 text-lg"
+                <FractalButton 
+                  className="rounded-full px-8 py-4 text-lg" 
+                  fractalType="cta"
                 >
                   Book Your Consultation Today
-                </MandalaButton>
+                </FractalButton>
               </Link>
             </div>
           </div>

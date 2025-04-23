@@ -1,4 +1,5 @@
 
+import { Link } from 'react-router-dom';
 import { MandalaButton } from '@/components/MandalaButton';
 
 const HeroSection = () => {
@@ -10,10 +11,10 @@ const HeroSection = () => {
           <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto text-center">Peace2Hearts is India's first dedicated space offering divorce prevention, emotional support, and legal clarity—because relationships deserve more than silence or struggle.</p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <MandalaButton 
-              variant="cta" 
-              mandalaType="lotus"
+              variant="primary" 
+              mandalaType="complex"
               href="/book-consultation"
-              className="text-xl md:text-2xl px-10 py-6"
+              className="text-lg"
             >
               Speak to an Expert
             </MandalaButton>
@@ -21,7 +22,7 @@ const HeroSection = () => {
               variant="secondary" 
               mandalaType="simple"
               href="/services"
-              className="text-xl md:text-2xl px-10 py-6"
+              className="text-lg"
             >
               Start Exploring Support Options
             </MandalaButton>
