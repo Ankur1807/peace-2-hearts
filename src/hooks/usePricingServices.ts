@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ServicePrice } from '@/utils/pricingTypes';
@@ -12,6 +11,7 @@ import {
 } from '@/utils/pricing/serviceOperations';
 import { addInitialServices } from '@/utils/pricing/serviceInitializer';
 import { supabase } from '@/integrations/supabase/client';
+import { useAdmin } from '@/hooks/useAdminContext';
 
 export const usePricingServices = () => {
   const [services, setServices] = useState<ServicePrice[]>([]);
@@ -19,33 +19,46 @@ export const usePricingServices = () => {
   const [editMode, setEditMode] = useState<string | null>(null);
   const [editedPrice, setEditedPrice] = useState<string>('');
   const { toast } = useToast();
-
-  const checkAuthStatus = async (): Promise<boolean> => {
-    const { data } = await supabase.auth.getSession();
-    return !!data.session;
-  };
+  const { isAdmin } = useAdmin();
 
   const fetchServices = async () => {
+    if (!isAdmin) {
+      toast({
+        title: 'Authentication Required',
+        description: 'You must be logged in as an admin to access pricing data.',
+        variant: 'destructive',
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      let data: ServicePrice[];
+      
+      // First check if the user is authenticated with Supabase
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      // Check for local admin authentication
+      const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
+      const authTime = parseInt(localStorage.getItem('p2h_admin_auth_time') || '0', 10);
+      const isSessionValid = adminAuthenticated && (Date.now() - authTime < 24 * 60 * 60 * 1000);
+      
+      if (!sessionData.session && !isSessionValid) {
+        toast({
+          title: 'Authentication Required',
+          description: 'You must be logged in as an admin to access pricing data.',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
       
       try {
-        // First check if the user is authenticated
-        const isAuthenticated = await checkAuthStatus();
-        if (!isAuthenticated) {
-          toast({
-            title: 'Authentication Required',
-            description: 'You must be logged in as an admin to access pricing data.',
-            variant: 'destructive',
-          });
-          setLoading(false);
-          return;
-        }
-
-        data = await fetchAllServices();
+        // Fetch services data
+        let data = await fetchAllServices();
         
         if (data.length === 0) {
+          // If no services exist, add initial services
           await addInitialServices();
           data = await fetchAllServices();
         }
@@ -244,6 +257,11 @@ export const usePricingServices = () => {
       });
     }
     console.error(`Error: ${operation}:`, error);
+  };
+
+  const checkAuthStatus = async (): Promise<boolean> => {
+    const { data } = await supabase.auth.getSession();
+    return !!data.session;
   };
 
   return {

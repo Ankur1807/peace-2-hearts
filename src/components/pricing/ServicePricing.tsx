@@ -8,9 +8,11 @@ import ServiceList from './ServiceList';
 import AddServiceForm from './AddServiceForm';
 import { usePricingServices } from '@/hooks/usePricingServices';
 import { NewServiceFormValues } from './AddServiceForm';
+import { useAdmin } from '@/hooks/useAdminContext';
 
 const ServicePricing = () => {
   const [openNewServiceDialog, setOpenNewServiceDialog] = useState(false);
+  const { isAdmin } = useAdmin();
   const {
     services,
     loading,
@@ -27,8 +29,10 @@ const ServicePricing = () => {
   } = usePricingServices();
 
   useEffect(() => {
-    fetchServices();
-  }, []);
+    if (isAdmin) {
+      fetchServices();
+    }
+  }, [isAdmin]);
 
   const onSubmitNewService = async (data: NewServiceFormValues) => {
     const success = await addNewService(data);
@@ -53,17 +57,25 @@ const ServicePricing = () => {
           <Button variant="outline" onClick={() => fetchServices()} disabled={loading}>
             <RefreshCw className="h-4 w-4 mr-1" /> Refresh
           </Button>
-          <Dialog open={openNewServiceDialog} onOpenChange={setOpenNewServiceDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-1" /> Add Service
-              </Button>
-            </DialogTrigger>
-            <AddServiceForm onSubmit={onSubmitNewService} />
-          </Dialog>
+          {isAdmin && (
+            <Dialog open={openNewServiceDialog} onOpenChange={setOpenNewServiceDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-1" /> Add Service
+                </Button>
+              </DialogTrigger>
+              <AddServiceForm onSubmit={onSubmitNewService} />
+            </Dialog>
+          )}
         </div>
       </CardHeader>
       <CardContent>
+        {!isAdmin && (
+          <div className="p-4 mb-4 bg-red-100 text-red-800 rounded-md">
+            <p className="font-medium">Authentication Required</p>
+            <p>You must be logged in as an admin to access pricing data.</p>
+          </div>
+        )}
         <ServiceList
           services={services}
           loading={loading}
@@ -75,6 +87,7 @@ const ServicePricing = () => {
           editMode={editMode}
           editedPrice={editedPrice}
           setEditedPrice={setEditedPrice}
+          isAdmin={isAdmin}
         />
       </CardContent>
     </Card>

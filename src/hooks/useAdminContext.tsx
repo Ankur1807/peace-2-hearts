@@ -39,42 +39,68 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
   const checkAdminStatus = async () => {
     try {
       setIsAdminChecking(true);
-      const storedKey = localStorage.getItem('admin_api_key');
+      
+      // First check Supabase authentication
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      // Then check for admin authentication in localStorage
       const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
       const authTime = parseInt(localStorage.getItem('p2h_admin_auth_time') || '0', 10);
+      const isSessionValid = adminAuthenticated && (Date.now() - authTime < ADMIN_SESSION_DURATION);
       
-      // Check if we have a valid p2h_admin session
-      if (adminAuthenticated && (Date.now() - authTime < ADMIN_SESSION_DURATION)) {
-        console.log("Valid admin session found");
+      console.log('Admin check - Supabase auth:', !!sessionData.session);
+      console.log('Admin check - Local auth:', adminAuthenticated);
+      console.log('Admin check - Session valid:', isSessionValid);
+      
+      // If we have a valid admin session in localStorage
+      if (isSessionValid) {
+        console.log("Valid admin session found in localStorage");
         setIsAdmin(true);
         setIsAdminChecking(false);
         return;
       }
       
-      // If no valid session, check API key
-      if (!storedKey) {
-        setIsAdmin(false);
-        setIsAdminChecking(false);
-        return;
+      // If we have a Supabase session, check if the user is an admin
+      if (sessionData.session) {
+        const adminStatus = await checkSuperbaseAdminStatus();
+        console.log("Checked Supabase admin status:", adminStatus);
+        
+        if (adminStatus) {
+          // Store the admin status in localStorage
+          localStorage.setItem('p2h_admin_authenticated', 'true');
+          localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
+          setIsAdmin(true);
+          setIsAdminChecking(false);
+          return;
+        }
       }
+      
+      // Check stored API key if no valid session
+      const storedKey = localStorage.getItem('admin_api_key');
+      if (storedKey) {
+        try {
+          const { data, error } = await supabase.functions.invoke('admin-auth', {
+            body: { apiKey: storedKey }
+          });
 
-      // Verify API key with Supabase function
-      const { data, error } = await supabase.functions.invoke('admin-auth', {
-        body: { apiKey: storedKey }
-      });
-
-      if (error || !data?.success) {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-        localStorage.removeItem('admin_api_key');
-        setIsAdminChecking(false);
-        return;
+          if (!error && data?.success) {
+            // Set admin session
+            localStorage.setItem('p2h_admin_authenticated', 'true');
+            localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
+            setIsAdmin(true);
+            setIsAdminChecking(false);
+            return;
+          } else {
+            console.error('API key validation failed:', error || data?.error);
+            localStorage.removeItem('admin_api_key');
+          }
+        } catch (error) {
+          console.error("Error checking stored API key:", error);
+        }
       }
-
-      setIsAdmin(true);
-      // Also set the p2h_admin auth flags for consistency
-      localStorage.setItem('p2h_admin_authenticated', 'true');
-      localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
+      
+      // If we reach here, the user is not authenticated as admin
+      setIsAdmin(false);
       
     } catch (error) {
       console.error("Error checking admin status:", error);
@@ -84,8 +110,31 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
     }
   };
 
+  // Check if the user is an admin via Supabase
+  const checkSuperbaseAdminStatus = async (): Promise<boolean> => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return false;
+      
+      // Pre-approved admin emails list
+      const adminEmails = [
+        'admin@peace2hearts.com', 
+        'founder@peace2hearts.com',
+        'ankurb@peace2hearts.com'
+      ];
+      
+      return adminEmails.includes(userData.user.email || '');
+    } catch (error) {
+      console.error('Error checking Supabase admin status:', error);
+      return false;
+    }
+  };
+
   const adminLogin = async (apiKey: string): Promise<{ success: boolean; error?: string }> => {
     try {
+      setIsAdminChecking(true);
+      
+      // Try to validate the API key
       const { data, error } = await supabase.functions.invoke('admin-auth', {
         body: { apiKey }
       });
@@ -94,14 +143,17 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
         throw new Error('Invalid API key');
       }
 
+      // Store API key and set admin session
       localStorage.setItem('admin_api_key', apiKey);
       localStorage.setItem('p2h_admin_authenticated', 'true');
       localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
       
       setIsAdmin(true);
+      setIsAdminChecking(false);
       return { success: true };
     } catch (error: any) {
       console.error('Authentication error:', error);
+      setIsAdminChecking(false);
       return { 
         success: false, 
         error: error.message || "Authentication failed" 
@@ -110,9 +162,14 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
   };
 
   const adminLogout = async (): Promise<void> => {
+    // Clear all admin authentication data
     localStorage.removeItem('admin_api_key');
     localStorage.removeItem('p2h_admin_authenticated');
     localStorage.removeItem('p2h_admin_auth_time');
+    
+    // Also sign out from Supabase
+    await supabase.auth.signOut();
+    
     setIsAdmin(false);
   };
 
