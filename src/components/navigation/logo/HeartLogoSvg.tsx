@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { logoColors } from '../../../utils/logoRendering/logoColors';
+import { logoColors } from '@/components/logo/LogoDrawer';
 
 interface HeartLogoSvgProps {
   animationClass?: string;
@@ -9,14 +9,8 @@ interface HeartLogoSvgProps {
 const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({ 
   animationClass = 'strong-heartbeat-glow' 
 }) => {
-  // Use the correct properties from logoColors
-  const { heartColor, contrastColor } = logoColors;
-  
-  // Define additional colors needed for the SVG based on the main colors
-  const shadowColor = "#403E43";
-  const accentColor = "#0EA5E9";
-  const secondaryColor = "#D946EF";
-  const tertiaryColor = "#F97316";
+  // Use the same colors as in LogoDrawer
+  const { logoColor, peaceSymbolColor, secondaryColor, accentColor, tertiaryColor, shadowColor } = logoColors;
 
   return (
     <svg 
@@ -35,7 +29,7 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
       {/* Main heart with glow animation */}
       <path 
         d="M50 90C47.5 90 45 89 42.5 87.5C30 80 10 60 10 35C10 22.5 20 12.5 32.5 12.5C40 12.5 46.25 16.25 50 22.5C53.75 16.25 60 12.5 67.5 12.5C80 12.5 90 22.5 90 35C90 60 70 80 57.5 87.5C55 89 52.5 90 50 90Z" 
-        stroke={heartColor} 
+        stroke={logoColor} 
         strokeWidth="4"
         fill="rgba(14, 165, 233, 0.15)"
       />
@@ -46,7 +40,7 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
         const x = 50 + Math.cos(angle * Math.PI/180) * dist;
         const y = 50 + Math.sin(angle * Math.PI/180) * dist;
         const size = index % 3 === 0 ? 2.5 : 1.8;
-        const color = index % 3 === 0 ? accentColor : (index % 3 === 1 ? secondaryColor : heartColor);
+        const color = index % 3 === 0 ? accentColor : (index % 3 === 1 ? secondaryColor : logoColor);
         
         // Star shape
         const points = 5;
@@ -75,7 +69,7 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
       })}
       
       {/* Peace symbol circle */}
-      <circle cx="50" cy="50" r="20" stroke={contrastColor} strokeWidth="2.5" fill="transparent" />
+      <circle cx="50" cy="50" r="20" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
       
       {/* Tree branch peace symbol lines with gradients and curves */}
       {/* Vertical branch */}
@@ -124,8 +118,8 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
         {x: 70, y: 25, color: tertiaryColor, size: 2.5},
         {x: 25, y: 70, color: accentColor, size: 2.5},
         {x: 75, y: 70, color: accentColor, size: 2.5},
-        {x: 50, y: 13, color: heartColor, size: 2.5},
-        {x: 50, y: 83, color: heartColor, size: 2.5}
+        {x: 50, y: 13, color: logoColor, size: 2.5},
+        {x: 50, y: 83, color: logoColor, size: 2.5}
       ].map((star, index) => {
         const points = 5;
         const outerRadius = star.size;
