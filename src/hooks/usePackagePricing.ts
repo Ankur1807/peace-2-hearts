@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ServicePrice } from '@/utils/pricingTypes';
-import { syncPackageIds, updatePackagePrice } from '@/utils/pricing/serviceOperations';
+import { syncPackageIds, updatePackagePrice } from '@/utils/pricing';
 
 export const usePackagePricing = () => {
   const [packages, setPackages] = useState<ServicePrice[]>([]);
