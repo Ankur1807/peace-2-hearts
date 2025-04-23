@@ -29,6 +29,13 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
   
   // Calculate the actual price to display and use for payment
   React.useEffect(() => {
+    // Check if test service is selected - always use hardcoded price 11
+    if (selectedServices.includes('test-service')) {
+      console.log('PaymentActions: Using hardcoded price 11 for test-service');
+      setEffectivePrice(11);
+      return;
+    }
+    
     let price = totalPrice;
     
     if (selectedServices.length === 1 && pricing) {

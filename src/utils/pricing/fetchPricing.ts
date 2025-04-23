@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { expandClientToDbIds, expandClientToDbPackageIds } from './serviceIdMapper';
 import { mapServicePricing, mapPackagePricing } from './pricingMapper';
@@ -27,6 +28,14 @@ export async function fetchServicePricing(
   skipCache = false
 ): Promise<Map<string, number>> {
   try {
+    // Special case: if test-service is requested, always include it with hardcoded price
+    // to ensure consistency across components
+    const hasTestService = serviceIds.includes('test-service');
+    if (hasTestService && serviceIds.length === 1) {
+      console.log('Fast path: Returning hardcoded test service price');
+      return new Map([['test-service', 11]]);
+    }
+    
     const cacheKey = `services-${serviceIds.sort().join('-')}`;
     
     // Return cached data if available and not expired
@@ -34,6 +43,16 @@ export async function fetchServicePricing(
       const cached = pricingCache[cacheKey];
       if (Date.now() - cached.timestamp < CACHE_TTL) {
         console.log('Using cached pricing data for services:', serviceIds);
+        
+        // Even with cached data, ensure test service has correct price
+        if (hasTestService && !cached.data.has('test-service')) {
+          const newCache = new Map(cached.data);
+          newCache.set('test-service', 11);
+          pricingCache[cacheKey].data = newCache;
+          console.log('Added test service price to cached data');
+          return newCache;
+        }
+        
         return cached.data;
       }
     }
@@ -46,9 +65,6 @@ export async function fetchServicePricing(
     if (dbIds.length === 0 && serviceIds.length > 0) {
       console.warn('No DB IDs found for client service IDs:', serviceIds);
     }
-    
-    // Handle special case for test service before querying database
-    const hasTestService = serviceIds.includes('test-service');
     
     // Query the database for pricing data
     let query = supabase
@@ -67,6 +83,10 @@ export async function fetchServicePricing(
     
     if (error) {
       console.error('Error fetching service pricing:', error);
+      if (hasTestService) {
+        console.log('Returning hardcoded test service price due to error');
+        return new Map([['test-service', 11]]);
+      }
       throw error;
     }
     
@@ -75,7 +95,7 @@ export async function fetchServicePricing(
     
     // Ensure test service has a price if it was requested
     if (hasTestService && !pricingMap.has('test-service')) {
-      console.log('Setting fixed price for test service after fetching');
+      console.log('Setting hardcoded test service price: 11');
       pricingMap.set('test-service', 11);
     }
     

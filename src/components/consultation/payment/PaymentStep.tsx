@@ -46,26 +46,30 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   const [actualPrice, setActualPrice] = React.useState<number>(totalPrice);
   
   React.useEffect(() => {
+    // Special case for test service - highest priority
+    if (selectedServices.includes('test-service')) {
+      console.log('PaymentStep: Test service selected, setting fixed price of 11');
+      if (actualPrice !== 11) {
+        setActualPrice(11);
+      }
+      return;
+    }
+
     let finalPrice = totalPrice;
 
-    // Handle test service specifically - always set to 11
-    if (selectedServices.includes('test-service')) {
-      finalPrice = 11;
-      console.log(`Using hardcoded price for test-service: ${finalPrice}`);
-    }
     // If we have a single service selected and a pricing map
-    else if (selectedServices.length === 1 && pricing) {
+    if (selectedServices.length === 1 && pricing) {
       const serviceId = selectedServices[0];
       
       // Check if it's a package ID directly
       if ((serviceId === 'divorce-prevention' || serviceId === 'pre-marriage-clarity') && pricing.has(serviceId)) {
         finalPrice = pricing.get(serviceId) || finalPrice;
-        console.log(`Using package price for ${serviceId}: ${finalPrice}`);
+        console.log(`PaymentStep: Using package price for ${serviceId}: ${finalPrice}`);
       } 
       // Check if it's a regular service
       else if (pricing.has(serviceId)) {
         finalPrice = pricing.get(serviceId) || finalPrice;
-        console.log(`Using service price for ${serviceId}: ${finalPrice}`);
+        console.log(`PaymentStep: Using service price for ${serviceId}: ${finalPrice}`);
       }
     }
     
@@ -78,13 +82,13 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       
       if (pricing.has(packageId)) {
         finalPrice = pricing.get(packageId) || finalPrice;
-        console.log(`Using package price for ${packageName} (${packageId}): ${finalPrice}`);
+        console.log(`PaymentStep: Using package price for ${packageName} (${packageId}): ${finalPrice}`);
       }
     }
     
     // Only update if the price has actually changed
     if (finalPrice !== actualPrice) {
-      console.log(`Updating actual price from ${actualPrice} to ${finalPrice}`);
+      console.log(`PaymentStep: Updating actual price from ${actualPrice} to ${finalPrice}`);
       setActualPrice(finalPrice);
     }
   }, [selectedServices, pricing, totalPrice, actualPrice]);
@@ -92,11 +96,11 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   // For debugging
   React.useEffect(() => {
     console.log(`PaymentStep - totalPrice: ${totalPrice}, actualPrice: ${actualPrice}`);
-    console.log(`Selected services: ${selectedServices.join(', ')}`);
-    console.log(`Is test service: ${selectedServices.includes('test-service')}`);
+    console.log(`PaymentStep - Selected services: ${selectedServices.join(', ')}`);
+    console.log(`PaymentStep - Is test service: ${selectedServices.includes('test-service')}`);
     
     if (pricing) {
-      console.log('Available pricing:', Object.fromEntries(pricing));
+      console.log('PaymentStep - Available pricing:', Object.fromEntries(pricing));
     }
   }, [totalPrice, actualPrice, selectedServices, pricing]);
 

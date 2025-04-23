@@ -33,7 +33,7 @@ export function mapServicePricing(
         
         // Special handling for test service - always set to 11
         if (id === 'test-service') {
-          console.log('Setting fixed price for test service');
+          console.log('Setting fixed price of 11 for test service');
           pricingMap.set(id, 11);
         }
       }
