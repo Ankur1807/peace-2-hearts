@@ -12,9 +12,11 @@ const ConsultationCTA: React.FC = () => {
           <p className="text-lg mb-8 text-white/90">
             Take the first step toward finding clarity and support in your relationship journey. Our initial consultation helps us understand your needs and create a personalized support plan.
           </p>
-          <FractalButton asChild fractalType="cta" className="text-lg inline-block w-auto">
-            <Link to="/book-consultation">Book Your Consultation Today</Link>
-          </FractalButton>
+          <div className="inline-block sm:w-auto w-full">
+            <FractalButton asChild fractalType="cta" className="text-lg">
+              <Link to="/book-consultation" className="inline-block w-full">Book Your Consultation Today</Link>
+            </FractalButton>
+          </div>
         </div>
       </div>
     </section>
