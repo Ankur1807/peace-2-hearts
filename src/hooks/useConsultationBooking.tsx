@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { PersonalDetails } from '@/utils/types';
@@ -66,30 +65,19 @@ export function useConsultationBooking() {
     setIsProcessing,
     toast
   });
-  
-  // Use payment hook with the consolidated state for proceedToPayment
-  const { 
-    proceedToPayment 
-  } = useConsultationPayment({
+
+  // Compose all required functions for the payment hook
+  const useConsultationPaymentParams = {
     state,
     toast,
     setIsProcessing,
     setShowPaymentStep,
     handleConfirmBooking,
     setReferenceId
-  });
+  };
   
-  // Use payment hook with the consolidated state for processPayment
-  const {
-    processPayment
-  } = useConsultationPayment({
-    state,
-    toast,
-    setIsProcessing,
-    setShowPaymentStep,
-    handleConfirmBooking,
-    setReferenceId
-  });
+  // Only initialize hooks once to avoid duplicating logic
+  const paymentHook = useConsultationPayment(useConsultationPaymentParams);
 
   // Return all state and functions
   return {
@@ -123,8 +111,7 @@ export function useConsultationBooking() {
     // Actions
     handlePersonalDetailsChange,
     handleConfirmBooking,
-    processPayment,
-    proceedToPayment,
+    ...paymentHook, // includes processPayment and proceedToPayment
     setShowPaymentStep
   };
 }

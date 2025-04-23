@@ -3,7 +3,8 @@ import { useState, useCallback } from 'react';
 
 export function useBookingState() {
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [serviceCategory, setServiceCategory] = useState('holistic');
+  // Default serviceCategory to "" for NO preselection; can be set via param elsewhere
+  const [serviceCategory, setServiceCategory] = useState('');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [timeSlot, setTimeSlot] = useState('');
   const [timeframe, setTimeframe] = useState('1-2-weeks');
