@@ -35,15 +35,13 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
 
   // Check if test service is selected
   const isTestService = selectedServices.includes('test-service');
-  const TEST_SERVICE_PRICE = 11; // Fixed price for test service
-  
+
   // Calculate the effective price - hardcode for test service
-  const effectivePrice = isTestService ? TEST_SERVICE_PRICE : totalPrice;
+  const effectivePrice = totalPrice;
   
   // Log pricing information for debugging
   useEffect(() => {
     console.log("ConsultationBookingForm isTestService:", isTestService);
-    console.log("ConsultationBookingForm fixed test price:", TEST_SERVICE_PRICE);
     console.log("ConsultationBookingForm effectivePrice:", effectivePrice);
     console.log("ConsultationBookingForm totalPrice:", totalPrice);
     console.log("ConsultationBookingForm selectedServices:", selectedServices);

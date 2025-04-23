@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { getConsultationTypeLabel } from '@/utils/consultationLabels';
-import { formatPrice } from '@/utils/pricing/fetchPricing';
+import { formatPrice } from '@/utils/pricing/priceFormatter';
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import { User } from 'lucide-react';
 

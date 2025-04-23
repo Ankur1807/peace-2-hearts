@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Shield, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getConsultationTypeLabel } from '@/utils/consultationLabels';
-import { formatPrice } from '@/utils/pricing/fetchPricing';
+import { formatPrice } from '@/utils/pricing/priceFormatter';
 import Script from '@/components/Script';
 import { loadRazorpayScript, isRazorpayAvailable } from '@/utils/payment/razorpayService';
 
