@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Link } from 'react-router-dom';
 
-interface MandalaButtonProps extends ButtonProps {
+interface MandalaButtonProps extends Omit<ButtonProps, 'variant'> {
   variant?: 'primary' | 'secondary' | 'outline' | 'cta';
   children: React.ReactNode;
   asChild?: boolean;
@@ -35,6 +35,7 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
       setIsMounted(true);
     }, []);
 
+    // Map our custom variants to ButtonProps variants
     const buttonVariant = 
       variant === 'primary' ? 'default' : 
       variant === 'secondary' ? 'secondary' : 
