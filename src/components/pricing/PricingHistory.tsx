@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { RefreshCw } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { PriceChange } from '@/utils/pricingTypes';
-import { formatPrice } from '@/utils/pricing/fetchPricing';
+import { formatPrice } from '@/utils/pricing/priceFormatter';
 
 const PricingHistory: React.FC = () => {
   const [priceChanges, setPriceChanges] = React.useState<PriceChange[]>([]);
