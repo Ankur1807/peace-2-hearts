@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import CircuitHeartLogo from './navigation/CircuitHeartLogo';
@@ -60,10 +59,17 @@ const Footer = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className={`grid grid-cols-1 ${isMobile ? 'md:grid-cols-4' : 'md:grid-cols-4'} gap-8 mb-8`}>
+          {/* First column - tagline */}
+          <div>
+            <p className="text-white/90 mb-4 ml-1">
+              Your emotional well-being matters—let's explore solutions together.
+            </p>
+          </div>
+          
           {/* Quick Links column */}
-          <div className="flex flex-col items-center md:items-start">
-            <h3 className="font-lora text-lg font-semibold text-white mb-4 text-center md:text-left">Quick Links</h3>
+          <div>
+            <h3 className="font-lora text-lg font-semibold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li><Link to="/about" className="text-white/90 hover:text-white">About Us</Link></li>
               <li><Link to="/services" className="text-white/90 hover:text-white">Our Services</Link></li>
@@ -72,11 +78,10 @@ const Footer = () => {
               <li><Link to="/privacy-policy" className="text-white/90 hover:text-white">Privacy Policy</Link></li>
             </ul>
           </div>
-          {/* Vertical divider */}
-          <div className="hidden md:block border-l border-white/20 h-full mx-auto"></div>
+          
           {/* Services column */}
-          <div className="flex flex-col items-center md:items-start">
-            <h3 className="font-lora text-lg font-semibold text-white mb-4 text-center md:text-left">Services</h3>
+          <div>
+            <h3 className="font-lora text-lg font-semibold text-white mb-4">Services</h3>
             <ul className="space-y-2">
               <li><Link to="/services/mental-health" className="text-white/90 hover:text-white">Mental Health Support</Link></li>
               <li><Link to="/services/legal-support" className="text-white/90 hover:text-white">Legal Consultations</Link></li>
@@ -85,11 +90,10 @@ const Footer = () => {
               <li><Link to="/services/custody" className="text-white/90 hover:text-white">Custody Support</Link></li>
             </ul>
           </div>
-          {/* Vertical divider */}
-          <div className="hidden md:block border-l border-white/20 h-full mx-auto"></div>
+          
           {/* Contact Us column */}
-          <div className="flex flex-col items-center md:items-start">
-            <h3 className="font-lora text-lg font-semibold text-white mb-4 text-center md:text-left">Contact Us</h3>
+          <div>
+            <h3 className="font-lora text-lg font-semibold text-white mb-4">Contact Us</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-white mt-0.5" />
@@ -107,15 +111,18 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="w-full flex flex-col items-center">
-          <div className="text-white/80 text-xs text-center mb-2" style={{ lineHeight: '1.5em', opacity: 0.75 }}>
-            Peace2Hearts provides informational content only and does not offer legal, psychological, or medical advice.<br />
-            We do not endorse consultants; users should seek independent professional guidance. If you are in crisis or feeling suicidal, please contact a suicide prevention helpline.
+        <div className="border-t border-white/20 pt-6 mb-4">
+          <div className="bg-white/10 rounded-lg p-4 text-white/80 text-xs text-center">
+            <p>
+              Peace2Hearts provides informational content only and does not offer legal, psychological, or medical advice. We do not endorse consultants, and users should seek independent professional guidance. If you are in crisis or feeling suicidal, please contact a suicide prevention helpline.
+            </p>
           </div>
         </div>
         
-        <div className="pt-6">
-          <p className="text-center text-white/80 text-sm">&copy; {new Date().getFullYear()} Peace2Hearts. All rights reserved.</p>
+        <div className="border-t border-white/20 pt-6">
+          <p className="text-center text-white/80 text-sm">
+            &copy; {new Date().getFullYear()} Peace2Hearts. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

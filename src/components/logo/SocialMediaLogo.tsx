@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { drawProfileLogo, drawCoverLogo } from './LogoDrawer';
+import { drawHeartWithPeace } from '../../utils/logoRendering/drawHeartLogo';
 
 interface SocialMediaLogoProps {
   type: 'profile' | 'cover';
@@ -26,12 +26,11 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Draw the appropriate logo based on type
-    if (type === 'profile') {
-      drawProfileLogo(ctx, canvas);
-    } else {
-      drawCoverLogo(ctx, canvas);
-    }
+    // Draw main logo with existing heart drawing function
+    const logoSize = Math.min(size.width, size.height) * 0.7;
+    const x = (size.width - logoSize) / 2;
+    const y = (size.height - logoSize) / 2;
+    drawHeartWithPeace(ctx, x, y, logoSize);
     
     // Call onRender callback if provided
     if (onRender) {

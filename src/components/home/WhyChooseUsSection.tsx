@@ -1,23 +1,7 @@
 
-import { Heart, BookOpen, MessageSquare, Shield, Bell, Users } from 'lucide-react';
+import { Heart, BookOpen, MessageSquare, Shield, Bell, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-
-const pastelCard =
-  "bg-gradient-to-br from-white to-softPink/10 shadow-md hover:shadow-lg transition-all duration-300";
-
-const iconBgClass = (color: string) =>
-  color === "vibrantPurple"
-    ? "bg-vibrantPurple/15"
-    : color === "peacefulBlue"
-    ? "bg-peacefulBlue/15"
-    : color === "brightOrange"
-    ? "bg-brightOrange/15"
-    : color === "vividPink"
-    ? "bg-vividPink/15"
-    : color === "softGreen"
-    ? "bg-softGreen/15"
-    : "bg-gray-200";
 
 const WhyChooseUsSection = () => {
   const isMobile = useIsMobile();
@@ -62,19 +46,19 @@ const WhyChooseUsSection = () => {
   ];
 
   const FeatureCard = ({ feature }) => (
-    <div className={`${pastelCard} rounded-xl p-9 flex flex-col min-h-[330px] items-center justify-center`}>
-      <div className={`${iconBgClass(feature.color)} p-4 rounded-full shadow mb-4`}>
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
+      <div className={`bg-${feature.color}/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4`}>
         <feature.icon className={`h-10 w-10 text-${feature.color}`} />
       </div>
-      <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3 text-center">{feature.title}</h3>
-      <p className="text-gray-600 text-center">{feature.description}</p>
+      <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">{feature.title}</h3>
+      <p className="text-gray-600">{feature.description}</p>
     </div>
   );
 
   return (
-    <section className="py-20">
+    <section className="py-16">
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-3xl mx-auto mb-14">
+        <div className="text-center max-w-3xl mx-auto mb-12">
           <h2 className="section-title">Why Expert Guidance Matters</h2>
           <p className="text-gray-600">Relationship challenges can be complex—our holistic approach ensures both your emotional and legal needs are addressed.</p>
         </div>
@@ -107,7 +91,7 @@ const WhyChooseUsSection = () => {
             </div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-x-10 gap-y-12">
+          <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <FeatureCard key={index} feature={feature} />
             ))}
@@ -119,4 +103,3 @@ const WhyChooseUsSection = () => {
 };
 
 export default WhyChooseUsSection;
-
