@@ -8,14 +8,12 @@ import { useEffectivePrice } from '@/hooks/consultation/payment/useEffectivePric
 
 type OrderSummaryProps = {
   consultationType: string;
-  totalPrice: number;
   selectedServices?: string[];
   pricing?: Map<string, number>;
 };
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ 
   consultationType, 
-  totalPrice, 
   selectedServices = [],
   pricing
 }) => {
@@ -32,8 +30,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
   const getEffectivePrice = useEffectivePrice({
     selectedServices,
-    pricing,
-    totalPrice
+    pricing
   });
 
   const consultationLabel = getConsultationLabel();
@@ -43,13 +40,19 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     console.log("OrderSummary rendered with:", {
       consultationType,
       selectedServices,
-      totalPrice,
       effectivePrice,
       consultationLabel,
-      pricingAvailable: pricing ? Object.fromEntries(pricing) : 'none',
-      hasValidPrice: effectivePrice > 0
+      pricingAvailable: pricing ? Object.fromEntries(pricing) : 'none'
     });
-  }, [consultationType, selectedServices, totalPrice, effectivePrice, consultationLabel, pricing]);
+  }, [consultationType, selectedServices, effectivePrice, consultationLabel, pricing]);
+
+  if (!effectivePrice || !selectedServices.length) {
+    return (
+      <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <p className="text-amber-800">Please select a service to see pricing details.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-6">
@@ -65,7 +68,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           <div className="border-t pt-3 mt-3">
             <div className="flex justify-between font-semibold">
               <span>Total</span>
-              <span>{effectivePrice > 0 ? `₹${effectivePrice}` : "Price not available"}</span>
+              <span>₹{effectivePrice}</span>
             </div>
           </div>
         </div>
