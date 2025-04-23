@@ -42,67 +42,21 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
     }
   });
 
-  // Determine the actual price to use based on selected services
-  const [actualPrice, setActualPrice] = React.useState<number>(totalPrice);
+  // Special case for test service - always use fixed price
+  const isTestService = selectedServices.includes('test-service');
+  const TEST_SERVICE_PRICE = 11; // Fixed price for test service
   
-  React.useEffect(() => {
-    // Special case for test service - highest priority
-    if (selectedServices.includes('test-service')) {
-      console.log('PaymentStep: Test service selected, setting fixed price of 11');
-      if (actualPrice !== 11) {
-        setActualPrice(11);
-      }
-      return;
-    }
-
-    let finalPrice = totalPrice;
-
-    // If we have a single service selected and a pricing map
-    if (selectedServices.length === 1 && pricing) {
-      const serviceId = selectedServices[0];
-      
-      // Check if it's a package ID directly
-      if ((serviceId === 'divorce-prevention' || serviceId === 'pre-marriage-clarity') && pricing.has(serviceId)) {
-        finalPrice = pricing.get(serviceId) || finalPrice;
-        console.log(`PaymentStep: Using package price for ${serviceId}: ${finalPrice}`);
-      } 
-      // Check if it's a regular service
-      else if (pricing.has(serviceId)) {
-        finalPrice = pricing.get(serviceId) || finalPrice;
-        console.log(`PaymentStep: Using service price for ${serviceId}: ${finalPrice}`);
-      }
-    }
-    
-    // Check if services match a package
-    const packageName = getPackageName(selectedServices);
-    if (packageName && pricing && !selectedServices.includes('test-service')) {
-      const packageId = packageName === "Divorce Prevention Package" 
-        ? 'divorce-prevention' 
-        : 'pre-marriage-clarity';
-      
-      if (pricing.has(packageId)) {
-        finalPrice = pricing.get(packageId) || finalPrice;
-        console.log(`PaymentStep: Using package price for ${packageName} (${packageId}): ${finalPrice}`);
-      }
-    }
-    
-    // Only update if the price has actually changed
-    if (finalPrice !== actualPrice) {
-      console.log(`PaymentStep: Updating actual price from ${actualPrice} to ${finalPrice}`);
-      setActualPrice(finalPrice);
-    }
-  }, [selectedServices, pricing, totalPrice, actualPrice]);
+  // Always use the test price for test service regardless of what's in the pricing map
+  const actualPrice = isTestService ? TEST_SERVICE_PRICE : totalPrice;
 
   // For debugging
   React.useEffect(() => {
-    console.log(`PaymentStep - totalPrice: ${totalPrice}, actualPrice: ${actualPrice}`);
+    console.log(`PaymentStep - isTestService: ${isTestService}`);
+    console.log(`PaymentStep - fixed test price: ${TEST_SERVICE_PRICE}`);
+    console.log(`PaymentStep - actualPrice: ${actualPrice}`);
+    console.log(`PaymentStep - totalPrice: ${totalPrice}`);
     console.log(`PaymentStep - Selected services: ${selectedServices.join(', ')}`);
-    console.log(`PaymentStep - Is test service: ${selectedServices.includes('test-service')}`);
-    
-    if (pricing) {
-      console.log('PaymentStep - Available pricing:', Object.fromEntries(pricing));
-    }
-  }, [totalPrice, actualPrice, selectedServices, pricing]);
+  }, [isTestService, actualPrice, totalPrice, selectedServices]);
 
   if (isProcessing) {
     return <PaymentLoader 
@@ -147,7 +101,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         razorpayLoaded={razorpayLoaded}
       />
 
-      {actualPrice <= 0 && (
+      {!isTestService && actualPrice <= 0 && (
         <PaymentErrorMessage message="Unable to calculate price. Please try selecting your services again or contact support." />
       )}
       

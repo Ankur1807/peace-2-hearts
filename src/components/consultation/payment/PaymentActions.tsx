@@ -24,64 +24,21 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
   acceptTerms,
   razorpayLoaded
 }) => {
-  // Get the effective price for this service
-  const [effectivePrice, setEffectivePrice] = React.useState<number>(totalPrice);
+  // Check if we're dealing with test service - this should be the first check
+  const isTestService = selectedServices.includes('test-service');
+  const TEST_SERVICE_PRICE = 11; // Fixed price for test service
   
-  // Calculate the actual price to display and use for payment
-  React.useEffect(() => {
-    let price = totalPrice;
-    
-    // Special handling for test service
-    const isTestService = selectedServices.includes('test-service');
-    
-    if (isTestService) {
-      if (pricing?.has('test-service')) {
-        const testPrice = pricing.get('test-service');
-        if (testPrice && testPrice > 0) {
-          console.log(`PaymentActions: Using price ${testPrice} for test-service from pricing map`);
-          price = testPrice;
-        } else {
-          console.log('PaymentActions: Test service has no valid price in pricing map, using default');
-          price = 11; // Default for test service
-        }
-      } else {
-        console.log('PaymentActions: No test service price in pricing map, using default');
-        price = 11; // Default for test service
-      }
-    }
-    // For single non-test service 
-    else if (selectedServices.length === 1 && pricing) {
-      const serviceId = selectedServices[0];
-      
-      if (pricing.has(serviceId)) {
-        price = pricing.get(serviceId) || price;
-        console.log(`PaymentActions: Using price ${price} for service ${serviceId}`);
-      }
-    }
-    
-    if (price !== effectivePrice) {
-      console.log(`PaymentActions: Updating effective price from ${effectivePrice} to ${price}`);
-      setEffectivePrice(price);
-    }
-  }, [totalPrice, selectedServices, pricing, effectivePrice]);
+  // Set the effective price - hardcode for test service
+  const effectivePrice = isTestService ? TEST_SERVICE_PRICE : totalPrice;
   
-  // Extra debug logging to make sure we have the right data
+  // Extra debug logging
   React.useEffect(() => {
+    console.log(`PaymentActions Debug - isTestService: ${isTestService}`);
+    console.log(`PaymentActions Debug - fixed test price: ${TEST_SERVICE_PRICE}`);
     console.log(`PaymentActions Debug - effectivePrice: ${effectivePrice}`);
     console.log(`PaymentActions Debug - totalPrice: ${totalPrice}`);
     console.log(`PaymentActions Debug - selectedServices: ${selectedServices.join(',')}`);
-    console.log(`PaymentActions Debug - pricing available:`, pricing ? Object.fromEntries(pricing) : 'No pricing data');
-    
-    // Special check for test service
-    if (selectedServices.includes('test-service')) {
-      console.log(`PaymentActions Debug - Test service price from map: ${pricing?.get('test-service') || 'not found'}`);
-    }
-    
-  }, [effectivePrice, totalPrice, selectedServices, pricing]);
-  
-  // Check if we're dealing with test service
-  const isTestService = selectedServices.includes('test-service');
-  const displayPrice = isTestService ? 11 : effectivePrice;
+  }, [isTestService, effectivePrice, totalPrice, selectedServices]);
   
   return (
     <div className="pt-6 flex justify-between">
@@ -91,16 +48,16 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
       <Button 
         type="submit" 
         className="bg-peacefulBlue hover:bg-peacefulBlue/90"
-        disabled={isProcessing || !acceptTerms || !razorpayLoaded || (effectivePrice <= 0 && !isTestService)}
+        disabled={isProcessing || !acceptTerms || !razorpayLoaded || (!isTestService && effectivePrice <= 0)}
         onClick={(e) => {
-          console.log(`Payment button clicked with effectivePrice: ${effectivePrice}, isTestService: ${isTestService}, final price: ${isTestService ? 11 : effectivePrice}`);
+          console.log(`Payment button clicked with effectivePrice: ${effectivePrice}, isTestService: ${isTestService}`);
           onSubmit(e);
         }}
       >
         {!razorpayLoaded ? "Loading Payment..." : 
          isProcessing ? "Processing..." : 
-         effectivePrice <= 0 && !isTestService ? "Price Not Available" : 
-         `Pay ${formatPrice(isTestService ? 11 : effectivePrice)}`}
+         !isTestService && effectivePrice <= 0 ? "Price Not Available" : 
+         `Pay ${formatPrice(isTestService ? TEST_SERVICE_PRICE : effectivePrice)}`}
       </Button>
     </div>
   );

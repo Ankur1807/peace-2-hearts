@@ -1,4 +1,3 @@
-
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing/fetchPricing';
 
@@ -7,29 +6,19 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
   let finalPrice = 0;
 
   try {
-    // Special handling for test service - fetch explicitly
+    // Special handling for test service - always set a fixed price regardless of DB
     if (selectedServices.includes('test-service')) {
-      console.log('Fetching pricing specifically for test service');
-      pricingMap = await fetchServicePricing(['test-service'], true); // Force skip cache
-      const testServicePrice = pricingMap.get('test-service');
-      
-      console.log(`Test service price from database: ${testServicePrice}`);
-      
-      if (testServicePrice && testServicePrice > 0) {
-        finalPrice = testServicePrice;
-        console.log(`Using test service price from database: ${finalPrice}`);
-      } else {
-        // Always set a default price for test service if not found in database
-        const defaultTestPrice = 11;
-        console.warn(`Test service price not found in database, using default price: ${defaultTestPrice}`);
-        pricingMap.set('test-service', defaultTestPrice);
-        finalPrice = defaultTestPrice;
-      }
+      console.log('Test service detected, setting fixed price of 11');
+      // Always set a fixed price for test service
+      const testPrice = 11;
+      pricingMap.set('test-service', testPrice);
+      finalPrice = testPrice;
       
       console.log(`Final test service price: ${finalPrice}, Pricing map:`, Object.fromEntries(pricingMap));
       return { pricingMap, finalPrice };
     }
 
+    // Standard handling for other services (unchanged)
     // Check if selected services match a package
     const packageName = getPackageName(selectedServices);
     if (packageName) {
@@ -68,12 +57,12 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
   } catch (error) {
     console.error('Error calculating pricing:', error);
     
-    // Even in case of errors, ensure test service has a price
+    // Even in case of errors for test service, ensure it has a fixed price
     if (selectedServices.includes('test-service')) {
-      const defaultTestPrice = 11;
-      console.log(`Setting default test service price due to error: ${defaultTestPrice}`);
-      pricingMap.set('test-service', defaultTestPrice);
-      finalPrice = defaultTestPrice;
+      const testPrice = 11;
+      console.log(`Setting fixed test service price due to error: ${testPrice}`);
+      pricingMap.set('test-service', testPrice);
+      finalPrice = testPrice;
     }
     
     return { pricingMap, finalPrice };

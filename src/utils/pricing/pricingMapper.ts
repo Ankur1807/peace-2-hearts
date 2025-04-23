@@ -14,45 +14,31 @@ export function mapServicePricing(
   console.log('Mapping pricing data for services:', dbPricing);
   const pricingMap = new Map<string, number>();
   
-  // First pass: add prices for exact matches in the database data
+  // Check if we need test service pricing
+  const isTestServiceRequested = requestedIds?.includes('test-service');
+  
+  if (isTestServiceRequested) {
+    // Always set a fixed price for test service
+    const TEST_SERVICE_PRICE = 11;
+    console.log(`Setting fixed test service price: ${TEST_SERVICE_PRICE}`);
+    pricingMap.set('test-service', TEST_SERVICE_PRICE);
+  }
+  
+  // Process database price data for other services
   dbPricing.forEach((item) => {
     const clientId = matchDbToClientId(item.service_id);
     if (clientId) {
       console.log(`Mapped DB ID ${item.service_id} to client ID ${clientId} with price ${item.price}`);
-      pricingMap.set(clientId, item.price);
+      
+      // Don't overwrite the test service price if already set
+      if (clientId !== 'test-service' || !pricingMap.has('test-service')) {
+        pricingMap.set(clientId, item.price);
+      }
     } else {
       console.log(`No client ID mapping found for DB ID ${item.service_id}`);
-      
-      // Special case for test service: if the DB service ID contains 'test', map it to test-service
-      const lowerServiceId = item.service_id.toLowerCase();
-      if (lowerServiceId.includes('test') || lowerServiceId.includes('trial')) {
-        console.log(`Found test service match for ${item.service_id} with price ${item.price}`);
-        pricingMap.set('test-service', item.price);
-      }
     }
   });
-  
-  // Check if we need to specifically look for the test-service
-  const needsTestService = requestedIds?.includes('test-service') && !pricingMap.has('test-service');
-  
-  if (needsTestService) {
-    console.log('Test service requested but not found in DB results, checking for it specifically');
-    // Look for test service in the database results with a case-insensitive search
-    const testServiceItem = dbPricing.find(item => {
-      const lowerServiceId = item.service_id.toLowerCase();
-      return lowerServiceId.includes('test') || lowerServiceId.includes('trial');
-    });
-    
-    if (testServiceItem) {
-      console.log(`Found test service with price ${testServiceItem.price}`);
-      pricingMap.set('test-service', testServiceItem.price);
-    } else {
-      console.log('No test service found in database, using default price');
-      // If we still can't find it, use a default price as fallback
-      pricingMap.set('test-service', 11);
-    }
-  }
-  
+
   // Log the final mapping
   console.log('Final service pricing map:', Object.fromEntries(pricingMap));
   

@@ -12,7 +12,7 @@ const serviceIdMap: Record<string, string[]> = {
   'premarital-counselling-couple': ['P2H-MH-premarital-counselling-couple', 'premarital-couple'],
   'couples-counselling': ['P2H-MH-couples-counselling', 'couples-counselling'],
   'sexual-health-counselling': ['P2H-MH-sexual-health-counselling', 'sexual-health-counselling'],
-  'test-service': ['P2H-test-service', 'test-service', 'test', 'trial-service', 'trial'], // Added more variations for test service
+  'test-service': ['P2H-test-service', 'test-service', 'test', 'trial-service', 'trial', 'p2h test', 'p2h-test'], // Added more variations for test service
   
   // Legal services
   'pre-marriage-legal': ['P2H-L-pre-marriage-legal', 'pre-marriage-legal'],

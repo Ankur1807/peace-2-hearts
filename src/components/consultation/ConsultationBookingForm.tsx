@@ -33,58 +33,19 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     processPayment
   } = bookingState;
 
-  // Calculate the effective price based on selected services
-  const [effectivePrice, setEffectivePrice] = React.useState<number>(totalPrice);
+  // Check if test service is selected
+  const isTestService = selectedServices.includes('test-service');
+  const TEST_SERVICE_PRICE = 11; // Fixed price for test service
   
-  useEffect(() => {
-    if (!pricing || selectedServices.length === 0) {
-      setEffectivePrice(totalPrice);
-      return;
-    }
-    
-    let price = totalPrice;
-    
-    // If single service is selected, get its price directly
-    if (selectedServices.length === 1) {
-      const serviceId = selectedServices[0];
-      
-      // Direct package ID
-      if ((serviceId === 'divorce-prevention' || serviceId === 'pre-marriage-clarity') && pricing.has(serviceId)) {
-        price = pricing.get(serviceId) || price;
-        console.log(`Using direct package price for ${serviceId}: ${price}`);
-      }
-      // Regular service
-      else if (pricing.has(serviceId)) {
-        price = pricing.get(serviceId) || price;
-        console.log(`Using service price for ${serviceId}: ${price}`);
-      }
-    }
-    
-    // Check for package match
-    const packageName = getPackageName(selectedServices);
-    if (packageName) {
-      const packageId = packageName === "Divorce Prevention Package" 
-        ? 'divorce-prevention' 
-        : 'pre-marriage-clarity';
-      
-      if (pricing.has(packageId)) {
-        price = pricing.get(packageId) || price;
-        console.log(`Using package price for ${packageName}: ${price}`);
-      }
-    }
-    
-    // Only update if changed
-    if (price !== effectivePrice) {
-      console.log(`ConsultationBookingForm: Updating effective price from ${effectivePrice} to ${price}`);
-      setEffectivePrice(price);
-    }
-  }, [pricing, selectedServices, totalPrice, effectivePrice]);
-
+  // Calculate the effective price - hardcode for test service
+  const effectivePrice = isTestService ? TEST_SERVICE_PRICE : totalPrice;
+  
   // Log pricing information for debugging
   useEffect(() => {
-    console.log("ConsultationBookingForm pricing data:", pricing ? Object.fromEntries(pricing) : "No pricing data");
-    console.log("ConsultationBookingForm totalPrice:", totalPrice);
+    console.log("ConsultationBookingForm isTestService:", isTestService);
+    console.log("ConsultationBookingForm fixed test price:", TEST_SERVICE_PRICE);
     console.log("ConsultationBookingForm effectivePrice:", effectivePrice);
+    console.log("ConsultationBookingForm totalPrice:", totalPrice);
     console.log("ConsultationBookingForm selectedServices:", selectedServices);
     
     // Check for package pricing
@@ -95,7 +56,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
         : 'pre-marriage-clarity';
       console.log(`Selected package: ${packageName}, packageId: ${packageId}, price: ${pricing?.get(packageId) || 'not found in pricing map'}`);
     }
-  }, [pricing, totalPrice, effectivePrice, selectedServices]);
+  }, [pricing, totalPrice, effectivePrice, selectedServices, isTestService]);
 
   const handlePersonalDetailsFieldChange = useCallback((field: string, value: string) => {
     handlePersonalDetailsChange({
@@ -157,7 +118,7 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
       console.log("Setting service from URL parameter:", subServiceParam);
       setSelectedServices([subServiceParam]);
     }
-  }, [setSelectedServices]); // Removed selectedServices from dependency array to prevent loop
+  }, []); // Removed selectedServices from dependency array to prevent loop
 
   // Handle payment form submission
   const handlePaymentSubmit = useCallback((e: React.FormEvent) => {
