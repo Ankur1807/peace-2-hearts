@@ -4,6 +4,7 @@ import { getConsultationTypeLabel } from '@/utils/consultationLabels';
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import OrderAmount from './OrderAmount';
 import ServiceDuration from './ServiceDuration';
+import { useEffectivePrice } from '@/hooks/consultation/payment/useEffectivePrice';
 
 type OrderSummaryProps = {
   consultationType: string;
@@ -29,26 +30,11 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         : 'Consultation');
   };
 
-  const getEffectivePrice = () => {
-    if (packageName) {
-      const packageId = packageName === "Divorce Prevention Package" 
-        ? 'divorce-prevention' 
-        : 'pre-marriage-clarity';
-      
-      if (pricing?.has(packageId)) {
-        return pricing.get(packageId)!;
-      }
-    }
-
-    if (selectedServices.length === 1) {
-      const serviceId = selectedServices[0];
-      if (pricing?.has(serviceId)) {
-        return pricing.get(serviceId)!;
-      }
-    }
-
-    return totalPrice;
-  };
+  const getEffectivePrice = useEffectivePrice({
+    selectedServices,
+    pricing,
+    totalPrice
+  });
 
   const packageName = selectedServices.length > 0 
     ? getPackageName(selectedServices) 
