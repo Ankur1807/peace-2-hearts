@@ -43,16 +43,23 @@ export function useConsultationPayment({
     // Log the processing with calculated price
     console.log(`Processing payment with effective price: ${effectivePrice}`);
     
-    // Check if the price is valid with a fallback
-    const validPrice = effectivePrice > 0 ? effectivePrice : 1500;
-    
-    // Set the calculated price to totalPrice for the state
-    if (state.setTotalPrice && validPrice > 0) {
-      state.setTotalPrice(validPrice);
-      console.log(`Updated totalPrice state to: ${validPrice}`);
+    // Check if the price is valid
+    if (effectivePrice <= 0) {
+      toast({
+        title: "Price Error",
+        description: "Unable to determine price for the selected service. Please try again or contact support.",
+        variant: "destructive"
+      });
+      return;
     }
     
-    // Always proceed with payment processing using valid price
+    // Set the calculated price to totalPrice for the state
+    if (state.setTotalPrice) {
+      state.setTotalPrice(effectivePrice);
+      console.log(`Updated totalPrice state to: ${effectivePrice}`);
+    }
+    
+    // Proceed with payment processing
     processPayment();
   }, [state, processPayment, toast, getEffectivePrice]);
 

@@ -126,7 +126,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       <PaymentActions 
         onPrevStep={onPrevStep}
         onSubmit={onSubmit}
-        totalPrice={effectivePrice > 0 ? effectivePrice : 1500}  
+        totalPrice={totalPrice}  
         selectedServices={selectedServices}
         pricing={pricing}
         isProcessing={isProcessing}

@@ -12,6 +12,7 @@ interface PaymentActionsProps {
   isProcessing: boolean;
   acceptTerms: boolean;
   razorpayLoaded: boolean;
+  totalPrice?: number; // Added totalPrice prop
 }
 
 const PaymentActions: React.FC<PaymentActionsProps> = ({
@@ -21,11 +22,13 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
   pricing,
   isProcessing,
   acceptTerms,
-  razorpayLoaded
+  razorpayLoaded,
+  totalPrice // Use the prop
 }) => {
   const getEffectivePrice = useEffectivePrice({
     selectedServices,
-    pricing
+    pricing,
+    totalPrice // Pass to the hook
   });
   
   const effectivePrice = getEffectivePrice();
@@ -34,9 +37,10 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
     console.log("PaymentActions - Price Info:", {
       selectedServices: selectedServices.join(','),
       effectivePrice,
+      totalPrice,
       pricingAvailable: pricing ? Object.fromEntries(pricing) : 'none'
     });
-  }, [selectedServices, effectivePrice, pricing]);
+  }, [selectedServices, effectivePrice, pricing, totalPrice]);
 
   const canProceed = razorpayLoaded && acceptTerms && effectivePrice > 0;
   

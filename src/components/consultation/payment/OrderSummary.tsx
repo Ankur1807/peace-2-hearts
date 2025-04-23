@@ -10,12 +10,14 @@ type OrderSummaryProps = {
   consultationType: string;
   selectedServices?: string[];
   pricing?: Map<string, number>;
+  totalPrice?: number; // Added totalPrice prop
 };
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ 
   consultationType, 
   selectedServices = [],
-  pricing
+  pricing,
+  totalPrice // Use the prop
 }) => {
   const getConsultationLabel = () => {
     const packageName = selectedServices.length > 0 
@@ -30,7 +32,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
   const getEffectivePrice = useEffectivePrice({
     selectedServices,
-    pricing
+    pricing,
+    totalPrice // Pass to the hook
   });
 
   const consultationLabel = getConsultationLabel();
@@ -41,10 +44,11 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       consultationType,
       selectedServices,
       effectivePrice,
+      totalPrice,
       consultationLabel,
       pricingAvailable: pricing ? Object.fromEntries(pricing) : 'none'
     });
-  }, [consultationType, selectedServices, effectivePrice, consultationLabel, pricing]);
+  }, [consultationType, selectedServices, effectivePrice, totalPrice, consultationLabel, pricing]);
 
   if (!effectivePrice || !selectedServices.length) {
     return (
