@@ -3,6 +3,9 @@ import { Heart, BookOpen, MessageSquare, Shield, Bell, Users, ChevronLeft, Chevr
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
+const featureBgGradient = "bg-gradient-to-br from-white to-softPink/10";
+const featureShadow = "shadow-md hover:shadow-lg transition-all duration-300";
+
 const WhyChooseUsSection = () => {
   const isMobile = useIsMobile();
   
@@ -45,10 +48,22 @@ const WhyChooseUsSection = () => {
     }
   ];
 
+  // Consistent Icon color classes
+  const iconColorClass = (color: string) => {
+    switch (color) {
+      case "vibrantPurple": return "text-vibrantPurple bg-vibrantPurple/15";
+      case "peacefulBlue": return "text-peacefulBlue bg-peacefulBlue/15";
+      case "brightOrange": return "text-brightOrange bg-brightOrange/15";
+      case "vividPink": return "text-vividPink bg-vividPink/15";
+      case "softGreen": return "text-softGreen bg-softGreen/15";
+      default: return "text-vibrantPurple bg-vibrantPurple/15";
+    }
+  };
+
   const FeatureCard = ({ feature }) => (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
-      <div className={`bg-${feature.color}/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4`}>
-        <feature.icon className={`h-10 w-10 text-${feature.color}`} />
+    <div className={`service-card ${featureBgGradient} ${featureShadow} rounded-xl border border-gray-100 text-center p-8 mx-1 my-2 flex flex-col items-center`}>
+      <div className={`p-4 rounded-full flex items-center justify-center mb-4 ${iconColorClass(feature.color)}`}>
+        <feature.icon className="h-9 w-9" />
       </div>
       <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">{feature.title}</h3>
       <p className="text-gray-600">{feature.description}</p>
@@ -91,7 +106,7 @@ const WhyChooseUsSection = () => {
             </div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-12">
             {features.map((feature, index) => (
               <FeatureCard key={index} feature={feature} />
             ))}
