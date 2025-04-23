@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/utils/pricing';
+import { useEffectivePrice } from '@/hooks/consultation/payment/useEffectivePrice';
 
 interface PaymentActionsProps {
   onPrevStep: () => void;
@@ -24,35 +25,23 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
   acceptTerms,
   razorpayLoaded
 }) => {
-  // Get price from pricing map if available, or fallback to totalPrice
-  const getEffectivePrice = () => {
-    if (selectedServices.includes('test-service') && pricing && pricing.has('test-service')) {
-      const price = pricing.get('test-service');
-      console.log(`PaymentActions - Using test service price: ${price}`);
-      return price as number;
-    }
-    
-    if (selectedServices.length === 1) {
-      const serviceId = selectedServices[0];
-      if (pricing && pricing.has(serviceId)) {
-        const price = pricing.get(serviceId);
-        console.log(`PaymentActions - Using service price for ${serviceId}: ${price}`);
-        return price as number;
-      }
-    }
-    
-    console.log(`PaymentActions - Using totalPrice: ${totalPrice}`);
-    return totalPrice;
-  };
+  const getEffectivePrice = useEffectivePrice({
+    selectedServices,
+    pricing,
+    totalPrice
+  });
   
   const effectivePrice = getEffectivePrice();
   
   // Extra debug logging
   React.useEffect(() => {
-    console.log(`PaymentActions Debug - selected services: ${selectedServices.join(',')}`);
-    console.log(`PaymentActions Debug - pricing map:`, pricing ? Object.fromEntries(pricing) : "N/A");
-    console.log(`PaymentActions Debug - totalPrice: ${totalPrice}`);
-    console.log(`PaymentActions Debug - effectivePrice: ${effectivePrice}`);
+    console.log("PaymentActions Debug:", {
+      selectedServices: selectedServices.join(','),
+      pricing: pricing ? Object.fromEntries(pricing) : "N/A",
+      totalPrice,
+      effectivePrice,
+      valid: effectivePrice > 0
+    });
   }, [effectivePrice, totalPrice, selectedServices, pricing]);
   
   return (

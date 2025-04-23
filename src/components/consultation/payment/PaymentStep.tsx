@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Shield, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { formatPrice } from '@/utils/pricing/priceFormatter';
 import Script from '@/components/Script';
 import { loadRazorpayScript, isRazorpayAvailable } from '@/utils/payment/razorpayService';
 import PaymentTerms from './PaymentTerms';
 import OrderSummary from './OrderSummary';
 import PaymentActions from './PaymentActions';
 import RazorpayCard from './RazorpayCard';
+import { useEffectivePrice } from '@/hooks/consultation/payment/useEffectivePrice';
 
 type PaymentStepProps = {
   consultationType: string;
@@ -37,18 +37,26 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   
-  const isTestService = selectedServices.includes('test-service');
+  // Use the hook to calculate the effective price
+  const getEffectivePrice = useEffectivePrice({
+    selectedServices,
+    pricing,
+    totalPrice
+  });
   
-  // Get fixed test price or from pricing map
-  const getTestServicePrice = () => {
-    const mappedPrice = pricing?.get('test-service');
-    console.log(`PaymentStep - test service price from mapping: ${mappedPrice}`);
-    return mappedPrice !== undefined ? mappedPrice : 11;
-  };
+  const effectivePrice = getEffectivePrice();
   
-  // Calculate the actual price to use
-  const actualPrice = isTestService ? getTestServicePrice() : totalPrice;
-  
+  // For debugging
+  useEffect(() => {
+    console.log("PaymentStep - Debug Information:", {
+      selectedServices,
+      effectivePrice,
+      totalPrice,
+      pricing: pricing ? Object.fromEntries(pricing) : {},
+      isTestService: selectedServices.includes('test-service')
+    });
+  }, [selectedServices, effectivePrice, totalPrice, pricing]);
+
   // Load Razorpay script
   useEffect(() => {
     const checkAndLoadRazorpay = async () => {
@@ -77,15 +85,6 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
 
     checkAndLoadRazorpay();
   }, []);
-  
-  // For debugging
-  useEffect(() => {
-    console.log("PaymentStep - isTestService:", isTestService);
-    console.log("PaymentStep - fixed test price:", getTestServicePrice());
-    console.log("PaymentStep - actualPrice:", actualPrice);
-    console.log("PaymentStep - totalPrice:", totalPrice);
-    console.log("PaymentStep - Selected services:", selectedServices);
-  }, [isTestService, totalPrice, selectedServices, pricing]);
 
   return (
     <div className="space-y-6">
@@ -112,7 +111,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       
       <OrderSummary 
         consultationType={consultationType}
-        totalPrice={actualPrice}
+        totalPrice={totalPrice}
         selectedServices={selectedServices}
         pricing={pricing}
       />
@@ -127,7 +126,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       <PaymentActions 
         onPrevStep={onPrevStep}
         onSubmit={onSubmit}
-        totalPrice={actualPrice}
+        totalPrice={effectivePrice}
         selectedServices={selectedServices}
         pricing={pricing}
         isProcessing={isProcessing}
@@ -141,7 +140,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         </div>
       )}
       
-      {actualPrice <= 0 && (
+      {effectivePrice <= 0 && (
         <div className="text-center text-amber-600 text-sm mt-2">
           Unable to calculate price. Please try selecting your services again or contact support.
         </div>

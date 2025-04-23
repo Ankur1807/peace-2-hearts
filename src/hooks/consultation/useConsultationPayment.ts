@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { usePaymentFlow } from './usePaymentFlow';
 import { useToast } from '@/hooks/use-toast';
+import { useEffectivePrice } from './payment/useEffectivePrice';
 
 interface UseConsultationPaymentProps {
   state: any;
@@ -20,6 +21,12 @@ export function useConsultationPayment({
   handleConfirmBooking,
   setReferenceId
 }: UseConsultationPaymentProps) {
+  const getEffectivePrice = useEffectivePrice({
+    selectedServices: state.selectedServices,
+    pricing: state.pricing,
+    totalPrice: state.totalPrice
+  });
+
   const { proceedToPayment, processPayment } = usePaymentFlow({
     state,
     toast,
@@ -30,25 +37,14 @@ export function useConsultationPayment({
   });
 
   const handleProcessPayment = useCallback(() => {
-    // Check if test service is selected
-    const isTestService = state.selectedServices.includes('test-service');
-    
-    // Calculate effective price for payment
-    let calculatedPrice = state.totalPrice;
-    
-    if (isTestService) {
-      // Get price from pricing map or use fallback
-      calculatedPrice = state.pricing?.get('test-service') || 11;
-      console.log(`Payment using test service price: ${calculatedPrice}`);
-    } else {
-      console.log(`Payment using total price: ${calculatedPrice}`);
-    }
+    // Get the effective price using our hook
+    const effectivePrice = getEffectivePrice();
     
     // Log the processing with calculated price
-    console.log(`Processing payment with calculated price: ${calculatedPrice}`);
+    console.log(`Processing payment with effective price: ${effectivePrice}`);
     
-    // Process payment with validation
-    if (calculatedPrice <= 0 && !isTestService) {
+    // Check if the price is valid
+    if (effectivePrice <= 0) {
       toast({
         title: "Unable to process payment",
         description: "The calculated amount is invalid. Please try again or contact support.",
@@ -59,7 +55,7 @@ export function useConsultationPayment({
     
     // Proceed with payment processing
     processPayment();
-  }, [state, processPayment, toast]);
+  }, [state, processPayment, toast, getEffectivePrice]);
 
   return {
     proceedToPayment,

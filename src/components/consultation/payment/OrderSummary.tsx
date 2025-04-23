@@ -43,6 +43,17 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   const consultationLabel = getConsultationLabel();
   const effectivePrice = getEffectivePrice();
 
+  React.useEffect(() => {
+    console.log("OrderSummary rendered with:", {
+      consultationType,
+      selectedServices,
+      totalPrice,
+      effectivePrice,
+      consultationLabel,
+      pricingAvailable: pricing ? Object.fromEntries(pricing) : 'none'
+    });
+  }, [consultationType, selectedServices, totalPrice, effectivePrice, consultationLabel, pricing]);
+
   return (
     <div className="mb-6">
       <div className="bg-gray-50 p-4 rounded-lg mb-6">

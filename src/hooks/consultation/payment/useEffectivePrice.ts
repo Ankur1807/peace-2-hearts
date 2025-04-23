@@ -14,6 +14,12 @@ export const useEffectivePrice = (state: EffectivePriceState) => {
       totalPrice: state.totalPrice
     });
     
+    // If no services selected or no pricing data, return totalPrice
+    if (!state.selectedServices?.length || !state.pricing) {
+      console.log(`useEffectivePrice: No valid services or pricing, returning totalPrice: ${state.totalPrice}`);
+      return state.totalPrice;
+    }
+
     // Check for test service first (highest priority)
     if (state.selectedServices.includes('test-service')) {
       // If test service is in pricing map, use that price
@@ -28,10 +34,19 @@ export const useEffectivePrice = (state: EffectivePriceState) => {
       return 11;
     }
     
-    // For regular services
-    if (!state.selectedServices || state.selectedServices.length === 0 || !state.pricing) {
-      console.log(`useEffectivePrice: No valid services or pricing, returning totalPrice: ${state.totalPrice}`);
-      return state.totalPrice;
+    // Check for package first (packages take priority over individual services)
+    const packageName = getPackageName(state.selectedServices);
+    
+    if (packageName) {
+      const packageId = packageName === "Divorce Prevention Package" 
+        ? 'divorce-prevention' 
+        : 'pre-marriage-clarity';
+      
+      if (state.pricing?.has(packageId)) {
+        const price = state.pricing.get(packageId) as number;
+        console.log(`useEffectivePrice: Using package price for ${packageId}: ${price}`);
+        return price;
+      }
     }
     
     // For individual services
@@ -49,3 +64,6 @@ export const useEffectivePrice = (state: EffectivePriceState) => {
     return state.totalPrice;
   };
 };
+
+// Import the getPackageName function at the top
+import { getPackageName } from '@/utils/consultation/packageUtils';
