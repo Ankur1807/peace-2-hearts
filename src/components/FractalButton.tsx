@@ -7,10 +7,11 @@ import { ArrowRight } from 'lucide-react';
 interface FractalButtonProps extends ButtonProps {
   fractalType?: 'primary' | 'secondary' | 'outline' | 'cta';
   pulseEffect?: boolean;
+  showArrow?: boolean;
 }
 
 const FractalButton = React.forwardRef<HTMLButtonElement, FractalButtonProps>(
-  ({ className, fractalType = 'primary', pulseEffect = false, children, ...props }, ref) => {
+  ({ className, fractalType = 'primary', pulseEffect = false, showArrow = true, children, ...props }, ref) => {
     const buttonVariant = 
       fractalType === 'primary' ? 'default' : 
       fractalType === 'secondary' ? 'secondary' : 
@@ -26,6 +27,23 @@ const FractalButton = React.forwardRef<HTMLButtonElement, FractalButtonProps>(
       className
     );
     
+    // When using asChild, we need to ensure there's only one child element
+    // We'll modify our approach based on whether asChild is true
+    if (props.asChild) {
+      // With asChild, we need a single child so we don't add the arrow here
+      return (
+        <Button
+          className={buttonClasses}
+          variant={buttonVariant}
+          ref={ref}
+          {...props}
+        >
+          {children}
+        </Button>
+      );
+    }
+    
+    // Without asChild, we can add both children and arrow directly
     return (
       <Button
         className={buttonClasses}
@@ -34,7 +52,7 @@ const FractalButton = React.forwardRef<HTMLButtonElement, FractalButtonProps>(
         {...props}
       >
         {children}
-        <ArrowRight className="ml-2 h-4 w-4" />
+        {showArrow && <ArrowRight className="ml-2 h-4 w-4" />}
       </Button>
     );
   }
