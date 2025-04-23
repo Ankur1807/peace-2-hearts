@@ -91,9 +91,30 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick, isLoggedIn }: Mob
             ))}
           </ul>
         </motion.nav>
+        <div className="px-6 mt-10 flex justify-center">
+          <Link
+            to="/book-consultation"
+            onClick={handleLinkClick}
+            className="w-full"
+          >
+            <button
+              className="
+                w-full py-4 rounded-full font-bold text-lg bg-gradient-to-r from-vibrantPurple to-vividPink 
+                text-white shadow-lg transition-transform duration-200 active:scale-95
+                border-none outline-none focus:ring-4 focus:ring-vividPink/40
+              "
+              style={{
+                letterSpacing: "0.02em"
+              }}
+            >
+              Book Your Session
+            </button>
+          </Link>
+        </div>
       </div>
     </motion.div>
   );
 };
 
 export default MobileMenuContent;
+
