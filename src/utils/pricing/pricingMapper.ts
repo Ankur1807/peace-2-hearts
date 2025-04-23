@@ -1,3 +1,4 @@
+
 import { matchDbToClientId } from './serviceIdMapper';
 
 /**
@@ -23,8 +24,8 @@ export function mapServicePricing(
       console.log(`No client ID mapping found for DB ID ${item.service_id}`);
       
       // Special case for test service: if the DB service ID contains 'test', map it to test-service
-      if (item.service_id.toLowerCase().includes('test') || 
-          item.service_id.toLowerCase().includes('trial')) {
+      const lowerServiceId = item.service_id.toLowerCase();
+      if (lowerServiceId.includes('test') || lowerServiceId.includes('trial')) {
         console.log(`Found test service match for ${item.service_id} with price ${item.price}`);
         pricingMap.set('test-service', item.price);
       }
@@ -37,10 +38,10 @@ export function mapServicePricing(
   if (needsTestService) {
     console.log('Test service requested but not found in DB results, checking for it specifically');
     // Look for test service in the database results with a case-insensitive search
-    const testServiceItem = dbPricing.find(item => 
-      item.service_id.toLowerCase().includes('test') || 
-      item.service_id.toLowerCase().includes('trial')
-    );
+    const testServiceItem = dbPricing.find(item => {
+      const lowerServiceId = item.service_id.toLowerCase();
+      return lowerServiceId.includes('test') || lowerServiceId.includes('trial');
+    });
     
     if (testServiceItem) {
       console.log(`Found test service with price ${testServiceItem.price}`);

@@ -31,18 +31,22 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
   React.useEffect(() => {
     let price = totalPrice;
     
-    if (!pricing || selectedServices.length === 0) {
-      console.log(`PaymentActions: No pricing data or services selected, using totalPrice: ${totalPrice}`);
-      setEffectivePrice(totalPrice);
-      return;
-    }
+    // Special handling for test service
+    const isTestService = selectedServices.includes('test-service');
     
-    // Check if test service is selected and has a price in the pricing map
-    if (selectedServices.includes('test-service') && pricing.has('test-service')) {
-      const testPrice = pricing.get('test-service');
-      if (testPrice && testPrice > 0) {
-        console.log(`PaymentActions: Using price ${testPrice} for test-service from pricing map`);
-        price = testPrice;
+    if (isTestService) {
+      if (pricing?.has('test-service')) {
+        const testPrice = pricing.get('test-service');
+        if (testPrice && testPrice > 0) {
+          console.log(`PaymentActions: Using price ${testPrice} for test-service from pricing map`);
+          price = testPrice;
+        } else {
+          console.log('PaymentActions: Test service has no valid price in pricing map, using default');
+          price = 11; // Default for test service
+        }
+      } else {
+        console.log('PaymentActions: No test service price in pricing map, using default');
+        price = 11; // Default for test service
       }
     }
     // For single non-test service 
@@ -75,6 +79,10 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
     
   }, [effectivePrice, totalPrice, selectedServices, pricing]);
   
+  // Check if we're dealing with test service
+  const isTestService = selectedServices.includes('test-service');
+  const displayPrice = isTestService ? 11 : effectivePrice;
+  
   return (
     <div className="pt-6 flex justify-between">
       <Button type="button" variant="outline" onClick={onPrevStep}>
@@ -83,16 +91,16 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
       <Button 
         type="submit" 
         className="bg-peacefulBlue hover:bg-peacefulBlue/90"
-        disabled={isProcessing || !acceptTerms || !razorpayLoaded || effectivePrice <= 0}
+        disabled={isProcessing || !acceptTerms || !razorpayLoaded || (effectivePrice <= 0 && !isTestService)}
         onClick={(e) => {
-          console.log(`Payment button clicked with effectivePrice: ${effectivePrice}`);
+          console.log(`Payment button clicked with effectivePrice: ${effectivePrice}, isTestService: ${isTestService}, final price: ${isTestService ? 11 : effectivePrice}`);
           onSubmit(e);
         }}
       >
         {!razorpayLoaded ? "Loading Payment..." : 
          isProcessing ? "Processing..." : 
-         effectivePrice <= 0 ? "Price Not Available" : 
-         `Pay ${formatPrice(effectivePrice)}`}
+         effectivePrice <= 0 && !isTestService ? "Price Not Available" : 
+         `Pay ${formatPrice(isTestService ? 11 : effectivePrice)}`}
       </Button>
     </div>
   );

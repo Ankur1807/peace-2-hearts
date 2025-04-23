@@ -27,11 +27,19 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     // Check if test service is selected
     const isTestService = selectedServices.includes('test-service');
     
-    if (isTestService && pricing?.has('test-service')) {
-      const testPrice = pricing.get('test-service');
-      if (testPrice && testPrice > 0) {
-        console.log(`OrderSummary: Using test service price ${testPrice}`);
-        price = testPrice;
+    if (isTestService) {
+      if (pricing?.has('test-service')) {
+        const testPrice = pricing.get('test-service');
+        if (testPrice && testPrice > 0) {
+          console.log(`OrderSummary: Using test service price ${testPrice}`);
+          price = testPrice;
+        } else {
+          console.log('OrderSummary: Test service has no valid price in pricing map, using default');
+          price = 11; // Default for test service
+        }
+      } else {
+        console.log('OrderSummary: No test service price in pricing map, using default');
+        price = 11; // Default for test service
       }
     }
     // For holistic packages
@@ -98,7 +106,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-gray-800">{consultationLabel}</span>
             <span className="font-medium">
-              {displayPrice > 0 ? formatPrice(displayPrice) : "Price not available"}
+              {isTestService ? formatPrice(11) : 
+               displayPrice > 0 ? formatPrice(displayPrice) : "Price not available"}
             </span>
           </div>
           {!isTestService && (
@@ -114,7 +123,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         <div className="flex justify-between font-semibold">
           <span>Total</span>
           <span className={displayPrice > 0 ? "text-lg" : "text-lg text-peacefulBlue"}>
-            {displayPrice > 0 ? formatPrice(displayPrice) : "Price unavailable"}
+            {isTestService ? formatPrice(11) : 
+             displayPrice > 0 ? formatPrice(displayPrice) : "Price unavailable"}
           </span>
         </div>
       </div>

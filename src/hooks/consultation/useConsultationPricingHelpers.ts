@@ -19,11 +19,14 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
         finalPrice = testServicePrice;
         console.log(`Using test service price from database: ${finalPrice}`);
       } else {
-        console.warn('Test service price not found in database, using fallback');
-        pricingMap.set('test-service', 11);
-        finalPrice = 11;
+        // Always set a default price for test service if not found in database
+        const defaultTestPrice = 11;
+        console.warn(`Test service price not found in database, using default price: ${defaultTestPrice}`);
+        pricingMap.set('test-service', defaultTestPrice);
+        finalPrice = defaultTestPrice;
       }
       
+      console.log(`Final test service price: ${finalPrice}, Pricing map:`, Object.fromEntries(pricingMap));
       return { pricingMap, finalPrice };
     }
 
@@ -67,9 +70,10 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
     
     // Even in case of errors, ensure test service has a price
     if (selectedServices.includes('test-service')) {
-      pricingMap.set('test-service', 11);
-      finalPrice = 11;
-      console.log('Set default test service price due to error');
+      const defaultTestPrice = 11;
+      console.log(`Setting default test service price due to error: ${defaultTestPrice}`);
+      pricingMap.set('test-service', defaultTestPrice);
+      finalPrice = defaultTestPrice;
     }
     
     return { pricingMap, finalPrice };

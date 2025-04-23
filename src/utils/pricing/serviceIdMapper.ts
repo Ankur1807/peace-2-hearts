@@ -12,7 +12,7 @@ const serviceIdMap: Record<string, string[]> = {
   'premarital-counselling-couple': ['P2H-MH-premarital-counselling-couple', 'premarital-couple'],
   'couples-counselling': ['P2H-MH-couples-counselling', 'couples-counselling'],
   'sexual-health-counselling': ['P2H-MH-sexual-health-counselling', 'sexual-health-counselling'],
-  'test-service': ['P2H-test-service', 'test-service', 'test'], // Added 'test' as another possible DB identifier
+  'test-service': ['P2H-test-service', 'test-service', 'test', 'trial-service', 'trial'], // Added more variations for test service
   
   // Legal services
   'pre-marriage-legal': ['P2H-L-pre-marriage-legal', 'pre-marriage-legal'],
@@ -75,6 +75,13 @@ export function expandClientToDbPackageIds(clientIds: string[]): string[] {
  * @returns Client-side service ID or null if not found
  */
 export function matchDbToClientId(dbId: string): string | null {
+  // Special case for test service - check for common patterns
+  const lowerDbId = dbId.toLowerCase();
+  if (lowerDbId.includes('test') || lowerDbId.includes('trial')) {
+    console.log(`Matched database ID ${dbId} to test-service`);
+    return 'test-service';
+  }
+  
   // Check all service ID mappings
   for (const [clientId, dbIds] of Object.entries(serviceIdMap)) {
     if (dbIds.some(id => dbId.includes(id))) {
