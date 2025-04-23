@@ -18,22 +18,23 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   selectedServices = [],
   pricing
 }) => {
-  // Check if test service is selected - this should be the first thing we do
-  const isTestService = selectedServices.includes('test-service');
-  const TEST_SERVICE_PRICE = 11; // Fixed price for test service
+  // Get price from pricing map if available, or fallback to totalPrice
+  const getEffectivePrice = () => {
+    if (selectedServices.includes('test-service') && pricing && pricing.has('test-service')) {
+      return pricing.get('test-service') as number;
+    }
+    return totalPrice;
+  };
   
-  // Calculate effective price - hardcode for test service
-  const effectivePrice = isTestService 
-    ? TEST_SERVICE_PRICE 
-    : totalPrice;
+  const effectivePrice = getEffectivePrice();
 
   // For holistic packages
-  const packageName = !isTestService && selectedServices.length > 0 
+  const packageName = selectedServices.length > 0 
     ? getPackageName(selectedServices) 
     : null;
   
   // Get the appropriate label - package name, service name, or generic label
-  const consultationLabel = isTestService 
+  const consultationLabel = selectedServices.includes('test-service')
     ? 'Test Service' 
     : packageName || (selectedServices.length > 0 
         ? getConsultationTypeLabel(selectedServices[0]) 
@@ -41,12 +42,11 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
   // Debug logs
   React.useEffect(() => {
-    console.log(`OrderSummary Debug - isTestService: ${isTestService}`);
-    console.log(`OrderSummary Debug - fixed test price: ${TEST_SERVICE_PRICE}`);
-    console.log(`OrderSummary Debug - effectivePrice: ${effectivePrice}`);
+    console.log(`OrderSummary Debug - selected services: ${selectedServices.join(',')}`);
+    console.log(`OrderSummary Debug - pricing map:`, pricing ? Object.fromEntries(pricing) : "N/A");
     console.log(`OrderSummary Debug - totalPrice: ${totalPrice}`);
-    console.log(`OrderSummary Debug - selectedServices: ${selectedServices.join(',')}`);
-  }, [isTestService, effectivePrice, totalPrice, selectedServices]);
+    console.log(`OrderSummary Debug - effectivePrice: ${effectivePrice}`);
+  }, [effectivePrice, totalPrice, selectedServices, pricing]);
   
   return (
     <div className="mb-6">
@@ -59,17 +59,15 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-gray-800">{consultationLabel}</span>
             <span className="font-medium">
-              {isTestService 
-                ? formatPrice(TEST_SERVICE_PRICE) 
-                : effectivePrice > 0 
-                  ? formatPrice(effectivePrice) 
-                  : "Price not available"}
+              {effectivePrice > 0 
+                ? formatPrice(effectivePrice) 
+                : "Price not available"}
             </span>
           </div>
-          {!isTestService && (
+          {!selectedServices.includes('test-service') && (
             <div className="text-sm text-gray-600">60-minute consultation</div>
           )}
-          {isTestService && (
+          {selectedServices.includes('test-service') && (
             <div className="text-sm text-gray-600">Test service for payment system validation</div>
           )}
         </div>
@@ -79,11 +77,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         <div className="flex justify-between font-semibold">
           <span>Total</span>
           <span className={effectivePrice > 0 ? "text-lg" : "text-lg text-peacefulBlue"}>
-            {isTestService 
-              ? formatPrice(TEST_SERVICE_PRICE) 
-              : effectivePrice > 0 
-                ? formatPrice(effectivePrice) 
-                : "Price unavailable"}
+            {effectivePrice > 0 
+              ? formatPrice(effectivePrice) 
+              : "Price unavailable"}
           </span>
         </div>
       </div>
