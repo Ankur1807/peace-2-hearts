@@ -15,6 +15,7 @@ export interface SavePaymentParams {
 
 // Check if Razorpay script is already loaded
 export const isRazorpayAvailable = (): boolean => {
+  console.log("Razorpay already available", typeof window !== 'undefined' && window.Razorpay !== undefined);
   return typeof window !== 'undefined' && window.Razorpay !== undefined;
 };
 
@@ -68,12 +69,21 @@ export const createRazorpayOrder = async (params: CreateOrderParams): Promise<Or
   try {
     const { amount, currency = 'INR', receipt, notes } = params;
     
-    console.log("Creating Razorpay order with params:", { amount, currency, receipt, notes });
+    // Ensure amount is valid, default to 11 for test service
+    const effectiveAmount = amount <= 0 && notes?.test === 'true' ? 11 : amount;
+    
+    console.log("Creating Razorpay order with params:", { 
+      amount: effectiveAmount, 
+      currency, 
+      receipt, 
+      notes,
+      isTestService: notes?.test === 'true'
+    });
     
     const { data, error } = await supabase.functions.invoke('razorpay', {
       body: JSON.stringify({
         action: 'create_order',
-        amount,
+        amount: effectiveAmount,
         currency,
         receipt,
         orderData: { notes }

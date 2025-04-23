@@ -1,28 +1,26 @@
 
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Link } from 'react-router-dom';
 import { Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-interface PaymentTermsProps {
+type PaymentTermsProps = {
   acceptTerms: boolean;
   setAcceptTerms: (checked: boolean) => void;
-}
+};
 
 const PaymentTerms: React.FC<PaymentTermsProps> = ({ acceptTerms, setAcceptTerms }) => {
   return (
     <div className="space-y-6">
-      <div className="flex items-start space-x-2">
+      <div className="flex items-center space-x-2">
         <Checkbox 
           id="terms" 
           checked={acceptTerms}
           onCheckedChange={(checked) => setAcceptTerms(checked === true)}
-          className="mt-1 border-2 border-peacefulBlue"
-          required
         />
         <label
           htmlFor="terms"
-          className="text-sm font-medium leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
           I agree to the{' '}
           <Link to="/terms" target="_blank" className="text-peacefulBlue hover:underline">

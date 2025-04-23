@@ -54,14 +54,25 @@ export function usePaymentFlow({
     }
     
     setShowPaymentStep(true);
-  }, [state.personalDetails, state.selectedServices, toast, setShowPaymentStep]);
+  }, [state.personalDetails, state.selectedServices, toast, setShowPaymentStep, validatePersonalDetails, validateServiceSelection]);
 
   // Process payment using Razorpay
   const processPayment = useCallback(async () => {
     // Only include if necessary setters are provided
     if (!setIsProcessing || !handleConfirmBooking) return;
     
-    if (!validatePaymentAmount(state.totalPrice)) {
+    // Special handling for test service
+    const isTestService = state.selectedServices.includes('test-service');
+    let effectivePrice = state.totalPrice;
+    
+    if (isTestService) {
+      // For test service, use price from pricing map or fallback to 11
+      effectivePrice = state.pricing?.get('test-service') || 11;
+      console.log(`Using test service price for payment: ${effectivePrice}`);
+    }
+    
+    // Validate payment amount for non-test services
+    if (!isTestService && !validatePaymentAmount(effectivePrice)) {
       toast({
         title: "Invalid Amount",
         description: "Cannot process payment for zero amount.",
@@ -106,7 +117,19 @@ export function usePaymentFlow({
       });
       setIsProcessing(false);
     }
-  }, [state.totalPrice, state.personalDetails, state.selectedServices, toast, setIsProcessing, setReferenceId, handleConfirmBooking]);
+  }, [
+    state.totalPrice, 
+    state.personalDetails, 
+    state.selectedServices, 
+    state.pricing,
+    toast, 
+    setIsProcessing, 
+    setReferenceId, 
+    handleConfirmBooking, 
+    validatePaymentAmount,
+    initializeRazorpayPayment,
+    openRazorpayCheckout
+  ]);
 
   return {
     proceedToPayment,
