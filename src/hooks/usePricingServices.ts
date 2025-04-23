@@ -4,12 +4,12 @@ import { useToast } from '@/hooks/use-toast';
 import { ServicePrice } from '@/utils/pricingTypes';
 import { NewServiceFormValues } from '@/components/pricing/AddServiceForm';
 import { 
-  fetchAllServices, 
   updateServicePrice, 
   toggleServiceActive, 
   createService, 
-  removeService 
-} from '@/utils/pricing/serviceOperations';
+  removeService,
+  fetchAllServices 
+} from '@/utils/pricing';
 import { addInitialServices } from '@/utils/pricing/serviceInitializer';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdmin } from '@/hooks/useAdminContext';
