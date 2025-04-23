@@ -1,20 +1,23 @@
 
-// Re-export from individual modules
+// Re-export from individual modules with descriptive naming
 export * from './services/priceManager';
 export * from './services/serviceManager';
 export * from './packages/packageManager';
 
-// Export from serviceCommands with explicit names to avoid conflicts
+// Export service commands with clear naming
 export {
-  updatePackagePrice as cmdUpdatePackagePrice,
-  syncPackageIds as cmdSyncPackageIds,
-  updateServicePrice as cmdUpdateServicePrice,
-  toggleServiceActive as cmdToggleServiceActive,
-  createService as cmdCreateService,
-  removeService as cmdRemoveService
+  updatePackagePrice,
+  syncPackageIds,
+  updateServicePrice,
+  toggleServiceActive,
+  createService,
+  removeService
 } from './serviceCommands';
 
-// Export from serviceQueries with explicit names to avoid conflicts
+// Export service queries with clear naming
 export {
-  fetchAllServices as queryFetchAllServices
+  fetchAllServices
 } from './serviceQueries';
+
+// Export pricing utilities
+export { fetchServicePricing, fetchPackagePricing, clearPricingCache } from './fetchPricing';

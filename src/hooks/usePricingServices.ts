@@ -1,13 +1,14 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ServicePrice } from '@/utils/pricingTypes';
 import { NewServiceFormValues } from '@/components/pricing/AddServiceForm';
 import { 
-  cmdUpdateServicePrice, 
-  cmdToggleServiceActive, 
-  cmdCreateService, 
-  cmdRemoveService,
-  queryFetchAllServices 
+  updateServicePrice, 
+  toggleServiceActive, 
+  createService, 
+  removeService,
+  fetchAllServices 
 } from '@/utils/pricing';
 import { addInitialServices } from '@/utils/pricing/serviceInitializer';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,12 +39,12 @@ export const usePricingServices = () => {
       
       try {
         // Fetch services data
-        let data = await queryFetchAllServices();
+        let data = await fetchAllServices();
         
         if (data.length === 0) {
           // If no services exist, add initial services
           await addInitialServices();
-          data = await queryFetchAllServices();
+          data = await fetchAllServices();
         }
         
         console.log('Fetched services data:', data);
@@ -105,7 +106,7 @@ export const usePricingServices = () => {
       const numericPrice = Number(editedPrice);
       console.log(`Saving price ${numericPrice} for service ID ${id}`);
       
-      await cmdUpdateServicePrice(id, numericPrice);
+      await updateServicePrice(id, numericPrice);
 
       toast({
         title: 'Price Updated',
@@ -134,7 +135,7 @@ export const usePricingServices = () => {
         return;
       }
 
-      await cmdToggleServiceActive(id, currentStatus);
+      await toggleServiceActive(id, currentStatus);
       
       toast({
         title: 'Status Updated',
@@ -162,7 +163,7 @@ export const usePricingServices = () => {
       }
 
       console.log("Adding new service with data:", data);
-      await cmdCreateService(data);
+      await createService(data);
       
       toast({
         title: 'Service Added',
@@ -191,7 +192,7 @@ export const usePricingServices = () => {
         return false;
       }
 
-      await cmdRemoveService(id);
+      await removeService(id);
       
       toast({
         title: 'Service Deleted',

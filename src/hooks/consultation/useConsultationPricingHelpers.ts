@@ -1,5 +1,6 @@
+
 import { getPackageName } from '@/utils/consultation/packageUtils';
-import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing/fetchPricing';
+import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing';
 
 export async function calculatePricingMap(selectedServices, serviceCategory, setPricingError, toast) {
   let pricingMap: Map<string, number> = new Map();

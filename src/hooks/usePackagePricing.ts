@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ServicePrice } from '@/utils/pricingTypes';
-import { cmdSyncPackageIds, cmdUpdatePackagePrice } from '@/utils/pricing';
+import { syncPackageIds, updatePackagePrice } from '@/utils/pricing';
 
 export const usePackagePricing = () => {
   const [packages, setPackages] = useState<ServicePrice[]>([]);
@@ -93,12 +93,12 @@ export const usePackagePricing = () => {
         throw new Error("Package not found");
       }
       
-      await cmdUpdatePackagePrice(id, price);
+      await updatePackagePrice(id, price);
       
       if (packageData.service_name.toLowerCase().includes('divorce prevention')) {
-        await cmdSyncPackageIds('Divorce Prevention Package', 'divorce-prevention', price);
+        await syncPackageIds('Divorce Prevention Package', 'divorce-prevention', price);
       } else if (packageData.service_name.toLowerCase().includes('pre-marriage clarity')) {
-        await cmdSyncPackageIds('Pre-Marriage Clarity Package', 'pre-marriage-clarity', price);
+        await syncPackageIds('Pre-Marriage Clarity Package', 'pre-marriage-clarity', price);
       }
       
       toast({
@@ -157,8 +157,8 @@ export const usePackagePricing = () => {
     try {
       setUpdating(true);
       
-      await cmdSyncPackageIds('Divorce Prevention Package', 'divorce-prevention', 8500);
-      await cmdSyncPackageIds('Pre-Marriage Clarity Package', 'pre-marriage-clarity', 7500);
+      await syncPackageIds('Divorce Prevention Package', 'divorce-prevention', 8500);
+      await syncPackageIds('Pre-Marriage Clarity Package', 'pre-marriage-clarity', 7500);
       
       toast({
         title: 'Packages Synchronized',
