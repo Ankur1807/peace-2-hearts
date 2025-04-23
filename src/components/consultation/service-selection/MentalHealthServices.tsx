@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { RadioGroup } from '@/components/ui/radio-group';
 import ServiceOption from './ServiceOption';
@@ -43,7 +42,6 @@ const MentalHealthServices: React.FC<MentalHealthServicesProps> = ({
     }
   ];
 
-  // Log pricing data for debugging
   useEffect(() => {
     if (pricing) {
       console.log("MentalHealthServices - Pricing data received:", Object.fromEntries(pricing));
@@ -56,17 +54,13 @@ const MentalHealthServices: React.FC<MentalHealthServicesProps> = ({
   return (
     <RadioGroup value={consultationType} onValueChange={handleBoxClick} className="space-y-4">
       {mentalHealthOptions.map(option => {
-        // Get price if available
         const price = pricing?.get(option.id);
-        
-        // Create title with price if available
         const titleWithPrice = price !== undefined
           ? `${option.title} (${formatPrice(price)})`
           : option.title;
         
-        // Special handling for test service - always show price if it's the test service
         const displayTitle = option.id === 'test-service' && price === undefined
-          ? `${option.title} (₹11)` // Hardcoded fallback for test service
+          ? `${option.title} (₹11)` 
           : titleWithPrice;
         
         return (

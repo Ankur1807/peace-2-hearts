@@ -329,6 +329,7 @@ export type Database = {
           category: string
           created_at: string
           currency: string
+          description: string | null
           id: string
           is_active: boolean
           price: number
@@ -343,6 +344,7 @@ export type Database = {
           category: string
           created_at?: string
           currency?: string
+          description?: string | null
           id?: string
           is_active?: boolean
           price: number
@@ -357,6 +359,7 @@ export type Database = {
           category?: string
           created_at?: string
           currency?: string
+          description?: string | null
           id?: string
           is_active?: boolean
           price?: number
