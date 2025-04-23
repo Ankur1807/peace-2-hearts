@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Copy, Clock, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ConsultantDetailWrapperProps {
   consultant: Consultant;
@@ -20,6 +21,7 @@ export function ConsultantDetailWrapper({
   getInitials,
   formatSpecialization
 }: ConsultantDetailWrapperProps) {
+  const isMobile = useIsMobile();
   const publicProfileLink = `${window.location.origin}/consultants/${consultant.id}`;
 
   const handleShareLink = () => {
@@ -87,8 +89,8 @@ export function ConsultantDetailWrapper({
               <p className="text-gray-600 mb-4">
                 This expert may be matched to your case based on your needs. To begin, please book a session through our main service page.
               </p>
-              <Link to="/book-consultation">
-                <Button className="px-8 py-6 text-lg">
+              <Link to="/book-consultation" className="inline-block w-full">
+                <Button className={`px-8 py-6 text-lg ${isMobile ? 'w-full' : ''}`}>
                   Book sessions with experts such as {consultant.name || "our consultants"}
                 </Button>
               </Link>
