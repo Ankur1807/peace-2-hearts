@@ -27,16 +27,6 @@ const MentalHealthServices: React.FC<MentalHealthServicesProps> = ({
       description: 'Strengthen family bonds by addressing conflicts and fostering understanding.'
     },
     {
-      id: 'premarital-counselling-individual',
-      title: 'Premarital Counselling - Individual',
-      description: 'Prepare for a strong marriage through guided personal reflection.'
-    },
-    {
-      id: 'premarital-counselling-couple',
-      title: 'Premarital Counselling - Couple',
-      description: 'Build a foundation for marriage together through guided discussions.'
-    },
-    {
       id: 'couples-counselling', 
       title: 'Couples Counselling',
       description: 'Professional guidance to strengthen communication and mutual understanding.'

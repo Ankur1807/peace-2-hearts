@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -27,8 +26,6 @@ interface ServiceSelectionOptionsProps {
 const mentalHealthServices: ServiceOption[] = [
   { id: 'mental-health-counselling', label: 'Mental Health Counselling', description: 'Speak with a therapist about anxiety, depression, or stress related to relationships.' },
   { id: 'family-therapy', label: 'Family Therapy', description: 'Strengthen family bonds by addressing conflicts and fostering understanding.' },
-  { id: 'premarital-counselling-individual', label: 'Premarital Counselling - Individual', description: 'Prepare for a strong marriage through guided personal reflection.' },
-  { id: 'premarital-counselling-couple', label: 'Premarital Counselling - Couple', description: 'Build a foundation for marriage together through guided discussions.' },
   { id: 'couples-counselling', label: 'Couples Counselling', description: 'Professional guidance to strengthen communication and mutual understanding.' },
   { id: 'sexual-health-counselling', label: 'Sexual Health Counselling', description: 'Specialized support for addressing intimacy concerns and enhancing relationship satisfaction.' },
   { id: 'test-service', label: 'Test Service', description: 'For testing payment gateway functionality.' }
