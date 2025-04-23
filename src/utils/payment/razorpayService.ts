@@ -4,6 +4,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { CreateOrderParams, OrderResponse, VerifyPaymentParams } from "./razorpayTypes";
+import { savePaymentDetails, forcePaymentSave } from "./paymentStorage";
 
 // Type definition for SavePaymentParams
 export interface SavePaymentParams {
@@ -134,7 +135,31 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
     }
     
     console.log("Payment verification response:", data);
-    return data?.success === true && data?.verified === true;
+    
+    // If payment is verified but no payment data is in response, try to recover it
+    if (data?.success === true && data?.verified === true) {
+      if (data.payment) {
+        // Extract payment amount from Razorpay response (in paise)
+        const amount = data.payment.amount / 100; // Convert from paise to rupees
+        
+        // Try to save the payment to our database
+        const consultationId = data.payment.notes?.consultationId || 'auto-recovered';
+        
+        // Use the savePaymentDetails function
+        const saveResult = await savePaymentDetails({
+          paymentId,
+          orderId,
+          amount,
+          consultationId
+        });
+        
+        console.log(`Payment save result after verification: ${saveResult}`);
+      }
+      
+      return true;
+    }
+    
+    return false;
   } catch (err) {
     console.error('Exception verifying payment:', err);
     return false;
@@ -143,48 +168,9 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
 
 /**
  * Save payment details to the database
+ * Re-export from paymentStorage for backward compatibility
  */
-export const savePaymentDetails = async (params: SavePaymentParams): Promise<boolean> => {
-  try {
-    const { paymentId, orderId, amount, consultationId } = params;
-    
-    console.log("Saving payment details:", { paymentId, orderId, amount, consultationId });
-    
-    // First check if payment record already exists
-    const { data: existingPayment } = await supabase
-      .from('payments')
-      .select('*')
-      .eq('transaction_id', paymentId)
-      .single();
-    
-    if (existingPayment) {
-      console.log("Payment already exists in database:", existingPayment);
-      return true; // Already saved
-    }
-    
-    // Insert payment record
-    const { error } = await supabase.from('payments').insert({
-      transaction_id: paymentId,
-      order_id: orderId,
-      consultation_id: consultationId,
-      amount: amount,
-      payment_status: 'completed',
-      payment_method: 'razorpay',
-      currency: 'INR'
-    });
-    
-    if (error) {
-      console.error('Error saving payment details:', error);
-      return false;
-    }
-    
-    console.log("Payment details saved successfully");
-    return true;
-  } catch (err) {
-    console.error('Exception saving payment details:', err);
-    return false;
-  }
-};
+export { savePaymentDetails, forcePaymentSave };
 
 /**
  * Verify payment by ID and update records if necessary
@@ -209,38 +195,20 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
     
     // If payment is verified but not in our database, save it
     if (data.verified && data.payment) {
-      const { data: existingPayment } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('transaction_id', paymentId)
-        .single();
+      // Extract data from payment response
+      const orderId = data.payment.order_id || '';
+      const amount = data.payment.amount / 100; // Convert from paise to rupees
+      const consultationId = data.payment.notes?.consultationId || 'recovered-payment';
       
-      if (!existingPayment) {
-        console.log("Payment verified with Razorpay but not in our database. Saving now:", data.payment);
-        
-        // Extract order ID if available
-        const orderId = data.payment.order_id || '';
-        const amount = data.payment.amount / 100; // Convert from paise to rupees
-        
-        // Save with minimal information
-        const { error: saveError } = await supabase.from('payments').insert({
-          transaction_id: paymentId,
-          order_id: orderId,
-          amount: amount,
-          payment_status: 'completed',
-          payment_method: 'razorpay',
-          currency: 'INR',
-          consultation_id: data.payment.notes?.consultationId || 'recovered-payment'
-        });
-        
-        if (saveError) {
-          console.error('Error saving recovered payment:', saveError);
-          return false;
-        }
-        
-        console.log("Recovered payment saved successfully");
-      }
+      // Use forcePaymentSave for maximum reliability
+      const saved = await forcePaymentSave({
+        paymentId,
+        orderId,
+        amount,
+        consultationId
+      });
       
+      console.log(`Recovery payment save result: ${saved}`);
       return true;
     }
     
@@ -250,3 +218,4 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
     return false;
   }
 };
+

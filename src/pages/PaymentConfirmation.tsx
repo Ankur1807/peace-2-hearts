@@ -7,6 +7,7 @@ import { verifyAndSyncPayment } from "@/utils/payment/razorpayService";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { checkPaymentExists } from "@/utils/payment/paymentStorage";
 
 // Accept either query params or state for flexibility
 const PaymentConfirmation = () => {
@@ -18,6 +19,7 @@ const PaymentConfirmation = () => {
   const referenceId = location.state?.referenceId || searchParams.get("ref") || null;
   const bookingDetails: BookingDetails | undefined = location.state?.bookingDetails;
   const paymentId = searchParams.get("razorpay_payment_id") || location.state?.paymentId;
+  const orderId = searchParams.get("razorpay_order_id") || location.state?.orderId;
   
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<{success: boolean; message: string} | null>(null);
@@ -25,10 +27,26 @@ const PaymentConfirmation = () => {
   // If we have a payment ID but no booking details, try to verify and recover the payment
   useEffect(() => {
     const verifyPayment = async () => {
-      if (paymentId && !bookingDetails) {
+      if (paymentId) {
         setIsVerifying(true);
         try {
+          // First check if the payment is already in our database
+          const paymentExists = await checkPaymentExists(paymentId);
+          
+          if (paymentExists) {
+            console.log("Payment already exists in database");
+            setVerificationResult({
+              success: true,
+              message: "Your payment has been verified and your booking is confirmed."
+            });
+            setIsVerifying(false);
+            return;
+          }
+          
+          // If payment not in database, verify with Razorpay and try to recover
+          console.log("Payment not found in database, attempting to verify and recover");
           const verified = await verifyAndSyncPayment(paymentId);
+          
           if (verified) {
             setVerificationResult({
               success: true,
@@ -53,7 +71,7 @@ const PaymentConfirmation = () => {
     };
     
     verifyPayment();
-  }, [paymentId, bookingDetails]);
+  }, [paymentId]);
 
   if (isVerifying) {
     return (
@@ -78,13 +96,15 @@ const PaymentConfirmation = () => {
         {verificationResult.success ? (
           <div className="mt-6 text-center">
             <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>
+            <p className="mb-4">Order ID: <strong>{orderId || "N/A"}</strong></p>
             <p className="mb-6">Your payment has been recorded in our system.</p>
             <Button onClick={() => navigate('/')}>Return to Home</Button>
           </div>
         ) : (
           <div className="mt-6 text-center">
             <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>
-            <p className="mb-6">Please save this payment ID for your reference.</p>
+            <p className="mb-4">Order ID: <strong>{orderId || "N/A"}</strong></p>
+            <p className="mb-6">Please save these details for your reference when contacting support.</p>
             <Button onClick={() => navigate('/')}>Return to Home</Button>
           </div>
         )}
