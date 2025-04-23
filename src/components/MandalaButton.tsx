@@ -49,9 +49,9 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
       "transition-all duration-300 transform hover:-translate-y-0.5",
       isMobile ? "w-full px-6 py-4" : "px-8 py-4",
       variant === 'primary' || variant === 'cta'
-        ? "bg-gradient-to-r from-[#36bcf6] to-[#7fe6c0] text-[#221F26] hover:shadow-lg shadow-md hover:from-[#36bcf6]/90 hover:to-[#7fe6c0]/90 border-none" // Changed text color to dark charcoal
+        ? "bg-gradient-to-r from-peacefulBlue to-softGreen text-vibrantPurple hover:shadow-lg shadow-md hover:from-peacefulBlue/90 hover:to-softGreen/90 border-none"
         : variant === 'secondary'
-        ? "bg-gradient-to-r from-[#36bcf6] to-[#7fe6c0] text-[#221F26] hover:shadow-lg shadow-md border-none" // Changed text color to dark charcoal
+        ? "bg-gradient-to-r from-peacefulBlue to-softGreen text-vibrantPurple hover:shadow-lg shadow-md border-none"
         : "border-2 border-peacefulBlue text-peacefulBlue hover:bg-peacefulBlue/5",
       className
     );
@@ -81,7 +81,7 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
           >
             <Link 
               to={href} 
-              className="w-full text-center flex items-center justify-center font-bold text-xl text-[#221F26]" // Explicitly set text color
+              className="w-full text-center flex items-center justify-center font-bold text-xl text-vibrantPurple" // Changed text color
               onClick={onClick}
             >
               {children}
@@ -106,7 +106,7 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
           asChild={asChild}
           {...props}
         >
-          <div className="flex items-center justify-center w-full text-center font-bold text-xl text-[#221F26]">{children}</div>
+          <div className="flex items-center justify-center w-full text-center font-bold text-xl text-vibrantPurple">{children}</div>
         </Button>
       </div>
     );
@@ -116,3 +116,4 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
 MandalaButton.displayName = "MandalaButton";
 
 export { MandalaButton };
+
