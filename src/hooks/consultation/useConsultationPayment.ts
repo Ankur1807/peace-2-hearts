@@ -38,27 +38,38 @@ export function useConsultationPayment({
       return state.totalPrice;
     }
     
-    const serviceId = state.selectedServices[0];
-    let price = state.totalPrice;
-    
-    // First check direct match in pricing map
-    if (state.pricing.has(serviceId)) {
-      price = state.pricing.get(serviceId) || price;
-      console.log(`Payment using direct service price for ${serviceId}: ${price}`);
-      return price;
-    }
-    
-    // Next check if it's a package
-    if (serviceId === 'divorce-prevention' || serviceId === 'pre-marriage-clarity') {
-      if (state.pricing.has(serviceId)) {
-        price = state.pricing.get(serviceId) || price;
-        console.log(`Payment using package price for ${serviceId}: ${price}`);
+    // Test service pricing check
+    if (state.selectedServices.includes('test-service') && state.pricing.has('test-service')) {
+      const price = state.pricing.get('test-service');
+      if (price) {
+        console.log(`Payment using test service price: ${price}`);
         return price;
       }
     }
     
-    console.log(`Payment using default price: ${price}`);
-    return price;
+    // Check direct match in pricing map for other service
+    const serviceId = state.selectedServices[0];
+    if (state.pricing.has(serviceId)) {
+      const price = state.pricing.get(serviceId);
+      if (price) {
+        console.log(`Payment using direct service price for ${serviceId}: ${price}`);
+        return price;
+      }
+    }
+    
+    // Check if it's a package
+    if (serviceId === 'divorce-prevention' || serviceId === 'pre-marriage-clarity') {
+      if (state.pricing.has(serviceId)) {
+        const price = state.pricing.get(serviceId);
+        if (price) {
+          console.log(`Payment using package price for ${serviceId}: ${price}`);
+          return price;
+        }
+      }
+    }
+    
+    console.log(`Payment using total price: ${state.totalPrice}`);
+    return state.totalPrice;
   }, [state.selectedServices, state.pricing, state.totalPrice]);
   
   // Function to proceed to payment step
@@ -96,7 +107,7 @@ export function useConsultationPayment({
     const actualPrice = getActualPrice();
     console.log(`Processing payment with calculated price: ${actualPrice}`);
     
-    if (!validatePaymentAmount(actualPrice)) {
+    if (!actualPrice || !validatePaymentAmount(actualPrice)) {
       toast({
         title: "Invalid Amount",
         description: "Cannot process payment for zero amount.",
@@ -126,13 +137,7 @@ export function useConsultationPayment({
         setReferenceId(receiptId);
       }
       
-      // Create a modified state object with the correct price
-      const modifiedState = {
-        ...state,
-        totalPrice: actualPrice
-      };
-      
-      // Initialize payment with the modified state
+      // Initialize payment
       const { order, razorpayKey } = await initializeRazorpayPayment(receiptId);
       
       // Open checkout

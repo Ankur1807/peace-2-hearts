@@ -38,10 +38,8 @@ export function useRazorpayPayment({
     // First check if test-service is selected
     if (state.selectedServices.includes('test-service') && state.pricing.has('test-service')) {
       const testServicePrice = state.pricing.get('test-service');
-      if (testServicePrice && testServicePrice > 0) {
-        console.log(`Using test service price from pricing map: ${testServicePrice}`);
-        return testServicePrice;
-      }
+      console.log(`Test service price from pricing map: ${testServicePrice}`);
+      return testServicePrice;
     }
     
     // Check if we have a direct service price
@@ -50,15 +48,13 @@ export function useRazorpayPayment({
       
       if (state.pricing.has(serviceId)) {
         const price = state.pricing.get(serviceId);
-        if (price && price > 0) {
-          console.log(`Using direct price for ${serviceId}: ${price}`);
-          return price;
-        }
+        console.log(`Direct price for ${serviceId}: ${price}`);
+        return price;
       }
     }
     
     // If we don't have a direct price, use totalPrice
-    return state.totalPrice > 0 ? state.totalPrice : 0;
+    return state.totalPrice;
   };
   
   // Initialize Razorpay payment 
@@ -67,7 +63,7 @@ export function useRazorpayPayment({
     const effectivePrice = getEffectivePrice();
     console.log("Starting payment process with amount:", effectivePrice);
     
-    if (effectivePrice <= 0) {
+    if (!effectivePrice || effectivePrice <= 0) {
       throw new Error("Cannot process payment with zero or negative amount");
     }
       

@@ -9,7 +9,25 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
   try {
     console.log(`Calculating pricing for services: ${selectedServices.join(', ')}`);
     
-    // Standard handling for all services (including test service)
+    // Special case for test service - fetch directly first
+    if (selectedServices.includes('test-service')) {
+      console.log("Test service selected, fetching its price");
+      const testServicePricing = await fetchServicePricing(['test-service'], true); // Skip cache
+      
+      if (testServicePricing.has('test-service')) {
+        const testPrice = testServicePricing.get('test-service') as number;
+        console.log(`Retrieved test service price: ${testPrice}`);
+        pricingMap.set('test-service', testPrice);
+        finalPrice = testPrice;
+        
+        // Return early since we don't need to process packages for test service
+        return { pricingMap, finalPrice };
+      } else {
+        console.log("Test service price not found in direct fetch");
+      }
+    }
+    
+    // Standard handling for all other services
     // Check if selected services match a package
     const packageName = getPackageName(selectedServices);
     if (packageName) {
@@ -41,12 +59,6 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
         const price = pricingMap.get(serviceId) || 0;
         finalPrice += price;
       });
-    }
-
-    // Check if we have a valid price, especially for test service
-    if (finalPrice <= 0 && selectedServices.includes('test-service') && pricingMap.has('test-service')) {
-      finalPrice = pricingMap.get('test-service') || 0;
-      console.log(`Using test service price directly: ${finalPrice}`);
     }
 
     console.log(`Final price calculated: ${finalPrice}, Pricing map:`, Object.fromEntries(pricingMap));

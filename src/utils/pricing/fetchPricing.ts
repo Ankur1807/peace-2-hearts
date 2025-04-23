@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { expandClientToDbIds, expandClientToDbPackageIds } from './serviceIdMapper';
 import { mapServicePricing, mapPackagePricing } from './pricingMapper';
@@ -56,7 +57,6 @@ export async function fetchServicePricing(
       console.warn('No DB IDs found for client service IDs:', serviceIds);
     }
     
-    // Query the database for pricing data
     // For test service, use a more flexible query
     let data = [];
     
@@ -70,14 +70,34 @@ export async function fetchServicePricing(
         
       if (testError) {
         console.error('Error fetching test service pricing:', testError);
-      } else {
+      } else if (testData && testData.length > 0) {
         console.log('Found test service data:', testData);
-        data = testData || [];
-      }
-      
-      // If no test services found in database, we'll handle this in mapServicePricing
-      if (!data.length) {
-        console.log('No test service found in database');
+        data = testData;
+      } else {
+        console.log('No test service found in database, fetching all services to check');
+        
+        // Try to get all services to find anything with "test" in the name
+        const { data: allData, error: allError } = await supabase
+          .from('service_pricing')
+          .select('service_id, price')
+          .eq('is_active', true);
+          
+        if (allError) {
+          console.error('Error fetching all services:', allError);
+        } else {
+          // Filter for anything that might be a test service
+          const possibleTestServices = allData?.filter(item => 
+            item.service_id.toLowerCase().includes('test') || 
+            item.service_id.toLowerCase().includes('trial')
+          );
+          
+          if (possibleTestServices && possibleTestServices.length > 0) {
+            console.log('Found possible test services:', possibleTestServices);
+            data = possibleTestServices;
+          } else {
+            console.log('No test services found in any database records');
+          }
+        }
       }
     }
     
@@ -98,9 +118,9 @@ export async function fetchServicePricing(
           
         if (error) {
           console.error('Error fetching regular service pricing:', error);
-        } else {
+        } else if (regularData && regularData.length > 0) {
           // Combine with any test service data
-          data = [...data, ...(regularData || [])];
+          data = [...data, ...regularData];
         }
       }
     }

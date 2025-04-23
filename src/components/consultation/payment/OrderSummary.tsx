@@ -21,8 +21,21 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   // Get price from pricing map if available, or fallback to totalPrice
   const getEffectivePrice = () => {
     if (selectedServices.includes('test-service') && pricing && pricing.has('test-service')) {
-      return pricing.get('test-service') as number;
+      const price = pricing.get('test-service');
+      console.log(`OrderSummary - Using test service price: ${price}`);
+      return price as number;
     }
+    
+    if (selectedServices.length === 1) {
+      const serviceId = selectedServices[0];
+      if (pricing && pricing.has(serviceId)) {
+        const price = pricing.get(serviceId);
+        console.log(`OrderSummary - Using service price for ${serviceId}: ${price}`);
+        return price as number;
+      }
+    }
+    
+    console.log(`OrderSummary - Using totalPrice: ${totalPrice}`);
     return totalPrice;
   };
   
