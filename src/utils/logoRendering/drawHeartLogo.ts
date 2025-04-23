@@ -1,3 +1,4 @@
+
 /**
  * Core drawing functions for the Peace2Hearts heart logo
  */
@@ -62,14 +63,11 @@ export const drawHeartWithPeace = (
   ctx.lineWidth = 2.5 * scale;
   ctx.stroke();
 
-  // Draw tree branches as the three peace symbol lines, keeping diagonals inside the circle
-
-  // Vertical branch: from pointed top of heart to center of peace circle
-  // Top heart tip at (50, 22), peace circle center at (50, 54)
-  drawTreeBranch(ctx, 50, 22, 50, 54, 2.5, scale, true);
+  // IMPORTANT FIX: Draw tree branches as the three peace symbol lines
+  // This vertical line connects the heart point to the peace circle center
+  drawTreeBranch(ctx, 50, 22, 50, 54, 2.5, scale, true); // From heart tip to peace circle center
 
   // Left diagonal (inside circle): from center to lower left inside the peace circle
-  // Let's use (50,54) to (33,75)
   drawTreeBranch(ctx, 50, 54, 33, 75, 2.5, scale, true);
 
   // Right diagonal (inside circle): from center to lower right inside the peace circle

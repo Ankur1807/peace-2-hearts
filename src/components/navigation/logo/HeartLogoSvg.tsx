@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { logoColors } from '@/components/logo/LogoDrawer';
+import { logoColors } from '@/utils/logoRendering/logoColors';
 
 interface HeartLogoSvgProps {
   animationClass?: string;
@@ -51,11 +51,6 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
     );
   }
 
-  // Precise coordinates for the peace symbol circle so it is tangent (touches) to the heart’s interior at top and bottom.
-  // On inspection, for a 80x80px heart centered at (50,50), a circle of radius ~30 centered at (50, 54) is best fit.
-  // Diagonals should start/stop inside this circle. The vertical branch from (50,22) [the top pointed edge of heart] to (50,54)
-  // Diagonals from (50,54) to (50-17,54+21) and (50+17,54+21), endpoints stay within the circle.
-
   return (
     <svg 
       viewBox="0 0 100 100" 
@@ -84,8 +79,7 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
       {/* Peace symbol circle fits snugly inside heart, slightly below center for more symmetry */}
       <circle cx="50" cy="54" r="30" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
       
-      {/* Tree branch peace symbol lines with gradients and curves */}
-      {/* Vertical branch: from pointed top of heart to center */}
+      {/* Key Fix: Add the vertical branch from heart point to peace circle center */}
       <path 
         d="M50,22 L50,54" 
         stroke="url(#branchGradient)" 
@@ -93,7 +87,7 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
         strokeLinecap="round"
       />
       
-      {/* Left diagonal branch - stays inside peace symbol circle */}
+      {/* Diagonal branches now contained within the circle */}
       <path 
         d="M50,54 L33,75" 
         stroke="url(#branchGradient)" 
@@ -101,7 +95,6 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
         strokeLinecap="round"
       />
       
-      {/* Right diagonal branch - stays inside peace symbol circle */}
       <path 
         d="M50,54 L67,75" 
         stroke="url(#branchGradient)" 
