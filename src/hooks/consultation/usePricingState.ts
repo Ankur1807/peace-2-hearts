@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing/fetchPricing';
+import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing';
 
 export function usePricingState() {
   const [pricing, setPricing] = useState<Map<string, number>>(new Map());

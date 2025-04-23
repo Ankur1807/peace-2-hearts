@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { formatPrice } from '@/utils/pricing/priceFormatter';
+import { formatPrice } from '@/utils/pricing';
 
 interface PaymentActionsProps {
   onPrevStep: () => void;

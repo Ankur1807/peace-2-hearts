@@ -1,17 +1,15 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ServicePrice } from '@/utils/pricingTypes';
-import { NewServiceFormValues } from '@/components/pricing/AddServiceForm';
+import { ServicePrice, NewServiceFormValues } from '@/utils/pricing/types';
 import { 
   updateServicePrice, 
   toggleServiceActive, 
   createService, 
   removeService,
-  fetchAllServices 
+  fetchAllServices,
+  addInitialServices
 } from '@/utils/pricing';
-import { addInitialServices } from '@/utils/pricing/serviceInitializer';
-import { supabase } from '@/integrations/supabase/client';
 import { useAdmin } from '@/hooks/useAdminContext';
 
 export const usePricingServices = () => {

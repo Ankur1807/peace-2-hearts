@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { formatPrice } from '@/utils/pricing/priceFormatter';
+import { formatPrice } from '@/utils/pricing';
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import { AlertCircle } from 'lucide-react';
 import { getConsultationTypeLabel } from '@/utils/consultationLabels';

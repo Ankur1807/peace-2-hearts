@@ -1,23 +1,37 @@
 
-// Re-export from individual modules with descriptive naming
-export * from './services/priceManager';
-export * from './services/serviceManager';
-export * from './packages/packageManager';
-
-// Export service commands with clear naming
+// Re-export from core module
 export {
-  updatePackagePrice,
-  syncPackageIds,
+  clearPricingCache,
+  formatPrice
+} from './core/pricingService';
+
+// Re-export from services module
+export {
   updateServicePrice,
   toggleServiceActive,
   createService,
-  removeService
-} from './serviceCommands';
+  removeService,
+  fetchAllServices,
+  addInitialServices
+} from './services/serviceManager';
 
-// Export service queries with clear naming
+// Re-export from packages module
 export {
-  fetchAllServices
-} from './serviceQueries';
+  updatePackagePrice,
+  syncPackageIds,
+  calculatePackagePrice
+} from './packages/packageManager';
 
-// Export pricing utilities
-export { fetchServicePricing, fetchPackagePricing, clearPricingCache } from './fetchPricing';
+// Re-export fetching utilities
+export {
+  fetchServicePricing,
+  fetchPackagePricing
+} from './fetchPricing';
+
+// Re-export types
+export type {
+  ServicePrice,
+  NewServiceFormValues,
+  DiscountCode,
+  ServiceOption
+} from './types';
