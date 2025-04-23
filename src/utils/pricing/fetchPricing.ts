@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { expandClientToDbIds, expandClientToDbPackageIds } from './serviceIdMapper';
 import { mapServicePricing, mapPackagePricing } from './pricingMapper';
@@ -28,14 +27,6 @@ export async function fetchServicePricing(
   skipCache = false
 ): Promise<Map<string, number>> {
   try {
-    // Special case: if test-service is requested, always include it with hardcoded price
-    // to ensure consistency across components
-    const hasTestService = serviceIds.includes('test-service');
-    if (hasTestService && serviceIds.length === 1) {
-      console.log('Fast path: Returning hardcoded test service price');
-      return new Map([['test-service', 11]]);
-    }
-    
     const cacheKey = `services-${serviceIds.sort().join('-')}`;
     
     // Return cached data if available and not expired
@@ -43,16 +34,6 @@ export async function fetchServicePricing(
       const cached = pricingCache[cacheKey];
       if (Date.now() - cached.timestamp < CACHE_TTL) {
         console.log('Using cached pricing data for services:', serviceIds);
-        
-        // Even with cached data, ensure test service has correct price
-        if (hasTestService && !cached.data.has('test-service')) {
-          const newCache = new Map(cached.data);
-          newCache.set('test-service', 11);
-          pricingCache[cacheKey].data = newCache;
-          console.log('Added test service price to cached data');
-          return newCache;
-        }
-        
         return cached.data;
       }
     }
@@ -73,33 +54,32 @@ export async function fetchServicePricing(
       .eq('type', 'service')
       .eq('is_active', true);
     
-    // Filter by service IDs if provided (excluding test-service as it's handled separately)
-    const nonTestServiceIds = dbIds.filter(id => !id.includes('test-service'));
-    if (nonTestServiceIds.length > 0) {
-      query = query.in('service_id', nonTestServiceIds);
+    // Special handling for test-service
+    const hasTestService = serviceIds.includes('test-service');
+    
+    // If only the test service is requested, look specifically for test services
+    if (hasTestService && serviceIds.length === 1) {
+      console.log('Specifically querying for test service');
+      query = query.or(`service_id.ilike.%test%,service_id.ilike.%trial%`);
+    } 
+    // Otherwise filter by the provided service IDs
+    else if (dbIds.length > 0) {
+      // Filter those that aren't test-service
+      const nonTestServiceIds = dbIds.filter(id => !id.toLowerCase().includes('test'));
+      if (nonTestServiceIds.length > 0) {
+        query = query.in('service_id', nonTestServiceIds);
+      }
     }
     
     const { data, error } = await query;
     
     if (error) {
       console.error('Error fetching service pricing:', error);
-      if (hasTestService) {
-        console.log('Returning hardcoded test service price due to error');
-        return new Map([['test-service', 11]]);
-      }
       throw error;
     }
     
     // Create the pricing map from database data
     const pricingMap = mapServicePricing(data || [], serviceIds);
-    
-    // Ensure test service has a price if it was requested
-    if (hasTestService && !pricingMap.has('test-service')) {
-      console.log('Setting hardcoded test service price: 11');
-      pricingMap.set('test-service', 11);
-    }
-    
-    console.log('Final pricing map:', Object.fromEntries(pricingMap));
     
     // Cache the result
     pricingCache[cacheKey] = {
@@ -107,17 +87,21 @@ export async function fetchServicePricing(
       timestamp: Date.now()
     };
     
+    console.log('Final pricing map:', Object.fromEntries(pricingMap));
     return pricingMap;
   } catch (error) {
     console.error('Failed to fetch service pricing:', error);
     
-    // Still handle test-service in case of API errors
+    // Create a pricing map with available data
+    const pricingMap = new Map<string, number>();
+    
+    // If test-service was requested, ensure it has a price
     if (serviceIds.includes('test-service')) {
-      console.log('Setting fixed price for test service due to API error');
-      return new Map([['test-service', 11]]);
+      console.log('Setting default price for test service due to API error');
+      pricingMap.set('test-service', 11);
     }
     
-    return new Map<string, number>();
+    return pricingMap;
   }
 }
 

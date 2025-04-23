@@ -35,7 +35,16 @@ export function useRazorpayPayment({
       return state.totalPrice;
     }
     
-    // First check if we have a direct service price
+    // First check if test-service is selected
+    if (state.selectedServices.includes('test-service') && state.pricing.has('test-service')) {
+      const testServicePrice = state.pricing.get('test-service');
+      if (testServicePrice && testServicePrice > 0) {
+        console.log(`Using test service price from pricing map: ${testServicePrice}`);
+        return testServicePrice;
+      }
+    }
+    
+    // Check if we have a direct service price
     if (state.selectedServices.length === 1) {
       const serviceId = state.selectedServices[0];
       

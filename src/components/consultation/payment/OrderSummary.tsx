@@ -18,7 +18,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   selectedServices = [],
   pricing
 }) => {
-  // Check if we have the test service selected - this is our highest priority
+  // Check if we have the test service selected
   const isTestService = selectedServices.includes('test-service');
   
   // For holistic packages
@@ -30,28 +30,23 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     : packageName === "Pre-Marriage Clarity Package" ? 'pre-marriage-clarity' : null;
   
   // Get service price if it's a single service (not a package)
-  const singleServiceId = selectedServices.length === 1 && !isTestService ? selectedServices[0] : null;
+  const singleServiceId = selectedServices.length === 1 ? selectedServices[0] : null;
   const singleServicePrice = singleServiceId && pricing && pricing.has(singleServiceId) 
     ? pricing.get(singleServiceId) 
     : null;
   
   // Determine the price to display based on priority:
-  // 1. Test service (always 11)
-  // 2. Package price 
-  // 3. Single service price
-  // 4. Total price (fallback)
+  // 1. Direct service price from pricing map (including test service)
+  // 2. Package price from pricing map
+  // 3. Total price (fallback)
   let displayPrice = totalPrice;
   
-  // Handle test service price specifically - always set to 11 if test service is selected
-  if (isTestService) {
-    displayPrice = 11; // Fixed price for test service
-    console.log('OrderSummary: Using hardcoded test service price: 11');
+  if (singleServiceId && pricing && pricing.has(singleServiceId)) {
+    displayPrice = pricing.get(singleServiceId)!;
+    console.log(`OrderSummary: Using price for ${singleServiceId}: ${displayPrice}`);
   } else if (packageId && pricing && pricing.has(packageId)) {
     displayPrice = pricing.get(packageId)!;
     console.log('OrderSummary: Using package price:', displayPrice);
-  } else if (singleServicePrice !== null) {
-    displayPrice = singleServicePrice;
-    console.log('OrderSummary: Using single service price:', displayPrice);
   }
   
   // Get the appropriate label - package name, service name, or generic label
