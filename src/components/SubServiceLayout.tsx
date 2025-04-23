@@ -47,7 +47,7 @@ const SubServiceLayout = ({
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to={`/services/${serviceType}`}>{serviceTypeLabel}</BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={`/services/${serviceType}`}>{serviceTypeLabel}</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -137,4 +137,3 @@ const SubServiceLayout = ({
 };
 
 export default SubServiceLayout;
-
