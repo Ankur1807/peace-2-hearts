@@ -36,16 +36,22 @@ export const useOpenRazorpayCheckout = ({
             orderId: response.razorpay_order_id,
             signature: response.razorpay_signature,
           });
+          
           if (!isVerified) throw new Error("Payment verification failed");
+          
           const paymentParams: SavePaymentParams = {
             paymentId: response.razorpay_payment_id,
             orderId: response.razorpay_order_id,
             amount: effectivePrice,
             consultationId: receiptId,
           };
-          await savePaymentDetails(paymentParams);
+          
+          const saveResult = await savePaymentDetails(paymentParams);
+          console.log("Payment save result:", saveResult);
+          
           if (setPaymentCompleted) setPaymentCompleted(true);
           if (handleConfirmBooking) await handleConfirmBooking();
+          
           toast({
             title: "Payment Successful",
             description: "Your payment has been processed successfully.",
