@@ -10,7 +10,7 @@ import ComplexMandalaPattern from './mandala/ComplexMandalaPattern';
 import LotusMandalaPattern from './mandala/LotusMandalaPattern';
 
 interface MandalaButtonProps extends Omit<ButtonProps, 'variant'> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'cta';
+  variant?: 'primary' | 'secondary' | 'outline' | 'cta' | 'teal';
   children: React.ReactNode;
   asChild?: boolean;
   mandalaType?: 'simple' | 'complex' | 'lotus';
@@ -42,13 +42,21 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
     const buttonVariant = 
       variant === 'primary' ? 'default' : 
       variant === 'secondary' ? 'secondary' : 
-      variant === 'cta' ? 'cta' : 'outline';
+      variant === 'cta' ? 'cta' :
+      variant === 'teal' ? 'teal' : 'outline';
+
+    // Use teal gradient if variant='teal'; otherwise use original
+    const tealClasses = "bg-gradient-to-r from-teal-400 to-teal-600 text-white shadow-md hover:from-teal-500 hover:to-teal-700 border-none";
     
     const baseClasses = cn(
-      "relative font-bold text-xl rounded-full flex justify-center items-center overflow-hidden z-0", // Increased from text-lg to text-xl
+      "relative font-bold rounded-full flex justify-center items-center overflow-hidden z-0",
+      // Increase base font size by 4 points (~1rem = 16px, so text-2xl is 24px, which is +4px from text-xl)
+      "text-[2rem]",   // 2rem = 32px, so ~4pt larger than before (typically 1pt=1.33px)
       "transition-all duration-300 transform hover:-translate-y-0.5",
       isMobile ? "w-full px-6 py-4" : "px-8 py-4",
-      variant === 'primary' || variant === 'cta'
+      variant === 'teal'
+        ? tealClasses
+        : variant === 'primary' || variant === 'cta'
         ? "bg-gradient-to-r from-[#9b87f5] to-[#8B5CF6] text-white hover:shadow-lg shadow-md hover:from-[#a792fa] hover:to-[#b389f4] border-none"
         : variant === 'secondary'
         ? "bg-gradient-to-r from-[#36bcf6] to-[#7fe6c0] text-white hover:shadow-lg shadow-md border-none"
@@ -79,7 +87,7 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
             asChild
             {...props}
           >
-            <Link to={href} className="w-full text-center flex items-center justify-center font-bold text-xl" onClick={onClick}>
+            <Link to={href} className="w-full text-center flex items-center justify-center font-bold text-[2rem]" onClick={onClick}>
               {children}
             </Link>
           </Button>
@@ -102,7 +110,7 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
           asChild={asChild}
           {...props}
         >
-          <div className="flex items-center justify-center w-full text-center font-bold text-xl">{children}</div>
+          <div className="flex items-center justify-center w-full text-center font-bold text-[2rem]">{children}</div>
         </Button>
       </div>
     );

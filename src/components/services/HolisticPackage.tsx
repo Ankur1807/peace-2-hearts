@@ -47,11 +47,11 @@ const HolisticPackage: React.FC<HolisticPackageProps> = ({
       
       <Link to={linkPath} className="block w-full mt-2">
         <MandalaButton
-          variant="primary"
+          variant="teal"
           mandalaType="simple"
-          className="w-full py-5 text-xl font-bold"
+          className="w-full py-6 text-[2rem] font-bold"
         >
-          {linkText}
+          Learn More
         </MandalaButton>
       </Link>
     </div>
@@ -59,3 +59,4 @@ const HolisticPackage: React.FC<HolisticPackageProps> = ({
 };
 
 export default HolisticPackage;
+
