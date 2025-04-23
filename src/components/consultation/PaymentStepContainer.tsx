@@ -1,6 +1,7 @@
 
 import React from 'react';
 import PaymentStep from './payment/PaymentStep';
+import { useEffectivePrice } from '@/hooks/consultation/payment/useEffectivePrice';
 
 interface PaymentStepContainerProps {
   consultationType: string;
@@ -22,19 +23,40 @@ const PaymentStepContainer: React.FC<PaymentStepContainerProps> = ({
   isProcessing,
   totalPrice,
   pricing
-}) => (
-  <form onSubmit={handlePaymentSubmit} className="space-y-6">
-    <PaymentStep 
-      consultationType={consultationType}
-      selectedServices={selectedServices}
-      onNextStep={processPayment}
-      onPrevStep={() => setShowPaymentStep(false)}
-      onSubmit={handlePaymentSubmit}
-      isProcessing={isProcessing}
-      totalPrice={totalPrice}
-      pricing={pricing}
-    />
-  </form>
-);
+}) => {
+  // Get and calculate the effective price
+  const getEffectivePrice = useEffectivePrice({
+    selectedServices,
+    pricing,
+    totalPrice
+  });
+  
+  const effectivePrice = getEffectivePrice();
+  
+  React.useEffect(() => {
+    console.log("PaymentStepContainer - Rendering with:", {
+      consultationType,
+      selectedServices: selectedServices.join(','),
+      totalPrice,
+      effectivePrice,
+      hasPricing: !!pricing
+    });
+  }, [consultationType, selectedServices, totalPrice, effectivePrice, pricing]);
+  
+  return (
+    <form onSubmit={handlePaymentSubmit} className="space-y-6">
+      <PaymentStep 
+        consultationType={consultationType}
+        selectedServices={selectedServices}
+        onNextStep={processPayment}
+        onPrevStep={() => setShowPaymentStep(false)}
+        onSubmit={handlePaymentSubmit}
+        isProcessing={isProcessing}
+        totalPrice={effectivePrice > 0 ? effectivePrice : totalPrice} 
+        pricing={pricing}
+      />
+    </form>
+  );
+};
 
 export default PaymentStepContainer;

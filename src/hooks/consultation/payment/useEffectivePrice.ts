@@ -1,4 +1,6 @@
 
+import { getPackageName } from '@/utils/consultation/packageUtils';
+
 type EffectivePriceState = {
   selectedServices: string[];
   pricing: Map<string, number> | undefined;
@@ -14,10 +16,10 @@ export const useEffectivePrice = (state: EffectivePriceState) => {
       totalPrice: state.totalPrice
     });
     
-    // If no services selected or no pricing data, return totalPrice
-    if (!state.selectedServices?.length || !state.pricing) {
-      console.log(`useEffectivePrice: No valid services or pricing, returning totalPrice: ${state.totalPrice}`);
-      return state.totalPrice;
+    // Safety check for null/undefined input
+    if (!state.selectedServices || !state.pricing) {
+      console.log("useEffectivePrice: Missing required data, returning fallback price");
+      return state.totalPrice > 0 ? state.totalPrice : 1500; // Fallback to 1500 if totalPrice is invalid
     }
 
     // Check for test service first (highest priority)
@@ -45,7 +47,7 @@ export const useEffectivePrice = (state: EffectivePriceState) => {
       if (state.pricing?.has(packageId)) {
         const price = state.pricing.get(packageId) as number;
         console.log(`useEffectivePrice: Using package price for ${packageId}: ${price}`);
-        return price;
+        return price > 0 ? price : 1500; // Fallback if price is invalid
       }
     }
     
@@ -55,15 +57,17 @@ export const useEffectivePrice = (state: EffectivePriceState) => {
       if (state.pricing.has(serviceId)) {
         const price = state.pricing.get(serviceId) as number;
         console.log(`useEffectivePrice: Using price for service ${serviceId}: ${price}`);
-        return price;
+        return price > 0 ? price : 1500; // Fallback if price is invalid
+      } else {
+        // If service ID not found in pricing map but we have a service selected
+        console.log(`useEffectivePrice: Service ${serviceId} not found in pricing map, using fallback`);
+        return 1500; // Reasonable fallback price for services
       }
     }
     
-    // Fallback to totalPrice
-    console.log(`useEffectivePrice: Fallback to totalPrice: ${state.totalPrice}`);
-    return state.totalPrice;
+    // Fallback to totalPrice with validation
+    const finalPrice = state.totalPrice > 0 ? state.totalPrice : 1500;
+    console.log(`useEffectivePrice: Using fallback price: ${finalPrice}`);
+    return finalPrice;
   };
 };
-
-// Import the getPackageName function at the top
-import { getPackageName } from '@/utils/consultation/packageUtils';

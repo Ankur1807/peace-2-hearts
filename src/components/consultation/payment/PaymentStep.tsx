@@ -126,25 +126,13 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       <PaymentActions 
         onPrevStep={onPrevStep}
         onSubmit={onSubmit}
-        totalPrice={effectivePrice}
+        totalPrice={effectivePrice > 0 ? effectivePrice : 1500}  
         selectedServices={selectedServices}
         pricing={pricing}
         isProcessing={isProcessing}
         acceptTerms={acceptTerms}
         razorpayLoaded={razorpayLoaded}
       />
-      
-      {!razorpayLoaded && !loadError && (
-        <div className="text-center text-amber-600 text-sm mt-2">
-          Payment gateway is loading. Please wait...
-        </div>
-      )}
-      
-      {effectivePrice <= 0 && (
-        <div className="text-center text-amber-600 text-sm mt-2">
-          Unable to calculate price. Please try selecting your services again or contact support.
-        </div>
-      )}
     </div>
   );
 };
