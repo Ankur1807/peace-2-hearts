@@ -10,15 +10,15 @@ const CTASection = () => {
           <p className="text-lg mb-8 text-white/90">Legal or emotional, we'll walk you through it—gently, honestly, and at your pace.</p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <MandalaButton
-              variant="primary"
-              mandalaType="simple"
+              variant="cta"
+              mandalaType="lotus"
               href="/book-consultation"
               className="text-lg"
             >
               Get Support Now
             </MandalaButton>
             <MandalaButton
-              variant="primary"
+              variant="secondary"
               mandalaType="simple"
               href="/contact"
               className="text-lg"
@@ -33,4 +33,3 @@ const CTASection = () => {
 };
 
 export default CTASection;
-

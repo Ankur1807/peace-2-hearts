@@ -13,8 +13,8 @@ const ConsultationCTA: React.FC = () => {
           </p>
           <div className="w-full sm:w-auto">
             <MandalaButton
-              variant="primary"
-              mandalaType="simple"
+              variant="cta"
+              mandalaType="lotus"
               href="/book-consultation"
               className="text-lg"
             >
