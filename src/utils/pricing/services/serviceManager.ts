@@ -88,7 +88,8 @@ export async function createService(serviceData: NewServiceFormValues): Promise<
     }
     
     // Format service_id based on category if not provided
-    if (!serviceData.service_id && serviceData.service_name && serviceData.category) {
+    let serviceId = serviceData.service_id;
+    if (!serviceId && serviceData.service_name && serviceData.category) {
       // Create a service ID formatted like P2H-MH-service-name or P2H-L-service-name
       const prefix = serviceData.category === 'mental-health' ? 'P2H-MH-' : 
                     serviceData.category === 'legal' ? 'P2H-L-' : 
@@ -100,19 +101,28 @@ export async function createService(serviceData: NewServiceFormValues): Promise<
         .replace(/[^\w\s-]/g, '')
         .replace(/\s+/g, '-');
       
-      serviceData.service_id = `${prefix}${slug}`;
+      serviceId = `${prefix}${slug}`;
     }
 
     // Add required fields to ensure type compatibility
     const serviceToInsert = {
-      ...serviceData,
+      service_id: serviceId!, // Now guaranteed to be non-null
+      service_name: serviceData.service_name,
+      price: serviceData.price,
+      category: serviceData.category,
+      description: serviceData.description,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      type: serviceData.type || 'service',
+      type: serviceData.type || 'service', 
       currency: serviceData.currency || 'INR',
       is_active: serviceData.is_active !== undefined ? serviceData.is_active : true,
       scenario: 'regular' // Add scenario since it's required
     };
+
+    // Validate that required fields are present
+    if (!serviceToInsert.service_id || !serviceToInsert.service_name || !serviceToInsert.category) {
+      throw new Error("Missing required fields: service_id, service_name, and category are required");
+    }
 
     const { error } = await supabase
       .from('service_pricing')
