@@ -31,11 +31,19 @@ export function usePackagePricing() {
       if (error) throw error;
 
       console.log('Fetched packages:', data);
-      setPackages(data || []);
+      
+      // Convert database response to ServicePrice array
+      const typedPackages: ServicePrice[] = data?.map(pkg => ({
+        ...pkg,
+        type: pkg.type as 'service' | 'package',
+        scenario: pkg.scenario || 'regular'
+      })) || [];
+      
+      setPackages(typedPackages);
 
       // Check if any packages need syncing (have different prices for same name)
       const packagesMap = new Map();
-      data?.forEach(pkg => {
+      typedPackages.forEach(pkg => {
         if (!packagesMap.has(pkg.service_name)) {
           packagesMap.set(pkg.service_name, [pkg.price]);
         } else {
@@ -56,7 +64,7 @@ export function usePackagePricing() {
     } finally {
       setLoading(false);
     }
-  }, [isAdmin]);
+  }, [isAdmin, toast]);
 
   useEffect(() => {
     fetchPackages();

@@ -7,7 +7,7 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import ServiceList from './ServiceList';
 import AddServiceForm from './AddServiceForm';
 import { usePricingServices } from '@/hooks/usePricingServices';
-import { NewServiceFormValues } from './AddServiceForm';
+import { NewServiceFormValues, ServicePrice } from '@/utils/pricing/types';
 import { useAdmin } from '@/hooks/useAdminContext';
 
 const ServicePricing = () => {
@@ -32,7 +32,7 @@ const ServicePricing = () => {
     if (isAdmin) {
       fetchServices();
     }
-  }, [isAdmin]);
+  }, [isAdmin, fetchServices]);
 
   const onSubmitNewService = async (data: NewServiceFormValues) => {
     const success = await addNewService(data);

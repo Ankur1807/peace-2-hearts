@@ -103,16 +103,20 @@ export async function createService(serviceData: NewServiceFormValues): Promise<
       serviceData.service_id = `${prefix}${slug}`;
     }
 
+    // Add required fields to ensure type compatibility
+    const serviceToInsert = {
+      ...serviceData,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      type: serviceData.type || 'service',
+      currency: serviceData.currency || 'INR',
+      is_active: serviceData.is_active !== undefined ? serviceData.is_active : true,
+      scenario: 'regular' // Add scenario since it's required
+    };
+
     const { error } = await supabase
       .from('service_pricing')
-      .insert([{
-        ...serviceData,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        type: serviceData.type || 'service',
-        currency: serviceData.currency || 'INR',
-        is_active: serviceData.is_active !== undefined ? serviceData.is_active : true,
-      }]);
+      .insert([serviceToInsert]);
     
     if (error) {
       console.error('Error creating service:', error);
@@ -173,7 +177,14 @@ export async function fetchAllServices(): Promise<ServicePrice[]> {
       throw error;
     }
     
-    return data || [];
+    // Ensure the returned data conforms to ServicePrice type
+    const typedData: ServicePrice[] = data.map(item => ({
+      ...item,
+      type: item.type as 'service' | 'package', // Ensure the type is correctly cast
+      scenario: item.scenario || 'regular', // Ensure scenario exists
+    }));
+    
+    return typedData;
   } catch (error) {
     console.error('Failed to fetch services:', error);
     throw error;
@@ -206,34 +217,43 @@ export async function addInitialServices(): Promise<boolean> {
       return false;
     }
     
-    // Add initial services
+    // Add initial services with all required fields
     const initialServices = [
       {
         service_id: 'P2H-MH-mental-health-counselling',
         service_name: 'Mental Health Counselling',
         price: 1500,
         category: 'mental-health',
-        type: 'service',
+        type: 'service' as const,
         is_active: true,
         currency: 'INR',
+        scenario: 'regular',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       },
       {
         service_id: 'P2H-MH-family-therapy',
         service_name: 'Family Therapy',
         price: 2000,
         category: 'mental-health',
-        type: 'service',
+        type: 'service' as const,
         is_active: true,
         currency: 'INR',
+        scenario: 'regular',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       },
       {
         service_id: 'P2H-L-general-legal-consultation',
         service_name: 'General Legal Consultation',
         price: 2500,
         category: 'legal',
-        type: 'service',
+        type: 'service' as const,
         is_active: true,
         currency: 'INR',
+        scenario: 'regular',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       },
     ];
     

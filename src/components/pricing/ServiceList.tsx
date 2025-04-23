@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Pencil, Save, X, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { ServicePrice } from '@/utils/pricingTypes';
+import { ServicePrice } from '@/utils/pricing/types';
 import { Switch } from '@/components/ui/switch';
 import { formatPrice } from '@/utils/pricing/priceFormatter';
 

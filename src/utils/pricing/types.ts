@@ -8,7 +8,7 @@ export interface ServicePrice {
   type: 'service' | 'package';
   is_active: boolean;
   currency: string;
-  scenario?: string;
+  scenario: string; // Changed from optional to required to match existing types
   created_at: string;
   updated_at: string;
   description?: string;
