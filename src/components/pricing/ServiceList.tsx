@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pencil, Save, X, Toggle, Trash2 } from 'lucide-react';
+import { Pencil, Save, X, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ServicePrice } from '@/utils/pricingTypes';
 import { Switch } from '@/components/ui/switch';

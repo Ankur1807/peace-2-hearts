@@ -18,8 +18,11 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   selectedServices = [],
   pricing
 }) => {
+  // Check if we have the test service selected
+  const isTestService = selectedServices.includes('test-service');
+  
   // For holistic packages
-  const packageName = selectedServices.length > 0 ? getPackageName(selectedServices) : null;
+  const packageName = selectedServices.length > 0 && !isTestService ? getPackageName(selectedServices) : null;
   
   // Get the appropriate package ID if it's a package
   const packageId = packageName === "Divorce Prevention Package" 
@@ -32,17 +35,23 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     ? pricing.get(singleServiceId) 
     : null;
   
-  // Determine the price to display - priority: package price > single service price > total price
+  // Determine the price to display - priority: test service > package price > single service price > total price
   let displayPrice = totalPrice;
   
-  if (packageId && pricing && pricing.has(packageId)) {
+  if (isTestService && pricing && pricing.has('test-service')) {
+    displayPrice = pricing.get('test-service')!;
+    console.log('Using test service price:', displayPrice);
+  } else if (packageId && pricing && pricing.has(packageId)) {
     displayPrice = pricing.get(packageId)!;
+    console.log('Using package price:', displayPrice);
   } else if (singleServicePrice !== null) {
     displayPrice = singleServicePrice;
+    console.log('Using single service price:', displayPrice);
   }
   
   // Get the appropriate label - package name, service name, or generic label
-  const consultationLabel = packageName || 
+  const consultationLabel = isTestService ? 'Test Service' : 
+                          packageName || 
                           (selectedServices.length > 0 ? getConsultationTypeLabel(selectedServices[0]) : 'Consultation');
 
   // Log for debugging

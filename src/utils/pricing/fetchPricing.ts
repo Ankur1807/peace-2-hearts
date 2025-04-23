@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { expandClientToDbIds, expandClientToDbPackageIds } from './serviceIdMapper';
 import { mapServicePricing, mapPackagePricing } from './pricingMapper';
@@ -48,6 +47,9 @@ export async function fetchServicePricing(
       console.warn('No DB IDs found for client service IDs:', serviceIds);
     }
     
+    // Handle special case for test service before querying database
+    const hasTestService = serviceIds.includes('test-service');
+    
     // Query the database for pricing data
     let query = supabase
       .from('service_pricing')
@@ -55,9 +57,10 @@ export async function fetchServicePricing(
       .eq('type', 'service')
       .eq('is_active', true);
     
-    // Filter by service IDs if provided
-    if (dbIds.length > 0) {
-      query = query.in('service_id', dbIds);
+    // Filter by service IDs if provided (excluding test-service as it's handled separately)
+    const nonTestServiceIds = dbIds.filter(id => !id.includes('test-service'));
+    if (nonTestServiceIds.length > 0) {
+      query = query.in('service_id', nonTestServiceIds);
     }
     
     const { data, error } = await query;
@@ -67,14 +70,16 @@ export async function fetchServicePricing(
       throw error;
     }
     
-    if (!data || data.length === 0) {
-      console.log('No pricing data found for services:', serviceIds);
-      return new Map<string, number>();
+    // Create the pricing map from database data
+    const pricingMap = mapServicePricing(data || [], serviceIds);
+    
+    // Ensure test service has a price if it was requested
+    if (hasTestService && !pricingMap.has('test-service')) {
+      console.log('Setting fixed price for test service after fetching');
+      pricingMap.set('test-service', 11);
     }
     
-    console.log('Received pricing data from API:', data);
-    
-    const pricingMap = mapServicePricing(data, serviceIds);
+    console.log('Final pricing map:', Object.fromEntries(pricingMap));
     
     // Cache the result
     pricingCache[cacheKey] = {
@@ -85,6 +90,13 @@ export async function fetchServicePricing(
     return pricingMap;
   } catch (error) {
     console.error('Failed to fetch service pricing:', error);
+    
+    // Still handle test-service in case of API errors
+    if (serviceIds.includes('test-service')) {
+      console.log('Setting fixed price for test service due to API error');
+      return new Map([['test-service', 11]]);
+    }
+    
     return new Map<string, number>();
   }
 }
