@@ -27,36 +27,37 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   linkText 
 }) => {
   return (
-    <div className="service-card">
-      <div className="mb-6">
-        <div className="p-3 rounded-full bg-peacefulBlue/10 inline-block mb-4">
-          <Icon className="h-8 w-8 text-peacefulBlue" />
-        </div>
-        <h2 className="text-3xl font-lora font-semibold text-gray-800">{title}</h2>
-      </div>
-      <p className="text-gray-600 mb-6">{description}</p>
-      
-      <div className="space-y-6 mb-8">
-        {options.map((option, index) => (
-          <div key={index}>
-            <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">{option.title}</h3>
-            <p className="text-gray-600">{option.description}</p>
+    <div className="service-card bg-white rounded-xl shadow-md border border-gray-100 flex flex-col h-full min-h-[550px] p-8">
+      <div>
+        <div className="mb-6 flex items-center">
+          <div className="p-3 rounded-full bg-peacefulBlue/10 mr-4">
+            <Icon className="h-8 w-8 text-peacefulBlue" />
           </div>
-        ))}
+          <h2 className="text-3xl font-lora font-semibold text-gray-800">{title}</h2>
+        </div>
+        <p className="text-gray-600 mb-6">{description}</p>
+        <div className="space-y-6 mb-8">
+          {options.map((option, index) => (
+            <div key={index}>
+              <h3 className="text-xl font-lora font-medium text-gray-800 mb-2">{option.title}</h3>
+              <p className="text-gray-600">{option.description}</p>
+            </div>
+          ))}
+        </div>
       </div>
-      
-      <Link to={linkPath} className="block w-full mt-4">
-        <MandalaButton
-          variant="primary"
-          mandalaType="simple"
-          className="w-full py-5 text-xl font-bold"
-        >
-          {linkText}
-        </MandalaButton>
-      </Link>
+      <div className="mt-auto flex items-end">
+        <Link to={linkPath} className="block w-full mt-2">
+          <MandalaButton
+            variant="primary"
+            mandalaType="simple"
+            className="w-full py-5 text-xl font-bold"
+          >
+            {linkText}
+          </MandalaButton>
+        </Link>
+      </div>
     </div>
   );
 };
 
 export default ServiceCard;
-
