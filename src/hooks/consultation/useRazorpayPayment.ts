@@ -1,4 +1,6 @@
 
+// Reorganized to delegate detailed logic to dedicated hooks
+
 import { useEffectivePrice } from './payment/useEffectivePrice';
 import { useInitializeRazorpayPayment } from './payment/useInitializeRazorpayPayment';
 import { useOpenRazorpayCheckout } from './payment/useOpenRazorpayCheckout';
@@ -49,3 +51,4 @@ export function useRazorpayPayment({
     openRazorpayCheckout,
   };
 }
+
