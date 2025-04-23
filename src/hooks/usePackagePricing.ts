@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ServicePrice } from '@/utils/pricingTypes';
@@ -157,8 +157,8 @@ export const usePackagePricing = () => {
     try {
       setUpdating(true);
       
-      await syncPackageIds('Divorce Prevention Package', 'divorce-prevention', 8500);
-      await syncPackageIds('Pre-Marriage Clarity Package', 'pre-marriage-clarity', 7500);
+      await cmdSyncPackageIds('Divorce Prevention Package', 'divorce-prevention', 8500);
+      await cmdSyncPackageIds('Pre-Marriage Clarity Package', 'pre-marriage-clarity', 7500);
       
       toast({
         title: 'Packages Synchronized',
