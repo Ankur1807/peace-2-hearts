@@ -58,7 +58,7 @@ const ServicesOverview: React.FC = () => {
         description="Our mental health services provide emotional support and guidance to individuals and couples navigating relationship challenges, whether you're working to strengthen your relationship or heal from a breakup."
         options={mentalHealthOptions}
         linkPath="/services/mental-health"
-        linkText="Learn More About Mental Health Services"
+        linkText="Learn More"
       />
       
       <ServiceCard
@@ -67,7 +67,7 @@ const ServicesOverview: React.FC = () => {
         description="Our legal experts provide guidance on all aspects of relationship law, helping you understand your rights and navigate legal processes with confidence."
         options={legalOptions}
         linkPath="/services/legal-support"
-        linkText="Learn More About Legal Services"
+        linkText="Learn More"
       />
     </div>
   );

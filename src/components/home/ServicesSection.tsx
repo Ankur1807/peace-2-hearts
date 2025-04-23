@@ -45,7 +45,7 @@ const ServicesSection = () => {
             </ul>
             <Button asChild variant="link" className="text-vibrantPurple hover:text-vibrantPurple/90 p-0 gap-1 font-medium">
               <Link to="/services/mental-health">
-                Explore Mental Health Support <ArrowRight className="h-4 w-4" />
+                Learn More <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -82,7 +82,7 @@ const ServicesSection = () => {
             </ul>
             <Button asChild variant="link" className="text-peacefulBlue hover:text-peacefulBlue/90 p-0 gap-1 font-medium">
               <Link to="/services/legal-support">
-                Explore Legal Help <ArrowRight className="h-4 w-4" />
+                Learn More <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>
