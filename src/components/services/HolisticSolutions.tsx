@@ -12,10 +12,21 @@ const HolisticSolutions: React.FC = () => {
     const loadPackagePrices = async () => {
       try {
         setIsLoading(true);
+        console.log("HolisticSolutions - Loading package prices for holistic packages");
+        
         const packageIds = ['divorce-prevention', 'pre-marriage-clarity'];
-        const pricingMap = await fetchPackagePricing(packageIds);
+        console.log("HolisticSolutions - Package IDs to fetch:", packageIds);
+        
+        // Skip cache to get fresh data
+        const pricingMap = await fetchPackagePricing(packageIds, true);
         setPackagePrices(pricingMap);
-        console.log('Holistic packages pricing loaded:', Object.fromEntries(pricingMap));
+        
+        console.log('HolisticSolutions - Loaded package pricing:', Object.fromEntries(pricingMap));
+        
+        // Debug - check if we have prices for each package
+        packageIds.forEach(id => {
+          console.log(`Package ${id} price:`, pricingMap.get(id));
+        });
       } catch (error) {
         console.error('Failed to load package prices:', error);
       } finally {

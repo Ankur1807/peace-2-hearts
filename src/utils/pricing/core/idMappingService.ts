@@ -42,6 +42,7 @@ export function expandClientToDbIds(clientIds: string[]): string[] {
 }
 
 export function expandClientToDbPackageIds(packageIds: string[]): string[] {
+  // This is the critical mapping for packages
   const packageToDbMap: Record<string, string[]> = {
     'divorce-prevention': ['P2H-H-divorce-prevention-package'],
     'pre-marriage-clarity': ['P2H-H-pre-marriage-clarity-solutions']
@@ -52,10 +53,10 @@ export function expandClientToDbPackageIds(packageIds: string[]): string[] {
     if (packageToDbMap[id]) {
       expandedIds.push(...packageToDbMap[id]);
     } else {
-      expandedIds.push(id);
+      expandedIds.push(id); // Keep the original ID if no mapping exists
     }
   });
   
+  console.log(`Expanded package IDs: ${packageIds} → ${expandedIds}`);
   return expandedIds;
 }
-

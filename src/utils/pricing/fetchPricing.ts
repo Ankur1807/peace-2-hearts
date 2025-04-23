@@ -12,6 +12,9 @@ import {
   fetchServicePricingData, 
   fetchPackagePricingData 
 } from './core/pricingFetchService';
+import {
+  expandClientToDbPackageIds
+} from './core/idMappingService';
 export { 
   clearPricingCache, 
   formatPrice 
@@ -62,6 +65,11 @@ export async function fetchPackagePricing(
 ): Promise<Map<string, number>> {
   console.log('fetchPackagePricing called with:', { packageIds, skipCache });
   
+  if (!packageIds || packageIds.length === 0) {
+    console.log('No package IDs provided, returning empty map');
+    return new Map<string, number>();
+  }
+  
   const cacheKey = `packages-${packageIds.sort().join('-')}`;
   if (!skipCache) {
     const cached = getPricingCache(cacheKey);
@@ -71,13 +79,22 @@ export async function fetchPackagePricing(
     }
   }
   
-  const data = await fetchPackagePricingData(packageIds);
-  console.log('Raw package pricing data from DB:', data);
-  
-  const pricingMap = mapPackagePricing(data, packageIds);
-  console.log('Mapped package pricing:', Object.fromEntries(pricingMap));
-  
-  setPricingCache(cacheKey, pricingMap);
-  return pricingMap;
+  try {
+    // Expand the client IDs to DB IDs before fetching
+    const expandedIds = expandClientToDbPackageIds(packageIds);
+    console.log('Expanded package IDs:', expandedIds);
+    
+    const data = await fetchPackagePricingData(packageIds);
+    console.log('Raw package pricing data from DB:', data);
+    
+    const pricingMap = mapPackagePricing(data, packageIds);
+    console.log('Mapped package pricing:', Object.fromEntries(pricingMap));
+    
+    setPricingCache(cacheKey, pricingMap);
+    return pricingMap;
+  } catch (error) {
+    console.error('Error in fetchPackagePricing:', error);
+    // Return empty map on error
+    return new Map<string, number>();
+  }
 }
-

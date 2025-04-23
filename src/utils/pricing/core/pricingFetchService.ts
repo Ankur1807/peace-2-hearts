@@ -33,24 +33,30 @@ export async function fetchPackagePricingData(packageIds?: string[]) {
   console.log('Fetching package pricing from DB for:', packageIds);
   
   if (!packageIds || packageIds.length === 0) {
+    console.log('No package IDs provided, returning empty array');
     return [];
   }
   
   const expandedIds = expandClientToDbPackageIds(packageIds);
   console.log('Expanded package IDs for DB query:', expandedIds);
   
-  const { data, error } = await supabase
-    .from('service_pricing')
-    .select('service_id, price, is_active, description')
-    .eq('type', 'package')
-    .in('service_id', expandedIds)
-    .eq('is_active', true);
-  
-  if (error) {
-    console.error('Error fetching package pricing:', error);
-    throw error;
+  try {
+    const { data, error } = await supabase
+      .from('service_pricing')
+      .select('service_id, price, is_active, description')
+      .eq('type', 'package')
+      .in('service_id', expandedIds)
+      .eq('is_active', true);
+    
+    if (error) {
+      console.error('Error fetching package pricing:', error);
+      throw error;
+    }
+    
+    console.log('Retrieved package pricing data:', data);
+    return data || [];
+  } catch (err) {
+    console.error('Exception in fetchPackagePricingData:', err);
+    throw err;
   }
-  
-  console.log('Retrieved package pricing data:', data);
-  return data || [];
 }

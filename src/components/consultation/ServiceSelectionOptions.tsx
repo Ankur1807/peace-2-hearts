@@ -66,7 +66,11 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
   // For debugging
   React.useEffect(() => {
     if (serviceCategory === 'holistic') {
-      console.log('Holistic packages pricing data:', pricing ? Object.fromEntries(pricing) : 'No pricing data');
+      console.log('ServiceSelectionOptions - Holistic packages pricing data:', pricing ? Object.fromEntries(pricing) : 'No pricing data');
+      if (pricing) {
+        console.log('Divorce Prevention Package price:', pricing.get('divorce-prevention'));
+        console.log('Pre-Marriage Clarity Package price:', pricing.get('pre-marriage-clarity'));
+      }
     }
   }, [serviceCategory, pricing]);
 
@@ -83,7 +87,7 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
           {holisticPackages.map(pkg => {
             // Show package price if available
             const price = pricing?.get(pkg.id);
-            console.log(`Package ${pkg.id} price:`, price);
+            console.log(`ServiceSelectionOptions - Package ${pkg.id} price:`, price);
 
             return (
               <div key={pkg.id} className="flex items-start space-x-2">
