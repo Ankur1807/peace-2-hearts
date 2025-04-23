@@ -3,6 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { toggleServiceActive, updateServicePrice, createService, removeService } from '@/utils/pricing';
 import { NewServiceFormValues } from '@/utils/pricing/types';
 import { useAdmin } from '@/hooks/useAdminContext';
+import { handleOperationError } from './pricingErrorHandler';
 
 export const useServiceOperations = () => {
   const { toast } = useToast();

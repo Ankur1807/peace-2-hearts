@@ -6,6 +6,7 @@ import { updatePackagePrice, syncPackageIds } from '@/utils/pricing';
 import { usePackageFetching } from './packages/usePackageFetching';
 import { usePackageSync } from './packages/usePackageSync';
 import { usePackageErrorHandler } from './packages/usePackageErrorHandler';
+import { supabase } from '@/integrations/supabase/client';
 
 export function usePackagePricing() {
   const [updating, setUpdating] = useState(false);
