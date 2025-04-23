@@ -2,8 +2,8 @@
 import React from 'react';
 import { formatPrice } from '@/utils/pricing';
 import { getPackageName } from '@/utils/consultation/packageUtils';
-import { AlertCircle } from 'lucide-react';
 import { getConsultationTypeLabel } from '@/utils/consultationLabels';
+import { AlertCircle } from 'lucide-react';
 
 interface PriceSummaryProps {
   services: string[];
@@ -18,7 +18,6 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
   totalPrice,
   currency = 'INR'
 }) => {
-
   // For holistic packages
   const packageName = services.length > 0 ? getPackageName(services) : null;
   const packageId = packageName === "Divorce Prevention Package" 
@@ -47,7 +46,7 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
 
   return (
     <div className="border rounded-lg p-4 bg-gray-50">
-      <h3 className="font-medium text-lg mb-3">Price Summary</h3>
+      <h3 className="font-medium text-lg mb-3">Price</h3>
       
       {displayPrice === 0 && (
         <div className="mb-3 flex items-center gap-2 bg-amber-50 p-3 rounded-md border border-amber-200">
@@ -75,16 +74,8 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
           </div>
         </div>
       )}
-      
-      <div className="flex justify-between items-center pt-3 font-semibold">
-        <span>Total</span>
-        <span className="text-lg">
-          {displayPrice > 0
-            ? formatPrice(displayPrice, currency)
-            : "Price not available"}
-        </span>
-      </div>
     </div>
   );
 };
+
 export default React.memo(PriceSummary);
