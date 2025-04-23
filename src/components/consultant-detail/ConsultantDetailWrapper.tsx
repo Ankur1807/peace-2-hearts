@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { ConsultantHeader } from "./ConsultantHeader";
 import { ExpertiseTab } from "./ExpertiseTab";
@@ -87,9 +86,6 @@ export function ConsultantDetailWrapper({
         <Card className="overflow-hidden border shadow-sm">
           <div className="p-6 bg-gray-50 border-b">
             <div className="text-center">
-              <p className="text-gray-600 mb-4">
-                This expert may be matched to your case based on your needs. To begin, please book a session through our main service page.
-              </p>
               <div className={isMobile ? "w-full" : "inline-block"}>
                 <FractalButton 
                   asChild 
@@ -97,7 +93,7 @@ export function ConsultantDetailWrapper({
                   className="w-full flex items-center justify-center"
                 >
                   <Link to="/book-consultation" className="w-full text-center">
-                    Book sessions with experts such as {consultant.name || "our consultants"}
+                    Book Your Session
                   </Link>
                 </FractalButton>
               </div>
