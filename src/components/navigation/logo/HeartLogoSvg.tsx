@@ -12,9 +12,9 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
   // Use the same colors as in LogoDrawer
   const { logoColor, peaceSymbolColor, secondaryColor, accentColor, tertiaryColor, shadowColor } = logoColors;
 
-  // --- 9 Star positions, circular layout inside the heart, surrounding peace symbol ---
+  // --- 9 Star positions, adjusted so all stars are inside the heart and around the peace symbol ---
   const starCount = 9;
-  const starRadius = 30;
+  const starRadius = 25; // Reduced radius so all stars are inside the heart, tightly ringed around the peace symbol
   const center = 50;
   const starColors = [
     accentColor, secondaryColor, logoColor, 
@@ -51,6 +51,11 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
     );
   }
 
+  // Precise coordinates for the peace symbol circle so it is tangent (touches) to the heart’s interior at top and bottom.
+  // On inspection, for a 80x80px heart centered at (50,50), a circle of radius ~30 centered at (50, 54) is best fit.
+  // Diagonals should start/stop inside this circle. The vertical branch from (50,22) [the top pointed edge of heart] to (50,54)
+  // Diagonals from (50,54) to (50-17,54+21) and (50+17,54+21), endpoints stay within the circle.
+
   return (
     <svg 
       viewBox="0 0 100 100" 
@@ -76,39 +81,40 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
       {/* 9 stars inside the heart, circular pattern around peace symbol */}
       {starEls}
 
-      {/* Peace symbol circle */}
-      <circle cx="50" cy="50" r="20" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
+      {/* Peace symbol circle fits snugly inside heart, slightly below center for more symmetry */}
+      <circle cx="50" cy="54" r="30" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
       
       {/* Tree branch peace symbol lines with gradients and curves */}
-      {/* Vertical branch */}
+      {/* Vertical branch: from pointed top of heart to center */}
       <path 
-        d="M50,30 C52,40 48,60 50,70" 
+        d="M50,22 L50,54" 
         stroke="url(#branchGradient)" 
         strokeWidth="2.5" 
         strokeLinecap="round"
       />
       
-      {/* Left diagonal branch - connecting to heart edge */}
+      {/* Left diagonal branch - stays inside peace symbol circle */}
       <path 
-        d="M50,50 C45,55 40,58 35,65" 
+        d="M50,54 L33,75" 
         stroke="url(#branchGradient)" 
         strokeWidth="2.5" 
         strokeLinecap="round"
       />
       
-      {/* Right diagonal branch - connecting to heart edge */}
+      {/* Right diagonal branch - stays inside peace symbol circle */}
       <path 
-        d="M50,50 C55,55 60,58 65,65" 
+        d="M50,54 L67,75" 
         stroke="url(#branchGradient)" 
         strokeWidth="2.5" 
         strokeLinecap="round"
       />
       
       {/* Small leaf buds on branches */}
-      <circle cx="51" cy="40" r="0.8" fill="#A3F2BE" />
-      <circle cx="49" cy="55" r="0.8" fill="#A3F2BE" />
-      <circle cx="42" cy="58" r="0.8" fill="#A3F2BE" />
-      <circle cx="58" cy="58" r="0.8" fill="#A3F2BE" />
+      <circle cx="50" cy="41" r="0.8" fill="#A3F2BE" />
+      <circle cx="47" cy="61" r="0.8" fill="#A3F2BE" />
+      <circle cx="53" cy="61" r="0.8" fill="#A3F2BE" />
+      <circle cx="40" cy="70" r="0.8" fill="#A3F2BE" />
+      <circle cx="60" cy="70" r="0.8" fill="#A3F2BE" />
       
       {/* Gradient definitions */}
       <defs>
@@ -119,7 +125,7 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
       </defs>
       
       {/* Central white dot where branches emerge from */}
-      <circle cx="50" cy="50" r="3.5" fill="#FFFFFF" />
+      <circle cx="50" cy="54" r="3.5" fill="#FFFFFF" />
     </svg>
   );
 };
