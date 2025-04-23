@@ -1,5 +1,6 @@
 
 import { verifyRazorpayPayment, savePaymentDetails, SavePaymentParams } from '@/utils/payment/razorpayService';
+import { useNavigate } from 'react-router-dom';
 
 interface OpenRazorpayCheckoutArgs {
   getEffectivePrice: () => number;
@@ -16,9 +17,12 @@ export const useOpenRazorpayCheckout = ({
   state,
   setIsProcessing,
   setPaymentCompleted,
+  setReferenceId,
   handleConfirmBooking,
   toast,
 }: OpenRazorpayCheckoutArgs) => {
+  const navigate = useNavigate();
+  
   return (order: any, razorpayKey: string, receiptId: string) => {
     const effectivePrice = getEffectivePrice();
     const options = {
@@ -37,7 +41,19 @@ export const useOpenRazorpayCheckout = ({
             signature: response.razorpay_signature,
           });
           
-          if (!isVerified) throw new Error("Payment verification failed");
+          if (!isVerified) {
+            console.error("Payment verification failed");
+            
+            // Even if verification fails, redirect with payment ID
+            navigate("/payment-confirmation", {
+              state: {
+                paymentId: response.razorpay_payment_id,
+                orderId: response.razorpay_order_id
+              }
+            });
+            
+            throw new Error("Payment verification failed");
+          }
           
           console.log("Payment verified successfully. Now saving payment details...");
           
@@ -58,6 +74,7 @@ export const useOpenRazorpayCheckout = ({
           }
           
           if (setPaymentCompleted) setPaymentCompleted(true);
+          if (setReferenceId) setReferenceId(receiptId);
           if (handleConfirmBooking) await handleConfirmBooking();
           
           toast({
@@ -68,7 +85,15 @@ export const useOpenRazorpayCheckout = ({
           console.error("Error processing payment confirmation:", error);
           toast({
             title: "Payment Verification Error",
-            description: error instanceof Error ? error.message : "Failed to verify payment",
+            description: "We received your payment but couldn't verify it. Please check the confirmation page for details.",
+          });
+          
+          // Redirect to payment confirmation page with available information
+          navigate("/payment-confirmation", {
+            state: {
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id
+            }
           });
         } finally {
           setIsProcessing(false);
@@ -81,6 +106,7 @@ export const useOpenRazorpayCheckout = ({
       },
       notes: {
         services: state.selectedServices.join(','),
+        consultationId: receiptId,
       },
       theme: {
         color: "#3399cc",
@@ -101,12 +127,25 @@ export const useOpenRazorpayCheckout = ({
       const razorpay = new window.Razorpay(options);
       razorpay.on("payment.failed", function (response: any) {
         console.error("Payment failed:", response.error);
+        
+        // Even if payment fails in Razorpay UI, we will redirect to confirmation
+        // page with payment ID to check if payment was actually successful
+        if (response.error && response.error.metadata && response.error.metadata.payment_id) {
+          navigate("/payment-confirmation", {
+            state: {
+              paymentId: response.error.metadata.payment_id,
+              orderId: order.id
+            }
+          });
+        }
+        
         toast({
           title: "Payment Failed",
           description: response.error.description || "Your payment was not successful. Please try again.",
         });
         setIsProcessing(false);
       });
+      
       console.log("Opening Razorpay payment modal with options:", {
         key: options.key,
         orderId: options.order_id,
@@ -116,6 +155,7 @@ export const useOpenRazorpayCheckout = ({
       razorpay.open();
     } catch (err) {
       console.error("Error initializing Razorpay:", err);
+      setIsProcessing(false);
       throw new Error("Failed to initialize payment gateway");
     }
   };

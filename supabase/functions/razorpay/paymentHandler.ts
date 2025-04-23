@@ -52,8 +52,21 @@ export async function handleVerifyPayment(
     const paymentData = await paymentResponse.json();
     console.log("Payment data retrieved:", JSON.stringify(paymentData));
     
-    // Additional verification if needed
-    // For demo purposes we'll consider it verified if we can fetch the payment
+    // Check if payment is captured or authorized
+    const paymentStatus = paymentData.status;
+    const isPaymentSuccessful = ['captured', 'authorized'].includes(paymentStatus);
+    
+    if (!isPaymentSuccessful) {
+      console.error("Payment is not successful according to Razorpay. Status:", paymentStatus);
+      return new Response(JSON.stringify({
+        success: false,
+        verified: false,
+        error: `Payment not successful. Status: ${paymentStatus}`
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      });
+    }
     
     return new Response(JSON.stringify({
       success: true,
