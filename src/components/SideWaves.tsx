@@ -15,12 +15,12 @@ const SideWaves: React.FC = () => {
         <path 
           d="M0,800 C15,700 -5,600 15,500 C30,400 0,300 15,200 C25,100 5,0 30,0 L0,0 L0,800 Z" 
           fill="url(#leftWaveGradient)" 
-          fillOpacity="0.1"
+          fillOpacity="0.2"
         />
         <path 
           d="M0,800 C20,750 5,650 20,550 C35,450 5,350 20,250 C30,150 10,50 35,0 L0,0 L0,800 Z" 
           fill="url(#leftWaveGradientAlt)" 
-          fillOpacity="0.08"
+          fillOpacity="0.16"
         />
         <defs>
           <linearGradient id="leftWaveGradient" x1="0" y1="0" x2="0" y2="800" gradientUnits="userSpaceOnUse">
@@ -47,12 +47,12 @@ const SideWaves: React.FC = () => {
         <path 
           d="M100,800 C85,700 105,600 85,500 C70,400 100,300 85,200 C75,100 95,0 70,0 L100,0 L100,800 Z" 
           fill="url(#rightWaveGradient)" 
-          fillOpacity="0.1"
+          fillOpacity="0.2"
         />
         <path 
           d="M100,800 C80,750 95,650 80,550 C65,450 95,350 80,250 C70,150 90,50 65,0 L100,0 L100,800 Z" 
           fill="url(#rightWaveGradientAlt)" 
-          fillOpacity="0.08"
+          fillOpacity="0.16"
         />
         <defs>
           <linearGradient id="rightWaveGradient" x1="0" y1="0" x2="0" y2="800" gradientUnits="userSpaceOnUse">
@@ -72,3 +72,4 @@ const SideWaves: React.FC = () => {
 };
 
 export default SideWaves;
+
