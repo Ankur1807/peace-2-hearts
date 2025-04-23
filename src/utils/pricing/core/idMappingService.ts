@@ -20,7 +20,9 @@ const dbToClientIdMap: Record<string, string> = {
   'Maintenance-Consultation': 'maintenance',
   'P2H-L-maintenance-consultation': 'maintenance',
   'General-Legal-Consultation': 'general-legal',
-  'P2H-L-general-legal-consultation': 'general-legal'
+  'P2H-L-general-legal-consultation': 'general-legal',
+  'P2H-H-divorce-prevention-package': 'divorce-prevention',
+  'P2H-H-pre-marriage-clarity-solutions': 'pre-marriage-clarity'
 };
 
 export function mapDbIdToClientId(dbId: string): string {

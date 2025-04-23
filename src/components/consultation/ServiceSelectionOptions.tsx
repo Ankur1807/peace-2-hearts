@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { formatPrice } from '@/utils/pricing/priceFormatter';
+import { formatPrice } from '@/utils/pricing';
 
 interface ServiceOption {
   id: string;
@@ -62,6 +63,13 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
   handlePackageSelection,
   pricing
 }) => {
+  // For debugging
+  React.useEffect(() => {
+    if (serviceCategory === 'holistic') {
+      console.log('Holistic packages pricing data:', pricing ? Object.fromEntries(pricing) : 'No pricing data');
+    }
+  }, [serviceCategory, pricing]);
+
   // For holistic package selection
   if (serviceCategory === 'holistic') {
     return (
@@ -75,6 +83,7 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
           {holisticPackages.map(pkg => {
             // Show package price if available
             const price = pricing?.get(pkg.id);
+            console.log(`Package ${pkg.id} price:`, price);
 
             return (
               <div key={pkg.id} className="flex items-start space-x-2">

@@ -38,6 +38,37 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
       // Return early since we don't need to process packages for test service
       return { pricingMap, finalPrice };
     }
+
+    // Check if selection is a package ID directly
+    if (selectedServices.length === 1 && 
+        (selectedServices[0] === 'divorce-prevention' || 
+         selectedServices[0] === 'pre-marriage-clarity')) {
+      
+      const packageId = selectedServices[0];
+      console.log(`Direct package selection: ${packageId}`);
+      
+      try {
+        // Fetch package pricing
+        const packagePricing = await fetchPackagePricing([packageId]);
+        if (packagePricing.has(packageId)) {
+          finalPrice = packagePricing.get(packageId)!;
+          pricingMap.set(packageId, finalPrice);
+          console.log(`Found direct package price: ${finalPrice} for ${packageId}`);
+        }
+      } catch (err) {
+        console.error(`Error fetching direct package price for ${packageId}:`, err);
+      }
+      
+      // Also get individual service prices for reference
+      try {
+        const individualPrices = await fetchServicePricing();
+        pricingMap = new Map([...pricingMap, ...individualPrices]);
+      } catch (err) {
+        console.error("Error fetching individual service prices:", err);
+      }
+      
+      return { pricingMap, finalPrice };
+    }
     
     // Standard handling for all other services
     // Check if selected services match a package
@@ -47,30 +78,61 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
         packageName === 'Divorce Prevention Package'
           ? 'divorce-prevention'
           : 'pre-marriage-clarity';
-      const packagePricing = await fetchPackagePricing([packageId]);
-      finalPrice = packagePricing.get(packageId) || 0;
-
-      if (finalPrice > 0) {
-        pricingMap.set(packageId, finalPrice);
+          
+      console.log(`Services match package: ${packageName} (${packageId})`);
+      
+      try {
+        // First get all individual prices
         const servicePricing = await fetchServicePricing(selectedServices);
         pricingMap = new Map([...pricingMap, ...servicePricing]);
-      } else {
-        pricingMap = await fetchServicePricing(selectedServices);
-        selectedServices.forEach((serviceId) => {
-          const price = pricingMap.get(serviceId) || 0;
-          finalPrice += price;
-        });
-        if (finalPrice > 0) {
-          finalPrice = Math.round(finalPrice * 0.85);
+        
+        // Then try to get package price
+        const packagePricing = await fetchPackagePricing([packageId]);
+        
+        if (packagePricing.has(packageId)) {
+          // If package has price, use it
+          finalPrice = packagePricing.get(packageId)!;
           pricingMap.set(packageId, finalPrice);
+          console.log(`Using package price: ${finalPrice}`);
+        } else {
+          // Calculate from individual services with discount
+          let sum = 0;
+          selectedServices.forEach((serviceId) => {
+            const price = servicePricing.get(serviceId) || 0;
+            sum += price;
+          });
+          
+          if (sum > 0) {
+            // Apply 15% discount for packages
+            finalPrice = Math.round(sum * 0.85);
+            pricingMap.set(packageId, finalPrice);
+            console.log(`Calculated discounted price: ${finalPrice} (15% off ${sum})`);
+          }
         }
+      } catch (err) {
+        console.error("Error processing package pricing:", err);
+        setPricingError('Error calculating package pricing');
       }
     } else {
-      pricingMap = await fetchServicePricing(selectedServices);
-      selectedServices.forEach((serviceId) => {
-        const price = pricingMap.get(serviceId) || 0;
-        finalPrice += price;
-      });
+      // Regular services
+      try {
+        pricingMap = await fetchServicePricing(selectedServices);
+        
+        if (selectedServices.length === 1) {
+          const serviceId = selectedServices[0];
+          finalPrice = pricingMap.get(serviceId) || 0;
+          console.log(`Single service price for ${serviceId}: ${finalPrice}`);
+        } else {
+          selectedServices.forEach((serviceId) => {
+            const price = pricingMap.get(serviceId) || 0;
+            finalPrice += price;
+          });
+          console.log(`Combined services price: ${finalPrice}`);
+        }
+      } catch (err) {
+        console.error("Error fetching service pricing:", err);
+        setPricingError('Error retrieving service pricing');
+      }
     }
 
     console.log(`Final price calculated: ${finalPrice}, Pricing map:`, Object.fromEntries(pricingMap));

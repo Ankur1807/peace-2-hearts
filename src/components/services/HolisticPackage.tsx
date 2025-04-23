@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MandalaButton } from '@/components/MandalaButton';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Loader2 } from 'lucide-react';
 import SiteCard from "@/components/SiteCard";
 
 interface HolisticPackageProps {
@@ -14,6 +14,8 @@ interface HolisticPackageProps {
   linkText: string;
   iconColor: string;
   dotColor: string;
+  price?: string;
+  isLoading?: boolean;
 }
 
 const HolisticPackage: React.FC<HolisticPackageProps> = ({
@@ -24,16 +26,30 @@ const HolisticPackage: React.FC<HolisticPackageProps> = ({
   linkPath,
   linkText,
   iconColor,
-  dotColor
+  dotColor,
+  price,
+  isLoading = false
 }) => {
   return (
     <SiteCard className="flex flex-col h-full">
       <div>
-        <div className="mb-6 flex items-center">
-          <div className={`p-3 rounded-full ${iconColor} mr-4 flex items-center justify-center`}>
-            <Icon className={`h-7 w-7 ${dotColor}`} />
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center">
+            <div className={`p-3 rounded-full ${iconColor} mr-4 flex items-center justify-center`}>
+              <Icon className={`h-7 w-7 ${dotColor}`} />
+            </div>
+            <h3 className="text-xl font-lora font-semibold text-gray-800">{title}</h3>
           </div>
-          <h3 className="text-xl font-lora font-semibold text-gray-800">{title}</h3>
+          {isLoading ? (
+            <div className="text-gray-400 flex items-center">
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" /> 
+              <span className="text-sm">Loading price</span>
+            </div>
+          ) : price ? (
+            <div className="text-lg font-medium text-peacefulBlue">
+              {price}
+            </div>
+          ) : null}
         </div>
         
         <p className="text-gray-600 mb-4">{description}</p>

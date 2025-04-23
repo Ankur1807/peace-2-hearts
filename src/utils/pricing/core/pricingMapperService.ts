@@ -15,10 +15,13 @@ export function mapServicePricing(
     }
   });
 
+  // Handle test service as a special case
   if (requestedIds.includes('test-service') && !pricingMap.has('test-service')) {
     pricingMap.set('test-service', 11);
   }
 
+  // Debug
+  console.log('mapServicePricing result:', Object.fromEntries(pricingMap));
   return pricingMap;
 }
 
@@ -29,18 +32,17 @@ export function mapPackagePricing(
   const pricingMap = new Map<string, number>();
   
   data.forEach((item) => {
-    if (item.service_id || item.package_id) {
+    if ((item.service_id || item.package_id) && item.price) {
+      // Normalize package ID
       let packageId = item.service_id || item.package_id;
-      
-      if (packageId.includes('divorce-prevention')) {
-        packageId = 'divorce-prevention';
-      } else if (packageId.includes('pre-marriage-clarity')) {
-        packageId = 'pre-marriage-clarity';
-      }
-      
+      packageId = mapDbIdToClientId(packageId);
+
+      console.log(`Mapping package ID: ${packageId} with price ${item.price}`);
       pricingMap.set(packageId, item.price);
     }
   });
   
+  // Debug
+  console.log('mapPackagePricing result:', Object.fromEntries(pricingMap));
   return pricingMap;
 }

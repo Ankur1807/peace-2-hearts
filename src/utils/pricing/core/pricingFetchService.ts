@@ -37,6 +37,7 @@ export async function fetchPackagePricingData(packageIds?: string[]) {
   }
   
   const expandedIds = expandClientToDbPackageIds(packageIds);
+  console.log('Expanded package IDs for DB query:', expandedIds);
   
   const { data, error } = await supabase
     .from('service_pricing')
