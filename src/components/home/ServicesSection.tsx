@@ -1,7 +1,7 @@
-
 import { ArrowRight, HeartPulse, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import SiteCard from "@/components/SiteCard";
 
 const ServicesSection = () => {
   return (
@@ -12,10 +12,10 @@ const ServicesSection = () => {
           <p className="text-gray-600">Helping you find your footing when love feels uncertain, overwhelming, or just plain hard.</p>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="service-card bg-gradient-to-br from-white to-softPink/10">
+        <div className="grid md:grid-cols-2 gap-10">
+          <SiteCard>
             <div className="mb-6 flex items-center">
-              <div className="p-4 rounded-full bg-vibrantPurple/15 mr-4">
+              <div className="p-4 rounded-full bg-vibrantPurple/15 mr-4 flex items-center justify-center">
                 <HeartPulse className="h-10 w-10 text-vibrantPurple" />
               </div>
               <h3 className="text-2xl font-lora font-semibold text-gray-800">Relationship Therapy & Support</h3>
@@ -48,11 +48,11 @@ const ServicesSection = () => {
                 Learn More <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-          </div>
+          </SiteCard>
           
-          <div className="service-card bg-gradient-to-br from-white to-peacefulBlue/10">
+          <SiteCard className="bg-gradient-to-br from-white to-peacefulBlue/10">
             <div className="mb-6 flex items-center">
-              <div className="p-4 rounded-full bg-peacefulBlue/15 mr-4">
+              <div className="p-4 rounded-full bg-peacefulBlue/15 mr-4 flex items-center justify-center">
                 <Gavel className="h-10 w-10 text-peacefulBlue" />
               </div>
               <h3 className="text-2xl font-lora font-semibold text-gray-800">Legal Clarity & Guidance</h3>
@@ -85,7 +85,7 @@ const ServicesSection = () => {
                 Learn More <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-          </div>
+          </SiteCard>
         </div>
       </div>
     </section>

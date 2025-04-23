@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { MandalaButton } from '@/components/MandalaButton';
 import { LucideIcon } from 'lucide-react';
+import SiteCard from "@/components/SiteCard";
 
 interface HolisticPackageProps {
   icon: LucideIcon;
@@ -26,10 +27,10 @@ const HolisticPackage: React.FC<HolisticPackageProps> = ({
   dotColor
 }) => {
   return (
-    <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100 flex flex-col h-full">
+    <SiteCard className="flex flex-col h-full">
       <div>
         <div className="mb-6 flex items-center">
-          <div className={`p-3 rounded-full ${iconColor} mr-4`}>
+          <div className={`p-3 rounded-full ${iconColor} mr-4 flex items-center justify-center`}>
             <Icon className={`h-7 w-7 ${dotColor}`} />
           </div>
           <h3 className="text-xl font-lora font-semibold text-gray-800">{title}</h3>
@@ -47,7 +48,7 @@ const HolisticPackage: React.FC<HolisticPackageProps> = ({
         </ul>
       </div>
 
-      <div className="mt-auto flex items-end"> {/* Ensures button is at the bottom */}
+      <div className="mt-auto flex items-end">
         <Link to={linkPath} className="block w-full mt-2">
           <MandalaButton
             variant="primary"
@@ -58,9 +59,8 @@ const HolisticPackage: React.FC<HolisticPackageProps> = ({
           </MandalaButton>
         </Link>
       </div>
-    </div>
+    </SiteCard>
   );
 };
 
 export default HolisticPackage;
-

@@ -1,7 +1,7 @@
-
 import { ArrowRight, PackageCheck, Heart, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import SiteCard from "@/components/SiteCard";
 
 const HolisticSolutionsSection = () => {
   return (
@@ -12,8 +12,8 @@ const HolisticSolutionsSection = () => {
           <p className="text-gray-600">Comprehensive care packages combining mental health support and legal guidance for your specific relationship journey.</p>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-12">
-          <div className="service-card bg-gradient-to-br from-white to-softPink/10 shadow-md hover:shadow-lg transition-all duration-300 p-8 rounded-xl border border-gray-100">
+        <div className="grid md:grid-cols-2 gap-10">
+          <SiteCard>
             <div className="mb-6 flex items-center">
               <div className="p-4 rounded-full bg-vibrantPurple/15 mr-4 flex items-center justify-center">
                 <PackageCheck className="h-9 w-9 text-vibrantPurple" />
@@ -62,9 +62,9 @@ const HolisticSolutionsSection = () => {
                 Learn More <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-          </div>
+          </SiteCard>
           
-          <div className="service-card bg-gradient-to-br from-white to-peacefulBlue/10 shadow-md hover:shadow-lg transition-all duration-300 p-8 rounded-xl border border-gray-100">
+          <SiteCard className="bg-gradient-to-br from-white to-peacefulBlue/10">
             <div className="mb-6 flex items-center">
               <div className="p-4 rounded-full bg-peacefulBlue/15 mr-4 flex items-center justify-center">
                 <PackageCheck className="h-9 w-9 text-peacefulBlue" />
@@ -103,7 +103,7 @@ const HolisticSolutionsSection = () => {
                 Learn More <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-          </div>
+          </SiteCard>
         </div>
       </div>
     </section>

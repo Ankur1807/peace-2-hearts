@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { MandalaButton } from '@/components/MandalaButton';
 import { LucideIcon } from 'lucide-react';
+import SiteCard from "@/components/SiteCard";
 
 interface ServiceOption {
   title: string;
@@ -27,10 +28,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   linkText 
 }) => {
   return (
-    <div className="service-card bg-white rounded-xl shadow-md border border-gray-100 flex flex-col h-full min-h-[550px] p-8">
+    <SiteCard className="flex flex-col h-full">
       <div>
         <div className="mb-6 flex items-center">
-          <div className="p-3 rounded-full bg-peacefulBlue/10 mr-4">
+          <div className="p-3 rounded-full bg-peacefulBlue/10 mr-4 flex items-center justify-center">
             <Icon className="h-8 w-8 text-peacefulBlue" />
           </div>
           <h2 className="text-3xl font-lora font-semibold text-gray-800">{title}</h2>
@@ -56,7 +57,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           </MandalaButton>
         </Link>
       </div>
-    </div>
+    </SiteCard>
   );
 };
 
