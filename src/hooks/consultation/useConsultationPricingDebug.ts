@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { getPackageName } from '@/utils/consultation/packageUtils';
 
 export function useConsultationPricingDebug(totalPrice, selectedServices, pricing) {
