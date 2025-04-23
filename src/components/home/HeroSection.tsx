@@ -14,7 +14,7 @@ const HeroSection = () => {
               <MandalaButton 
                 variant="primary" 
                 mandalaType="complex"
-                className="text-lg"
+                className="text-2xl px-16 py-8 rounded-full font-bold"
               >
                 Speak to an Expert
               </MandalaButton>
@@ -23,7 +23,7 @@ const HeroSection = () => {
               <MandalaButton 
                 variant="secondary" 
                 mandalaType="simple"
-                className="text-lg"
+                className="text-2xl px-16 py-8 rounded-full font-bold"
               >
                 Start Exploring Support Options
               </MandalaButton>

@@ -14,7 +14,7 @@ const CTASection = () => {
               <MandalaButton
                 variant="primary"
                 mandalaType="simple"
-                className="text-lg"
+                className="text-2xl px-16 py-8 rounded-full font-bold"
               >
                 Get Support Now
               </MandalaButton>
@@ -23,7 +23,7 @@ const CTASection = () => {
               <MandalaButton
                 variant="primary"
                 mandalaType="simple"
-                className="text-lg"
+                className="text-2xl px-16 py-8 rounded-full font-bold"
               >
                 Contact Us
               </MandalaButton>
