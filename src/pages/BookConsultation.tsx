@@ -1,4 +1,3 @@
-
 import { useSearchParams } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -10,6 +9,7 @@ import BookingSuccessView from '@/components/consultation/BookingSuccessView';
 import BookingFormContainer from '@/components/consultation/BookingFormContainer';
 import ConsultationInitializer from '@/components/consultation/ConsultationInitializer';
 import { getPackageName } from '@/utils/consultation/packageUtils';
+import { useNavigate } from 'react-router-dom';
 
 const BookConsultation = () => {
   const [searchParams] = useSearchParams();
@@ -29,7 +29,8 @@ const BookConsultation = () => {
     totalPrice
   } = bookingState;
 
-  // Generate booking details for success view
+  const navigate = useNavigate();
+
   const createBookingDetails = (): BookingDetails => ({
     clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
     email: personalDetails.email,
@@ -41,6 +42,26 @@ const BookConsultation = () => {
     packageName: getPackageName(selectedServices),
     amount: totalPrice
   });
+
+  React.useEffect(() => {
+    if (submitted && referenceId) {
+      navigate("/payment-confirmation", {
+        state: {
+          referenceId,
+          bookingDetails: createBookingDetails()
+        },
+        replace: true
+      });
+    }
+  }, [submitted, referenceId]);
+
+  if (submitted && referenceId) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-lg">Redirecting to confirmation page...</div>
+      </div>
+    );
+  }
 
   return (
     <>

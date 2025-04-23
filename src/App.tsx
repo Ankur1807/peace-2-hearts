@@ -41,6 +41,7 @@ import ConsultantDetail from "./pages/ConsultantDetail";
 import Dashboard from "./pages/Dashboard";
 import LogoExport from './pages/LogoExport';
 import MobileBookings from './pages/MobileBookings';
+import PaymentConfirmation from './pages/PaymentConfirmation';
 
 // Admin pages
 import AdminLayout from './components/admin/AdminLayout';
@@ -140,6 +141,9 @@ const App = () => {
                 
                 {/* Mobile Bookings Route */}
                 <Route path="/mobile-bookings" element={<MobileBookings />} />
+                
+                {/* Payment Confirmation Route */}
+                <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
