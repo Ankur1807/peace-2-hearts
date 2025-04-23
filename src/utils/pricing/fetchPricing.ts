@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { expandClientToDbIds, expandClientToDbPackageIds } from './serviceIdMapper';
 import { mapServicePricing, mapPackagePricing } from './pricingMapper';
@@ -29,6 +30,13 @@ export async function fetchServicePricing(
   try {
     const cacheKey = `services-${serviceIds.sort().join('-')}`;
     
+    // Special handling for test service to ensure we always skip cache
+    const hasTestService = serviceIds.includes('test-service');
+    if (hasTestService) {
+      skipCache = true;
+      console.log('Test service requested, forcing cache bypass');
+    }
+    
     // Return cached data if available and not expired
     if (!skipCache && pricingCache[cacheKey]) {
       const cached = pricingCache[cacheKey];
@@ -55,20 +63,66 @@ export async function fetchServicePricing(
       .eq('is_active', true);
     
     // Special handling for test-service
-    const hasTestService = serviceIds.includes('test-service');
-    
-    // If only the test service is requested, look specifically for test services
-    if (hasTestService && serviceIds.length === 1) {
-      console.log('Specifically querying for test service');
-      query = query.or(`service_id.ilike.%test%,service_id.ilike.%trial%`);
-    } 
-    // Otherwise filter by the provided service IDs
-    else if (dbIds.length > 0) {
-      // Filter those that aren't test-service
-      const nonTestServiceIds = dbIds.filter(id => !id.toLowerCase().includes('test'));
-      if (nonTestServiceIds.length > 0) {
-        query = query.in('service_id', nonTestServiceIds);
+    if (hasTestService) {
+      console.log('Specifically querying for test service with multiple patterns');
+      // Create a more flexible search for test service with multiple OR conditions
+      if (serviceIds.length === 1) {
+        // If only test service is requested, use pattern matching
+        query = query.or(`service_id.ilike.%test%,service_id.ilike.%trial%`);
+      } else {
+        // If other services are also requested, use a combination approach
+        const testServicePatterns = ['%test%', '%trial%'];
+        const testQuery = supabase
+          .from('service_pricing')
+          .select('service_id, price')
+          .eq('type', 'service')
+          .eq('is_active', true)
+          .or(`service_id.ilike.%test%,service_id.ilike.%trial%`);
+        
+        const { data: testData, error: testError } = await testQuery;
+        
+        if (testError) {
+          console.error('Error fetching test service pricing:', testError);
+        } else if (testData && testData.length > 0) {
+          console.log('Found test service pricing data:', testData);
+          // Continue with regular query for other services
+          const nonTestServiceIds = dbIds.filter(id => 
+            !id.toLowerCase().includes('test') && 
+            !id.toLowerCase().includes('trial')
+          );
+          
+          if (nonTestServiceIds.length > 0) {
+            query = query.in('service_id', nonTestServiceIds);
+          }
+          
+          const { data: regularData, error: regularError } = await query;
+          
+          if (regularError) {
+            console.error('Error fetching regular service pricing:', regularError);
+          } else {
+            // Combine test service data with regular service data
+            const combinedData = [...(testData || []), ...(regularData || [])];
+            console.log('Combined pricing data:', combinedData);
+            
+            // Create the pricing map from combined database data
+            const pricingMap = mapServicePricing(combinedData, serviceIds);
+            
+            // Cache the result
+            pricingCache[cacheKey] = {
+              data: pricingMap,
+              timestamp: Date.now()
+            };
+            
+            console.log('Final pricing map:', Object.fromEntries(pricingMap));
+            return pricingMap;
+          }
+        }
       }
+    } 
+    // If not specifically handling test service or the above didn't work
+    else if (dbIds.length > 0) {
+      // Filter by the provided service IDs
+      query = query.in('service_id', dbIds);
     }
     
     const { data, error } = await query;
@@ -78,8 +132,16 @@ export async function fetchServicePricing(
       throw error;
     }
     
+    console.log('Raw pricing data from database:', data);
+    
     // Create the pricing map from database data
     const pricingMap = mapServicePricing(data || [], serviceIds);
+    
+    // If test service was requested but not found in the database, add a default price
+    if (hasTestService && !pricingMap.has('test-service')) {
+      console.log('Test service price not found in DB, setting default price of 11');
+      pricingMap.set('test-service', 11);
+    }
     
     // Cache the result
     pricingCache[cacheKey] = {

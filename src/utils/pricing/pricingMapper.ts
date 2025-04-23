@@ -1,4 +1,3 @@
-
 import { matchDbToClientId } from './serviceIdMapper';
 
 /**
@@ -22,6 +21,13 @@ export function mapServicePricing(
       pricingMap.set(clientId, item.price);
     } else {
       console.log(`No client ID mapping found for DB ID ${item.service_id}`);
+      
+      // Special case for test service: if the DB service ID contains 'test', map it to test-service
+      if (item.service_id.toLowerCase().includes('test') || 
+          item.service_id.toLowerCase().includes('trial')) {
+        console.log(`Found test service match for ${item.service_id} with price ${item.price}`);
+        pricingMap.set('test-service', item.price);
+      }
     }
   });
   
@@ -45,6 +51,9 @@ export function mapServicePricing(
       pricingMap.set('test-service', 11);
     }
   }
+  
+  // Log the final mapping
+  console.log('Final service pricing map:', Object.fromEntries(pricingMap));
   
   return pricingMap;
 }

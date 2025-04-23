@@ -10,8 +10,10 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
     // Special handling for test service - fetch explicitly
     if (selectedServices.includes('test-service')) {
       console.log('Fetching pricing specifically for test service');
-      pricingMap = await fetchServicePricing(['test-service']);
+      pricingMap = await fetchServicePricing(['test-service'], true); // Force skip cache
       const testServicePrice = pricingMap.get('test-service');
+      
+      console.log(`Test service price from database: ${testServicePrice}`);
       
       if (testServicePrice && testServicePrice > 0) {
         finalPrice = testServicePrice;
@@ -58,6 +60,7 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
       });
     }
 
+    console.log(`Final price calculated: ${finalPrice}, Pricing map:`, Object.fromEntries(pricingMap));
     return { pricingMap, finalPrice };
   } catch (error) {
     console.error('Error calculating pricing:', error);
@@ -66,6 +69,7 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
     if (selectedServices.includes('test-service')) {
       pricingMap.set('test-service', 11);
       finalPrice = 11;
+      console.log('Set default test service price due to error');
     }
     
     return { pricingMap, finalPrice };

@@ -18,36 +18,54 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   selectedServices = [],
   pricing
 }) => {
+  // Calculate the effective price to display
+  const [displayPrice, setDisplayPrice] = React.useState<number>(totalPrice);
+  
+  React.useEffect(() => {
+    let price = totalPrice;
+    
+    // Check if test service is selected
+    const isTestService = selectedServices.includes('test-service');
+    
+    if (isTestService && pricing?.has('test-service')) {
+      const testPrice = pricing.get('test-service');
+      if (testPrice && testPrice > 0) {
+        console.log(`OrderSummary: Using test service price ${testPrice}`);
+        price = testPrice;
+      }
+    }
+    // For holistic packages
+    else {
+      const packageName = selectedServices.length > 0 ? getPackageName(selectedServices) : null;
+      const packageId = packageName === "Divorce Prevention Package" 
+        ? 'divorce-prevention' 
+        : packageName === "Pre-Marriage Clarity Package" ? 'pre-marriage-clarity' : null;
+      
+      if (packageId && pricing?.has(packageId)) {
+        price = pricing.get(packageId) || price;
+        console.log(`OrderSummary: Using package price ${price} for ${packageId}`);
+      }
+      // Single service (non-package, non-test)
+      else if (selectedServices.length === 1 && pricing) {
+        const serviceId = selectedServices[0];
+        if (pricing.has(serviceId)) {
+          price = pricing.get(serviceId) || price;
+          console.log(`OrderSummary: Using price for service ${serviceId}: ${price}`);
+        }
+      }
+    }
+    
+    if (price !== displayPrice) {
+      console.log(`OrderSummary: Updating display price from ${displayPrice} to ${price}`);
+      setDisplayPrice(price);
+    }
+  }, [totalPrice, selectedServices, pricing, displayPrice]);
+  
   // Check if we have the test service selected
   const isTestService = selectedServices.includes('test-service');
   
   // For holistic packages
   const packageName = selectedServices.length > 0 && !isTestService ? getPackageName(selectedServices) : null;
-  
-  // Get the appropriate package ID if it's a package
-  const packageId = packageName === "Divorce Prevention Package" 
-    ? 'divorce-prevention' 
-    : packageName === "Pre-Marriage Clarity Package" ? 'pre-marriage-clarity' : null;
-  
-  // Get service price if it's a single service (not a package)
-  const singleServiceId = selectedServices.length === 1 ? selectedServices[0] : null;
-  const singleServicePrice = singleServiceId && pricing && pricing.has(singleServiceId) 
-    ? pricing.get(singleServiceId) 
-    : null;
-  
-  // Determine the price to display based on priority:
-  // 1. Direct service price from pricing map (including test service)
-  // 2. Package price from pricing map
-  // 3. Total price (fallback)
-  let displayPrice = totalPrice;
-  
-  if (singleServiceId && pricing && pricing.has(singleServiceId)) {
-    displayPrice = pricing.get(singleServiceId)!;
-    console.log(`OrderSummary: Using price for ${singleServiceId}: ${displayPrice}`);
-  } else if (packageId && pricing && pricing.has(packageId)) {
-    displayPrice = pricing.get(packageId)!;
-    console.log('OrderSummary: Using package price:', displayPrice);
-  }
   
   // Get the appropriate label - package name, service name, or generic label
   const consultationLabel = isTestService ? 'Test Service' : 
@@ -55,11 +73,19 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                           (selectedServices.length > 0 ? getConsultationTypeLabel(selectedServices[0]) : 'Consultation');
 
   // Log for debugging
-  console.log(`OrderSummary: packageName=${packageName}, packageId=${packageId}, singleServiceId=${singleServiceId}, displayPrice=${displayPrice}, totalPrice=${totalPrice}`);
-  console.log(`OrderSummary: isTestService=${isTestService}, selectedServices=${selectedServices.join(',')}`);
-  if (pricing) {
-    console.log('OrderSummary: Pricing map:', Object.fromEntries(pricing));
-  }
+  React.useEffect(() => {
+    console.log(`OrderSummary Debug - packageName: ${packageName}`);
+    console.log(`OrderSummary Debug - isTestService: ${isTestService}`);
+    console.log(`OrderSummary Debug - displayPrice: ${displayPrice}`);
+    console.log(`OrderSummary Debug - totalPrice: ${totalPrice}`);
+    console.log(`OrderSummary Debug - selectedServices: ${selectedServices.join(',')}`);
+    console.log(`OrderSummary Debug - pricing available:`, pricing ? Object.fromEntries(pricing) : 'No pricing data');
+    
+    // Special check for test service
+    if (isTestService) {
+      console.log(`OrderSummary Debug - Test service price from map: ${pricing?.get('test-service') || 'not found'}`);
+    }
+  }, [packageName, isTestService, displayPrice, totalPrice, selectedServices, pricing]);
   
   return (
     <div className="mb-6">
