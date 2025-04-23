@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -39,7 +38,6 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
       setIsMounted(true);
     }, []);
 
-    // Map our custom variants to ButtonProps variants
     const buttonVariant = 
       variant === 'primary' ? 'default' : 
       variant === 'secondary' ? 'secondary' : 
@@ -49,7 +47,6 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
       "relative font-bold text-lg rounded-full flex justify-center items-center overflow-hidden z-0",
       "transition-all duration-300 transform hover:-translate-y-0.5",
       isMobile ? "w-full px-6 py-4" : "px-8 py-4",
-      // New improved button styles for vivid purple CTA look
       variant === 'primary' || variant === 'cta'
         ? "bg-gradient-to-r from-[#9b87f5] to-[#8B5CF6] text-white hover:shadow-lg shadow-md hover:from-[#a792fa] hover:to-[#b389f4] border-none"
         : variant === 'secondary'
@@ -58,7 +55,6 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
       className
     );
     
-    // Only render the mandala background if mounted (to prevent SSR issues)
     const MandalaBackground = isMounted && (
       <div className="absolute inset-0 w-full h-full -z-10">
         {mandalaType === 'simple' && <SimpleMandalaPattern isHovered={isHovered} animated={animated} />}
@@ -67,7 +63,6 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
       </div>
     );
     
-    // Generate different content based on asChild prop and href
     if (asChild && href) {
       return (
         <div 
@@ -83,7 +78,7 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
             asChild
             {...props}
           >
-            <Link to={href} className="w-full text-center flex items-center justify-center" onClick={onClick}>
+            <Link to={href} className="w-full text-center flex items-center justify-center font-bold" onClick={onClick}>
               {children}
             </Link>
           </Button>
@@ -106,7 +101,7 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
           asChild={asChild}
           {...props}
         >
-          <div className="flex items-center justify-center w-full text-center">{children}</div>
+          <div className="flex items-center justify-center w-full text-center font-bold">{children}</div>
         </Button>
       </div>
     );
@@ -116,4 +111,3 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
 MandalaButton.displayName = "MandalaButton";
 
 export { MandalaButton };
-
