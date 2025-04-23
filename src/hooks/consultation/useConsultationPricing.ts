@@ -54,9 +54,9 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       let pricingMap: Map<string, number> = new Map();
       let finalPrice = 0;
       
-      // Special handling for test service
+      // Special handling for test service - always use hardcoded price 11
       if (selectedServices.includes('test-service')) {
-        console.log('Test service selected, setting fixed price');
+        console.log('Test service selected, setting fixed price of 11');
         pricingMap.set('test-service', 11);
         finalPrice = 11;
       } else {
@@ -139,19 +139,29 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       setTotalPrice(finalPrice);
       
       // If no prices found despite having valid services, show error
-      if (finalPrice === 0 && selectedServices.length > 0) {
+      if (finalPrice === 0 && selectedServices.length > 0 && !selectedServices.includes('test-service')) {
         const errorMsg = 'No pricing information available for selected services';
         console.warn(errorMsg);
         setPricingError(errorMsg);
       }
     } catch (error) {
       console.error("Error fetching pricing:", error);
-      setPricingError("Failed to fetch pricing information");
-      toast({ 
-        title: "Error retrieving pricing information", 
-        description: "Please try again later or contact support.",
-        variant: "destructive"
-      });
+      
+      // Even on error, ensure test service has a price
+      if (selectedServices.includes('test-service')) {
+        console.log('Setting test service price despite error');
+        const testPricingMap = new Map([['test-service', 11]]);
+        setPricing(testPricingMap);
+        setTotalPrice(11);
+        setPricingError(null);
+      } else {
+        setPricingError("Failed to fetch pricing information");
+        toast({ 
+          title: "Error retrieving pricing information", 
+          description: "Please try again later or contact support.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsLoading(false);
       initialFetchDone.current = true;

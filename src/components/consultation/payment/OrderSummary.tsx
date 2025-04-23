@@ -38,9 +38,10 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   // Determine the price to display - priority: test service > package price > single service price > total price
   let displayPrice = totalPrice;
   
-  if (isTestService && pricing && pricing.has('test-service')) {
-    displayPrice = pricing.get('test-service')!;
-    console.log('Using test service price:', displayPrice);
+  // Handle test service price specifically - always set to 11 if test service is selected
+  if (isTestService) {
+    displayPrice = 11; // Fixed price for test service
+    console.log('Using hardcoded test service price: 11');
   } else if (packageId && pricing && pricing.has(packageId)) {
     displayPrice = pricing.get(packageId)!;
     console.log('Using package price:', displayPrice);
@@ -56,6 +57,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
   // Log for debugging
   console.log(`OrderSummary: packageName=${packageName}, packageId=${packageId}, singleServiceId=${singleServiceId}, displayPrice=${displayPrice}, totalPrice=${totalPrice}`);
+  console.log(`isTestService=${isTestService}, selectedServices=${selectedServices.join(',')}`);
   if (pricing) {
     console.log('Pricing map:', Object.fromEntries(pricing));
   }

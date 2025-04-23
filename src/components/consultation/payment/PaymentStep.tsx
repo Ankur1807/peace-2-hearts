@@ -47,9 +47,14 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   
   React.useEffect(() => {
     let finalPrice = totalPrice;
-    
+
+    // Handle test service specifically - always set to 11
+    if (selectedServices.includes('test-service')) {
+      finalPrice = 11;
+      console.log(`Using hardcoded price for test-service: ${finalPrice}`);
+    }
     // If we have a single service selected and a pricing map
-    if (selectedServices.length === 1 && pricing) {
+    else if (selectedServices.length === 1 && pricing) {
       const serviceId = selectedServices[0];
       
       // Check if it's a package ID directly
@@ -66,7 +71,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
     
     // Check if services match a package
     const packageName = getPackageName(selectedServices);
-    if (packageName && pricing) {
+    if (packageName && pricing && !selectedServices.includes('test-service')) {
       const packageId = packageName === "Divorce Prevention Package" 
         ? 'divorce-prevention' 
         : 'pre-marriage-clarity';
@@ -88,6 +93,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   React.useEffect(() => {
     console.log(`PaymentStep - totalPrice: ${totalPrice}, actualPrice: ${actualPrice}`);
     console.log(`Selected services: ${selectedServices.join(', ')}`);
+    console.log(`Is test service: ${selectedServices.includes('test-service')}`);
     
     if (pricing) {
       console.log('Available pricing:', Object.fromEntries(pricing));
