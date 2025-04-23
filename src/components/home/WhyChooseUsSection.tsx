@@ -1,55 +1,59 @@
 
-import { Heart, BookOpen, MessageSquare, Shield, Bell, Users } from 'lucide-react';
+import { Heart, BookOpen, MessageSquare, Shield, Bell, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
-const pastelClass = "bg-gradient-to-br from-white to-peacefulBlue/10 shadow-md"; // Match legal/therapy cards
-
-const FeatureCard = ({ feature }) => (
-  <div className={`${pastelClass} rounded-xl border border-gray-100 p-6 text-center hover:shadow-lg transition-shadow flex flex-col justify-between h-full`}>
-    <div className={`p-4 rounded-full bg-peacefulBlue/10 flex items-center justify-center mx-auto mb-4`}>
-      <feature.icon className="h-10 w-10 text-vibrantPurple" />
-    </div>
-    <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">{feature.title}</h3>
-    <p className="text-gray-600">{feature.description}</p>
-  </div>
-);
-
 const WhyChooseUsSection = () => {
   const isMobile = useIsMobile();
-
+  
   const features = [
     {
       icon: Heart,
+      color: "vibrantPurple",
       title: "Compassionate Care",
       description: "We approach every client with empathy, recognizing the emotional complexities of relationship struggles."
     },
     {
       icon: BookOpen,
+      color: "peacefulBlue",
       title: "Expert Knowledge",
       description: "Our team brings deep expertise in both mental health and family law to offer well-rounded, practical support."
     },
     {
       icon: MessageSquare,
+      color: "brightOrange",
       title: "Tailored Approach",
       description: "No two relationships are the same. We adapt our care to meet your unique needs, stage, and story."
     },
     {
       icon: Shield,
+      color: "vividPink",
       title: "No-Strings-Attached Legal Help",
       description: "Legal consultations without pressure—just honest advice, without the push to litigate."
     },
     {
       icon: Bell,
+      color: "softGreen",
       title: "Divorce Prevention Focus",
       description: "We believe separation isn't always the only option. When there's a chance for repair, we'll help you explore it."
     },
     {
       icon: Users,
+      color: "brightOrange",
       title: "Empathetic, Trusted Team",
       description: "From your first call to every session, expect warmth, care, and zero judgment."
     }
   ];
+
+  const FeatureCard = ({ feature }) => (
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
+      <div className={`bg-${feature.color}/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4`}>
+        <feature.icon className={`h-10 w-10 text-${feature.color}`} />
+      </div>
+      <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">{feature.title}</h3>
+      <p className="text-gray-600">{feature.description}</p>
+    </div>
+  );
 
   return (
     <section className="py-16">
@@ -87,8 +91,7 @@ const WhyChooseUsSection = () => {
             </div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-10">
-            {/* Increased gap between cards */}
+          <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <FeatureCard key={index} feature={feature} />
             ))}
@@ -100,4 +103,3 @@ const WhyChooseUsSection = () => {
 };
 
 export default WhyChooseUsSection;
-
