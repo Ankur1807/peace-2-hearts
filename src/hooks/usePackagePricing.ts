@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ServicePrice } from '@/utils/pricingTypes';
-import { syncPackageIds, updatePackagePrice } from '@/utils/pricing';
+import { cmdSyncPackageIds, cmdUpdatePackagePrice } from '@/utils/pricing';
 
 export const usePackagePricing = () => {
   const [packages, setPackages] = useState<ServicePrice[]>([]);
@@ -93,12 +93,12 @@ export const usePackagePricing = () => {
         throw new Error("Package not found");
       }
       
-      await updatePackagePrice(id, price);
+      await cmdUpdatePackagePrice(id, price);
       
       if (packageData.service_name.toLowerCase().includes('divorce prevention')) {
-        await syncPackageIds('Divorce Prevention Package', 'divorce-prevention', price);
+        await cmdSyncPackageIds('Divorce Prevention Package', 'divorce-prevention', price);
       } else if (packageData.service_name.toLowerCase().includes('pre-marriage clarity')) {
-        await syncPackageIds('Pre-Marriage Clarity Package', 'pre-marriage-clarity', price);
+        await cmdSyncPackageIds('Pre-Marriage Clarity Package', 'pre-marriage-clarity', price);
       }
       
       toast({
