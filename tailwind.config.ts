@@ -153,6 +153,22 @@ export default {
 						opacity: '0.5',
 						transform: 'scale(1.05)'
 					}
+				},
+				'spin-slow': {
+					'from': { transform: 'rotate(0deg)' },
+					'to': { transform: 'rotate(360deg)' }
+				},
+				'spin-reverse-slow': {
+					'from': { transform: 'rotate(0deg)' },
+					'to': { transform: 'rotate(-360deg)' }
+				},
+				'spin-slower': {
+					'from': { transform: 'rotate(0deg)' },
+					'to': { transform: 'rotate(360deg)' }
+				},
+				'spin-very-slow': {
+					'from': { transform: 'rotate(0deg)' },
+					'to': { transform: 'rotate(360deg)' }
 				}
 			},
 			animation: {
@@ -165,7 +181,11 @@ export default {
 				'strong-heartbeat-glow': 'strong-heartbeat-glow 1.5s ease-in-out infinite',
 				'footer-heartbeat-glow': 'footer-heartbeat-glow 1.5s ease-in-out infinite',
 				'fractal-rotate': 'fractalRotate 4s linear infinite',
-				'pulse-fractal': 'pulseFractal 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+				'pulse-fractal': 'pulseFractal 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				'spin-slow': 'spin-slow 12s linear infinite',
+				'spin-reverse-slow': 'spin-reverse-slow 15s linear infinite',
+				'spin-slower': 'spin-slower 20s linear infinite',
+				'spin-very-slow': 'spin-very-slow 30s linear infinite'
 			},
 			backgroundImage: {
 				'gradient-wave': 'linear-gradient(90deg, #8B5CF6 0%, #0EA5E9 100%)',

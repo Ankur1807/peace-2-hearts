@@ -1,7 +1,8 @@
+
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
-import { FractalButton } from "@/components/FractalButton";
+import { MandalaButton } from "@/components/MandalaButton";
 
 interface MobileMenuContentProps {
   isOpen: boolean;
@@ -89,16 +90,15 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick, isLoggedIn }: Mob
           </ul>
         </motion.nav>
         <div className="px-6 mt-10 flex justify-center">
-          <FractalButton 
-            asChild 
-            fractalType="secondary" 
-            className="w-full text-lg"
+          <MandalaButton 
+            variant="secondary" 
+            mandalaType="lotus"
+            href="/book-consultation"
             onClick={handleLinkClick}
+            className="w-full text-lg"
           >
-            <Link to="/book-consultation" className="w-full text-center">
-              Book Your Session
-            </Link>
-          </FractalButton>
+            Book Your Session
+          </MandalaButton>
         </div>
       </div>
     </motion.div>
