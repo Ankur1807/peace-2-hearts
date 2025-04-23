@@ -37,7 +37,7 @@ const FractalButton = React.forwardRef<HTMLButtonElement, FractalButtonProps>(
         asChild={asChild}
         {...props}
       >
-        <span className="mx-auto">{children}</span>
+        <div className="flex items-center justify-center w-full text-center">{children}</div>
       </Button>
     );
   }
@@ -46,3 +46,4 @@ const FractalButton = React.forwardRef<HTMLButtonElement, FractalButtonProps>(
 FractalButton.displayName = "FractalButton";
 
 export { FractalButton };
+
