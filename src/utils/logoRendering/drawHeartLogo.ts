@@ -29,7 +29,7 @@ export const drawHeartWithPeace = (
   drawHeartPath(ctx, 53, 53, 86, scale);
   ctx.fillStyle = shadowColor;
   ctx.fill();
-
+  
   // Main heart with glow
   ctx.beginPath();
   drawHeartPath(ctx, 50, 50, 80, scale);
@@ -38,43 +38,40 @@ export const drawHeartWithPeace = (
   ctx.fillStyle = 'rgba(14, 165, 233, 0.15)';
   ctx.fill();
   ctx.stroke();
-
-  // Draw 9 stars inside heart, in circular pattern surrounding peace symbol
-  const starCount = 9;
-  const radius = 25; // Adjusted: tighter so stars are inside heart, circling peace symbol closely
-  const starColors = [
-    accentColor, secondaryColor, logoColor, // alternate for pop
-    tertiaryColor, accentColor, secondaryColor,
-    tertiaryColor, accentColor, logoColor
-  ];
-  for (let i = 0; i < starCount; i++) {
-    const angle = (i / starCount) * Math.PI * 2 - Math.PI/2; // Start at top
-    const sx = 50 + Math.cos(angle) * radius;
-    const sy = 54 + Math.sin(angle) * radius; // center of peace symbol is now at y=54
-    // Cycle through colors
-    const color = starColors[i % starColors.length];
-    drawStar(ctx, sx, sy, 2.6, 5, color, scale);
-  }
-
-  // Peace symbol circle (now fits snugly, tangent to inside of heart)
+  
+  // Replace inner circle with subtle sparkles
+  drawSparklePattern(ctx, 50, 50, 30, scale, accentColor, secondaryColor, logoColor);
+  
+  // Peace symbol circle
   ctx.beginPath();
-  ctx.arc(50 * scale, 54 * scale, 30 * scale, 0, Math.PI * 2);
+  ctx.arc(50 * scale, 50 * scale, 20 * scale, 0, Math.PI * 2);
   ctx.strokeStyle = peaceSymbolColor;
   ctx.lineWidth = 2.5 * scale;
   ctx.stroke();
-
-  // IMPORTANT FIX: Draw tree branches as the three peace symbol lines
-  // This vertical line connects the heart point to the peace circle center
-  drawTreeBranch(ctx, 50, 22, 50, 54, 2.5, scale, true); // From heart tip to peace circle center
-
-  // Left diagonal (inside circle): from center to lower left inside the peace circle
-  drawTreeBranch(ctx, 50, 54, 33, 75, 2.5, scale, true);
-
-  // Right diagonal (inside circle): from center to lower right inside the peace circle
-  drawTreeBranch(ctx, 50, 54, 67, 75, 2.5, scale, true);
-
-  // Central white dot at the center of the peace symbol - TOP LAYER
-  drawDot(ctx, 50, 54, 3.5, '#FFFFFF', scale);
-
+  
+  // Draw tree branches instead of straight peace symbol lines
+  // Vertical branch (top to bottom)
+  drawTreeBranch(ctx, 50, 30, 50, 70, 2.5, scale);
+  
+  // Left diagonal branch (connects to heart edge)
+  drawTreeBranch(ctx, 50, 50, 35, 65, 2.5, scale);
+  
+  // Right diagonal branch (connects to heart edge)
+  drawTreeBranch(ctx, 50, 50, 65, 65, 2.5, scale);
+  
+  // Small accent stars instead of previous square shapes
+  drawStar(ctx, 20, 35, 2.5, 5, secondaryColor, scale);
+  drawStar(ctx, 80, 35, 2.5, 5, secondaryColor, scale);
+  drawStar(ctx, 30, 25, 2.5, 5, tertiaryColor, scale);
+  drawStar(ctx, 70, 25, 2.5, 5, tertiaryColor, scale);
+  drawStar(ctx, 25, 70, 2.5, 5, accentColor, scale);
+  drawStar(ctx, 75, 70, 2.5, 5, accentColor, scale);
+  drawStar(ctx, 50, 15, 2.5, 5, logoColor, scale);
+  drawStar(ctx, 50, 85, 2.5, 5, logoColor, scale);
+  
+  // Central white dot at the center of the peace symbol - MOVED TO END to draw it on top
+  drawDot(ctx, 50, 50, 3.5, '#FFFFFF', scale);
+  
+  // Restore context
   ctx.restore();
 };

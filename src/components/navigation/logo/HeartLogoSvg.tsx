@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { logoColors } from '@/utils/logoRendering/logoColors';
+import { logoColors } from '@/components/logo/LogoDrawer';
 
 interface HeartLogoSvgProps {
   animationClass?: string;
@@ -11,45 +11,6 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
 }) => {
   // Use the same colors as in LogoDrawer
   const { logoColor, peaceSymbolColor, secondaryColor, accentColor, tertiaryColor, shadowColor } = logoColors;
-
-  // --- 9 Star positions, adjusted so all stars are inside the heart and around the peace symbol ---
-  const starCount = 9;
-  const starRadius = 25; // Reduced radius so all stars are inside the heart, tightly ringed around the peace symbol
-  const center = 50;
-  const starColors = [
-    accentColor, secondaryColor, logoColor, 
-    tertiaryColor, accentColor, secondaryColor, 
-    tertiaryColor, accentColor, logoColor
-  ];
-  const starEls = [];
-  for (let i = 0; i < starCount; i++) {
-    const angle = (i / starCount) * Math.PI * 2 - Math.PI/2;
-    const x = center + Math.cos(angle) * starRadius;
-    const y = center + Math.sin(angle) * starRadius;
-    const size = 2.6;
-    const color = starColors[i % starColors.length];
-    // Star path logic
-    const points = 5;
-    const outerRadius = size;
-    const innerRadius = size * 0.4;
-    let starPath = "";
-    for (let j = 0; j < points * 2; j++) {
-      const r = j % 2 === 0 ? outerRadius : innerRadius;
-      const ptAngle = -Math.PI/2 + (j / (points * 2)) * Math.PI * 2;
-      const starX = x + Math.cos(ptAngle) * r;
-      const starY = y + Math.sin(ptAngle) * r;
-      starPath += (j === 0 ? "M" : "L") + starX + "," + starY;
-    }
-    starPath += "Z";
-    starEls.push(
-      <path 
-        key={`star-${i}`} 
-        d={starPath}
-        fill={color}
-        opacity="0.87"
-      />
-    );
-  }
 
   return (
     <svg 
@@ -72,42 +33,74 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
         strokeWidth="4"
         fill="rgba(14, 165, 233, 0.15)"
       />
-
-      {/* 9 stars inside the heart, circular pattern around peace symbol */}
-      {starEls}
-
-      {/* Peace symbol circle fits snugly inside heart, slightly below center for more symmetry */}
-      <circle cx="50" cy="54" r="30" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
       
-      {/* Key Fix: Add the vertical branch from heart point to peace circle center */}
+      {/* Sparkle pattern instead of inner circle */}
+      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, index) => {
+        const dist = 30;
+        const x = 50 + Math.cos(angle * Math.PI/180) * dist;
+        const y = 50 + Math.sin(angle * Math.PI/180) * dist;
+        const size = index % 3 === 0 ? 2.5 : 1.8;
+        const color = index % 3 === 0 ? accentColor : (index % 3 === 1 ? secondaryColor : logoColor);
+        
+        // Star shape
+        const points = 5;
+        const outerRadius = size;
+        const innerRadius = size * 0.4;
+        let starPath = "";
+        
+        for (let i = 0; i < points * 2; i++) {
+          const radius = i % 2 === 0 ? outerRadius : innerRadius;
+          const angle = (i / (points * 2)) * Math.PI * 2;
+          const starX = x + Math.cos(angle) * radius;
+          const starY = y + Math.sin(angle) * radius;
+          
+          starPath += (i === 0 ? "M" : "L") + starX + "," + starY;
+        }
+        starPath += "Z";
+        
+        return (
+          <path 
+            key={`star-${index}`}
+            d={starPath}
+            fill={color}
+            opacity="0.8"
+          />
+        );
+      })}
+      
+      {/* Peace symbol circle */}
+      <circle cx="50" cy="50" r="20" stroke={peaceSymbolColor} strokeWidth="2.5" fill="transparent" />
+      
+      {/* Tree branch peace symbol lines with gradients and curves */}
+      {/* Vertical branch */}
       <path 
-        d="M50,22 L50,54" 
+        d="M50,30 C52,40 48,60 50,70" 
         stroke="url(#branchGradient)" 
         strokeWidth="2.5" 
         strokeLinecap="round"
       />
       
-      {/* Diagonal branches now contained within the circle */}
+      {/* Left diagonal branch - connecting to heart edge */}
       <path 
-        d="M50,54 L33,75" 
+        d="M50,50 C45,55 40,58 35,65" 
         stroke="url(#branchGradient)" 
         strokeWidth="2.5" 
         strokeLinecap="round"
       />
       
+      {/* Right diagonal branch - connecting to heart edge */}
       <path 
-        d="M50,54 L67,75" 
+        d="M50,50 C55,55 60,58 65,65" 
         stroke="url(#branchGradient)" 
         strokeWidth="2.5" 
         strokeLinecap="round"
       />
       
       {/* Small leaf buds on branches */}
-      <circle cx="50" cy="41" r="0.8" fill="#A3F2BE" />
-      <circle cx="47" cy="61" r="0.8" fill="#A3F2BE" />
-      <circle cx="53" cy="61" r="0.8" fill="#A3F2BE" />
-      <circle cx="40" cy="70" r="0.8" fill="#A3F2BE" />
-      <circle cx="60" cy="70" r="0.8" fill="#A3F2BE" />
+      <circle cx="51" cy="40" r="0.8" fill="#A3F2BE" />
+      <circle cx="49" cy="55" r="0.8" fill="#A3F2BE" />
+      <circle cx="42" cy="58" r="0.8" fill="#A3F2BE" />
+      <circle cx="58" cy="58" r="0.8" fill="#A3F2BE" />
       
       {/* Gradient definitions */}
       <defs>
@@ -117,8 +110,44 @@ const HeartLogoSvg: React.FC<HeartLogoSvgProps> = ({
         </linearGradient>
       </defs>
       
-      {/* Central white dot where branches emerge from */}
-      <circle cx="50" cy="54" r="3.5" fill="#FFFFFF" />
+      {/* Additional decorative elements - stars */}
+      {[
+        {x: 20, y: 35, color: secondaryColor, size: 2.5},
+        {x: 80, y: 35, color: secondaryColor, size: 2.5},
+        {x: 30, y: 25, color: tertiaryColor, size: 2.5},
+        {x: 70, y: 25, color: tertiaryColor, size: 2.5},
+        {x: 25, y: 70, color: accentColor, size: 2.5},
+        {x: 75, y: 70, color: accentColor, size: 2.5},
+        {x: 50, y: 13, color: logoColor, size: 2.5},
+        {x: 50, y: 83, color: logoColor, size: 2.5}
+      ].map((star, index) => {
+        const points = 5;
+        const outerRadius = star.size;
+        const innerRadius = star.size * 0.4;
+        let starPath = "";
+        
+        for (let i = 0; i < points * 2; i++) {
+          const radius = i % 2 === 0 ? outerRadius : innerRadius;
+          const angle = (i / (points * 2)) * Math.PI * 2;
+          const starX = star.x + Math.cos(angle) * radius;
+          const starY = star.y + Math.sin(angle) * radius;
+          
+          starPath += (i === 0 ? "M" : "L") + starX + "," + starY;
+        }
+        starPath += "Z";
+        
+        return (
+          <path 
+            key={`accent-star-${index}`}
+            d={starPath}
+            fill={star.color}
+            opacity="0.85"
+          />
+        );
+      })}
+
+      {/* Central white dot where branches emerge from - MOVED TO END so it's on top */}
+      <circle cx="50" cy="50" r="3.5" fill="#FFFFFF" />
     </svg>
   );
 };

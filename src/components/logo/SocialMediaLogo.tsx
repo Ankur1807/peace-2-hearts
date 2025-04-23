@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { drawHeartWithPeace } from '../../utils/logoRendering/drawHeartLogo';
+import { drawHeartWithPeace } from '../../../utils/logoRendering/drawHeartLogo';
 
 interface SocialMediaLogoProps {
   type: 'profile' | 'cover';
@@ -51,3 +51,4 @@ const SocialMediaLogo: React.FC<SocialMediaLogoProps> = ({
 };
 
 export default SocialMediaLogo;
+
