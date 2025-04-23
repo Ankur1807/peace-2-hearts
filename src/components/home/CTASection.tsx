@@ -14,18 +14,18 @@ const CTASection = () => {
               <MandalaButton
                 variant="primary"
                 mandalaType="simple"
-                className="text-2xl px-16 py-8 rounded-full font-bold"
+                className="text-3xl px-16 py-8 rounded-full font-bold"
               >
-                Get Support Now
+                Speak to an Expert
               </MandalaButton>
             </Link>
             <Link to="/contact" className="w-full sm:w-auto">
               <MandalaButton
                 variant="primary"
                 mandalaType="simple"
-                className="text-2xl px-16 py-8 rounded-full font-bold"
+                className="text-3xl px-16 py-8 rounded-full font-bold"
               >
-                Contact Us
+                Explore Support Options
               </MandalaButton>
             </Link>
           </div>
