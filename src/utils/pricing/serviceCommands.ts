@@ -7,14 +7,30 @@
 import { supabase } from '@/integrations/supabase/client';
 import { expandClientToDbPackageIds } from './serviceIdMapper';
 
+// Helper function to check admin authentication
+const checkAdminAuth = async () => {
+  // First check localStorage for direct admin authentication
+  const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
+  const authTime = parseInt(localStorage.getItem('p2h_admin_auth_time') || '0', 10);
+  const sessionDuration = 24 * 60 * 60 * 1000; // 24 hours
+  
+  if (adminAuthenticated && (Date.now() - authTime < sessionDuration)) {
+    return true;
+  }
+  
+  // Then check Supabase session
+  const { data: sessionData } = await supabase.auth.getSession();
+  return !!sessionData.session;
+};
+
 // Update package price in the service_pricing table
 export async function updatePackagePrice(id: string, price: number) {
   console.log(`Updating package price for ID ${id} to ${price}`);
   
   try {
     // Check if user is authenticated
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
+    const isAuthenticated = await checkAdminAuth();
+    if (!isAuthenticated) {
       throw new Error("Authentication required to update services.");
     }
     
@@ -44,8 +60,8 @@ export async function syncPackageIds(packageName: string, clientId: string, pric
   
   try {
     // Check if user is authenticated
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
+    const isAuthenticated = await checkAdminAuth();
+    if (!isAuthenticated) {
       throw new Error("Authentication required to update services.");
     }
     
@@ -101,8 +117,8 @@ export async function updateServicePrice(id: string, price: number) {
   
   try {
     // Check if user is authenticated
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
+    const isAuthenticated = await checkAdminAuth();
+    if (!isAuthenticated) {
       throw new Error("Authentication required to update services.");
     }
     
@@ -132,8 +148,8 @@ export async function toggleServiceActive(id: string, currentStatus: boolean) {
   
   try {
     // Check if user is authenticated
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
+    const isAuthenticated = await checkAdminAuth();
+    if (!isAuthenticated) {
       throw new Error("Authentication required to update services.");
     }
     
@@ -163,12 +179,10 @@ export async function createService(serviceData: any) {
   
   try {
     // Check if user is authenticated
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
+    const isAuthenticated = await checkAdminAuth();
+    if (!isAuthenticated) {
       throw new Error("Authentication required to create services.");
     }
-    
-    console.log("Authentication confirmed, session:", sessionData.session.user.id);
     
     // Format service_id based on category if not provided
     if (!serviceData.service_id && serviceData.service_name && serviceData.category) {
@@ -216,8 +230,8 @@ export async function removeService(id: string) {
   
   try {
     // Check if user is authenticated
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
+    const isAuthenticated = await checkAdminAuth();
+    if (!isAuthenticated) {
       throw new Error("Authentication required to delete services.");
     }
     
