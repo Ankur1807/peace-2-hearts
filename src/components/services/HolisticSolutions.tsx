@@ -24,7 +24,7 @@ const HolisticSolutions: React.FC = () => {
             "1 Legal Consultation"
           ]}
           linkPath="/services/holistic/divorce-prevention"
-          linkText="Learn More About This Package"
+          linkText="Learn More"
           iconColor="bg-vibrantPurple/15"
           dotColor="text-vibrantPurple"
         />
@@ -38,7 +38,7 @@ const HolisticSolutions: React.FC = () => {
             "2 Mental Health Sessions"
           ]}
           linkPath="/services/holistic/pre-marriage-clarity"
-          linkText="Learn More About This Package"
+          linkText="Learn More"
           iconColor="bg-peacefulBlue/15"
           dotColor="text-peacefulBlue"
         />
