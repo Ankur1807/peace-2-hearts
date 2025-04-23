@@ -1,8 +1,8 @@
+
 import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
-import { Button } from './ui/button';
-import { FractalButton } from './FractalButton';
+import { MandalaButton } from './MandalaButton';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from './ui/breadcrumb';
@@ -47,7 +47,7 @@ const SubServiceLayout = ({
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to={`/services/${serviceType}`}>{serviceTypeLabel}</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={`/services/${serviceType}`}>{serviceTypeLabel}</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -69,10 +69,14 @@ const SubServiceLayout = ({
                 <p className="text-gray-600 text-lg">{description}</p>
                 <div className="pt-4">
                   <Link to={bookingUrl}>
-                    <FractalButton className="hero-btn rounded-full px-6 py-3" fractalType="primary">
+                    <MandalaButton
+                      variant="primary"
+                      mandalaType="simple"
+                      className="rounded-full px-14 py-7 text-2xl font-bold"
+                    >
                       Book a Consultation
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </FractalButton>
+                      <ArrowRight className="ml-2 h-6 w-6" />
+                    </MandalaButton>
                   </Link>
                 </div>
               </div>
@@ -114,14 +118,14 @@ const SubServiceLayout = ({
               Our professional team is here to support you through every step of your journey.
             </p>
             <Link to={bookingUrl}>
-              <FractalButton 
-                className="text-lg font-bold bg-white text-peacefulBlue hover:bg-white/90 rounded-full px-8 py-5 shadow-lg" 
-                fractalType="primary" 
-                pulseEffect={true}
+              <MandalaButton
+                variant="primary"
+                mandalaType="simple"
+                className="text-2xl font-bold bg-white text-peacefulBlue hover:bg-white/90 rounded-full px-14 py-7 shadow-lg"
               >
                 Book Your Consultation Now
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </FractalButton>
+                <ArrowRight className="ml-2 h-6 w-6" />
+              </MandalaButton>
             </Link>
           </div>
         </section>
@@ -133,3 +137,4 @@ const SubServiceLayout = ({
 };
 
 export default SubServiceLayout;
+

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { MandalaButton } from '@/components/MandalaButton';
 import { LucideIcon } from 'lucide-react';
 
 interface ServiceOption {
@@ -45,11 +45,18 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         ))}
       </div>
       
-      <Button asChild className="bg-peacefulBlue hover:bg-peacefulBlue/90 text-white">
-        <Link to={linkPath}>{linkText}</Link>
-      </Button>
+      <Link to={linkPath} className="block w-full mt-4">
+        <MandalaButton
+          variant="primary"
+          mandalaType="simple"
+          className="w-full py-5 text-xl font-bold"
+        >
+          {linkText}
+        </MandalaButton>
+      </Link>
     </div>
   );
 };
 
 export default ServiceCard;
+
