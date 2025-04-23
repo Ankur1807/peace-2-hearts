@@ -1,7 +1,21 @@
 
-import { mapServicePricing, mapPackagePricing, getPricingCache, setPricingCache } from './core/pricingService';
-import { fetchServicePricingData, fetchPackagePricingData } from './core/pricingService';
-export { clearPricingCache, formatPrice } from './core/pricingService';
+// Import from individual modules after refactoring
+import { 
+  mapServicePricing, 
+  mapPackagePricing 
+} from './core/pricingMapperService';
+import { 
+  getPricingCache, 
+  setPricingCache 
+} from './core/cacheService';
+import { 
+  fetchServicePricingData, 
+  fetchPackagePricingData 
+} from './core/pricingFetchService';
+export { 
+  clearPricingCache, 
+  formatPrice 
+} from './core/pricingService';
 
 /**
  * Fetch service pricing data.
@@ -16,6 +30,8 @@ export async function fetchServicePricing(
   const hasTestService = serviceIds.includes('test-service');
   const cacheKey = `services-${serviceIds.sort().join('-')}`;
   
+  console.log('fetchServicePricing called with:', { serviceIds, skipCache });
+  
   if (!skipCache && !hasTestService) {
     const cached = getPricingCache(cacheKey);
     if (cached) {
@@ -25,10 +41,12 @@ export async function fetchServicePricing(
   }
 
   const data = await fetchServicePricingData(serviceIds);
+  console.log('Raw service pricing data from DB:', data);
+  
   const pricingMap = mapServicePricing(data, serviceIds);
+  console.log('Mapped service pricing:', Object.fromEntries(pricingMap));
+  
   setPricingCache(cacheKey, pricingMap);
-
-  console.log('Final pricing map:', Object.fromEntries(pricingMap));
   return pricingMap;
 }
 
@@ -42,6 +60,8 @@ export async function fetchPackagePricing(
   packageIds: string[] = [],
   skipCache = false
 ): Promise<Map<string, number>> {
+  console.log('fetchPackagePricing called with:', { packageIds, skipCache });
+  
   const cacheKey = `packages-${packageIds.sort().join('-')}`;
   if (!skipCache) {
     const cached = getPricingCache(cacheKey);
@@ -50,9 +70,14 @@ export async function fetchPackagePricing(
       return cached;
     }
   }
+  
   const data = await fetchPackagePricingData(packageIds);
+  console.log('Raw package pricing data from DB:', data);
+  
   const pricingMap = mapPackagePricing(data, packageIds);
+  console.log('Mapped package pricing:', Object.fromEntries(pricingMap));
+  
   setPricingCache(cacheKey, pricingMap);
-
   return pricingMap;
 }
+
