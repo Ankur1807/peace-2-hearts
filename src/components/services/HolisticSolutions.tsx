@@ -1,47 +1,9 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { PackageCheck } from 'lucide-react';
 import HolisticPackage from './HolisticPackage';
-import { fetchPackagePricing } from '@/utils/pricing';
 
 const HolisticSolutions: React.FC = () => {
-  const [packagePrices, setPackagePrices] = useState<Map<string, number>>(new Map());
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const loadPackagePrices = async () => {
-      try {
-        setIsLoading(true);
-        console.log("HolisticSolutions - Loading package prices for holistic packages");
-        
-        const packageIds = ['divorce-prevention', 'pre-marriage-clarity'];
-        console.log("HolisticSolutions - Package IDs to fetch:", packageIds);
-        
-        // Skip cache to get fresh data
-        const pricingMap = await fetchPackagePricing(packageIds, true);
-        setPackagePrices(pricingMap);
-        
-        console.log('HolisticSolutions - Loaded package pricing:', Object.fromEntries(pricingMap));
-        
-        // Debug - check if we have prices for each package
-        packageIds.forEach(id => {
-          console.log(`Package ${id} price:`, pricingMap.get(id));
-        });
-      } catch (error) {
-        console.error('Failed to load package prices:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPackagePrices();
-  }, []);
-
-  const getFormattedPrice = (packageId: string) => {
-    const price = packagePrices.get(packageId);
-    return price ? `₹${price.toLocaleString('en-IN')}` : '';
-  };
-
   return (
     <div className="mt-16 mb-16">
       <div className="text-center max-w-3xl mx-auto mb-12">
@@ -65,8 +27,6 @@ const HolisticSolutions: React.FC = () => {
           linkText="Learn More"
           iconColor="bg-vibrantPurple/15"
           dotColor="text-vibrantPurple"
-          price={getFormattedPrice('divorce-prevention')}
-          isLoading={isLoading}
         />
         
         <HolisticPackage
@@ -81,8 +41,6 @@ const HolisticSolutions: React.FC = () => {
           linkText="Learn More"
           iconColor="bg-peacefulBlue/15"
           dotColor="text-peacefulBlue"
-          price={getFormattedPrice('pre-marriage-clarity')}
-          isLoading={isLoading}
         />
       </div>
     </div>
