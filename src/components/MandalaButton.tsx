@@ -45,10 +45,12 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
       "relative font-bold text-lg rounded-full flex justify-center items-center overflow-hidden z-0",
       "transition-all duration-300 transform hover:-translate-y-0.5",
       isMobile ? "w-full px-6 py-4" : "px-8 py-4",
-      variant === 'primary' ? 'bg-gradient-to-r from-vibrantPurple to-vividPink text-white hover:shadow-[0_0_15px_rgba(139,92,246,0.5)]' : 
-      variant === 'secondary' ? 'bg-gradient-to-r from-peacefulBlue to-softGreen text-white hover:shadow-[0_0_15px_rgba(14,165,233,0.5)]' : 
-      variant === 'cta' ? 'bg-vibrantPurple text-white border-2 border-peacefulBlue hover:shadow-[0_0_15px_rgba(139,92,246,0.6)]' :
-      'border-2 border-peacefulBlue text-peacefulBlue hover:bg-peacefulBlue/5',
+      // New improved button styles for vivid purple CTA look
+      variant === 'primary' || variant === 'cta'
+        ? "bg-gradient-to-r from-[#9b87f5] to-[#8B5CF6] text-white hover:shadow-lg shadow-md hover:from-[#a792fa] hover:to-[#b389f4] border-none"
+        : variant === 'secondary'
+        ? "bg-gradient-to-r from-[#36bcf6] to-[#7fe6c0] text-white hover:shadow-lg shadow-md border-none"
+        : "border-2 border-peacefulBlue text-peacefulBlue hover:bg-peacefulBlue/5",
       className
     );
     
