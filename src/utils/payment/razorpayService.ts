@@ -151,12 +151,13 @@ export const savePaymentDetails = async (params: SavePaymentParams): Promise<boo
     console.log("Saving payment details:", { paymentId, orderId, amount, consultationId });
     
     const { error } = await supabase.from('payments').insert({
-      payment_id: paymentId,
+      transaction_id: paymentId,
       order_id: orderId,
-      amount: amount,
       consultation_id: consultationId,
-      status: 'completed',
-      created_at: new Date().toISOString()
+      amount: amount,
+      payment_status: 'completed',
+      payment_method: 'razorpay',
+      currency: 'INR'
     });
     
     if (error) {
@@ -164,6 +165,7 @@ export const savePaymentDetails = async (params: SavePaymentParams): Promise<boo
       return false;
     }
     
+    console.log("Payment details saved successfully");
     return true;
   } catch (err) {
     console.error('Exception saving payment details:', err);

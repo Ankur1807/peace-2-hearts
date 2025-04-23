@@ -39,6 +39,8 @@ export const useOpenRazorpayCheckout = ({
           
           if (!isVerified) throw new Error("Payment verification failed");
           
+          console.log("Payment verified successfully. Now saving payment details...");
+          
           const paymentParams: SavePaymentParams = {
             paymentId: response.razorpay_payment_id,
             orderId: response.razorpay_order_id,
@@ -46,8 +48,14 @@ export const useOpenRazorpayCheckout = ({
             consultationId: receiptId,
           };
           
+          console.log("Payment parameters for saving:", paymentParams);
+          
           const saveResult = await savePaymentDetails(paymentParams);
           console.log("Payment save result:", saveResult);
+          
+          if (!saveResult) {
+            console.warn("Failed to save payment details to database, but payment was verified");
+          }
           
           if (setPaymentCompleted) setPaymentCompleted(true);
           if (handleConfirmBooking) await handleConfirmBooking();
@@ -99,7 +107,12 @@ export const useOpenRazorpayCheckout = ({
         });
         setIsProcessing(false);
       });
-      console.log("Opening Razorpay payment modal");
+      console.log("Opening Razorpay payment modal with options:", {
+        key: options.key,
+        orderId: options.order_id,
+        amount: options.amount,
+        currency: options.currency,
+      });
       razorpay.open();
     } catch (err) {
       console.error("Error initializing Razorpay:", err);
