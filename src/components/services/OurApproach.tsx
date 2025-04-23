@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Users, MessageSquare, Calendar } from 'lucide-react';
+import SiteCard from "@/components/SiteCard";
 
 interface ApproachCardProps {
   icon: React.ReactNode;
@@ -10,13 +11,13 @@ interface ApproachCardProps {
 
 const ApproachCard: React.FC<ApproachCardProps> = ({ icon, title, description }) => {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center">
+    <SiteCard className="text-center">
       <div className="bg-peacefulBlue/10 p-3 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
         {icon}
       </div>
       <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">{title}</h3>
       <p className="text-gray-600">{description}</p>
-    </div>
+    </SiteCard>
   );
 };
 
