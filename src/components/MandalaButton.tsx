@@ -5,9 +5,9 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Link } from 'react-router-dom';
 
-import SimpleMandala from './mandala/SimpleMandala';
-import ComplexMandala from './mandala/ComplexMandala';
-import LotusMandala from './mandala/LotusMandala';
+import SimpleMandalaPattern from './mandala/SimpleMandalaPattern';
+import ComplexMandalaPattern from './mandala/ComplexMandalaPattern';
+import LotusMandalaPattern from './mandala/LotusMandalaPattern';
 
 interface MandalaButtonProps extends Omit<ButtonProps, 'variant'> {
   variant?: 'primary' | 'secondary' | 'outline' | 'cta';
@@ -61,9 +61,9 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
     // Only render the mandala background if mounted (to prevent SSR issues)
     const MandalaBackground = isMounted && (
       <div className="absolute inset-0 w-full h-full -z-10">
-        {mandalaType === 'simple' && <SimpleMandala isHovered={isHovered} animated={animated} />}
-        {mandalaType === 'complex' && <ComplexMandala isHovered={isHovered} animated={animated} />}
-        {mandalaType === 'lotus' && <LotusMandala isHovered={isHovered} animated={animated} />}
+        {mandalaType === 'simple' && <SimpleMandalaPattern isHovered={isHovered} animated={animated} />}
+        {mandalaType === 'complex' && <ComplexMandalaPattern isHovered={isHovered} animated={animated} />}
+        {mandalaType === 'lotus' && <LotusMandalaPattern isHovered={isHovered} animated={animated} />}
       </div>
     );
     
@@ -116,3 +116,4 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
 MandalaButton.displayName = "MandalaButton";
 
 export { MandalaButton };
+
