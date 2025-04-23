@@ -1,7 +1,7 @@
-
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import { FractalButton } from "@/components/FractalButton";
 
 interface MobileMenuContentProps {
   isOpen: boolean;
@@ -15,11 +15,9 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick, isLoggedIn }: Mob
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
     { path: "/services", label: "Services" },
-    // Resources link removed
     { path: "/contact", label: "Contact" },
   ];
 
-  // Add dashboard link if user is logged in
   if (isLoggedIn) {
     links.push({ path: "/dashboard", label: "Dashboard" });
   }
@@ -49,7 +47,6 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick, isLoggedIn }: Mob
     },
   };
 
-  // Handle both onClose and onMenuItemClick when a link is clicked
   const handleLinkClick = () => {
     if (onMenuItemClick) onMenuItemClick();
     onClose();
@@ -92,24 +89,16 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick, isLoggedIn }: Mob
           </ul>
         </motion.nav>
         <div className="px-6 mt-10 flex justify-center">
-          <Link
-            to="/book-consultation"
+          <FractalButton 
+            asChild 
+            fractalType="secondary" 
+            className="w-full text-lg"
             onClick={handleLinkClick}
-            className="w-full"
           >
-            <button
-              className="
-                w-full py-4 rounded-full font-bold text-lg bg-gradient-to-r from-vibrantPurple to-vividPink 
-                text-white shadow-lg transition-transform duration-200 active:scale-95
-                border-none outline-none focus:ring-4 focus:ring-vividPink/40
-              "
-              style={{
-                letterSpacing: "0.02em"
-              }}
-            >
+            <Link to="/book-consultation" className="w-full text-center">
               Book Your Session
-            </button>
-          </Link>
+            </Link>
+          </FractalButton>
         </div>
       </div>
     </motion.div>
@@ -117,4 +106,3 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick, isLoggedIn }: Mob
 };
 
 export default MobileMenuContent;
-
