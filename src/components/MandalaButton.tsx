@@ -45,13 +45,13 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
       variant === 'cta' ? 'cta' : 'outline';
     
     const baseClasses = cn(
-      "relative font-bold text-xl rounded-full flex justify-center items-center overflow-hidden z-0", // Increased from text-lg to text-xl
+      "relative font-bold text-xl rounded-full flex justify-center items-center overflow-hidden z-0", 
       "transition-all duration-300 transform hover:-translate-y-0.5",
       isMobile ? "w-full px-6 py-4" : "px-8 py-4",
       variant === 'primary' || variant === 'cta'
-        ? "bg-gradient-to-r from-[#9b87f5] to-[#8B5CF6] text-white hover:shadow-lg shadow-md hover:from-[#a792fa] hover:to-[#b389f4] border-none"
+        ? "bg-gradient-to-r from-[#36bcf6] to-[#7fe6c0] text-[#221F26] hover:shadow-lg shadow-md hover:from-[#36bcf6]/90 hover:to-[#7fe6c0]/90 border-none" // Changed text color to dark charcoal
         : variant === 'secondary'
-        ? "bg-gradient-to-r from-[#36bcf6] to-[#7fe6c0] text-white hover:shadow-lg shadow-md border-none"
+        ? "bg-gradient-to-r from-[#36bcf6] to-[#7fe6c0] text-[#221F26] hover:shadow-lg shadow-md border-none" // Changed text color to dark charcoal
         : "border-2 border-peacefulBlue text-peacefulBlue hover:bg-peacefulBlue/5",
       className
     );
@@ -79,7 +79,11 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
             asChild
             {...props}
           >
-            <Link to={href} className="w-full text-center flex items-center justify-center font-bold text-xl" onClick={onClick}>
+            <Link 
+              to={href} 
+              className="w-full text-center flex items-center justify-center font-bold text-xl text-[#221F26]" // Explicitly set text color
+              onClick={onClick}
+            >
               {children}
             </Link>
           </Button>
@@ -102,7 +106,7 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
           asChild={asChild}
           {...props}
         >
-          <div className="flex items-center justify-center w-full text-center font-bold text-xl">{children}</div>
+          <div className="flex items-center justify-center w-full text-center font-bold text-xl text-[#221F26]">{children}</div>
         </Button>
       </div>
     );
@@ -112,4 +116,3 @@ const MandalaButton = React.forwardRef<HTMLButtonElement, MandalaButtonProps>(
 MandalaButton.displayName = "MandalaButton";
 
 export { MandalaButton };
-
