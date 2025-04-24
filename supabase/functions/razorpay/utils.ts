@@ -34,14 +34,43 @@ export async function createSignature(orderId: string, paymentId: string, secret
 // Parse and validate request data
 export async function parseRequestData(req: Request): Promise<{ data: any; error: string | null }> {
   try {
-    const data = await req.json();
-    console.log("Request data received:", JSON.stringify(data));
-    return { data, error: null };
+    // Create a clone of the request to avoid consuming the body multiple times
+    const clonedReq = req.clone();
+    let text;
+    
+    try {
+      text = await clonedReq.text();
+    } catch (err) {
+      console.error("Error reading request body as text:", err);
+      return { 
+        data: null, 
+        error: 'Failed to read request body' 
+      };
+    }
+    
+    if (!text) {
+      return { 
+        data: null, 
+        error: 'Empty request body' 
+      };
+    }
+    
+    try {
+      const data = JSON.parse(text);
+      console.log("Request data received:", JSON.stringify(data));
+      return { data, error: null };
+    } catch (err) {
+      console.error("Error parsing JSON:", err);
+      return { 
+        data: null, 
+        error: 'Invalid JSON in request body' 
+      };
+    }
   } catch (err) {
-    console.error("Error parsing request JSON:", err);
+    console.error("Exception in parseRequestData:", err);
     return { 
       data: null, 
-      error: 'Invalid JSON in request body' 
+      error: 'Request processing error' 
     };
   }
 }

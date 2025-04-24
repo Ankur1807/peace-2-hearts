@@ -1,5 +1,9 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { handleCors } from "./utils.ts";
+import { handleCreateOrder } from "./orderHandler.ts";
+import { handleVerifyPayment } from "./paymentHandler.ts";
+import { parseRequestData, getRazorpayKeys } from "./utils.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,170 +11,71 @@ const corsHeaders = {
 };
 
 serve(async (req: Request) => {
-  // Handle CORS
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: corsHeaders
-    });
+  // Handle CORS preflight requests
+  const corsResponse = handleCors(req);
+  if (corsResponse) {
+    return corsResponse;
   }
 
   try {
-    const { action } = await req.json();
+    // Parse request data safely
+    const { data, error } = await parseRequestData(req);
     
-    if (action === 'create_order') {
-      // Extract params for create order
-      const { amount, currency = 'INR', receipt, orderData } = await req.json();
-      
-      // Get API keys from env
-      const key_id = Deno.env.get('RAZORPAY_KEY_ID');
-      const key_secret = Deno.env.get('RAZORPAY_KEY_SECRET');
-      
-      if (!key_id || !key_secret) {
-        console.error("Razorpay API keys not configured");
-        return new Response(JSON.stringify({
-          success: false,
-          error: 'Payment gateway not configured'
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500
-        });
-      }
-      
-      // Authentication for Razorpay API
-      const auth = btoa(`${key_id}:${key_secret}`);
-      
-      // Create order on Razorpay
-      const orderPayload = {
-        amount: amount * 100, // Convert to paise
-        currency: currency,
-        receipt: receipt,
-        notes: orderData?.notes || {}
-      };
-      
-      console.log("Creating Razorpay order:", orderPayload);
-      
-      const razorpayResponse = await fetch('https://api.razorpay.com/v1/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Basic ${auth}`
-        },
-        body: JSON.stringify(orderPayload)
-      });
-      
-      const orderResult = await razorpayResponse.json();
-      
-      if (!razorpayResponse.ok) {
-        console.error("Razorpay API error:", orderResult);
-        return new Response(JSON.stringify({
-          success: false,
-          error: 'Failed to create order',
-          details: orderResult
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: razorpayResponse.status
-        });
-      }
-      
+    if (error || !data) {
+      console.error("Error parsing request data:", error);
       return new Response(JSON.stringify({
-        success: true,
-        order_id: orderResult.id,
-        details: {
-          id: orderResult.id,
-          amount: orderResult.amount / 100, // Convert back to rupees
-          currency: orderResult.currency,
-          key_id: key_id
-        }
+        success: false,
+        error: error || 'Invalid request data'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
-      });
-    } 
-    else if (action === 'verify_payment') {
-      // Extract params for verify payment
-      const { paymentId, orderData } = await req.json();
-      
-      // Get API keys from env
-      const key_id = Deno.env.get('RAZORPAY_KEY_ID');
-      const key_secret = Deno.env.get('RAZORPAY_KEY_SECRET');
-      
-      if (!key_id || !key_secret) {
-        console.error("Razorpay API keys not configured");
-        return new Response(JSON.stringify({
-          success: false,
-          verified: false,
-          error: 'Payment gateway not configured'
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500
-        });
-      }
-      
-      // Authentication for Razorpay API
-      const auth = btoa(`${key_id}:${key_secret}`);
-      
-      // Fetch payment details from Razorpay to confirm it's valid
-      const paymentUrl = `https://api.razorpay.com/v1/payments/${paymentId}`;
-      const paymentResponse = await fetch(paymentUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Basic ${auth}`
-        }
-      });
-      
-      if (!paymentResponse.ok) {
-        const errorData = await paymentResponse.json();
-        console.error("Failed to verify payment with Razorpay:", errorData);
-        return new Response(JSON.stringify({
-          success: false,
-          verified: false,
-          error: 'Payment verification failed'
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400
-        });
-      }
-      
-      const paymentData = await paymentResponse.json();
-      
-      // Check if payment is captured or authorized
-      const paymentStatus = paymentData.status;
-      const isPaymentSuccessful = ['captured', 'authorized'].includes(paymentStatus);
-      
-      if (!isPaymentSuccessful) {
-        console.error("Payment is not successful according to Razorpay. Status:", paymentStatus);
-        return new Response(JSON.stringify({
-          success: false,
-          verified: false,
-          error: `Payment not successful. Status: ${paymentStatus}`
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400
-        });
-      }
-      
-      return new Response(JSON.stringify({
-        success: true,
-        verified: true,
-        message: 'Payment verified successfully',
-        payment: paymentData
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
+        status: 400
       });
     }
     
-    // Handle unknown action
-    return new Response(JSON.stringify({
-      error: 'Invalid action'
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400
-    });
+    // Get API keys
+    const { key_id, key_secret } = getRazorpayKeys();
+    
+    if (!key_id || !key_secret) {
+      console.error("Razorpay API keys not configured");
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Payment gateway not configured'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      });
+    }
+    
+    // Authentication for Razorpay API
+    const auth = btoa(`${key_id}:${key_secret}`);
+    
+    const { action } = data;
+    
+    if (action === 'create_order') {
+      // Extract params for create order
+      const { amount, currency = 'INR', receipt, orderData } = data;
+      return await handleCreateOrder(amount, currency, receipt, orderData?.notes, auth, key_id);
+    } 
+    else if (action === 'verify_payment') {
+      // Extract params for verify payment
+      const { paymentId, orderData, checkOnly } = data;
+      return await handleVerifyPayment(paymentId, orderData, auth);
+    } 
+    else {
+      // Handle unknown action
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Invalid action'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      });
+    }
     
   } catch (error) {
     console.error("Error processing request:", error);
     return new Response(JSON.stringify({
+      success: false,
       error: 'Internal Server Error',
       details: error.message
     }), {

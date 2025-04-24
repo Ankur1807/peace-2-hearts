@@ -62,8 +62,10 @@ export async function handleCreateOrder(
       success: true,
       order_id: orderResult.id,
       details: {
-        ...orderResult,
-        key_id: key_id  // Include key_id in response details
+        id: orderResult.id,
+        amount: orderResult.amount / 100, // Convert back to rupees
+        currency: orderResult.currency,
+        key_id: key_id
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
