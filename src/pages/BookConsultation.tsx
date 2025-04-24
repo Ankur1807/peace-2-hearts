@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -38,6 +38,19 @@ const BookConsultation = () => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Track the current step in the UI for debugging
+  const [debugState, setDebugState] = useState({
+    showingPaymentStep: false
+  });
+  
+  // Track state changes for debugging
+  useEffect(() => {
+    if (showPaymentStep !== debugState.showingPaymentStep) {
+      console.log(`showPaymentStep changed from ${debugState.showingPaymentStep} to ${showPaymentStep}`);
+      setDebugState(prev => ({ ...prev, showingPaymentStep: showPaymentStep }));
+    }
+  }, [showPaymentStep, debugState.showingPaymentStep]);
 
   const createBookingDetails = (): BookingDetails => ({
     clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
@@ -66,6 +79,7 @@ const BookConsultation = () => {
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      console.log("Payment form submitted from BookConsultation page");
       await bookingState.processPayment();
     } catch (error) {
       console.error('Payment error:', error);

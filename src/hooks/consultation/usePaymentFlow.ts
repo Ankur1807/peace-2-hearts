@@ -68,9 +68,10 @@ export function usePaymentFlow({
     
     // Force setShowPaymentStep to true to ensure the component updates
     console.log("Form validation passed, proceeding to payment step - SETTING showPaymentStep to TRUE");
-    setTimeout(() => {
-      setShowPaymentStep(true);
-    }, 0);
+    setShowPaymentStep(true);
+    
+    // Add a debug log to confirm the state change
+    console.log("showPaymentStep should now be true");
   }, [state.personalDetails, state.selectedServices, toast, setShowPaymentStep, validatePersonalDetails, validateServiceSelection]);
 
   // Process payment using Razorpay

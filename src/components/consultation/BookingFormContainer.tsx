@@ -3,6 +3,8 @@ import React from 'react';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 import ConsultationDetailsForm from './ConsultationDetailsForm';
 import { useBookingState } from './booking/useBookingState';
+import PaymentStepContainer from './PaymentStepContainer';
+import { Card } from '@/components/ui/card';
 
 interface BookingFormContainerProps {
   bookingState: ConsultationBookingHook & {
@@ -31,7 +33,10 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
     setIsProcessing,
     pricing,
     totalPrice,
-    handleConfirmBooking
+    proceedToPayment,
+    showPaymentStep,
+    setShowPaymentStep,
+    processPayment
   } = enrichedBookingState;
   
   // Debug to verify pricing data is available
@@ -39,9 +44,10 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
     console.log('BookingFormContainer rendered with pricing data:', {
       pricingAvailable: !!pricing,
       totalPrice,
-      pricingSize: pricing ? pricing.size : 0
+      pricingSize: pricing ? pricing.size : 0,
+      showPaymentStep
     });
-  }, [pricing, totalPrice]);
+  }, [pricing, totalPrice, showPaymentStep]);
   
   // Handle form submission
   const handleFormSubmit = React.useCallback(() => {
@@ -51,6 +57,18 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
       bookingState.proceedToPayment();
     } else {
       console.error("proceedToPayment function not available");
+    }
+  }, [bookingState]);
+  
+  // Handle payment submission  
+  const handlePaymentSubmit = React.useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Payment submission in BookingFormContainer");
+    if (bookingState.processPayment) {
+      console.log("Processing payment from BookingFormContainer");
+      bookingState.processPayment();
+    } else {
+      console.error("processPayment function not available");
     }
   }, [bookingState]);
   
@@ -85,26 +103,41 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="max-w-4xl mx-auto">
-        <ConsultationDetailsForm 
-          serviceCategory={serviceCategory}
-          setServiceCategory={setServiceCategory}
-          selectedServices={selectedServices}
-          setSelectedServices={setSelectedServices}
-          handleServiceSelection={handleServiceSelection}
-          handlePackageSelection={handlePackageSelection}
-          date={date}
-          setDate={setDate}
-          timeSlot={timeSlot}
-          setTimeSlot={setTimeSlot}
-          timeframe={timeframe}
-          setTimeframe={setTimeframe}
-          personalDetails={personalDetails}
-          handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
-          isProcessing={isProcessing}
-          pricing={pricing || new Map()}
-          totalPrice={totalPrice}
-          onSubmit={handleFormSubmit}
-        />
+        {showPaymentStep ? (
+          <Card className="backdrop-blur-sm bg-white/80 p-6 md:p-8 border border-gray-100 shadow-xl rounded-xl relative z-10">
+            <PaymentStepContainer
+              consultationType={serviceCategory}
+              selectedServices={selectedServices}
+              processPayment={processPayment}
+              setShowPaymentStep={setShowPaymentStep}
+              handlePaymentSubmit={handlePaymentSubmit}
+              isProcessing={isProcessing}
+              pricing={pricing || new Map()}
+              totalPrice={totalPrice}
+            />
+          </Card>
+        ) : (
+          <ConsultationDetailsForm 
+            serviceCategory={serviceCategory}
+            setServiceCategory={setServiceCategory}
+            selectedServices={selectedServices}
+            setSelectedServices={setSelectedServices}
+            handleServiceSelection={handleServiceSelection}
+            handlePackageSelection={handlePackageSelection}
+            date={date}
+            setDate={setDate}
+            timeSlot={timeSlot}
+            setTimeSlot={setTimeSlot}
+            timeframe={timeframe}
+            setTimeframe={setTimeframe}
+            personalDetails={personalDetails}
+            handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
+            isProcessing={isProcessing}
+            pricing={pricing || new Map()}
+            totalPrice={totalPrice}
+            onSubmit={handleFormSubmit}
+          />
+        )}
       </div>
     </div>
   );
