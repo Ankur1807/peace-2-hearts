@@ -15,7 +15,7 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
   const isHolisticPackage = bookingDetails?.serviceCategory === 'holistic';
 
   return (
-    <div className="text-center">
+    <div className="space-y-6">
       <ConfirmationHeader />
       
       {referenceId && (
@@ -30,6 +30,7 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
           timeframe={bookingDetails.timeframe}
           packageName={bookingDetails.packageName}
           isHolisticPackage={isHolisticPackage}
+          amount={bookingDetails.amount}
         />
       )}
       

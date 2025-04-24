@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
+import { Card } from "@/components/ui/card";
 
 // Accept either query params or state for flexibility
 const PaymentConfirmation = () => {
@@ -41,7 +42,7 @@ const PaymentConfirmation = () => {
   // If we have a payment ID but no booking details, try to verify and recover the payment
   useEffect(() => {
     const verifyPayment = async () => {
-      if (paymentId) {
+      if (paymentId && !verificationResult) {
         setIsVerifying(true);
         try {
           // Verify with Razorpay directly
@@ -71,7 +72,7 @@ const PaymentConfirmation = () => {
     };
     
     verifyPayment();
-  }, [paymentId, orderId, referenceId, amount]);
+  }, [paymentId, orderId, referenceId, amount, verificationResult]);
 
   return (
     <>
@@ -92,26 +93,64 @@ const PaymentConfirmation = () => {
           </div>
         ) : verificationResult ? (
           <div className="max-w-4xl mx-auto px-4 py-10">
-            <Alert variant={verificationResult.success ? "default" : "destructive"} className="mb-6">
-              <AlertTitle className="text-xl">{verificationResult.success ? "Payment Verified" : "Verification Issue"}</AlertTitle>
-              <AlertDescription className="text-lg">{verificationResult.message}</AlertDescription>
-            </Alert>
-            
-            {verificationResult.success ? (
-              <div className="mt-6 text-center">
-                <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>
-                <p className="mb-4">Order ID: <strong>{orderId || "N/A"}</strong></p>
-                <p className="mb-6">Your payment has been recorded in our system.</p>
-                <Button onClick={() => navigate('/')}>Return to Home</Button>
-              </div>
-            ) : (
-              <div className="mt-6 text-center">
-                <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>
-                <p className="mb-4">Order ID: <strong>{orderId || "N/A"}</strong></p>
-                <p className="mb-6">Please save these details for your reference when contacting support.</p>
-                <Button onClick={() => navigate('/')}>Return to Home</Button>
-              </div>
-            )}
+            <Card className="p-8 mb-6">
+              <Alert variant={verificationResult.success ? "default" : "destructive"} className="mb-6">
+                <AlertTitle className="text-xl font-lora">{verificationResult.success ? "Payment Verified" : "Verification Issue"}</AlertTitle>
+                <AlertDescription className="text-lg">{verificationResult.message}</AlertDescription>
+              </Alert>
+              
+              {verificationResult.success ? (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <h2 className="text-2xl font-semibold font-lora">Payment Information</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                      <div>
+                        <p className="text-gray-500 text-sm">Payment ID</p>
+                        <p className="font-medium">{paymentId}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-sm">Order ID</p>
+                        <p className="font-medium">{orderId || "N/A"}</p>
+                      </div>
+                      {amount > 0 && (
+                        <div>
+                          <p className="text-gray-500 text-sm">Amount Paid</p>
+                          <p className="font-medium">₹{amount}</p>
+                        </div>
+                      )}
+                      {referenceId && (
+                        <div>
+                          <p className="text-gray-500 text-sm">Reference ID</p>
+                          <p className="font-medium">{referenceId}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {bookingDetails ? (
+                    <BookingSuccessView
+                      referenceId={referenceId}
+                      bookingDetails={bookingDetails}
+                    />
+                  ) : (
+                    <div className="text-center py-6">
+                      <p className="mb-4">Your payment has been successfully processed.</p>
+                      <p className="mb-6 text-gray-600">
+                        You will receive a confirmation email shortly with your booking details.
+                      </p>
+                      <Button onClick={() => navigate('/')}>Return to Home</Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-6 text-center">
+                  <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>
+                  <p className="mb-4">Order ID: <strong>{orderId || "N/A"}</strong></p>
+                  <p className="mb-6">Please save these details for your reference when contacting support.</p>
+                  <Button onClick={() => navigate('/')}>Return to Home</Button>
+                </div>
+              )}
+            </Card>
           </div>
         ) : (!referenceId && !bookingDetails && !paymentId) ? (
           <div className="flex flex-col items-center justify-center px-4 py-8">
