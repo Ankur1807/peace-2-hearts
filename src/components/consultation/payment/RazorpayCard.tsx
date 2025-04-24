@@ -34,8 +34,26 @@ const RazorpayCard: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Razorpay Badge */}
+      <div className="mt-4 flex justify-center">
+        <a 
+          href="https://razorpay.com/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-block"
+        >
+          <img 
+            referrerPolicy="origin" 
+            src="https://badges.razorpay.com/badge-light.png" 
+            style={{ height: '45px', width: '113px' }} 
+            alt="Razorpay | Payment Gateway | Neobank" 
+          />
+        </a>
+      </div>
     </Card>
   );
 };
 
 export default RazorpayCard;
+
