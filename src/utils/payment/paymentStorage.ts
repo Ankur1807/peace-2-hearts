@@ -123,7 +123,7 @@ export const forcePaymentSave = async (
       return true; // Already saved
     }
     
-    // Use the direct implementation without creating a SavePaymentParams object
+    // Use direct function call with separate parameters to avoid type recursion
     return await savePaymentDirectly(paymentId, orderId, amount, consultationId);
   } catch (err) {
     console.error('Exception in forcePaymentSave:', err);
