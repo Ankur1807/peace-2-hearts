@@ -115,7 +115,7 @@ export type Database = {
           client_email: string | null
           client_name: string | null
           client_phone: string | null
-          consultant_id: string
+          consultant_id: string | null
           consultation_type: string
           created_at: string
           date: string | null
@@ -126,13 +126,13 @@ export type Database = {
           time_slot: string
           timeframe: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           client_email?: string | null
           client_name?: string | null
           client_phone?: string | null
-          consultant_id: string
+          consultant_id?: string | null
           consultation_type: string
           created_at?: string
           date?: string | null
@@ -143,13 +143,13 @@ export type Database = {
           time_slot: string
           timeframe?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           client_email?: string | null
           client_name?: string | null
           client_phone?: string | null
-          consultant_id?: string
+          consultant_id?: string | null
           consultation_type?: string
           created_at?: string
           date?: string | null
@@ -160,7 +160,7 @@ export type Database = {
           time_slot?: string
           timeframe?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
