@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { PersonalDetails } from '@/utils/types';
@@ -107,6 +108,7 @@ export function useConsultationBooking() {
     setTimeSlot,
     setTimeframe,
     setTotalPrice,
+    setIsProcessing, // Explicitly export this function
     
     // Actions
     handlePersonalDetailsChange,

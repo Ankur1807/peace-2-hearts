@@ -12,7 +12,7 @@ import BookingFormContainer from '@/components/consultation/BookingFormContainer
 import ConsultationInitializer from '@/components/consultation/ConsultationInitializer';
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast'; // Fixed import path
+import { useToast } from '@/hooks/use-toast';
 
 const BookConsultation = () => {
   const [searchParams] = useSearchParams();
@@ -33,7 +33,7 @@ const BookConsultation = () => {
     showPaymentStep,
     setShowPaymentStep,
     isProcessing,
-    setIsProcessing: setProcessingState // Rename to avoid conflict with prop name
+    setIsProcessing
   } = bookingState;
 
   const navigate = useNavigate();
@@ -104,8 +104,7 @@ const BookConsultation = () => {
             <BookingFormContainer 
               bookingState={{
                 ...bookingState,
-                handlePaymentSubmit,
-                setIsProcessing: setProcessingState // Pass the correct function
+                handlePaymentSubmit
               }}
             />
           </>

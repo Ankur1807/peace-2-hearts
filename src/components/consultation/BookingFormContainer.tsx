@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 import ConsultationDetailsForm from './ConsultationDetailsForm';
@@ -27,6 +28,7 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
     personalDetails,
     handlePersonalDetailsChange,
     isProcessing,
+    setIsProcessing,
     pricing,
     totalPrice,
     handleConfirmBooking
