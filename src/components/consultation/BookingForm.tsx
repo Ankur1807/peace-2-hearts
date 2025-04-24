@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PersonalDetails } from '@/utils/types';
 import ServiceSection from './form/ServiceSection';
 import DateTimeSection from './form/DateTimeSection';
@@ -8,6 +8,7 @@ import PricingSection from './form/PricingSection';
 import FormActions from './FormActions';
 import { isFormValid } from './form/ValidationHelper';
 import { Card } from '@/components/ui/card';
+import { motion } from 'framer-motion';
 
 interface BookingFormProps {
   serviceCategory: string;
@@ -48,6 +49,27 @@ const BookingForm: React.FC<BookingFormProps> = ({
   totalPrice,
   onSubmit
 }) => {
+  // Track which step the user is on
+  const [currentStep, setCurrentStep] = useState(1);
+  
+  // Update step based on user selections
+  useEffect(() => {
+    if (selectedServices.length > 0 && currentStep === 1) {
+      setCurrentStep(2);
+    }
+  }, [selectedServices, currentStep]);
+
+  useEffect(() => {
+    if ((date && timeSlot) || (serviceCategory === 'holistic' && timeframe)) {
+      if (currentStep === 2) setCurrentStep(3);
+    }
+  }, [date, timeSlot, timeframe, serviceCategory, currentStep]);
+
+  const fadeInAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  };
+
   return (
     <form 
       onSubmit={(e) => {
@@ -73,41 +95,65 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </div>
         </Card>
         
-        <Card className="overflow-hidden border-0 shadow-lg">
-          <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
-            <h3 className="text-xl font-semibold text-white">Choose Your Time</h3>
-          </div>
-          <div className="p-6">
-            <DateTimeSection
-              serviceCategory={serviceCategory}
-              date={date}
-              setDate={setDate}
-              timeSlot={timeSlot}
-              setTimeSlot={setTimeSlot}
-              timeframe={timeframe}
-              setTimeframe={setTimeframe}
-            />
-          </div>
-        </Card>
+        {currentStep >= 2 && (
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeInAnimation}
+          >
+            <Card className="overflow-hidden border-0 shadow-lg">
+              <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
+                <h3 className="text-xl font-semibold text-white">Choose Your Time</h3>
+              </div>
+              <div className="p-6">
+                <DateTimeSection
+                  serviceCategory={serviceCategory}
+                  date={date}
+                  setDate={setDate}
+                  timeSlot={timeSlot}
+                  setTimeSlot={setTimeSlot}
+                  timeframe={timeframe}
+                  setTimeframe={setTimeframe}
+                />
+              </div>
+            </Card>
+          </motion.div>
+        )}
         
-        <Card className="overflow-hidden border-0 shadow-lg">
-          <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
-            <h3 className="text-xl font-semibold text-white">Your Information</h3>
-          </div>
-          <div className="p-6">
-            <PersonalDetailsFields 
-              personalDetails={personalDetails}
-              handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
-            />
-          </div>
-        </Card>
+        {currentStep >= 3 && (
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeInAnimation}
+          >
+            <Card className="overflow-hidden border-0 shadow-lg">
+              <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
+                <h3 className="text-xl font-semibold text-white">Your Information</h3>
+              </div>
+              <div className="p-6">
+                <PersonalDetailsFields 
+                  personalDetails={personalDetails}
+                  handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
+                />
+              </div>
+            </Card>
+          </motion.div>
+        )}
       </div>
       
-      <PricingSection
-        selectedServices={selectedServices}
-        pricing={pricing}
-        totalPrice={totalPrice}
-      />
+      {currentStep >= 3 && (
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeInAnimation}
+        >
+          <PricingSection
+            selectedServices={selectedServices}
+            pricing={pricing}
+            totalPrice={totalPrice}
+          />
+        </motion.div>
+      )}
       
       <FormActions 
         isFormValid={isFormValid(
