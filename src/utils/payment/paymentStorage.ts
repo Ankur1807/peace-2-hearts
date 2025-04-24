@@ -71,8 +71,15 @@ export const forcePaymentSave = async (params: SavePaymentParams): Promise<boole
       return true; // Already saved
     }
     
-    // Call savePaymentDetails directly but with a type assertion to break the cycle
-    return await savePaymentDetails({...params} as SavePaymentParams);
+    // Break the type recursion by using a type assertion and creating a new object
+    const paymentParams = {
+      paymentId: params.paymentId,
+      orderId: params.orderId,
+      amount: params.amount,
+      consultationId: params.consultationId
+    };
+    
+    return await savePaymentDetails(paymentParams as SavePaymentParams);
   } catch (err) {
     console.error('Exception in forcePaymentSave:', err);
     return false;
