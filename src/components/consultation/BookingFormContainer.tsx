@@ -62,8 +62,11 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
   
   // Handle personal details changes
   const handlePersonalDetailsFieldChange = React.useCallback((field: string, value: string) => {
-    handlePersonalDetailsChange(field, value);
-  }, [handlePersonalDetailsChange]);
+    handlePersonalDetailsChange({
+      ...personalDetails,
+      [field]: value
+    });
+  }, [handlePersonalDetailsChange, personalDetails]);
   
   return (
     <div className="container mx-auto px-4 py-10">
@@ -72,6 +75,7 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
           serviceCategory={serviceCategory}
           setServiceCategory={setServiceCategory}
           selectedServices={selectedServices}
+          setSelectedServices={setSelectedServices}
           handleServiceSelection={handleServiceSelection}
           handlePackageSelection={handlePackageSelection}
           date={date}

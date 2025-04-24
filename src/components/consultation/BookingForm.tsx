@@ -26,7 +26,7 @@ interface BookingFormProps {
   isProcessing: boolean;
   pricing: Map<string, number>;
   totalPrice: number;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: () => void;
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
@@ -52,7 +52,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     <form 
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(e);
+        onSubmit();
       }}
       className="space-y-8"
     >

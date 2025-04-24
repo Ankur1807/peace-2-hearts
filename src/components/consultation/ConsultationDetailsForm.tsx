@@ -1,6 +1,7 @@
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import BookingForm from './BookingForm';
+import { PersonalDetails } from '@/utils/types';
 
 interface ConsultationDetailsFormProps {
   serviceCategory: string;
