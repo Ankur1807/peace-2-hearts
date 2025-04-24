@@ -4,7 +4,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { CreateOrderParams, OrderResponse, VerifyPaymentParams, SavePaymentParams } from "./razorpayTypes";
-import { savePaymentDetails, forcePaymentSave } from "./paymentStorage";
+import { savePaymentDetails, checkPaymentExists } from "./paymentStorage";
 import { loadRazorpayScript, isRazorpayAvailable } from "./razorpayLoader";
 
 /**
@@ -117,10 +117,9 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
 };
 
 /**
- * Save payment details to the database
- * Re-export from paymentStorage for backward compatibility
+ * Export payment storage functions
  */
-export { savePaymentDetails };
+export { savePaymentDetails, checkPaymentExists };
 
 /**
  * Verify payment by ID and update records if necessary
@@ -150,13 +149,13 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
       const amount = data.payment.amount / 100; // Convert from paise to rupees
       const consultationId = data.payment.notes?.consultationId || 'recovered-payment';
       
-      // Using individual parameters instead of object to avoid type recursion
-      const saved = await forcePaymentSave(
+      // Save payment details
+      const saved = await savePaymentDetails({
         paymentId,
         orderId,
         amount,
         consultationId
-      );
+      });
       
       console.log(`Recovery payment save result: ${saved}`);
       return true;

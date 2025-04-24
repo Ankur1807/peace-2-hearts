@@ -1,7 +1,10 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-interface PaymentDetails {
+/**
+ * Interface for payment details
+ */
+export interface PaymentDetails {
   paymentId: string;
   orderId: string;
   amount: number;
