@@ -1,9 +1,8 @@
-
 /**
  * Utility functions for Razorpay integration
  */
 import { supabase } from "@/integrations/supabase/client";
-import { CreateOrderParams, OrderResponse, VerifyPaymentParams } from "./razorpayTypes";
+import { CreateOrderParams, OrderResponse, VerifyPaymentParams, SavePaymentParams } from "./razorpayTypes";
 import { savePaymentDetails, forcePaymentSave } from "./paymentStorage";
 import { loadRazorpayScript, isRazorpayAvailable } from "./razorpayLoader";
 
@@ -47,7 +46,17 @@ export const createRazorpayOrder = async (params: CreateOrderParams): Promise<Or
     return { 
       success: false, 
       error: 'Failed to create order',
-      details: err instanceof Error ? err.message : String(err)
+      details: err instanceof Error ? { 
+        id: 'error', 
+        amount: 0, 
+        currency: 'INR', 
+        message: err.message 
+      } : { 
+        id: 'error', 
+        amount: 0, 
+        currency: 'INR', 
+        message: String(err) 
+      }
     };
   }
 };
@@ -167,4 +176,4 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
 export { loadRazorpayScript, isRazorpayAvailable };
 
 // Re-export types for compatibility with existing code
-export type { CreateOrderParams, OrderResponse, VerifyPaymentParams } from './razorpayTypes';
+export type { CreateOrderParams, OrderResponse, VerifyPaymentParams, SavePaymentParams } from './razorpayTypes';
