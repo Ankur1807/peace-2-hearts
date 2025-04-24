@@ -18,21 +18,16 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
     <div className="space-y-6">
       <ConfirmationHeader />
       
-      {referenceId && (
-        <BookingReference referenceId={referenceId} />
-      )}
-      
-      {bookingDetails && (
-        <BookingDetailsCard 
-          services={bookingDetails.services}
-          date={bookingDetails.date}
-          timeSlot={bookingDetails.timeSlot}
-          timeframe={bookingDetails.timeframe}
-          packageName={bookingDetails.packageName}
-          isHolisticPackage={isHolisticPackage}
-          amount={bookingDetails.amount}
-        />
-      )}
+      <BookingDetailsCard 
+        services={bookingDetails?.services || []}
+        date={bookingDetails?.date}
+        timeSlot={bookingDetails?.timeSlot}
+        timeframe={bookingDetails?.timeframe}
+        packageName={bookingDetails?.packageName}
+        isHolisticPackage={isHolisticPackage}
+        amount={bookingDetails?.amount}
+        referenceId={referenceId || undefined}
+      />
       
       <NextSteps />
       
