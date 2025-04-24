@@ -106,6 +106,7 @@ const savePaymentDirectly = async (
 /**
  * Force save payment details even when previous attempts failed
  * This is a fallback mechanism for reconciliation
+ * Using primitive types to avoid circular references
  */
 export const forcePaymentSave = async (
   paymentId: string, 
@@ -126,8 +127,13 @@ export const forcePaymentSave = async (
       return true; // Already saved
     }
     
-    // Direct call to avoid any type recursion
-    return savePaymentDirectly(paymentId, orderId, amount, consultationId);
+    // Directly call the function with primitive parameters to avoid type recursion
+    return await savePaymentDirectly(
+      paymentId, 
+      orderId, 
+      amount, 
+      consultationId
+    );
   } catch (err) {
     console.error('Exception in forcePaymentSave:', err);
     return false;
