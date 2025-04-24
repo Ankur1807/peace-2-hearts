@@ -51,13 +51,62 @@ export const savePaymentDetails = async (params: SavePaymentParams): Promise<boo
   }
 };
 
+// This is a separate implementation to avoid recursive type issues
+const savePaymentDirectly = async (
+  paymentId: string,
+  orderId: string,
+  amount: number,
+  consultationId: string
+): Promise<boolean> => {
+  try {
+    console.log("Direct saving payment details:", { paymentId, orderId, amount, consultationId });
+    
+    // Insert payment record into payments table
+    const { data, error } = await supabase
+      .from('payments')
+      .insert({
+        payment_id: paymentId,
+        order_id: orderId,
+        amount: amount,
+        consultation_id: consultationId,
+        status: 'completed'
+      });
+    
+    if (error) {
+      console.error('Error directly saving payment details:', error);
+      return false;
+    }
+    
+    console.log("Payment details directly saved successfully:", data);
+    
+    // Update consultation status if the consultation ID exists
+    if (consultationId) {
+      const { error: updateError } = await supabase
+        .from('consultations')
+        .update({ status: 'paid', payment_id: paymentId })
+        .eq('reference_id', consultationId);
+      
+      if (updateError) {
+        console.error('Error updating consultation status in direct save:', updateError);
+      } else {
+        console.log("Consultation status updated successfully in direct save");
+      }
+    }
+    
+    return true;
+  } catch (err) {
+    console.error('Exception in direct payment save:', err);
+    return false;
+  }
+};
+
 /**
  * Force save payment details even when previous attempts failed
  * This is a fallback mechanism for reconciliation
  */
 export const forcePaymentSave = async (params: SavePaymentParams): Promise<boolean> => {
   try {
-    const { paymentId } = params;
+    const { paymentId, orderId, amount, consultationId } = params;
     
     // Check if the payment already exists
     const { data: existingPayment } = await supabase
@@ -71,15 +120,8 @@ export const forcePaymentSave = async (params: SavePaymentParams): Promise<boole
       return true; // Already saved
     }
     
-    // Break the type recursion by using a type assertion and creating a new object
-    const paymentParams = {
-      paymentId: params.paymentId,
-      orderId: params.orderId,
-      amount: params.amount,
-      consultationId: params.consultationId
-    };
-    
-    return await savePaymentDetails(paymentParams as SavePaymentParams);
+    // Use the separate implementation to avoid type recursion
+    return await savePaymentDirectly(paymentId, orderId, amount, consultationId);
   } catch (err) {
     console.error('Exception in forcePaymentSave:', err);
     return false;
