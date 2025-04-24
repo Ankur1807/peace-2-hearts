@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for Razorpay integration
  */
@@ -119,7 +120,7 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
  * Save payment details to the database
  * Re-export from paymentStorage for backward compatibility
  */
-export { savePaymentDetails, forcePaymentSave };
+export { savePaymentDetails };
 
 /**
  * Verify payment by ID and update records if necessary
@@ -149,13 +150,8 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
       const amount = data.payment.amount / 100; // Convert from paise to rupees
       const consultationId = data.payment.notes?.consultationId || 'recovered-payment';
       
-      // Use forcePaymentSave for maximum reliability
-      const saved = await forcePaymentSave({
-        paymentId,
-        orderId,
-        amount,
-        consultationId
-      });
+      // Use forcePaymentSave with the new signature
+      const saved = await forcePaymentSave(paymentId, orderId, amount, consultationId);
       
       console.log(`Recovery payment save result: ${saved}`);
       return true;

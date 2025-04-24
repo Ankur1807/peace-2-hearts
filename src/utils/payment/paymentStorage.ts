@@ -104,10 +104,8 @@ const savePaymentDirectly = async (
  * Force save payment details even when previous attempts failed
  * This is a fallback mechanism for reconciliation
  */
-export const forcePaymentSave = async (params: SavePaymentParams): Promise<boolean> => {
+export const forcePaymentSave = async (paymentId: string, orderId: string, amount: number, consultationId: string): Promise<boolean> => {
   try {
-    const { paymentId, orderId, amount, consultationId } = params;
-    
     // Check if the payment already exists
     const { data: existingPayment } = await supabase
       .from('payments')
