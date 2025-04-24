@@ -25,6 +25,17 @@ export const saveConsultation = async (
     const referenceId = generateReferenceId();
     console.log("Generated reference ID:", referenceId);
 
+    // Get current authenticated user, if any
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData?.user?.id || '00000000-0000-0000-0000-000000000000'; // Default anonymous user ID
+    
+    // Get default consultant ID (for now use a placeholder)
+    // In a real scenario, this would come from a selection or assignment logic
+    const defaultConsultantId = '00000000-0000-0000-0000-000000000000'; // Replace with actual default consultant logic
+    
+    console.log("Using user ID:", userId);
+    console.log("Using consultant ID:", defaultConsultantId);
+
     // Prepare the consultation data
     const consultationData = {
       consultation_type: consultationType,
@@ -36,7 +47,9 @@ export const saveConsultation = async (
       client_phone: personalDetails.phone,
       status: 'scheduled',
       message: personalDetails.message,
-      reference_id: referenceId
+      reference_id: referenceId,
+      user_id: userId,
+      consultant_id: defaultConsultantId
     };
     
     console.log("Saving consultation to Supabase:", consultationData);
@@ -60,4 +73,3 @@ export const saveConsultation = async (
     throw error;
   }
 };
-
