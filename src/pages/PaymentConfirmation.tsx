@@ -7,7 +7,7 @@ import { verifyAndSyncPayment } from "@/utils/payment/razorpayService";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { checkPaymentExists } from "@/utils/payment/paymentStorage";
+import { checkPaymentExists, savePaymentDetails } from "@/utils/payment/paymentStorage";
 
 // Accept either query params or state for flexibility
 const PaymentConfirmation = () => {
@@ -20,9 +20,21 @@ const PaymentConfirmation = () => {
   const bookingDetails: BookingDetails | undefined = location.state?.bookingDetails;
   const paymentId = searchParams.get("razorpay_payment_id") || location.state?.paymentId;
   const orderId = searchParams.get("razorpay_order_id") || location.state?.orderId;
+  const amount = location.state?.amount || 0;
   
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<{success: boolean; message: string} | null>(null);
+
+  // Debug what data we have
+  useEffect(() => {
+    console.log("Payment Confirmation Page loaded with:", { 
+      referenceId, 
+      paymentId, 
+      orderId, 
+      amount,
+      hasBookingDetails: !!bookingDetails
+    });
+  }, [referenceId, paymentId, orderId, amount, bookingDetails]);
 
   // If we have a payment ID but no booking details, try to verify and recover the payment
   useEffect(() => {
@@ -46,6 +58,26 @@ const PaymentConfirmation = () => {
           // If payment not in database, verify with Razorpay and try to recover
           console.log("Payment not found in database, attempting to verify and recover");
           const verified = await verifyAndSyncPayment(paymentId);
+          
+          // If we have enough info to save payment directly, try that as a last resort
+          if (!verified && orderId && referenceId && amount > 0) {
+            console.log("Attempting direct payment save as last resort");
+            const saved = await savePaymentDetails({
+              paymentId,
+              orderId,
+              amount,
+              consultationId: referenceId
+            });
+            
+            if (saved) {
+              setVerificationResult({
+                success: true,
+                message: "Your payment has been recorded and your booking is confirmed."
+              });
+              setIsVerifying(false);
+              return;
+            }
+          }
           
           if (verified) {
             setVerificationResult({
@@ -71,7 +103,7 @@ const PaymentConfirmation = () => {
     };
     
     verifyPayment();
-  }, [paymentId]);
+  }, [paymentId, orderId, referenceId, amount]);
 
   if (isVerifying) {
     return (

@@ -15,11 +15,15 @@ export const savePaymentDetails = async (params: SavePaymentParams): Promise<boo
     console.log("Saving payment details:", { paymentId, orderId, amount, consultationId });
     
     // First check if payment record already exists to avoid duplicates
-    const { data: existingPayment } = await supabase
+    const { data: existingPayment, error: checkError } = await supabase
       .from('payments')
       .select('*')
       .eq('transaction_id', paymentId)
-      .single();
+      .maybeSingle();
+    
+    if (checkError) {
+      console.error('Error checking for existing payment:', checkError);
+    }
     
     if (existingPayment) {
       console.log("Payment already exists in database:", existingPayment);
@@ -64,15 +68,17 @@ export const savePaymentDetails = async (params: SavePaymentParams): Promise<boo
         currency: 'INR'
       });
       
-      if (!error) {
-        console.log("Payment details saved successfully on retry");
-        return true;
+      if (error) {
+        console.error('Error during payment save retry:', error);
+        return false;
       }
+      
+      console.log("Payment details saved successfully on retry");
+      return true;
     } catch (retryErr) {
       console.error('Exception during payment save retry:', retryErr);
+      return false;
     }
-    
-    return false;
   }
 };
 
@@ -80,6 +86,11 @@ export const savePaymentDetails = async (params: SavePaymentParams): Promise<boo
  * Checks if a payment exists in the database
  */
 export const checkPaymentExists = async (paymentId: string): Promise<boolean> => {
+  if (!paymentId) {
+    console.error("Cannot check for payment with empty payment ID");
+    return false;
+  }
+  
   try {
     console.log("Checking if payment exists:", paymentId);
     
@@ -107,6 +118,11 @@ export const checkPaymentExists = async (paymentId: string): Promise<boolean> =>
  */
 export const forcePaymentSave = async (params: SavePaymentParams): Promise<boolean> => {
   const { paymentId, orderId, amount, consultationId } = params;
+  
+  if (!paymentId) {
+    console.error("Cannot save payment with empty payment ID");
+    return false;
+  }
   
   try {
     console.log("Force saving payment details:", { paymentId, orderId, amount, consultationId });

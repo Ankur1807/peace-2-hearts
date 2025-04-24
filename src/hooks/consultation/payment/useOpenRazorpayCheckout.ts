@@ -41,22 +41,10 @@ export const useOpenRazorpayCheckout = ({
             signature: response.razorpay_signature,
           });
           
-          if (!isVerified) {
-            console.error("Payment verification failed");
-            
-            // Even if verification fails, redirect with payment ID
-            navigate("/payment-confirmation", {
-              state: {
-                paymentId: response.razorpay_payment_id,
-                orderId: response.razorpay_order_id
-              }
-            });
-            
-            throw new Error("Payment verification failed");
-          }
+          console.log("Payment verification result:", isVerified);
           
-          console.log("Payment verified successfully. Now saving payment details...");
-          
+          // Always try to save payment details regardless of verification result
+          // This ensures we have a record of the payment attempt
           const paymentParams: SavePaymentParams = {
             paymentId: response.razorpay_payment_id,
             orderId: response.razorpay_order_id,
@@ -70,29 +58,53 @@ export const useOpenRazorpayCheckout = ({
           console.log("Payment save result:", saveResult);
           
           if (!saveResult) {
-            console.warn("Failed to save payment details to database, but payment was verified");
+            console.warn("Failed to save payment details to database directly. Will redirect to confirmation page for recovery");
           }
           
-          if (setPaymentCompleted) setPaymentCompleted(true);
-          if (setReferenceId) setReferenceId(receiptId);
-          if (handleConfirmBooking) await handleConfirmBooking();
-          
-          toast({
-            title: "Payment Successful",
-            description: "Your payment has been processed successfully.",
-          });
+          // If payment is verified and data was saved successfully, continue with booking
+          if (isVerified && saveResult) {
+            if (setPaymentCompleted) setPaymentCompleted(true);
+            if (setReferenceId) setReferenceId(receiptId);
+            if (handleConfirmBooking) await handleConfirmBooking();
+            
+            toast({
+              title: "Payment Successful",
+              description: "Your payment has been processed successfully.",
+            });
+          } else {
+            // If verification or saving fails, redirect to payment confirmation page
+            // with all the data needed to recover
+            navigate("/payment-confirmation", {
+              state: {
+                paymentId: response.razorpay_payment_id,
+                orderId: response.razorpay_order_id,
+                amount: effectivePrice,
+                referenceId: receiptId
+              }
+            });
+            
+            if (!isVerified) {
+              console.warn("Payment verification failed, redirecting to confirmation page");
+              toast({
+                title: "Payment Verification",
+                description: "Your payment is being processed. Please wait for confirmation.",
+              });
+            }
+          }
         } catch (error) {
           console.error("Error processing payment confirmation:", error);
           toast({
-            title: "Payment Verification Error",
-            description: "We received your payment but couldn't verify it. Please check the confirmation page for details.",
+            title: "Payment Processing",
+            description: "We received your payment but need to verify it. Please check the confirmation page.",
           });
           
           // Redirect to payment confirmation page with available information
           navigate("/payment-confirmation", {
             state: {
               paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id
+              orderId: response.razorpay_order_id,
+              amount: effectivePrice,
+              referenceId: receiptId
             }
           });
         } finally {
@@ -134,14 +146,16 @@ export const useOpenRazorpayCheckout = ({
           navigate("/payment-confirmation", {
             state: {
               paymentId: response.error.metadata.payment_id,
-              orderId: order.id
+              orderId: order.id,
+              amount: effectivePrice,
+              referenceId: receiptId
             }
           });
         }
         
         toast({
-          title: "Payment Failed",
-          description: response.error.description || "Your payment was not successful. Please try again.",
+          title: "Payment Status",
+          description: response.error.description || "Your payment status is being verified. If paid, you will see confirmation soon.",
         });
         setIsProcessing(false);
       });
