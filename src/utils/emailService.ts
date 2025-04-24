@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 interface ContactFormData {
@@ -60,17 +61,17 @@ export async function sendContactEmail(formData: ContactFormData): Promise<boole
 export async function sendBookingConfirmationEmail(bookingDetails: BookingDetails): Promise<boolean> {
   try {
     // Create a serialized version of booking details for API transmission
+    // We need to make a shallow copy WITHOUT the date property first
+    const { date, ...restDetails } = bookingDetails;
+    
+    // Then create our serialized object with the correct date type
     const serializedBookingDetails: SerializedBookingDetails = {
-      ...bookingDetails
+      ...restDetails
     };
     
     // Convert Date object to ISO string for proper transmission
-    if (bookingDetails.date instanceof Date) {
-      serializedBookingDetails.date = bookingDetails.date.toISOString();
-    } else {
-      // If date is undefined, keep it undefined
-      // This ensures we don't try to call toISOString on undefined
-      serializedBookingDetails.date = undefined;
+    if (date instanceof Date) {
+      serializedBookingDetails.date = date.toISOString();
     }
     
     console.log('Sending booking confirmation with date:', serializedBookingDetails.date);
