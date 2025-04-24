@@ -40,7 +40,10 @@ export function usePaymentFlow({
   // Function to proceed to payment step
   const proceedToPayment = useCallback(() => {
     // Only include if setShowPaymentStep is provided
-    if (!setShowPaymentStep) return;
+    if (!setShowPaymentStep) {
+      console.error("setShowPaymentStep not provided to usePaymentFlow");
+      return;
+    }
     
     console.log("proceedToPayment called with:", {
       personalDetails: state.personalDetails,
@@ -50,6 +53,11 @@ export function usePaymentFlow({
     // Validate form first
     if (!validatePersonalDetails(state.personalDetails) || 
         !validateServiceSelection(state.selectedServices)) {
+      console.error("Form validation failed:", {
+        personalDetails: validatePersonalDetails(state.personalDetails),
+        serviceSelection: validateServiceSelection(state.selectedServices)
+      });
+      
       toast({
         title: "Form Incomplete",
         description: "Please fill out all required fields before proceeding to payment.",
@@ -58,14 +66,20 @@ export function usePaymentFlow({
       return;
     }
     
-    console.log("Form validation passed, proceeding to payment step");
-    setShowPaymentStep(true);
+    // Force setShowPaymentStep to true to ensure the component updates
+    console.log("Form validation passed, proceeding to payment step - SETTING showPaymentStep to TRUE");
+    setTimeout(() => {
+      setShowPaymentStep(true);
+    }, 0);
   }, [state.personalDetails, state.selectedServices, toast, setShowPaymentStep, validatePersonalDetails, validateServiceSelection]);
 
   // Process payment using Razorpay
   const processPayment = useCallback(async () => {
     // Only include if necessary setters are provided
-    if (!setIsProcessing || !handleConfirmBooking) return;
+    if (!setIsProcessing || !handleConfirmBooking) {
+      console.error("Required handlers not provided to processPayment");
+      return;
+    }
     
     console.log("processPayment called with:", {
       selectedServices: state.selectedServices,
@@ -84,6 +98,7 @@ export function usePaymentFlow({
     
     // Validate payment amount for non-test services
     if (!isTestService && !validatePaymentAmount(effectivePrice)) {
+      console.error("Invalid payment amount:", effectivePrice);
       toast({
         title: "Invalid Amount",
         description: "Cannot process payment for zero amount.",

@@ -23,13 +23,12 @@ const FormActions: React.FC<FormActionsProps> = ({
         </p>
       </div>
       <Button 
-        type="submit" 
+        type="button" // Change from "submit" to "button" to prevent form submission
         className="bg-peacefulBlue hover:bg-peacefulBlue/90 shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
         disabled={!isFormValid || isProcessing}
-        onClick={(e) => {
-          console.log("Payment button clicked in FormActions");
+        onClick={() => {
+          console.log("Payment button clicked in FormActions with direct handler");
           if (onProceed) {
-            e.preventDefault();
             onProceed();
           }
         }}

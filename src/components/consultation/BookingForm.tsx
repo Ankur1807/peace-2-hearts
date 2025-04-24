@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PersonalDetails } from '@/utils/types';
 import ServiceSection from './form/ServiceSection';
@@ -67,17 +68,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form submitted in BookingForm");
+  const handleProceed = () => {
+    console.log("handleProceed called in BookingForm");
+    // Prevent default form submission - direct action
     onSubmit();
   };
 
   return (
-    <form 
-      onSubmit={handleFormSubmit}
-      className="space-y-8"
-    >
+    <div className="space-y-8">
       <div className="grid grid-cols-1 gap-8">
         <Card className="overflow-hidden border-0 shadow-lg">
           <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
@@ -166,9 +164,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
         )} 
         isProcessing={isProcessing} 
         totalPrice={totalPrice}
-        onProceed={onSubmit}
+        onProceed={handleProceed}
       />
-    </form>
+    </div>
   );
 };
 
