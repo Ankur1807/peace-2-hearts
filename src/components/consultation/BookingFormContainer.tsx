@@ -1,11 +1,12 @@
-
 import React from 'react';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 import ConsultationDetailsForm from './ConsultationDetailsForm';
 import { useBookingState } from './booking/useBookingState';
 
 interface BookingFormContainerProps {
-  bookingState: ConsultationBookingHook;
+  bookingState: ConsultationBookingHook & {
+    handlePaymentSubmit?: (e: React.FormEvent) => Promise<void>;
+  };
 }
 
 const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingState }) => {
@@ -89,7 +90,11 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
           isProcessing={isProcessing}
           pricing={pricing || new Map()}
           totalPrice={totalPrice}
-          onSubmit={handleConfirmBooking}
+          onSubmit={() => {
+            if (bookingState.proceedToPayment) {
+              bookingState.proceedToPayment();
+            }
+          }}
         />
       </div>
     </div>

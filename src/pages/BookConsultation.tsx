@@ -11,6 +11,7 @@ import BookingFormContainer from '@/components/consultation/BookingFormContainer
 import ConsultationInitializer from '@/components/consultation/ConsultationInitializer';
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/components/ui/toast';
 
 const BookConsultation = () => {
   const [searchParams] = useSearchParams();
@@ -27,10 +28,15 @@ const BookConsultation = () => {
     serviceCategory,
     selectedServices,
     personalDetails,
-    totalPrice
+    totalPrice,
+    showPaymentStep,
+    setShowPaymentStep,
+    isProcessing,
+    setIsProcessing
   } = bookingState;
 
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const createBookingDetails = (): BookingDetails => ({
     clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
@@ -56,6 +62,20 @@ const BookConsultation = () => {
     }
   }, [submitted, referenceId]);
 
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await bookingState.processPayment();
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({
+        title: "Payment Error",
+        description: "There was an error processing your payment. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (submitted && referenceId) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -67,12 +87,9 @@ const BookConsultation = () => {
   return (
     <>
       <SEO 
-        title={submitted ? "Consultation Confirmed" : "Book a Consultation"}
-        description={submitted 
-          ? "Your consultation with Peace2Hearts has been successfully booked. We look forward to supporting you on your relationship journey."
-          : "Schedule a consultation with our relationship counselors or legal experts. Take the first step towards peace and clarity in your relationship journey."
-        }
-        keywords="book relationship counseling, legal consultation appointment, therapy session, mental health support"
+        title="Book a Consultation"
+        description="Schedule a consultation with our relationship counselors or legal experts."
+        keywords="book relationship counseling, legal consultation appointment, therapy session"
       />
       <Navigation />
       <main className="py-16 md:py-24">
@@ -83,7 +100,12 @@ const BookConsultation = () => {
               subServiceParam={subServiceParam}
               bookingState={bookingState}
             />
-            <BookingFormContainer bookingState={bookingState} />
+            <BookingFormContainer 
+              bookingState={{
+                ...bookingState,
+                handlePaymentSubmit
+              }}
+            />
           </>
         ) : (
           <BookingSuccessView 

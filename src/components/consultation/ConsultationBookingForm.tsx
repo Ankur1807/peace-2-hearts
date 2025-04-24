@@ -6,7 +6,9 @@ import PaymentStepContainer from './PaymentStepContainer';
 import { Card } from '@/components/ui/card';
 
 interface ConsultationBookingFormProps {
-  bookingState: ConsultationBookingHook;
+  bookingState: ConsultationBookingHook & {
+    handlePaymentSubmit: (e: React.FormEvent) => Promise<void>;
+  };
 }
 
 const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ bookingState }) => {
@@ -17,21 +19,9 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     processPayment,
     isProcessing,
     pricing,
-    totalPrice
+    totalPrice,
+    handlePaymentSubmit
   } = bookingState;
-
-  const getFormattedConsultationType = () => {
-    if (!selectedServices || selectedServices.length === 0) {
-      return "Consultation";
-    }
-    return selectedServices[0];
-  };
-
-  const handlePaymentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(`Submitting payment with total price: ${totalPrice}`);
-    processPayment();
-  };
 
   return (
     <div className="relative">
@@ -47,8 +37,8 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
             setShowPaymentStep={setShowPaymentStep}
             handlePaymentSubmit={handlePaymentSubmit}
             isProcessing={isProcessing}
-            totalPrice={totalPrice}
             pricing={pricing}
+            totalPrice={totalPrice}
           />
         </Card>
       ) : (
