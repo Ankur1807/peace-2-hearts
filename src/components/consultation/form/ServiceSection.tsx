@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ServiceCategorySelector from '../ServiceCategorySelector';
 import ServiceSelectionOptions from '../ServiceSelectionOptions';
@@ -21,7 +20,7 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
   handlePackageSelection,
   pricing
 }) => {
-  // Debug to verify pricing data is being passed correctly
+  // Debug to verify pricing data
   React.useEffect(() => {
     console.log('ServiceSection rendering with pricing:', {
       pricingAvailable: !!pricing,
@@ -29,14 +28,6 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
       selectedServices,
       pricingSize: pricing ? pricing.size : 0
     });
-    
-    if (pricing && pricing.size > 0) {
-      // Log a few sample prices for debugging
-      const sampleServices = ['mental-health-counselling', 'family-therapy', 'divorce'];
-      sampleServices.forEach(id => {
-        console.log(`Price for ${id}: ${pricing.get(id) || 'not available'}`);
-      });
-    }
   }, [pricing, serviceCategory, selectedServices]);
   
   return (
@@ -61,6 +52,12 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
             handlePackageSelection={handlePackageSelection}
             pricing={pricing}
           />
+
+          {serviceCategory === 'legal' && (
+            <p className="mt-4 text-sm text-gray-600 italic text-center">
+              Currently available only on Saturday and Sunday
+            </p>
+          )}
         </motion.div>
       )}
     </div>

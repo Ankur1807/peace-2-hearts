@@ -2,6 +2,7 @@
 import React from 'react';
 import DateTimePicker from '../DateTimePicker';
 import TimeframeSelector from '../TimeframeSelector';
+import { isSaturday, isSunday } from 'date-fns';
 
 interface DateTimeSectionProps {
   serviceCategory: string;
@@ -43,6 +44,16 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     return tomorrow;
   };
 
+  // Function to check if a date should be disabled
+  const isDateDisabled = (date: Date) => {
+    if (serviceCategory === 'legal') {
+      // Only allow Saturdays and Sundays for legal consultations
+      return !(isSaturday(date) || isSunday(date));
+    }
+    // For other services, only disable past dates
+    return date < getMinDate();
+  };
+
   return (
     <div className="p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">
       <h3 className="text-xl font-semibold mb-4 text-gray-800">Schedule Your Session</h3>
@@ -61,6 +72,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
           serviceCategory={serviceCategory}
           availableTimeSlots={getAvailableTimeSlots()}
           minDate={getMinDate()}
+          isDateDisabled={isDateDisabled}
         />
       )}
     </div>
