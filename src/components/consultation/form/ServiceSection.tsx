@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ServiceCategorySelector from '../ServiceCategorySelector';
 import ServiceSelectionOptions from '../ServiceSelectionOptions';
+import { motion } from 'framer-motion';
 
 interface ServiceSectionProps {
   serviceCategory: string;
@@ -39,48 +40,29 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
   }, [pricing, serviceCategory, selectedServices]);
   
   return (
-    <div className="space-y-6">
-      <Tabs
-        value={serviceCategory}
-        onValueChange={setServiceCategory}
-        className="w-full"
-      >
-        <TabsList className="grid grid-cols-3 mb-8">
-          <TabsTrigger value="mental-health">Mental Health</TabsTrigger>
-          <TabsTrigger value="legal">Legal</TabsTrigger>
-          <TabsTrigger value="holistic">Holistic Packages</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="mental-health">
+    <div className="space-y-8">
+      <ServiceCategorySelector
+        serviceCategory={serviceCategory}
+        setServiceCategory={setServiceCategory}
+      />
+      
+      {serviceCategory && (
+        <motion.div 
+          key={serviceCategory}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="mt-8"
+        >
           <ServiceSelectionOptions 
-            serviceCategory="mental-health"
+            serviceCategory={serviceCategory}
             selectedServices={selectedServices}
             handleServiceSelection={handleServiceSelection}
             handlePackageSelection={handlePackageSelection}
             pricing={pricing}
           />
-        </TabsContent>
-        
-        <TabsContent value="legal">
-          <ServiceSelectionOptions 
-            serviceCategory="legal"
-            selectedServices={selectedServices}
-            handleServiceSelection={handleServiceSelection}
-            handlePackageSelection={handlePackageSelection}
-            pricing={pricing}
-          />
-        </TabsContent>
-        
-        <TabsContent value="holistic">
-          <ServiceSelectionOptions 
-            serviceCategory="holistic"
-            selectedServices={selectedServices}
-            handleServiceSelection={handleServiceSelection}
-            handlePackageSelection={handlePackageSelection}
-            pricing={pricing}
-          />
-        </TabsContent>
-      </Tabs>
+        </motion.div>
+      )}
     </div>
   );
 };
