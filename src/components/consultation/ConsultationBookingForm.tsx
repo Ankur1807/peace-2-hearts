@@ -4,6 +4,7 @@ import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 import BookingFormContent from './booking/BookingFormContent';
 import PaymentStepContainer from './PaymentStepContainer';
 import { Card } from '@/components/ui/card';
+import { getConsultationTypeLabel } from '@/utils/consultationLabels';
 
 interface ConsultationBookingFormProps {
   bookingState: ConsultationBookingHook & {
@@ -20,8 +21,17 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
     isProcessing,
     pricing,
     totalPrice,
-    handlePaymentSubmit
+    handlePaymentSubmit,
+    serviceCategory
   } = bookingState;
+
+  // Helper function to get formatted consultation type
+  const getFormattedConsultationType = () => {
+    if (selectedServices && selectedServices.length > 0) {
+      return getConsultationTypeLabel(selectedServices[0]);
+    }
+    return getConsultationTypeLabel(serviceCategory);
+  };
 
   return (
     <div className="relative">
