@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for Razorpay integration
  */
@@ -150,7 +149,7 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
       const amount = data.payment.amount / 100; // Convert from paise to rupees
       const consultationId = data.payment.notes?.consultationId || 'recovered-payment';
       
-      // Use forcePaymentSave with the new signature
+      // Use forcePaymentSave with individual parameters (not an object)
       const saved = await forcePaymentSave(paymentId, orderId, amount, consultationId);
       
       console.log(`Recovery payment save result: ${saved}`);
