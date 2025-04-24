@@ -42,6 +42,11 @@ export function usePaymentFlow({
     // Only include if setShowPaymentStep is provided
     if (!setShowPaymentStep) return;
     
+    console.log("proceedToPayment called with:", {
+      personalDetails: state.personalDetails,
+      selectedServices: state.selectedServices
+    });
+
     // Validate form first
     if (!validatePersonalDetails(state.personalDetails) || 
         !validateServiceSelection(state.selectedServices)) {
@@ -53,6 +58,7 @@ export function usePaymentFlow({
       return;
     }
     
+    console.log("Form validation passed, proceeding to payment step");
     setShowPaymentStep(true);
   }, [state.personalDetails, state.selectedServices, toast, setShowPaymentStep, validatePersonalDetails, validateServiceSelection]);
 
@@ -60,6 +66,11 @@ export function usePaymentFlow({
   const processPayment = useCallback(async () => {
     // Only include if necessary setters are provided
     if (!setIsProcessing || !handleConfirmBooking) return;
+    
+    console.log("processPayment called with:", {
+      selectedServices: state.selectedServices,
+      totalPrice: state.totalPrice
+    });
     
     // Special handling for test service
     const isTestService = state.selectedServices.includes('test-service');
@@ -103,8 +114,10 @@ export function usePaymentFlow({
       }
       
       // Initialize payment
+      console.log("Initializing Razorpay payment with receipt ID:", receiptId);
       const { order, razorpayKey } = await initializeRazorpayPayment(receiptId);
       
+      console.log("Payment initialized, opening checkout with order:", order);
       // Open checkout
       openRazorpayCheckout(order, razorpayKey, receiptId);
       

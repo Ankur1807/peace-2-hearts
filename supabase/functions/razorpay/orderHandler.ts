@@ -12,6 +12,7 @@ export async function handleCreateOrder(
   if (!amount || !currency || !receipt) {
     console.error("Missing required parameters:", { amount, currency, receipt });
     return new Response(JSON.stringify({
+      success: false,
       error: 'Missing required parameters'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -59,8 +60,11 @@ export async function handleCreateOrder(
     // Return the successful order response with key information
     return new Response(JSON.stringify({
       success: true,
-      order: orderResult,
-      key_id: key_id // Include key_id in response
+      order_id: orderResult.id,
+      details: {
+        ...orderResult,
+        key_id: key_id  // Include key_id in response details
+      }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200
@@ -68,6 +72,7 @@ export async function handleCreateOrder(
   } catch (err) {
     console.error("Error calling Razorpay API:", err);
     return new Response(JSON.stringify({
+      success: false,
       error: 'Error communicating with Razorpay',
       details: err.message
     }), {

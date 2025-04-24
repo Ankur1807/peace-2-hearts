@@ -86,6 +86,12 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
     checkAndLoadRazorpay();
   }, []);
 
+  const handleSubmit = (e: React.FormEvent) => {
+    console.log("Payment form submitted");
+    e.preventDefault();
+    onSubmit(e);
+  };
+
   return (
     <div className="space-y-6">
       <Script 
@@ -123,16 +129,34 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         setAcceptTerms={setAcceptTerms}
       />
       
-      <PaymentActions 
-        onPrevStep={onPrevStep}
-        onSubmit={onSubmit}
-        totalPrice={totalPrice}  
-        selectedServices={selectedServices}
-        pricing={pricing}
-        isProcessing={isProcessing}
-        acceptTerms={acceptTerms}
-        razorpayLoaded={razorpayLoaded}
-      />
+      <div className="pt-6 flex justify-between">
+        <Button type="button" variant="outline" onClick={onPrevStep}>
+          Back
+        </Button>
+        <Button 
+          type="submit" 
+          className="bg-peacefulBlue hover:bg-peacefulBlue/90"
+          disabled={isProcessing || !acceptTerms || !razorpayLoaded || effectivePrice <= 0}
+          onClick={handleSubmit}
+        >
+          {!razorpayLoaded ? "Loading Payment..." : 
+           isProcessing ? "Processing..." : 
+           effectivePrice <= 0 ? "Price Not Available" : 
+           `Pay ₹${effectivePrice}`}
+        </Button>
+      </div>
+      
+      {!razorpayLoaded && !loadError && (
+        <div className="text-center text-amber-600 text-sm mt-2">
+          Payment gateway is loading. Please wait...
+        </div>
+      )}
+      
+      {effectivePrice <= 0 && (
+        <div className="text-center text-amber-600 text-sm mt-2">
+          Unable to calculate price. Please try selecting your services again or contact support.
+        </div>
+      )}
     </div>
   );
 };

@@ -41,10 +41,15 @@ export function useConsultationPayment({
     const effectivePrice = getEffectivePrice();
     
     // Log the processing with calculated price
-    console.log(`Processing payment with effective price: ${effectivePrice}`);
+    console.log(`Processing payment with effective price: ${effectivePrice}`, {
+      selectedServices: state.selectedServices,
+      pricing: state.pricing ? Object.fromEntries(state.pricing) : {},
+      totalPrice: state.totalPrice
+    });
     
     // Check if the price is valid
     if (effectivePrice <= 0) {
+      console.error("Invalid price detected:", effectivePrice);
       toast({
         title: "Price Error",
         description: "Unable to determine price for the selected service. Please try again or contact support.",
@@ -60,6 +65,7 @@ export function useConsultationPayment({
     }
     
     // Proceed with payment processing
+    console.log("Calling processPayment function");
     processPayment();
   }, [state, processPayment, toast, getEffectivePrice]);
 

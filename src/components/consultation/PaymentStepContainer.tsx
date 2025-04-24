@@ -11,7 +11,7 @@ interface PaymentStepContainerProps {
   handlePaymentSubmit: (e: React.FormEvent) => void;
   isProcessing: boolean;
   pricing: Map<string, number>;
-  totalPrice: number; // Added totalPrice prop
+  totalPrice: number;
 }
 
 const PaymentStepContainer: React.FC<PaymentStepContainerProps> = ({
@@ -22,12 +22,12 @@ const PaymentStepContainer: React.FC<PaymentStepContainerProps> = ({
   handlePaymentSubmit,
   isProcessing,
   pricing,
-  totalPrice // Use the prop
+  totalPrice
 }) => {
   const getEffectivePrice = useEffectivePrice({
     selectedServices,
     pricing,
-    totalPrice // Pass to the hook
+    totalPrice
   });
   
   const effectivePrice = getEffectivePrice();
@@ -44,7 +44,10 @@ const PaymentStepContainer: React.FC<PaymentStepContainerProps> = ({
   }, [consultationType, selectedServices, effectivePrice, pricing, totalPrice]);
   
   return (
-    <form onSubmit={handlePaymentSubmit} className="space-y-6">
+    <form onSubmit={(e) => {
+      console.log("Payment form submitted");
+      handlePaymentSubmit(e);
+    }} className="space-y-6">
       <PaymentStep 
         consultationType={consultationType}
         selectedServices={selectedServices}

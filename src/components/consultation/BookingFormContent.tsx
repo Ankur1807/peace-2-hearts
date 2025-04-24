@@ -23,6 +23,7 @@ const BookingFormContent: React.FC<BookingFormContentProps> = ({ bookingState })
     personalDetails,
     handlePersonalDetailsChange,
     isProcessing,
+    setIsProcessing,
     pricing,
     totalPrice,
     setTotalPrice,
@@ -33,43 +34,45 @@ const BookingFormContent: React.FC<BookingFormContentProps> = ({ bookingState })
   } = bookingState;
   
   // Handle service selection
-  const handleServiceSelection = (serviceId: string, checked: boolean) => {
+  const handleServiceSelection = React.useCallback((serviceId: string, checked: boolean) => {
     console.log(`Service selection: ${serviceId}, checked: ${checked}`);
     if (checked) {
       bookingState.setSelectedServices([serviceId]);
     } else {
       bookingState.setSelectedServices([]);
     }
-  };
+  }, [bookingState]);
   
   // Handle package selection (sets multiple services)
-  const handlePackageSelection = (packageId: string) => {
+  const handlePackageSelection = React.useCallback((packageId: string) => {
     console.log(`Package selection: ${packageId}`);
     if (packageId === 'divorce-prevention') {
       bookingState.setSelectedServices(['divorce-prevention']);
     } else if (packageId === 'pre-marriage-clarity') {
       bookingState.setSelectedServices(['pre-marriage-clarity']);
     }
-  };
+  }, [bookingState]);
   
   // Handle personal details changes
-  const handlePersonalDetailsFieldChange = (field: string, value: string) => {
+  const handlePersonalDetailsFieldChange = React.useCallback((field: string, value: string) => {
     handlePersonalDetailsChange({
       ...personalDetails,
       [field]: value
     });
-  };
+  }, [handlePersonalDetailsChange, personalDetails]);
   
   // Handle form submission - we need to make this compatible with the expected signature
-  const handleFormSubmit = () => {
+  const handleFormSubmit = React.useCallback(() => {
+    console.log("Form submit button clicked, proceeding to payment...");
     proceedToPayment();
-  };
+  }, [proceedToPayment]);
   
   // Handle payment submission
-  const handlePaymentSubmit = (e: React.FormEvent) => {
+  const handlePaymentSubmit = React.useCallback((e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Payment submit button clicked, processing payment...");
     processPayment();
-  };
+  }, [processPayment]);
   
   return (
     <div className="relative">
@@ -108,7 +111,7 @@ const BookingFormContent: React.FC<BookingFormContentProps> = ({ bookingState })
             isProcessing={isProcessing}
             pricing={pricing || new Map()}
             totalPrice={totalPrice}
-            onSubmit={handleFormSubmit} // Modified to match the expected signature
+            onSubmit={handleFormSubmit}
           />
         </Card>
       )}
