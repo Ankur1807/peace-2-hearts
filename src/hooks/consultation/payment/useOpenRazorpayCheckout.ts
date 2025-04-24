@@ -1,4 +1,3 @@
-
 import { verifyRazorpayPayment, savePaymentDetails, SavePaymentParams } from '@/utils/payment/razorpayService';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,6 +33,18 @@ export const useOpenRazorpayCheckout = ({
       order_id: order.id,
       handler: async function (response: any) {
         console.log("Payment successful:", response);
+        
+        // Navigate to payment verification immediately after Razorpay closes
+        navigate("/payment-verification", {
+          state: {
+            paymentId: response.razorpay_payment_id,
+            orderId: response.razorpay_order_id,
+            signature: response.razorpay_signature,
+            amount: effectivePrice,
+            receiptId: receiptId
+          }
+        });
+        
         try {
           const isVerified = await verifyRazorpayPayment({
             paymentId: response.razorpay_payment_id,
@@ -43,8 +54,6 @@ export const useOpenRazorpayCheckout = ({
           
           console.log("Payment verification result:", isVerified);
           
-          // Always try to save payment details regardless of verification result
-          // This ensures we have a record of the payment attempt
           const paymentParams: SavePaymentParams = {
             paymentId: response.razorpay_payment_id,
             orderId: response.razorpay_order_id,
@@ -57,48 +66,18 @@ export const useOpenRazorpayCheckout = ({
           const saveResult = await savePaymentDetails(paymentParams);
           console.log("Payment save result:", saveResult);
           
-          if (!saveResult) {
-            console.warn("Failed to save payment details to database directly. Will redirect to confirmation page for recovery");
-          }
-          
-          // If payment is verified and data was saved successfully, continue with booking
-          if (isVerified && saveResult) {
-            if (setPaymentCompleted) setPaymentCompleted(true);
-            if (setReferenceId) setReferenceId(receiptId);
-            if (handleConfirmBooking) await handleConfirmBooking();
-            
-            toast({
-              title: "Payment Successful",
-              description: "Your payment has been processed successfully.",
-            });
-          } else {
-            // If verification or saving fails, redirect to payment confirmation page
-            // with all the data needed to recover
-            navigate("/payment-confirmation", {
-              state: {
-                paymentId: response.razorpay_payment_id,
-                orderId: response.razorpay_order_id,
-                amount: effectivePrice,
-                referenceId: receiptId
-              }
-            });
-            
-            if (!isVerified) {
-              console.warn("Payment verification failed, redirecting to confirmation page");
-              toast({
-                title: "Payment Verification",
-                description: "Your payment is being processed. Please wait for confirmation.",
-              });
+          // Redirect to final confirmation page after verification
+          navigate("/payment-confirmation", {
+            state: {
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              amount: effectivePrice,
+              referenceId: receiptId
             }
-          }
-        } catch (error) {
-          console.error("Error processing payment confirmation:", error);
-          toast({
-            title: "Payment Processing",
-            description: "We received your payment but need to verify it. Please check the confirmation page.",
           });
           
-          // Redirect to payment confirmation page with available information
+        } catch (error) {
+          console.error("Error processing payment confirmation:", error);
           navigate("/payment-confirmation", {
             state: {
               paymentId: response.razorpay_payment_id,
@@ -140,8 +119,6 @@ export const useOpenRazorpayCheckout = ({
       razorpay.on("payment.failed", function (response: any) {
         console.error("Payment failed:", response.error);
         
-        // Even if payment fails in Razorpay UI, we will redirect to confirmation
-        // page with payment ID to check if payment was actually successful
         if (response.error && response.error.metadata && response.error.metadata.payment_id) {
           navigate("/payment-confirmation", {
             state: {
@@ -154,8 +131,8 @@ export const useOpenRazorpayCheckout = ({
         }
         
         toast({
-          title: "Payment Status",
-          description: response.error.description || "Your payment status is being verified. If paid, you will see confirmation soon.",
+          title: "Payment Failed",
+          description: response.error.description || "Your payment could not be processed. Please try again.",
         });
         setIsProcessing(false);
       });
