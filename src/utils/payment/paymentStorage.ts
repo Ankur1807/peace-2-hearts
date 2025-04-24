@@ -51,7 +51,10 @@ export const savePaymentDetails = async (params: SavePaymentParams): Promise<boo
   }
 };
 
-// This is a separate implementation to avoid recursive type issues
+/**
+ * Direct implementation for saving payment details
+ * This avoids recursive type issues by using primitive parameters
+ */
 const savePaymentDirectly = async (
   paymentId: string,
   orderId: string,
@@ -123,7 +126,7 @@ export const forcePaymentSave = async (
       return true; // Already saved
     }
     
-    // Use direct function call with separate parameters to avoid type recursion
+    // Call directly with primitive parameters to avoid type recursion
     return await savePaymentDirectly(paymentId, orderId, amount, consultationId);
   } catch (err) {
     console.error('Exception in forcePaymentSave:', err);
