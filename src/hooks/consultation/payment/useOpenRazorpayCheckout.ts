@@ -1,6 +1,5 @@
 
-import { verifyRazorpayPayment, savePaymentDetails } from '@/utils/payment/razorpayService';
-import { SavePaymentParams } from '@/utils/payment/razorpayTypes';
+import { verifyRazorpayPayment } from '@/utils/payment/razorpayService';
 import { useNavigate } from 'react-router-dom';
 
 interface OpenRazorpayCheckoutArgs {
@@ -55,18 +54,6 @@ export const useOpenRazorpayCheckout = ({
           });
           
           console.log("Payment verification result:", isVerified);
-          
-          const paymentParams: SavePaymentParams = {
-            paymentId: response.razorpay_payment_id,
-            orderId: response.razorpay_order_id,
-            amount: effectivePrice,
-            consultationId: receiptId,
-          };
-          
-          console.log("Payment parameters for saving:", paymentParams);
-          
-          const saveResult = await savePaymentDetails(paymentParams);
-          console.log("Payment save result:", saveResult);
           
           // Redirect to final confirmation page after verification
           navigate("/payment-confirmation", {

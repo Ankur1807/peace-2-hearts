@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import BookingSuccessView from "@/components/consultation/BookingSuccessView";
@@ -6,7 +7,6 @@ import { verifyAndSyncPayment } from "@/utils/payment/razorpayService";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { checkPaymentExists, savePaymentDetails } from "@/utils/payment/paymentStorage";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
@@ -44,42 +44,8 @@ const PaymentConfirmation = () => {
       if (paymentId) {
         setIsVerifying(true);
         try {
-          // First check if the payment is already in our database
-          const paymentExists = await checkPaymentExists(paymentId);
-          
-          if (paymentExists) {
-            console.log("Payment already exists in database");
-            setVerificationResult({
-              success: true,
-              message: "Your payment has been verified and your booking is confirmed."
-            });
-            setIsVerifying(false);
-            return;
-          }
-          
-          // If payment not in database, verify with Razorpay and try to recover
-          console.log("Payment not found in database, attempting to verify and recover");
+          // Verify with Razorpay directly
           const verified = await verifyAndSyncPayment(paymentId);
-          
-          // If we have enough info to save payment directly, try that as a last resort
-          if (!verified && orderId && referenceId && amount > 0) {
-            console.log("Attempting direct payment save as last resort");
-            const saved = await savePaymentDetails({
-              paymentId,
-              orderId,
-              amount,
-              consultationId: referenceId
-            });
-            
-            if (saved) {
-              setVerificationResult({
-                success: true,
-                message: "Your payment has been recorded and your booking is confirmed."
-              });
-              setIsVerifying(false);
-              return;
-            }
-          }
           
           if (verified) {
             setVerificationResult({
