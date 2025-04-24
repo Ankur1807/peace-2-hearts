@@ -24,6 +24,11 @@ interface BookingDetails {
   packageName?: string;
 }
 
+// Create a modified interface that allows for the date to be a string when sending via API
+interface SerializedBookingDetails extends Omit<BookingDetails, 'date'> {
+  date?: string;
+}
+
 export async function sendContactEmail(formData: ContactFormData): Promise<boolean> {
   try {
     const { name, email, phone, subject, message, isResend } = formData;
@@ -55,17 +60,14 @@ export async function sendContactEmail(formData: ContactFormData): Promise<boole
 
 export async function sendBookingConfirmationEmail(bookingDetails: BookingDetails): Promise<boolean> {
   try {
-    // Prepare date for serialization if it exists
-    let serializedBookingDetails = {
+    // Create a serialized version of booking details for API transmission
+    const serializedBookingDetails: SerializedBookingDetails = {
       ...bookingDetails
     };
     
     // Convert Date object to ISO string for proper transmission
     if (bookingDetails.date instanceof Date) {
-      serializedBookingDetails = {
-        ...serializedBookingDetails,
-        date: bookingDetails.date.toISOString()
-      };
+      serializedBookingDetails.date = bookingDetails.date.toISOString();
     }
     
     console.log('Sending booking confirmation with date:', serializedBookingDetails.date);

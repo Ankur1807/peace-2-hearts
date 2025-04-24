@@ -78,6 +78,14 @@ export function useConsultationActions({
         
         // Send confirmation email
         try {
+          // Log the date for debugging
+          console.log("Booking date before sending email:", state.date);
+          if (state.date) {
+            console.log("Date type:", typeof state.date);
+            console.log("Is Date instance:", state.date instanceof Date);
+            console.log("Date string representation:", state.date.toString());
+          }
+          
           await sendBookingConfirmationEmail({
             clientName: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
             email: state.personalDetails.email,

@@ -31,12 +31,18 @@ export function formatTimeframe(timeframe: string): string {
   return timeframes[timeframe] || timeframe;
 }
 
-// Format date to readable string - fixed to handle date properly
+// Format date to readable string - improved to handle both string and Date types
 export function formatDate(date?: Date | string): string {
   if (!date) return 'To be determined';
   
   // Ensure we have a Date object
   const dateObject = typeof date === 'string' ? new Date(date) : date;
+  
+  // Check if dateObject is valid
+  if (isNaN(dateObject.getTime())) {
+    console.error('Invalid date received:', date);
+    return 'Invalid date';
+  }
   
   return dateObject.toLocaleDateString('en-US', { 
     weekday: 'long', 
