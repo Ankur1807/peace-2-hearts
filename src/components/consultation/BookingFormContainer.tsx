@@ -43,6 +43,17 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
     });
   }, [pricing, totalPrice]);
   
+  // Handle form submission
+  const handleFormSubmit = React.useCallback(() => {
+    console.log("Form submission in BookingFormContainer");
+    if (bookingState.proceedToPayment) {
+      console.log("Calling proceedToPayment from BookingFormContainer");
+      bookingState.proceedToPayment();
+    } else {
+      console.error("proceedToPayment function not available");
+    }
+  }, [bookingState]);
+  
   // Handle service selection
   const handleServiceSelection = React.useCallback((serviceId: string, checked: boolean) => {
     console.log(`Service selection: ${serviceId}, checked: ${checked}`);
@@ -92,11 +103,7 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
           isProcessing={isProcessing}
           pricing={pricing || new Map()}
           totalPrice={totalPrice}
-          onSubmit={() => {
-            if (bookingState.proceedToPayment) {
-              bookingState.proceedToPayment();
-            }
-          }}
+          onSubmit={handleFormSubmit}
         />
       </div>
     </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PersonalDetails } from '@/utils/types';
 import ServiceSection from './form/ServiceSection';
@@ -49,10 +48,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
   totalPrice,
   onSubmit
 }) => {
-  // Track which step the user is on
   const [currentStep, setCurrentStep] = useState(1);
   
-  // Update step based on user selections
   useEffect(() => {
     if (selectedServices.length > 0 && currentStep === 1) {
       setCurrentStep(2);
@@ -70,12 +67,15 @@ const BookingForm: React.FC<BookingFormProps> = ({
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form submitted in BookingForm");
+    onSubmit();
+  };
+
   return (
     <form 
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit();
-      }}
+      onSubmit={handleFormSubmit}
       className="space-y-8"
     >
       <div className="grid grid-cols-1 gap-8">
@@ -165,7 +165,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
           personalDetails
         )} 
         isProcessing={isProcessing} 
-        totalPrice={totalPrice} 
+        totalPrice={totalPrice}
+        onProceed={onSubmit}
       />
     </form>
   );

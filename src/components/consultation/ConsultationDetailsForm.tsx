@@ -25,6 +25,11 @@ interface ConsultationDetailsFormProps {
 }
 
 const ConsultationDetailsForm: React.FC<ConsultationDetailsFormProps> = (props) => {
+  const handleSubmit = () => {
+    console.log("Form submitted in ConsultationDetailsForm");
+    props.onSubmit();
+  };
+
   return (
     <BookingForm
       serviceCategory={props.serviceCategory}
@@ -43,7 +48,7 @@ const ConsultationDetailsForm: React.FC<ConsultationDetailsFormProps> = (props) 
       isProcessing={props.isProcessing}
       pricing={props.pricing}
       totalPrice={props.totalPrice}
-      onSubmit={props.onSubmit}
+      onSubmit={handleSubmit}
     />
   );
 };
