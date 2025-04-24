@@ -57,7 +57,7 @@ export function useConsultationActions({
 
       console.log("Starting booking process with state:", {
         services: state.selectedServices,
-        date: state.date,
+        date: state.date ? state.date.toString() : undefined,
         timeSlot: state.timeSlot,
         timeframe: state.timeframe,
         personalDetails: state.personalDetails,
@@ -84,6 +84,7 @@ export function useConsultationActions({
             console.log("Date type:", typeof state.date);
             console.log("Is Date instance:", state.date instanceof Date);
             console.log("Date string representation:", state.date.toString());
+            console.log("Date ISO string:", state.date.toISOString());
           }
           
           await sendBookingConfirmationEmail({

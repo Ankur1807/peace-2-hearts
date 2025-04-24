@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 interface ContactFormData {
@@ -68,6 +67,10 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
     // Convert Date object to ISO string for proper transmission
     if (bookingDetails.date instanceof Date) {
       serializedBookingDetails.date = bookingDetails.date.toISOString();
+    } else {
+      // If date is undefined, keep it undefined
+      // This ensures we don't try to call toISOString on undefined
+      serializedBookingDetails.date = undefined;
     }
     
     console.log('Sending booking confirmation with date:', serializedBookingDetails.date);
