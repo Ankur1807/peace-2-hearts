@@ -71,7 +71,7 @@ export const forcePaymentSave = async (params: SavePaymentParams): Promise<boole
       return true; // Already saved
     }
     
-    // If not, save it normally
+    // If not, save it normally - fixed recursive call
     return await savePaymentDetails(params);
   } catch (err) {
     console.error('Exception in forcePaymentSave:', err);

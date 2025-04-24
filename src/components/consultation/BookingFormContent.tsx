@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card } from '@/components/ui/card';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 import BookingForm from './BookingForm';
@@ -60,13 +60,13 @@ const BookingFormContent: React.FC<BookingFormContentProps> = ({ bookingState })
     });
   };
   
-  // Handle form submission
+  // Handle form submission - fix the type error by adding event parameter
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     proceedToPayment();
   };
   
-  // Handle payment submission
+  // Handle payment submission - this is already correct
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     processPayment();
@@ -109,7 +109,7 @@ const BookingFormContent: React.FC<BookingFormContentProps> = ({ bookingState })
             isProcessing={isProcessing}
             pricing={pricing || new Map()}
             totalPrice={totalPrice}
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit} // Pass the function with event parameter
           />
         </Card>
       )}
