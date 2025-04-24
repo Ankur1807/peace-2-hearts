@@ -1,5 +1,6 @@
 
 import { getServiceLabel } from '@/utils/consultationLabels';
+import { formatDate } from '@/utils/formatUtils';
 
 interface ServiceDetailsProps {
   services: string[];
@@ -19,12 +20,7 @@ const ServiceDetails = ({ services, date, timeSlot }: ServiceDetailsProps) => {
       {date && (
         <>
           <p className="font-medium mb-2">Appointment Date:</p>
-          <p className="mb-2">{date.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric'
-          })}</p>
+          <p className="mb-2">{date instanceof Date ? formatDate(date) : 'Date to be confirmed'}</p>
         </>
       )}
       {timeSlot && (

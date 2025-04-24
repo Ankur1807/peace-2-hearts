@@ -17,7 +17,7 @@ export interface BookingEmailRequest {
   referenceId: string;
   consultationType: string;
   services: string[];
-  date?: Date;
+  date?: string | Date;
   timeSlot?: string;
   timeframe?: string;
   message?: string;
@@ -76,6 +76,8 @@ export function getContactAdminEmailTemplate(data: ContactEmailRequest): string 
 // Generate booking confirmation email for client
 export function getBookingUserEmailTemplate(data: BookingEmailRequest): string {
   const { clientName, referenceId, services, date, timeSlot, timeframe, isResend, packageName } = data;
+  
+  console.log("Formatting booking email with date:", date);
   
   // Determine if this is a holistic package (which uses timeframe instead of date/time)
   const isHolisticPackage = !date && timeframe;

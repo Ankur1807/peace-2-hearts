@@ -31,10 +31,14 @@ export function formatTimeframe(timeframe: string): string {
   return timeframes[timeframe] || timeframe;
 }
 
-// Format date to readable string
-export function formatDate(date?: Date): string {
+// Format date to readable string - fixed to handle date properly
+export function formatDate(date?: Date | string): string {
   if (!date) return 'To be determined';
-  return new Date(date).toLocaleDateString('en-US', { 
+  
+  // Ensure we have a Date object
+  const dateObject = typeof date === 'string' ? new Date(date) : date;
+  
+  return dateObject.toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 

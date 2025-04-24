@@ -55,10 +55,25 @@ export async function sendContactEmail(formData: ContactFormData): Promise<boole
 
 export async function sendBookingConfirmationEmail(bookingDetails: BookingDetails): Promise<boolean> {
   try {
+    // Prepare date for serialization if it exists
+    let serializedBookingDetails = {
+      ...bookingDetails
+    };
+    
+    // Convert Date object to ISO string for proper transmission
+    if (bookingDetails.date instanceof Date) {
+      serializedBookingDetails = {
+        ...serializedBookingDetails,
+        date: bookingDetails.date.toISOString()
+      };
+    }
+    
+    console.log('Sending booking confirmation with date:', serializedBookingDetails.date);
+    
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
         type: 'booking-confirmation',
-        ...bookingDetails,
+        ...serializedBookingDetails,
         isResend: bookingDetails.isResend || false
       }
     });
