@@ -1,30 +1,16 @@
 
-/**
- * Type definitions for Razorpay integration
- */
+// Types for Razorpay service
 
 export interface CreateOrderParams {
   amount: number;
   currency?: string;
-  receipt: string;
+  receipt?: string;
   notes?: Record<string, string>;
 }
 
 export interface OrderResponse {
   success: boolean;
-  order?: {
-    id: string;
-    entity: string;
-    amount: number;
-    amount_paid: number;
-    amount_due: number;
-    currency: string;
-    receipt: string;
-    status: string;
-    created_at: number;
-    notes?: Record<string, string>;
-  };
-  key_id?: string; // Add key_id to response type
+  order_id?: string;
   error?: string;
   details?: any;
 }
@@ -32,7 +18,7 @@ export interface OrderResponse {
 export interface VerifyPaymentParams {
   paymentId: string;
   orderId: string;
-  signature: string;
+  signature?: string;
 }
 
 export interface SavePaymentParams {
@@ -40,4 +26,29 @@ export interface SavePaymentParams {
   orderId: string;
   amount: number;
   consultationId: string;
+}
+
+export interface RazorpayOrderOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description?: string;
+  image?: string;
+  order_id: string;
+  handler: (response: any) => void;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  notes?: Record<string, string>;
+  theme?: {
+    color?: string;
+  };
+  modal?: {
+    ondismiss?: () => void;
+    escape?: boolean;
+    confirm_close?: boolean;
+  };
 }
