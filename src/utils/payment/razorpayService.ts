@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for Razorpay integration
  */
@@ -14,21 +13,17 @@ export const createRazorpayOrder = async (params: CreateOrderParams): Promise<Or
   try {
     const { amount, currency = 'INR', receipt, notes } = params;
     
-    // Ensure amount is valid, default to 11 for test service
-    const effectiveAmount = amount <= 0 && notes?.test === 'true' ? 11 : amount;
-    
     console.log("Creating Razorpay order with params:", { 
-      amount: effectiveAmount, 
+      amount, 
       currency, 
       receipt, 
-      notes,
-      isTestService: notes?.test === 'true'
+      notes
     });
     
     const { data, error } = await supabase.functions.invoke('razorpay', {
       body: JSON.stringify({
         action: 'create_order',
-        amount: effectiveAmount,
+        amount,
         currency,
         receipt,
         orderData: { notes }

@@ -21,14 +21,13 @@ export const useInitializeRazorpayPayment = ({
     console.log("Using payment amount:", validAmount);
     
     try {
-      // Normal flow with validated price
+      // Create order with validated price
       const orderResponse = await createRazorpayOrder({
         amount: validAmount,
         receipt: receiptId,
         notes: {
           services: state.selectedServices.join(','),
           client: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
-          test: state.selectedServices.includes('test-service') ? 'true' : 'false',
         },
       });
       
@@ -43,7 +42,11 @@ export const useInitializeRazorpayPayment = ({
       
       // Extract order details and key_id
       const order = orderResponse.details || { id: orderId, amount: validAmount, currency: 'INR' };
-      const razorpayKey = orderResponse.details?.key_id || "rzp_test_C4wVqKJiq5fXgj";
+      const razorpayKey = orderResponse.details?.key_id;
+      
+      if (!razorpayKey) {
+        throw new Error("Razorpay key not configured. Please contact support.");
+      }
       
       console.log("Payment initialized successfully with order ID:", orderId);
       

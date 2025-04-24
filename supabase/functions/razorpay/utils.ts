@@ -48,13 +48,12 @@ export async function parseRequestData(req: Request): Promise<{ data: any; error
 
 // Get Razorpay API keys
 export function getRazorpayKeys(): { key_id: string | null; key_secret: string | null } {
-  const key_id = Deno.env.get('RAZORPAY_KEY_ID') || "rzp_test_C4wVqKJiq5fXgj"; // Fallback for testing
-  const key_secret = Deno.env.get('RAZORPAY_KEY_SECRET') || "C3qzVNh95VIUmgvSC1O9M7qd"; // Fallback for testing
+  const key_id = Deno.env.get('RAZORPAY_KEY_ID');
+  const key_secret = Deno.env.get('RAZORPAY_KEY_SECRET');
   
   if (!key_id || !key_secret) {
     console.error("Razorpay API keys not configured");
   }
   
-  console.log("Using Razorpay key_id:", key_id);
   return { key_id, key_secret };
 }
