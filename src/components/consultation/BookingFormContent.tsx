@@ -60,13 +60,12 @@ const BookingFormContent: React.FC<BookingFormContentProps> = ({ bookingState })
     });
   };
   
-  // Handle form submission - fix the type error by adding event parameter
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Handle form submission - we need to make this compatible with the expected signature
+  const handleFormSubmit = () => {
     proceedToPayment();
   };
   
-  // Handle payment submission - this is already correct
+  // Handle payment submission
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     processPayment();
@@ -109,7 +108,7 @@ const BookingFormContent: React.FC<BookingFormContentProps> = ({ bookingState })
             isProcessing={isProcessing}
             pricing={pricing || new Map()}
             totalPrice={totalPrice}
-            onSubmit={handleSubmit} // Pass the function with event parameter
+            onSubmit={handleFormSubmit} // Modified to match the expected signature
           />
         </Card>
       )}
