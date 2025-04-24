@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ServiceCategorySelector from '../ServiceCategorySelector';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ServiceSelectionOptions from '../ServiceSelectionOptions';
 
 interface ServiceSectionProps {
@@ -9,7 +9,7 @@ interface ServiceSectionProps {
   selectedServices: string[];
   handleServiceSelection: (serviceId: string, checked: boolean) => void;
   handlePackageSelection: (packageId: string) => void;
-  pricing: Map<string, number>;
+  pricing?: Map<string, number>;
 }
 
 const ServiceSection: React.FC<ServiceSectionProps> = ({
@@ -20,37 +20,67 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
   handlePackageSelection,
   pricing
 }) => {
-  // Log pricing data for debugging
-  console.log("ServiceSection received pricing data:", Object.fromEntries(pricing || new Map()));
-  console.log("ServiceSection received selectedServices:", selectedServices);
-  
-  // Function to handle service category change
-  const handleCategoryChange = (category: string) => {
-    console.log("Changing service category to:", category);
-    setServiceCategory(category);
-    // Clear selected services when category changes
-    handleServiceSelection('', false);
-  };
+  // Debug to verify pricing data is being passed correctly
+  React.useEffect(() => {
+    console.log('ServiceSection rendering with pricing:', {
+      pricingAvailable: !!pricing,
+      serviceCategory,
+      selectedServices,
+      pricingSize: pricing ? pricing.size : 0
+    });
+    
+    if (pricing && pricing.size > 0) {
+      // Log a few sample prices for debugging
+      const sampleServices = ['mental-health-counselling', 'family-therapy', 'divorce'];
+      sampleServices.forEach(id => {
+        console.log(`Price for ${id}: ${pricing.get(id) || 'not available'}`);
+      });
+    }
+  }, [pricing, serviceCategory, selectedServices]);
   
   return (
     <div className="space-y-6">
-      <div className="p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">
-        <h3 className="text-xl font-semibold mb-4 text-gray-800">Choose Your Service Category</h3>
-        <ServiceCategorySelector 
-          serviceCategory={serviceCategory}
-          setServiceCategory={handleCategoryChange}
-        />
-      </div>
-      
-      <div className="p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">
-        <ServiceSelectionOptions 
-          serviceCategory={serviceCategory}
-          selectedServices={selectedServices}
-          handleServiceSelection={handleServiceSelection}
-          handlePackageSelection={handlePackageSelection}
-          pricing={pricing}
-        />
-      </div>
+      <Tabs
+        value={serviceCategory}
+        onValueChange={setServiceCategory}
+        className="w-full"
+      >
+        <TabsList className="grid grid-cols-3 mb-8">
+          <TabsTrigger value="mental-health">Mental Health</TabsTrigger>
+          <TabsTrigger value="legal">Legal</TabsTrigger>
+          <TabsTrigger value="holistic">Holistic Packages</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="mental-health">
+          <ServiceSelectionOptions 
+            serviceCategory="mental-health"
+            selectedServices={selectedServices}
+            handleServiceSelection={handleServiceSelection}
+            handlePackageSelection={handlePackageSelection}
+            pricing={pricing}
+          />
+        </TabsContent>
+        
+        <TabsContent value="legal">
+          <ServiceSelectionOptions 
+            serviceCategory="legal"
+            selectedServices={selectedServices}
+            handleServiceSelection={handleServiceSelection}
+            handlePackageSelection={handlePackageSelection}
+            pricing={pricing}
+          />
+        </TabsContent>
+        
+        <TabsContent value="holistic">
+          <ServiceSelectionOptions 
+            serviceCategory="holistic"
+            selectedServices={selectedServices}
+            handleServiceSelection={handleServiceSelection}
+            handlePackageSelection={handlePackageSelection}
+            pricing={pricing}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

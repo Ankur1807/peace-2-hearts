@@ -9,65 +9,49 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
   try {
     console.log(`Calculating pricing for services: ${selectedServices.join(', ')}`);
     
-    // Special case for test service - set a hardcoded price first as fallback
-    if (selectedServices.includes('test-service')) {
-      console.log("Test service selected, using hardcoded price as fallback");
-      pricingMap.set('test-service', 11);
-      finalPrice = 11;
-    }
-    
-    // Try to fetch from database even for test service (might override the hardcoded price if available)
-    if (selectedServices.includes('test-service')) {
-      console.log("Test service selected, fetching its price");
-      try {
-        const testServicePricing = await fetchServicePricing(['test-service'], true); // Skip cache
-        
-        if (testServicePricing.has('test-service')) {
-          const testPrice = testServicePricing.get('test-service') as number;
-          console.log(`Retrieved test service price from DB: ${testPrice}`);
-          pricingMap.set('test-service', testPrice);
-          finalPrice = testPrice;
-        } else {
-          console.log("Test service price not found in DB, using fallback price: 11");
-        }
-      } catch (err) {
-        console.log("Error fetching test service price, using fallback:", err);
-        // Keep fallback price already set above
-      }
+    // Load initial pricing data for all services to ensure prices are shown on the form
+    // This runs regardless of service selection to populate the pricing dropdown
+    try {
+      const mentalHealthIds = [
+        'mental-health-counselling', 
+        'family-therapy', 
+        'premarital-counselling-individual',
+        'premarital-counselling-couple',
+        'couples-counselling',
+        'sexual-health-counselling'
+      ];
       
-      // Return early since we don't need to process packages for test service
-      return { pricingMap, finalPrice };
-    }
-
-    // Check if selection is a package ID directly
-    if (selectedServices.length === 1 && 
-        (selectedServices[0] === 'divorce-prevention' || 
-         selectedServices[0] === 'pre-marriage-clarity')) {
+      const legalIds = [
+        'pre-marriage-legal',
+        'mediation',
+        'divorce',
+        'custody',
+        'maintenance',
+        'general-legal'
+      ];
       
-      const packageId = selectedServices[0];
-      console.log(`Direct package selection: ${packageId}`);
+      const packageIds = [
+        'divorce-prevention',
+        'pre-marriage-clarity'
+      ];
       
-      try {
-        // Fetch package pricing
-        const packagePricing = await fetchPackagePricing([packageId]);
-        if (packagePricing.has(packageId)) {
-          finalPrice = packagePricing.get(packageId)!;
-          pricingMap.set(packageId, finalPrice);
-          console.log(`Found direct package price: ${finalPrice} for ${packageId}`);
-        }
-      } catch (err) {
-        console.error(`Error fetching direct package price for ${packageId}:`, err);
-      }
+      console.log('Fetching all service and package pricing data');
       
-      // Also get individual service prices for reference
-      try {
-        const individualPrices = await fetchServicePricing();
-        pricingMap = new Map([...pricingMap, ...individualPrices]);
-      } catch (err) {
-        console.error("Error fetching individual service prices:", err);
-      }
+      // Load all pricing data regardless of selection to populate the form
+      const [servicePricing, packagePricing] = await Promise.all([
+        fetchServicePricing([...mentalHealthIds, ...legalIds]),
+        fetchPackagePricing(packageIds)
+      ]);
       
-      return { pricingMap, finalPrice };
+      console.log('Service pricing data:', Object.fromEntries(servicePricing));
+      console.log('Package pricing data:', Object.fromEntries(packagePricing));
+      
+      // Combine pricing maps
+      pricingMap = new Map([...servicePricing, ...packagePricing]);
+      console.log('Combined pricing map:', Object.fromEntries(pricingMap));
+    } catch (err) {
+      console.error('Error loading initial pricing data:', err);
+      // Continue execution to handle selected services
     }
     
     // Standard handling for all other services
@@ -113,10 +97,16 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
         console.error("Error processing package pricing:", err);
         setPricingError('Error calculating package pricing');
       }
-    } else {
+    } else if (selectedServices.length > 0) {
       // Regular services
       try {
-        pricingMap = await fetchServicePricing(selectedServices);
+        // Get prices for selected services
+        const selectedServicePricing = await fetchServicePricing(selectedServices);
+        
+        // Update the pricing map with these prices
+        selectedServicePricing.forEach((price, id) => {
+          pricingMap.set(id, price);
+        });
         
         if (selectedServices.length === 1) {
           const serviceId = selectedServices[0];
@@ -135,18 +125,11 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
       }
     }
 
-    console.log(`Final price calculated: ${finalPrice}, Pricing map:`, Object.fromEntries(pricingMap));
+    console.log(`Final price calculated: ${finalPrice}, Pricing map has ${pricingMap.size} items`);
     return { pricingMap, finalPrice };
   } catch (error) {
     console.error('Error calculating pricing:', error);
     setPricingError('Failed to calculate pricing');
-    
-    // Set fallback pricing for test service even in case of errors
-    if (selectedServices.includes('test-service')) {
-      pricingMap.set('test-service', 11);
-      finalPrice = 11;
-    }
-    
     return { pricingMap, finalPrice };
   }
 }
