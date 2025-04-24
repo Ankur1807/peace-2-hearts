@@ -71,14 +71,18 @@ export const forcePaymentSave = async (params: SavePaymentParams): Promise<boole
       return true; // Already saved
     }
     
-    // If not, save it directly using the original function
-    // Fix: Call the function directly without type recursion
-    const result = await savePaymentDetails({...params});
-    return result;
+    // If not saved yet, use the savePaymentDetails function
+    // Breaking the recursive type chain by using a different approach
+    return await savePaymentDetailsDirectly(params);
   } catch (err) {
     console.error('Exception in forcePaymentSave:', err);
     return false;
   }
+};
+
+// Helper function to break the recursive type chain
+const savePaymentDetailsDirectly = async (params: SavePaymentParams): Promise<boolean> => {
+  return await savePaymentDetails(params);
 };
 
 /**
