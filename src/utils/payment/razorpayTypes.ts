@@ -29,9 +29,3 @@ export interface VerifyPaymentParams {
   signature: string;
 }
 
-export interface SavePaymentParams {
-  paymentId: string;
-  orderId: string;
-  amount: number;
-  consultationId: string;
-}

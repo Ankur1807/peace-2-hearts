@@ -1,10 +1,8 @@
-
 /**
  * Utility functions for Razorpay integration
  */
 import { supabase } from "@/integrations/supabase/client";
-import { CreateOrderParams, OrderResponse, VerifyPaymentParams, SavePaymentParams } from "./razorpayTypes";
-import { savePaymentDetails, checkPaymentExists } from "./paymentStorage";
+import { CreateOrderParams, OrderResponse, VerifyPaymentParams } from "./razorpayTypes";
 import { loadRazorpayScript, isRazorpayAvailable } from "./razorpayLoader";
 
 /**
@@ -86,30 +84,7 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
     
     console.log("Payment verification response from Razorpay:", data);
     
-    // If payment is verified but no payment data is in response, try to recover it
-    if (data?.success === true && data?.verified === true) {
-      if (data.payment) {
-        // Extract payment amount from Razorpay response (in paise)
-        const amount = data.payment.amount / 100; // Convert from paise to rupees
-        
-        // Try to save the payment to our database
-        const consultationId = data.payment.notes?.consultationId || 'auto-recovered';
-        
-        // Use the savePaymentDetails function
-        const saveResult = await savePaymentDetails({
-          paymentId,
-          orderId,
-          amount,
-          consultationId
-        });
-        
-        console.log(`Payment save result after verification: ${saveResult}`);
-      }
-      
-      return true;
-    }
-    
-    return false;
+    return data?.success === true && data?.verified === true;
   } catch (err) {
     console.error('Exception verifying payment:', err);
     return false;
@@ -117,18 +92,13 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
 };
 
 /**
- * Export payment storage functions
- */
-export { savePaymentDetails, checkPaymentExists };
-
-/**
- * Verify payment by ID and update records if necessary
+ * Verify payment by ID
  */
 export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> => {
   try {
     console.log("Verifying payment by ID:", paymentId);
     
-    // Check if payment exists in Razorpay
+    // Check payment status in Razorpay
     const { data, error } = await supabase.functions.invoke('razorpay', {
       body: JSON.stringify({
         action: 'verify_payment',
@@ -142,25 +112,6 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
       return false;
     }
     
-    // If payment is verified but not in our database, save it
-    if (data.verified && data.payment) {
-      // Extract data from payment response
-      const orderId = data.payment.order_id || '';
-      const amount = data.payment.amount / 100; // Convert from paise to rupees
-      const consultationId = data.payment.notes?.consultationId || 'recovered-payment';
-      
-      // Save payment details
-      const saved = await savePaymentDetails({
-        paymentId,
-        orderId,
-        amount,
-        consultationId
-      });
-      
-      console.log(`Recovery payment save result: ${saved}`);
-      return true;
-    }
-    
     return data.verified || false;
   } catch (err) {
     console.error('Exception in verifyAndSyncPayment:', err);
@@ -172,4 +123,4 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
 export { loadRazorpayScript, isRazorpayAvailable };
 
 // Re-export types for compatibility with existing code
-export type { CreateOrderParams, OrderResponse, VerifyPaymentParams, SavePaymentParams } from './razorpayTypes';
+export type { CreateOrderParams, OrderResponse, VerifyPaymentParams } from './razorpayTypes';
