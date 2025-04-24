@@ -150,8 +150,13 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
       const amount = data.payment.amount / 100; // Convert from paise to rupees
       const consultationId = data.payment.notes?.consultationId || 'recovered-payment';
       
-      // Call with individual parameters to avoid type recursion
-      const saved = await forcePaymentSave(paymentId, orderId, amount, consultationId);
+      // Using individual parameters instead of object to avoid type recursion
+      const saved = await forcePaymentSave(
+        paymentId,
+        orderId,
+        amount,
+        consultationId
+      );
       
       console.log(`Recovery payment save result: ${saved}`);
       return true;
