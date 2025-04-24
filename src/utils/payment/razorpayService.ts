@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for Razorpay integration
  */
@@ -68,7 +69,7 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
   try {
     const { paymentId, orderId, signature } = params;
     
-    console.log("Verifying payment:", { paymentId, orderId, signature: signature ? "provided" : "missing" });
+    console.log("Verifying Razorpay payment:", { paymentId, orderId, signature: signature ? "provided" : "missing" });
     
     const { data, error } = await supabase.functions.invoke('razorpay', {
       body: JSON.stringify({
@@ -87,7 +88,7 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
       return false;
     }
     
-    console.log("Payment verification response:", data);
+    console.log("Payment verification response from Razorpay:", data);
     
     // If payment is verified but no payment data is in response, try to recover it
     if (data?.success === true && data?.verified === true) {

@@ -12,7 +12,7 @@ export const savePaymentDetails = async (params: SavePaymentParams): Promise<boo
   const { paymentId, orderId, amount, consultationId } = params;
   
   try {
-    console.log("Saving payment details:", { paymentId, orderId, amount, consultationId });
+    console.log("Saving payment details to Supabase:", { paymentId, orderId, amount, consultationId });
     
     // First check if payment record already exists to avoid duplicates
     const { data: existingPayment, error: checkError } = await supabase
@@ -45,11 +45,11 @@ export const savePaymentDetails = async (params: SavePaymentParams): Promise<boo
       .select();
     
     if (error) {
-      console.error('Error saving payment details:', error);
+      console.error('Error saving payment details to Supabase:', error);
       throw new Error(`Failed to save payment: ${error.message}`);
     }
     
-    console.log("Payment details saved successfully:", data);
+    console.log("Payment details saved successfully to Supabase:", data);
     return true;
   } catch (err) {
     console.error('Exception saving payment details:', err);
@@ -92,7 +92,7 @@ export const checkPaymentExists = async (paymentId: string): Promise<boolean> =>
   }
   
   try {
-    console.log("Checking if payment exists:", paymentId);
+    console.log("Checking if payment exists in Supabase:", paymentId);
     
     const { data, error } = await supabase
       .from('payments')
@@ -125,7 +125,7 @@ export const forcePaymentSave = async (params: SavePaymentParams): Promise<boole
   }
   
   try {
-    console.log("Force saving payment details:", { paymentId, orderId, amount, consultationId });
+    console.log("Force saving payment details to Supabase:", { paymentId, orderId, amount, consultationId });
     
     // Check if payment already exists
     const exists = await checkPaymentExists(paymentId);
@@ -146,11 +146,11 @@ export const forcePaymentSave = async (params: SavePaymentParams): Promise<boole
     });
     
     if (error) {
-      console.error('Error during force save of payment:', error);
+      console.error('Error during force save of payment in Supabase:', error);
       return false;
     }
     
-    console.log("Payment force saved successfully");
+    console.log("Payment force saved successfully to Supabase");
     return true;
   } catch (err) {
     console.error('Critical failure saving payment:', err);

@@ -8,6 +8,9 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { checkPaymentExists, savePaymentDetails } from "@/utils/payment/paymentStorage";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 
 // Accept either query params or state for flexibility
 const PaymentConfirmation = () => {
@@ -105,70 +108,69 @@ const PaymentConfirmation = () => {
     verifyPayment();
   }, [paymentId, orderId, referenceId, amount]);
 
-  if (isVerifying) {
-    return (
-      <div className="flex flex-col items-center justify-center px-4 py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-peacefulBlue mb-4" />
-        <h1 className="text-2xl font-semibold mb-2">Verifying Your Payment</h1>
-        <p className="text-gray-700">
-          Please wait while we verify your payment details...
-        </p>
-      </div>
-    );
-  }
-
-  if (verificationResult) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-10">
-        <Alert variant={verificationResult.success ? "default" : "destructive"} className="mb-6">
-          <AlertTitle className="text-xl">{verificationResult.success ? "Payment Verified" : "Verification Issue"}</AlertTitle>
-          <AlertDescription className="text-lg">{verificationResult.message}</AlertDescription>
-        </Alert>
-        
-        {verificationResult.success ? (
-          <div className="mt-6 text-center">
-            <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>
-            <p className="mb-4">Order ID: <strong>{orderId || "N/A"}</strong></p>
-            <p className="mb-6">Your payment has been recorded in our system.</p>
-            <Button onClick={() => navigate('/')}>Return to Home</Button>
+  return (
+    <>
+      <SEO
+        title="Payment Confirmation"
+        description="Confirm your booking and payment details for your Peace2Hearts consultation."
+        keywords="payment confirmation, booking confirmation, consultation payment"
+      />
+      <Navigation />
+      <main className="max-w-4xl mx-auto px-4 py-10">
+        {isVerifying ? (
+          <div className="flex flex-col items-center justify-center px-4 py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-peacefulBlue mb-4" />
+            <h1 className="text-2xl font-semibold mb-2">Verifying Your Payment</h1>
+            <p className="text-gray-700">
+              Please wait while we verify your payment details...
+            </p>
+          </div>
+        ) : verificationResult ? (
+          <div className="max-w-4xl mx-auto px-4 py-10">
+            <Alert variant={verificationResult.success ? "default" : "destructive"} className="mb-6">
+              <AlertTitle className="text-xl">{verificationResult.success ? "Payment Verified" : "Verification Issue"}</AlertTitle>
+              <AlertDescription className="text-lg">{verificationResult.message}</AlertDescription>
+            </Alert>
+            
+            {verificationResult.success ? (
+              <div className="mt-6 text-center">
+                <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>
+                <p className="mb-4">Order ID: <strong>{orderId || "N/A"}</strong></p>
+                <p className="mb-6">Your payment has been recorded in our system.</p>
+                <Button onClick={() => navigate('/')}>Return to Home</Button>
+              </div>
+            ) : (
+              <div className="mt-6 text-center">
+                <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>
+                <p className="mb-4">Order ID: <strong>{orderId || "N/A"}</strong></p>
+                <p className="mb-6">Please save these details for your reference when contacting support.</p>
+                <Button onClick={() => navigate('/')}>Return to Home</Button>
+              </div>
+            )}
+          </div>
+        ) : (!referenceId && !bookingDetails && !paymentId) ? (
+          <div className="flex flex-col items-center justify-center px-4 py-8">
+            <h1 className="text-2xl font-semibold mb-4">Booking Confirmation</h1>
+            <p className="text-gray-700 mb-4">
+              We received your booking request, but we couldn't find complete details.
+            </p>
+            <p className="text-gray-700 mb-4">
+              If you've made a payment, it should be processed shortly.
+            </p>
+            <p className="text-gray-500">
+              Please check your email for further details!
+            </p>
+            <Button className="mt-6" onClick={() => navigate('/')}>Return to Home</Button>
           </div>
         ) : (
-          <div className="mt-6 text-center">
-            <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>
-            <p className="mb-4">Order ID: <strong>{orderId || "N/A"}</strong></p>
-            <p className="mb-6">Please save these details for your reference when contacting support.</p>
-            <Button onClick={() => navigate('/')}>Return to Home</Button>
-          </div>
+          <BookingSuccessView
+            referenceId={referenceId}
+            bookingDetails={bookingDetails}
+          />
         )}
-      </div>
-    );
-  }
-
-  if (!referenceId && !bookingDetails && !paymentId) {
-    return (
-      <div className="flex flex-col items-center justify-center px-4 py-8">
-        <h1 className="text-2xl font-semibold mb-4">Booking Confirmation</h1>
-        <p className="text-gray-700 mb-4">
-          We received your booking request, but we couldn't find complete details.
-        </p>
-        <p className="text-gray-700 mb-4">
-          If you've made a payment, it should be processed shortly.
-        </p>
-        <p className="text-gray-500">
-          Please check your email for further details!
-        </p>
-        <Button className="mt-6" onClick={() => navigate('/')}>Return to Home</Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
-      <BookingSuccessView
-        referenceId={referenceId}
-        bookingDetails={bookingDetails}
-      />
-    </div>
+      </main>
+      <Footer />
+    </>
   );
 };
 
