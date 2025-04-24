@@ -32,17 +32,20 @@ export const useInitializeRazorpayPayment = ({
         },
       });
       
-      if (!orderResponse.success || !orderResponse.order) {
+      if (!orderResponse.success || !orderResponse.order_id) {
         console.error("Order creation failed:", orderResponse.error);
         throw new Error(orderResponse.error || "Failed to create order");
       }
       
-      const { order, key_id } = orderResponse;
-      if (setOrderId) setOrderId(order.id);
+      // Use the order_id from the response
+      const orderId = orderResponse.order_id;
+      if (setOrderId) setOrderId(orderId);
       
-      // Use the returned key or fallback to test key
-      const razorpayKey = key_id || "rzp_test_C4wVqKJiq5fXgj";
-      console.log("Payment initialized successfully with order ID:", order.id);
+      // Extract order details and key_id
+      const order = orderResponse.details || { id: orderId, amount: validAmount, currency: 'INR' };
+      const razorpayKey = orderResponse.details?.key_id || "rzp_test_C4wVqKJiq5fXgj";
+      
+      console.log("Payment initialized successfully with order ID:", orderId);
       
       return { order, razorpayKey };
     } catch (err) {

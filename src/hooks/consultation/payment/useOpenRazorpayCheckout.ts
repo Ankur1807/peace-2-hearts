@@ -1,4 +1,6 @@
-import { verifyRazorpayPayment, savePaymentDetails, SavePaymentParams } from '@/utils/payment/razorpayService';
+
+import { verifyRazorpayPayment, savePaymentDetails } from '@/utils/payment/razorpayService';
+import { SavePaymentParams } from '@/utils/payment/razorpayTypes';
 import { useNavigate } from 'react-router-dom';
 
 interface OpenRazorpayCheckoutArgs {
