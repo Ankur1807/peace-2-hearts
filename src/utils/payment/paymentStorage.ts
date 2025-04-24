@@ -72,7 +72,9 @@ export const forcePaymentSave = async (params: SavePaymentParams): Promise<boole
     }
     
     // If not, save it directly using the original function
-    return savePaymentDetails(params); // Fixed recursive call by removing "await"
+    // Fix: Call the function directly without type recursion
+    const result = await savePaymentDetails({...params});
+    return result;
   } catch (err) {
     console.error('Exception in forcePaymentSave:', err);
     return false;
