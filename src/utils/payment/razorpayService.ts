@@ -165,3 +165,6 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
 
 // Re-export script loading utilities
 export { loadRazorpayScript, isRazorpayAvailable };
+
+// Re-export types for compatibility with existing code
+export type { CreateOrderParams, OrderResponse, VerifyPaymentParams } from './razorpayTypes';

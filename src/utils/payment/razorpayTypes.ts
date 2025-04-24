@@ -12,7 +12,13 @@ export interface OrderResponse {
   success: boolean;
   order_id?: string;
   error?: string;
-  details?: any;
+  details?: {
+    id: string;
+    amount: number;
+    currency: string;
+    key_id?: string;
+    [key: string]: any;
+  };
 }
 
 export interface VerifyPaymentParams {
