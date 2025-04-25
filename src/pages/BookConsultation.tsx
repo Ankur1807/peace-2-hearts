@@ -55,17 +55,24 @@ const BookConsultation = () => {
   const createBookingDetails = (): BookingDetails => ({
     clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
     email: personalDetails.email,
+    referenceId: referenceId || '',
     services: selectedServices || [], 
     date: date, 
     timeSlot: timeSlot,
     timeframe: timeframe,
     serviceCategory: serviceCategory,
     packageName: getPackageName(selectedServices),
-    amount: totalPrice
+    amount: totalPrice,
+    message: personalDetails.message
   });
 
   React.useEffect(() => {
     if (submitted && referenceId) {
+      console.log("Booking submitted successfully, navigating to confirmation page with:", {
+        referenceId,
+        bookingDetails: createBookingDetails()
+      });
+      
       navigate("/payment-confirmation", {
         state: {
           referenceId,
@@ -74,7 +81,7 @@ const BookConsultation = () => {
         replace: true
       });
     }
-  }, [submitted, referenceId]);
+  }, [submitted, referenceId, navigate]);
 
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

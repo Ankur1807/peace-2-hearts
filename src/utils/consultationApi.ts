@@ -52,6 +52,11 @@ export const saveConsultation = async (
       throw new Error(`Failed to save consultation: ${error.message}`);
     }
     
+    if (!data || data.length === 0) {
+      console.error("No data returned after inserting consultation");
+      throw new Error("Failed to save consultation: No data returned");
+    }
+    
     console.log("Consultation saved successfully to Supabase:", data);
     
     return { ...data[0], referenceId };

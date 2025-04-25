@@ -22,9 +22,33 @@ const handler = async (req: Request): Promise<Response> => {
     const requestText = await req.text();
     console.log("Request text:", requestText);
     
-    // Parse JSON
-    const requestData = JSON.parse(requestText);
+    let requestData;
+    try {
+      // Parse JSON
+      requestData = JSON.parse(requestText);
+    } catch (parseError) {
+      console.error("Error parsing JSON:", parseError);
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+    
     const { type, ...data } = requestData;
+    
+    if (!type) {
+      console.error("Missing 'type' field in request");
+      return new Response(
+        JSON.stringify({ error: "Missing 'type' field in request" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
     
     console.log(`Processing ${type} email request`, data);
 

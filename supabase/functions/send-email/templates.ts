@@ -23,6 +23,7 @@ export interface BookingEmailRequest {
   isResend?: boolean;
   packageName?: string;
   serviceCategory?: string;
+  amount?: number;
 }
 
 export function getContactUserEmailTemplate(data: ContactEmailRequest): string {
@@ -86,6 +87,7 @@ export function getBookingUserEmailTemplate(data: BookingEmailRequest): string {
           ${servicesList}
         </ul>
         ${dateTimeSection}
+        ${data.amount ? `<p><strong>Amount Paid:</strong> ₹${data.amount}</p>` : ''}
       </div>
       
       <p>Our team will be in touch with you shortly to confirm the details and provide any additional information you might need.</p>
@@ -127,6 +129,7 @@ export function getBookingAdminEmailTemplate(data: BookingEmailRequest): string 
         ${servicesList}
       </ul>
       ${dateTimeSection}
+      ${data.amount ? `<p><strong>Amount Paid:</strong> ₹${data.amount}</p>` : ''}
       ${data.message ? `
         <p><strong>Client Message:</strong></p>
         <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">
