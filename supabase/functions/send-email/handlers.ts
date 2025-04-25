@@ -66,12 +66,14 @@ export async function handleContactEmail(data: ContactEmailRequest) {
 
 // Handle booking confirmation emails
 export async function handleBookingEmail(data: BookingEmailRequest) {
-  const { email, consultationType, isResend } = data;
+  const { email, consultationType, isResend, referenceId } = data;
   
-  console.log("Handling booking email request:", JSON.stringify(data, null, 2));
+  console.log("Handling booking email request for reference ID:", referenceId);
+  console.log("Email recipient:", email);
+  console.log("Booking data:", JSON.stringify(data, null, 2));
   
-  // Format date if exists
-  if (data.date) {
+  // Use provided formatted date or format the date if exists
+  if (data.date && !data.formattedDate) {
     const formattedDate = formatDate(data.date);
     console.log(`Formatting date from ${data.date} to ${formattedDate}`);
     data.formattedDate = formattedDate;
@@ -79,6 +81,7 @@ export async function handleBookingEmail(data: BookingEmailRequest) {
   
   try {
     // Send confirmation email to client
+    console.log("Sending confirmation email to client:", email);
     const userEmailResponse = await resend.emails.send({
       from: "Peace2Hearts <contact@peace2hearts.com>",
       to: [email],
@@ -86,21 +89,33 @@ export async function handleBookingEmail(data: BookingEmailRequest) {
       html: getBookingUserEmailTemplate(data),
     });
     
-    console.log("User booking email sent:", userEmailResponse);
+    console.log("User booking email sent successfully:", userEmailResponse);
     
     // Send notification to admin
+    console.log("Sending notification email to admin");
     const adminEmailResponse = await resend.emails.send({
       from: "Peace2Hearts Booking System <contact@peace2hearts.com>",
       to: ["contact@peace2hearts.com"],
-      subject: `${isResend ? "[RESEND] " : ""}New Consultation Booking: ${consultationType}`,
+      subject: `${isResend ? "[RESEND] " : ""}New Consultation Booking: ${consultationType} (Ref: ${referenceId})`,
       html: getBookingAdminEmailTemplate(data),
     });
     
-    console.log("Admin booking email sent:", adminEmailResponse);
+    console.log("Admin booking email sent successfully:", adminEmailResponse);
 
-    return { userEmail: userEmailResponse, adminEmail: adminEmailResponse };
+    return { 
+      userEmail: userEmailResponse, 
+      adminEmail: adminEmailResponse,
+      success: true
+    };
   } catch (error) {
     console.error("Error sending booking email:", error);
+    console.error("Error details:", error.message);
+    
+    // Try to provide more details about the error
+    if (error.response) {
+      console.error("Response error:", error.response);
+    }
+    
     throw error;
   }
 }

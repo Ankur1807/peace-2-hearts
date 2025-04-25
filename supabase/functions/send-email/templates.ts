@@ -71,6 +71,12 @@ export function getBookingUserEmailTemplate(data: BookingEmailRequest): string {
       <p><strong>Date:</strong> ${data.formattedDate}</p>
       <p><strong>Time Slot:</strong> ${data.timeSlot}</p>
     `;
+  } else if (data.date && data.timeSlot) {
+    // Fallback if formatted date is not available
+    dateTimeSection = `
+      <p><strong>Date:</strong> ${data.date}</p>
+      <p><strong>Time Slot:</strong> ${data.timeSlot}</p>
+    `;
   }
 
   return `
@@ -110,9 +116,15 @@ export function getBookingAdminEmailTemplate(data: BookingEmailRequest): string 
   let dateTimeSection = '';
   if (isHolisticBooking && data.timeframe) {
     dateTimeSection = `<p><strong>Preferred Timeframe:</strong> ${data.timeframe}</p>`;
-  } else if (data.date) {
+  } else if (data.formattedDate) {
     dateTimeSection = `
-      <p><strong>Date:</strong> ${data.formattedDate || data.date}</p>
+      <p><strong>Date:</strong> ${data.formattedDate}</p>
+      ${data.timeSlot ? `<p><strong>Time Slot:</strong> ${data.timeSlot}</p>` : ''}
+    `;
+  } else if (data.date) {
+    // Fallback if formatted date is not available
+    dateTimeSection = `
+      <p><strong>Date:</strong> ${data.date}</p>
       ${data.timeSlot ? `<p><strong>Time Slot:</strong> ${data.timeSlot}</p>` : ''}
     `;
   }

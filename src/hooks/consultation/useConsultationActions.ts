@@ -102,6 +102,8 @@ export function useConsultationActions({
         
         // Send confirmation email
         try {
+          console.log("Preparing to send booking confirmation email");
+          
           // Log the date for debugging
           console.log("Booking date before sending email:", state.date);
           if (state.date) {
@@ -140,10 +142,20 @@ export function useConsultationActions({
           if (!emailSent) {
             console.error("Failed to send confirmation email");
             // Continue with the booking process even if email fails
+            toast({
+              title: "Email Notification",
+              description: "Your booking was successful, but there was an issue sending the confirmation email. You'll still receive details from our team.",
+              variant: "warning"
+            });
           }
         } catch (emailError) {
           console.error("Error sending confirmation email:", emailError);
           // Continue with the booking process even if email fails
+          toast({
+            title: "Email Notification",
+            description: "Your booking was successful, but there was an issue sending the confirmation email. You'll still receive details from our team.",
+            variant: "warning"
+          });
         }
         
         setSubmitted(true);
@@ -151,7 +163,7 @@ export function useConsultationActions({
         
         toast({
           title: "Booking Confirmed",
-          description: `Your consultation${state.selectedServices.length > 1 ? 's have' : ' has'} been successfully booked.`,
+          description: `Your consultation${state.selectedServices.length > 1 ? 's have' : ' has'} been successfully booked. Reference ID: ${lastResult.referenceId}`,
         });
       } else {
         throw new Error("Failed to create consultation: No reference ID generated");

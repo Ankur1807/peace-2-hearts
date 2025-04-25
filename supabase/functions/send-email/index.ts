@@ -70,7 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email sent successfully:", emailResponse);
 
-    return new Response(JSON.stringify(emailResponse), {
+    return new Response(JSON.stringify({ success: true, ...emailResponse }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -80,7 +80,11 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-email function:", error);
     return new Response(
-      JSON.stringify({ error: error.message, stack: error.stack }),
+      JSON.stringify({ 
+        error: error.message, 
+        stack: error.stack,
+        details: error.response ? error.response : "No additional details"
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
