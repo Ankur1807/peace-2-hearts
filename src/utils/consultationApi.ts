@@ -37,7 +37,6 @@ export const saveConsultation = async (
       status: 'scheduled',
       message: personalDetails.message,
       reference_id: referenceId,
-      // Removed user_id and consultant_id as they are now optional
     };
     
     console.log("Saving consultation to Supabase:", consultationData);

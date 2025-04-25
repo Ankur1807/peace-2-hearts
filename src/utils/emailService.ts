@@ -35,6 +35,13 @@ export async function sendContactEmail(formData: ContactFormData): Promise<boole
   try {
     const { name, email, phone, subject, message, isResend } = formData;
     
+    console.log('Sending contact email with data:', {
+      name, 
+      email, 
+      subject, 
+      messageLength: message?.length || 0
+    });
+    
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
         type: 'contact',
@@ -74,10 +81,13 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
     // Convert Date object to ISO string for proper transmission
     if (date instanceof Date) {
       serializedBookingDetails.date = date.toISOString();
+      console.log('Date is a Date object, converted to ISO string:', serializedBookingDetails.date);
+    } else if (date) {
+      console.log('Date is not a Date object:', date);
+      serializedBookingDetails.date = String(date);
     }
     
-    console.log('Sending booking confirmation with date:', serializedBookingDetails.date);
-    console.log('Full booking details for email:', JSON.stringify(serializedBookingDetails, null, 2));
+    console.log('Sending booking confirmation with data:', JSON.stringify(serializedBookingDetails, null, 2));
     
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
