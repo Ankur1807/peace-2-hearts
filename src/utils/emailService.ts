@@ -22,6 +22,8 @@ interface BookingDetails {
   message?: string;
   isResend?: boolean;
   packageName?: string;
+  serviceCategory?: string;
+  amount?: number;
 }
 
 // Create a modified interface that allows for the date to be a string when sending via API
@@ -75,6 +77,7 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
     }
     
     console.log('Sending booking confirmation with date:', serializedBookingDetails.date);
+    console.log('Full booking details for email:', JSON.stringify(serializedBookingDetails, null, 2));
     
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {

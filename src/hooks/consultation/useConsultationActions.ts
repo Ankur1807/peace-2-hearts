@@ -26,6 +26,15 @@ export function useConsultationActions({
     const { selectedServices, serviceCategory, date, timeSlot, timeframe, personalDetails } = state;
     let lastResult;
     
+    console.log("processServiceBookings - Starting bookings process with state:", {
+      selectedServices, 
+      serviceCategory, 
+      date: date ? date.toString() : undefined, 
+      timeSlot, 
+      timeframe, 
+      personalDetails
+    });
+
     for (const service of selectedServices) {
       console.log(`Creating consultation for service: ${service}`);
       const result = await saveConsultation(
@@ -87,7 +96,8 @@ export function useConsultationActions({
             console.log("Date ISO string:", state.date.toISOString());
           }
           
-          await sendBookingConfirmationEmail({
+          // Create email details object
+          const emailDetails = {
             clientName: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
             email: state.personalDetails.email,
             referenceId: lastResult.referenceId,
@@ -100,9 +110,15 @@ export function useConsultationActions({
             timeframe: state.serviceCategory === 'holistic' ? state.timeframe : undefined,
             message: state.personalDetails.message,
             // Include package name if applicable
-            packageName: packageName
-          });
-          console.log("Confirmation email sent successfully");
+            packageName: packageName,
+            // Add service category
+            serviceCategory: state.serviceCategory
+          };
+          
+          console.log("Sending email with details:", JSON.stringify(emailDetails, null, 2));
+          
+          const emailSent = await sendBookingConfirmationEmail(emailDetails);
+          console.log("Confirmation email sent successfully:", emailSent);
         } catch (emailError) {
           console.error("Error sending confirmation email:", emailError);
           // Continue with the booking process even if email fails
