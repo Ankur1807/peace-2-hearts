@@ -26,7 +26,7 @@ const BookingDetailsCard = ({
 }: BookingDetailsCardProps) => {
   return (
     <div className="mb-8 max-w-lg mx-auto text-left">
-      <h3 className="text-xl font-semibold mb-3">Booking Details:</h3>
+      <h3 className="text-xl font-semibold mb-3">Booking Information:</h3>
       <div className="bg-gray-50 p-6 rounded-lg space-y-4">
         {referenceId && (
           <div className="mb-4">
