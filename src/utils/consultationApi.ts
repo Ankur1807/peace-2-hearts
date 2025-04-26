@@ -34,7 +34,7 @@ export const saveConsultation = async (
       client_name: `${personalDetails.firstName} ${personalDetails.lastName}`,
       client_email: personalDetails.email,
       client_phone: personalDetails.phone,
-      status: 'scheduled',
+      status: 'scheduled', // Initially set to scheduled, will be updated to 'paid' after payment
       message: personalDetails.message,
       reference_id: referenceId,
     };
@@ -63,5 +63,53 @@ export const saveConsultation = async (
   } catch (error) {
     console.error("Error in saveConsultation:", error);
     throw error;
+  }
+};
+
+// Update a consultation record (e.g., after payment)
+export const updateConsultationStatus = async (
+  referenceId: string,
+  newStatus: string
+) => {
+  try {
+    console.log(`Updating consultation ${referenceId} to status ${newStatus}`);
+    
+    const { data, error } = await supabase
+      .from('consultations')
+      .update({ status: newStatus })
+      .eq('reference_id', referenceId)
+      .select();
+    
+    if (error) {
+      console.error("Error updating consultation status:", error);
+      return false;
+    }
+    
+    console.log("Consultation status updated successfully:", data);
+    return true;
+  } catch (error) {
+    console.error("Error in updateConsultationStatus:", error);
+    return false;
+  }
+};
+
+// Get consultation details by reference ID
+export const getConsultationByReferenceId = async (referenceId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('consultations')
+      .select('*')
+      .eq('reference_id', referenceId)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching consultation by reference ID:", error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error in getConsultationByReferenceId:", error);
+    return null;
   }
 };

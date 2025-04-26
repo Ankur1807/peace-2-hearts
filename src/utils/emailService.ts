@@ -14,7 +14,7 @@ interface BookingDetails {
   clientName: string;
   email: string;
   referenceId: string;
-  consultationType: string;
+  consultationType?: string;
   services: string[];
   date?: Date;
   timeSlot?: string;

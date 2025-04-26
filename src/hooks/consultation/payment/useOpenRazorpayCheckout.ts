@@ -1,6 +1,7 @@
 
-import { verifyRazorpayPayment } from '@/utils/payment/razorpayService';
+import { verifyRazorpayPayment, savePaymentRecord } from '@/utils/payment/razorpayService';
 import { useNavigate } from 'react-router-dom';
+import { BookingDetails } from '@/utils/types';
 
 interface OpenRazorpayCheckoutArgs {
   getEffectivePrice: () => number;
@@ -25,6 +26,25 @@ export const useOpenRazorpayCheckout = ({
   
   return (order: any, razorpayKey: string, receiptId: string) => {
     const effectivePrice = getEffectivePrice();
+    
+    // Create booking details object for passing between pages
+    const createBookingDetails = (): BookingDetails => ({
+      clientName: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
+      email: state.personalDetails.email,
+      referenceId: receiptId,
+      consultationType: state.selectedServices.length > 1 ? 'multiple' : state.selectedServices[0],
+      services: state.selectedServices || [],
+      date: state.serviceCategory === 'holistic' ? undefined : state.date,
+      timeSlot: state.serviceCategory === 'holistic' ? undefined : state.timeSlot,
+      timeframe: state.serviceCategory === 'holistic' ? state.timeframe : undefined,
+      packageName: state.serviceCategory === 'holistic' ? 
+        (state.selectedServices.includes('divorce-prevention') ? 'Divorce Prevention Package' : 
+        state.selectedServices.includes('pre-marriage-clarity') ? 'Pre-Marriage Clarity Package' : null) : null,
+      serviceCategory: state.serviceCategory,
+      amount: effectivePrice,
+      message: state.personalDetails.message
+    });
+    
     const options = {
       key: razorpayKey,
       amount: order.amount,
@@ -35,18 +55,14 @@ export const useOpenRazorpayCheckout = ({
       handler: async function (response: any) {
         console.log("Payment successful:", response);
         
-        // Navigate to payment verification immediately after Razorpay closes
-        navigate("/payment-verification", {
-          state: {
-            paymentId: response.razorpay_payment_id,
-            orderId: response.razorpay_order_id,
-            signature: response.razorpay_signature,
-            amount: effectivePrice,
-            receiptId: receiptId
-          }
-        });
-        
         try {
+          // Save the reference ID if we have the setter function
+          if (setReferenceId) {
+            console.log("Setting reference ID:", receiptId);
+            setReferenceId(receiptId);
+          }
+          
+          // First verify the payment
           const isVerified = await verifyRazorpayPayment({
             paymentId: response.razorpay_payment_id,
             orderId: response.razorpay_order_id,
@@ -55,16 +71,61 @@ export const useOpenRazorpayCheckout = ({
           
           console.log("Payment verification result:", isVerified);
           
-          // Redirect to final confirmation page after verification
-          navigate("/payment-confirmation", {
-            state: {
+          if (isVerified) {
+            // If payment is verified, save payment record
+            const paymentSaved = await savePaymentRecord({
               paymentId: response.razorpay_payment_id,
               orderId: response.razorpay_order_id,
               amount: effectivePrice,
-              referenceId: receiptId
+              referenceId: receiptId,
+              status: 'completed'
+            });
+            
+            console.log("Payment record saved:", paymentSaved);
+
+            // Now handle booking confirmation - this creates the consultation record
+            if (handleConfirmBooking) {
+              console.log("Calling handleConfirmBooking to create consultation record");
+              await handleConfirmBooking();
+              
+              if (setPaymentCompleted) {
+                setPaymentCompleted(true);
+              }
+            } else {
+              console.warn("handleConfirmBooking function not provided");
             }
-          });
-          
+            
+            // Generate booking details for passing to confirmation page
+            const bookingDetails = createBookingDetails();
+            
+            // Navigate to final confirmation page
+            navigate("/payment-confirmation", {
+              state: {
+                paymentId: response.razorpay_payment_id,
+                orderId: response.razorpay_order_id,
+                amount: effectivePrice,
+                referenceId: receiptId,
+                bookingDetails: bookingDetails
+              }
+            });
+          } else {
+            // If verification fails, still try to navigate but with error state
+            toast({
+              title: "Payment Verification Failed",
+              description: "We couldn't verify your payment. Please contact support.",
+              variant: "destructive"
+            });
+            
+            navigate("/payment-confirmation", {
+              state: {
+                paymentId: response.razorpay_payment_id,
+                orderId: response.razorpay_order_id,
+                amount: effectivePrice,
+                referenceId: receiptId,
+                verificationFailed: true
+              }
+            });
+          }
         } catch (error) {
           console.error("Error processing payment confirmation:", error);
           navigate("/payment-confirmation", {
@@ -72,7 +133,8 @@ export const useOpenRazorpayCheckout = ({
               paymentId: response.razorpay_payment_id,
               orderId: response.razorpay_order_id,
               amount: effectivePrice,
-              referenceId: receiptId
+              referenceId: receiptId,
+              error: "Error processing payment"
             }
           });
         } finally {
@@ -114,7 +176,8 @@ export const useOpenRazorpayCheckout = ({
               paymentId: response.error.metadata.payment_id,
               orderId: order.id,
               amount: effectivePrice,
-              referenceId: receiptId
+              referenceId: receiptId,
+              paymentFailed: true
             }
           });
         }

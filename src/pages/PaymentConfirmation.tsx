@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import BookingSuccessView from "@/components/consultation/BookingSuccessView";
 import { BookingDetails } from "@/utils/types";
-import { verifyAndSyncPayment } from "@/utils/payment/razorpayService";
+import { verifyAndSyncPayment, savePaymentRecord } from "@/utils/payment/razorpayService";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -11,12 +11,14 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 // Accept either query params or state for flexibility
 const PaymentConfirmation = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   // Try getting from state first (safer), fall back to search params
   const referenceId = location.state?.referenceId || searchParams.get("ref") || null;
@@ -24,9 +26,12 @@ const PaymentConfirmation = () => {
   const paymentId = searchParams.get("razorpay_payment_id") || location.state?.paymentId;
   const orderId = searchParams.get("razorpay_order_id") || location.state?.orderId;
   const amount = location.state?.amount || 0;
+  const paymentFailed = location.state?.paymentFailed || false;
+  const verificationFailed = location.state?.verificationFailed || false;
   
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<{success: boolean; message: string} | null>(null);
+  const [bookingRecovered, setBookingRecovered] = useState(false);
 
   // Debug what data we have
   useEffect(() => {
@@ -35,9 +40,11 @@ const PaymentConfirmation = () => {
       paymentId, 
       orderId, 
       amount,
-      hasBookingDetails: !!bookingDetails
+      hasBookingDetails: !!bookingDetails,
+      paymentFailed,
+      verificationFailed
     });
-  }, [referenceId, paymentId, orderId, amount, bookingDetails]);
+  }, [referenceId, paymentId, orderId, amount, bookingDetails, paymentFailed, verificationFailed]);
 
   // If we have a payment ID but no booking details, try to verify and recover the payment
   useEffect(() => {
@@ -49,6 +56,29 @@ const PaymentConfirmation = () => {
           const verified = await verifyAndSyncPayment(paymentId);
           
           if (verified) {
+            // Try to save the payment record if we have a reference ID
+            if (referenceId && amount > 0) {
+              try {
+                const paymentSaved = await savePaymentRecord({
+                  paymentId,
+                  orderId: orderId || '',
+                  amount,
+                  referenceId,
+                  status: 'completed'
+                });
+                
+                if (paymentSaved) {
+                  setBookingRecovered(true);
+                  toast({
+                    title: "Payment Record Saved",
+                    description: "Your payment record has been successfully saved."
+                  });
+                }
+              } catch (error) {
+                console.error("Error saving payment record:", error);
+              }
+            }
+            
             setVerificationResult({
               success: true,
               message: "Your payment has been verified and your booking is confirmed."
@@ -72,7 +102,22 @@ const PaymentConfirmation = () => {
     };
     
     verifyPayment();
-  }, [paymentId, orderId, referenceId, amount, verificationResult]);
+  }, [paymentId, orderId, referenceId, amount, verificationResult, toast]);
+
+  // Handle failed payments
+  useEffect(() => {
+    if (paymentFailed) {
+      setVerificationResult({
+        success: false,
+        message: "Your payment was not completed. Please try again or contact support."
+      });
+    } else if (verificationFailed) {
+      setVerificationResult({
+        success: false,
+        message: "We couldn't verify your payment. Please contact our support team."
+      });
+    }
+  }, [paymentFailed, verificationFailed]);
 
   return (
     <>
@@ -135,9 +180,16 @@ const PaymentConfirmation = () => {
                   ) : (
                     <div className="text-center py-6">
                       <p className="mb-4">Your payment has been successfully processed.</p>
-                      <p className="mb-6 text-gray-600">
-                        You will receive a confirmation email shortly with your booking details.
-                      </p>
+                      {bookingRecovered ? (
+                        <p className="mb-6 text-green-600">
+                          Your booking record has been successfully recovered.
+                        </p>
+                      ) : (
+                        <p className="mb-6 text-amber-600">
+                          We couldn't find complete booking details, but your payment has been recorded. 
+                          You will receive a confirmation email shortly.
+                        </p>
+                      )}
                       <Button onClick={() => navigate('/')}>Return to Home</Button>
                     </div>
                   )}
@@ -147,7 +199,16 @@ const PaymentConfirmation = () => {
                   <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>
                   <p className="mb-4">Order ID: <strong>{orderId || "N/A"}</strong></p>
                   <p className="mb-6">Please save these details for your reference when contacting support.</p>
-                  <Button onClick={() => navigate('/')}>Return to Home</Button>
+                  <div className="space-y-3">
+                    <Button onClick={() => navigate('/book-consultation')} className="w-full sm:w-auto">
+                      Try Booking Again
+                    </Button>
+                    <div className="pt-2">
+                      <Button onClick={() => navigate('/')} variant="outline" className="w-full sm:w-auto">
+                        Return to Home
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
             </Card>
