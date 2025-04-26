@@ -32,6 +32,9 @@ serve(async (req: Request) => {
       });
     }
     
+    // Log the request data for debugging
+    console.log("Razorpay function received request:", JSON.stringify(data));
+    
     // Get API keys
     const { key_id, key_secret } = getRazorpayKeys();
     
@@ -54,18 +57,43 @@ serve(async (req: Request) => {
     if (action === 'create_order') {
       // Extract params for create order
       const { amount, currency = 'INR', receipt, orderData } = data;
+      
+      if (!amount || amount <= 0 || !receipt) {
+        console.error("Invalid create_order parameters:", { amount, receipt });
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Invalid order parameters'
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400
+        });
+      }
+      
       return await handleCreateOrder(amount, currency, receipt, orderData?.notes, auth, key_id);
     } 
     else if (action === 'verify_payment') {
       // Extract params for verify payment
       const { paymentId, orderData, checkOnly } = data;
+      
+      if (!paymentId) {
+        console.error("Missing paymentId for verify_payment");
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Missing payment ID'
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400
+        });
+      }
+      
       return await handleVerifyPayment(paymentId, orderData, auth);
     } 
     else {
       // Handle unknown action
+      console.error("Unknown action requested:", action);
       return new Response(JSON.stringify({
         success: false,
-        error: 'Invalid action'
+        error: `Invalid action: ${action}`
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400
@@ -73,11 +101,11 @@ serve(async (req: Request) => {
     }
     
   } catch (error) {
-    console.error("Error processing request:", error);
+    console.error("Error processing Razorpay request:", error);
     return new Response(JSON.stringify({
       success: false,
       error: 'Internal Server Error',
-      details: error.message
+      details: error.message || String(error)
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500

@@ -4,79 +4,83 @@ import { corsHeaders } from './utils.ts';
 export async function handleCreateOrder(
   amount: number, 
   currency: string, 
-  receipt: string, 
-  notes: Record<string, string> | undefined,
+  receipt: string,
+  notes: any,
   auth: string,
   key_id: string
 ): Promise<Response> {
-  if (!amount || !currency || !receipt) {
-    console.error("Missing required parameters:", { amount, currency, receipt });
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'Missing required parameters'
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400
-    });
-  }
-  
-  console.log("Creating order with params:", { amount, currency, receipt, notes });
-  
-  // Create order on Razorpay
-  const orderPayload = {
-    amount: amount * 100, // Convert to paise
-    currency: currency,
-    receipt: receipt,
-    notes: notes || {}
-  };
-  
-  console.log("Sending request to Razorpay:", JSON.stringify(orderPayload));
-  
   try {
-    const razorpayResponse = await fetch('https://api.razorpay.com/v1/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${auth}`
-      },
-      body: JSON.stringify(orderPayload)
-    });
+    console.log(`Creating order with: amount=${amount}, currency=${currency}, receipt=${receipt}`);
     
-    const orderResult = await razorpayResponse.json();
-    console.log("Order created:", JSON.stringify(orderResult));
-    
-    if (!razorpayResponse.ok) {
-      console.error("Razorpay API error:", orderResult);
+    // Ensure amount is a number and convert to paise (smallest currency unit)
+    const amountInPaise = Math.round(Number(amount) * 100);
+    if (isNaN(amountInPaise) || amountInPaise <= 0) {
+      console.error("Invalid amount:", amount);
       return new Response(JSON.stringify({
         success: false,
-        error: 'Failed to create order',
-        details: orderResult
+        error: 'Invalid amount'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: razorpayResponse.status
+        status: 400
       });
     }
     
-    // Return the successful order response with key information
-    return new Response(JSON.stringify({
+    const orderData = {
+      amount: amountInPaise,
+      currency,
+      receipt,
+      notes: notes || {},
+      // Add partial payment setting as false
+      partial_payment: false
+    };
+    
+    console.log("Sending order creation request to Razorpay:", JSON.stringify(orderData));
+    
+    const response = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderData)
+    });
+    
+    const data = await response.json();
+    console.log("Razorpay order response:", JSON.stringify(data));
+    
+    if (!response.ok) {
+      console.error("Razorpay order creation failed:", data);
+      return new Response(JSON.stringify({
+        success: false,
+        error: data.error?.description || 'Failed to create order',
+        details: data
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: response.status
+      });
+    }
+    
+    const orderResponse = {
       success: true,
-      order_id: orderResult.id,
+      order_id: data.id,
       details: {
-        id: orderResult.id,
-        amount: orderResult.amount / 100, // Convert back to rupees
-        currency: orderResult.currency,
-        key_id: key_id
+        id: data.id,
+        amount: data.amount / 100, // Convert back from paise to main currency unit
+        currency: data.currency,
+        key_id // Include the key_id for frontend to use
       }
-    }), {
+    };
+    
+    return new Response(JSON.stringify(orderResponse), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200
     });
   } catch (err) {
-    console.error("Error calling Razorpay API:", err);
+    console.error("Exception in handleCreateOrder:", err);
     return new Response(JSON.stringify({
       success: false,
-      error: 'Error communicating with Razorpay',
-      details: err.message
+      error: 'Error creating order',
+      details: err instanceof Error ? err.message : String(err)
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500

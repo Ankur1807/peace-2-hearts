@@ -1,17 +1,22 @@
 
 import { createRazorpayOrder } from '@/utils/payment/razorpayService';
+import { useToast } from '@/hooks/use-toast';
 
 interface InitializeRazorpayArgs {
   getEffectivePrice: () => number;
   state: any;
   setOrderId?: (id: string | null) => void;
+  toast?: any;
 }
 
 export const useInitializeRazorpayPayment = ({
   getEffectivePrice,
   state,
-  setOrderId
+  setOrderId,
+  toast
 }: InitializeRazorpayArgs) => {
+  const internalToast = useToast?.() || { toast: () => {} };
+  
   return async (receiptId: string) => {
     const effectivePrice = getEffectivePrice();
     console.log("Starting payment process with calculated amount:", effectivePrice);
@@ -32,8 +37,24 @@ export const useInitializeRazorpayPayment = ({
       });
       
       if (!orderResponse.success || !orderResponse.order_id) {
-        console.error("Order creation failed:", orderResponse.error);
-        throw new Error(orderResponse.error || "Failed to create order");
+        console.error("Order creation failed:", orderResponse);
+        const errorMessage = orderResponse.error || "Failed to create order";
+        
+        if (toast) {
+          toast({
+            title: "Payment Initialization Failed",
+            description: errorMessage,
+            variant: "destructive"
+          });
+        } else if (internalToast.toast) {
+          internalToast.toast({
+            title: "Payment Initialization Failed", 
+            description: errorMessage,
+            variant: "destructive"
+          });
+        }
+        
+        throw new Error(errorMessage);
       }
       
       // Use the order_id from the response
@@ -45,7 +66,23 @@ export const useInitializeRazorpayPayment = ({
       const razorpayKey = orderResponse.details?.key_id;
       
       if (!razorpayKey) {
-        throw new Error("Razorpay key not configured. Please contact support.");
+        const errorMessage = "Razorpay key not configured. Please contact support.";
+        
+        if (toast) {
+          toast({
+            title: "Payment Configuration Error",
+            description: errorMessage,
+            variant: "destructive"
+          });
+        } else if (internalToast.toast) {
+          internalToast.toast({
+            title: "Payment Configuration Error", 
+            description: errorMessage,
+            variant: "destructive"
+          });
+        }
+        
+        throw new Error(errorMessage);
       }
       
       console.log("Payment initialized successfully with order ID:", orderId);

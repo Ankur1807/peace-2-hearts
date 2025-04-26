@@ -1,4 +1,5 @@
-// Existing code
+
+// Cors headers for cross-origin requests
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -34,9 +35,19 @@ export function handleCors(req: Request): Response | null {
 
 // Get Razorpay API keys from environment
 export function getRazorpayKeys(): { key_id: string, key_secret: string } {
+  const key_id = Deno.env.get('RAZORPAY_KEY_ID') || '';
+  const key_secret = Deno.env.get('RAZORPAY_KEY_SECRET') || '';
+  
+  // Log if keys are missing (but don't expose actual keys in logs)
+  if (!key_id || !key_secret) {
+    console.error("Razorpay API keys missing or not configured properly");
+  } else {
+    console.log("Razorpay API keys found");
+  }
+  
   return {
-    key_id: Deno.env.get('RAZORPAY_KEY_ID') || '',
-    key_secret: Deno.env.get('RAZORPAY_KEY_SECRET') || ''
+    key_id,
+    key_secret
   };
 }
 
