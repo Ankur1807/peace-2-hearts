@@ -11,7 +11,7 @@ import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/utils/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 const PaymentConfirmation = () => {
   const [searchParams] = useSearchParams();
