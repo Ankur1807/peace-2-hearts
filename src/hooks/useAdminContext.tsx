@@ -34,21 +34,24 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
 
   useEffect(() => {
     checkAdminStatus();
+    
+    // Check admin status every 5 minutes to ensure session remains valid
+    const intervalId = setInterval(checkAdminStatus, 5 * 60 * 1000);
+    
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   const checkAdminStatus = async () => {
     try {
       setIsAdminChecking(true);
       
-      // First check Supabase authentication
-      const { data: sessionData } = await supabase.auth.getSession();
-      
-      // Then check for admin authentication in localStorage
+      // First check for admin authentication in localStorage
       const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
       const authTime = parseInt(localStorage.getItem('p2h_admin_auth_time') || '0', 10);
       const isSessionValid = adminAuthenticated && (Date.now() - authTime < ADMIN_SESSION_DURATION);
       
-      console.log('Admin check - Supabase auth:', !!sessionData.session);
       console.log('Admin check - Local auth:', adminAuthenticated);
       console.log('Admin check - Session valid:', isSessionValid);
       
@@ -60,7 +63,10 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
         return;
       }
       
-      // If we have a Supabase session, check if the user is an admin
+      // If no valid session in localStorage, check Supabase
+      const { data: sessionData } = await supabase.auth.getSession();
+      console.log('Admin check - Supabase auth:', !!sessionData.session);
+      
       if (sessionData.session) {
         const adminStatus = await checkSuperbaseAdminStatus();
         console.log("Checked Supabase admin status:", adminStatus);
@@ -79,11 +85,9 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
       const storedKey = localStorage.getItem('admin_api_key');
       if (storedKey) {
         try {
-          const { data, error } = await supabase.functions.invoke('admin-auth', {
-            body: { apiKey: storedKey }
-          });
-
-          if (!error && data?.success) {
+          const validationResult = await validateApiKey(storedKey);
+          
+          if (validationResult) {
             // Set admin session
             localStorage.setItem('p2h_admin_authenticated', 'true');
             localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
@@ -91,7 +95,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
             setIsAdminChecking(false);
             return;
           } else {
-            console.error('API key validation failed:', error || data?.error);
+            // Clear invalid API key
             localStorage.removeItem('admin_api_key');
           }
         } catch (error) {
@@ -107,6 +111,24 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
       setIsAdmin(false);
     } finally {
       setIsAdminChecking(false);
+    }
+  };
+  
+  // Added separate function to validate API key
+  const validateApiKey = async (apiKey: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-auth', {
+        body: { apiKey }
+      });
+
+      if (!error && data?.success) {
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("API key validation error:", error);
+      return false;
     }
   };
 
@@ -134,12 +156,9 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
     try {
       setIsAdminChecking(true);
       
-      // Try to validate the API key
-      const { data, error } = await supabase.functions.invoke('admin-auth', {
-        body: { apiKey }
-      });
-
-      if (error || !data?.success) {
+      const isValidKey = await validateApiKey(apiKey);
+      
+      if (!isValidKey) {
         throw new Error('Invalid API key');
       }
 

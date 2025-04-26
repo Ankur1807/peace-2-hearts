@@ -1,6 +1,7 @@
 
 import React from 'react';
 import PaymentStep from './payment/PaymentStep';
+import { useEffectivePrice } from '@/hooks/consultation/payment/useEffectivePrice';
 
 interface PaymentStepContainerProps {
   consultationType: string;
@@ -9,8 +10,8 @@ interface PaymentStepContainerProps {
   setShowPaymentStep: (show: boolean) => void;
   handlePaymentSubmit: (e: React.FormEvent) => void;
   isProcessing: boolean;
-  totalPrice: number;
   pricing: Map<string, number>;
+  totalPrice: number;
 }
 
 const PaymentStepContainer: React.FC<PaymentStepContainerProps> = ({
@@ -20,21 +21,45 @@ const PaymentStepContainer: React.FC<PaymentStepContainerProps> = ({
   setShowPaymentStep,
   handlePaymentSubmit,
   isProcessing,
-  totalPrice,
-  pricing
-}) => (
-  <form onSubmit={handlePaymentSubmit} className="space-y-6">
-    <PaymentStep 
-      consultationType={consultationType}
-      selectedServices={selectedServices}
-      onNextStep={processPayment}
-      onPrevStep={() => setShowPaymentStep(false)}
-      onSubmit={handlePaymentSubmit}
-      isProcessing={isProcessing}
-      totalPrice={totalPrice}
-      pricing={pricing}
-    />
-  </form>
-);
+  pricing,
+  totalPrice
+}) => {
+  const getEffectivePrice = useEffectivePrice({
+    selectedServices,
+    pricing,
+    totalPrice
+  });
+  
+  const effectivePrice = getEffectivePrice();
+  
+  React.useEffect(() => {
+    console.log("PaymentStepContainer - Price Info:", {
+      consultationType,
+      selectedServices: selectedServices.join(','),
+      effectivePrice,
+      totalPrice,
+      hasPricing: !!pricing,
+      pricingData: pricing ? Object.fromEntries(pricing) : {}
+    });
+  }, [consultationType, selectedServices, effectivePrice, pricing, totalPrice]);
+  
+  return (
+    <form onSubmit={(e) => {
+      console.log("Payment form submitted");
+      handlePaymentSubmit(e);
+    }} className="space-y-6">
+      <PaymentStep 
+        consultationType={consultationType}
+        selectedServices={selectedServices}
+        onNextStep={processPayment}
+        onPrevStep={() => setShowPaymentStep(false)}
+        onSubmit={handlePaymentSubmit}
+        isProcessing={isProcessing}
+        totalPrice={effectivePrice}
+        pricing={pricing}
+      />
+    </form>
+  );
+};
 
 export default PaymentStepContainer;

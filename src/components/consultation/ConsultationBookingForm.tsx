@@ -1,128 +1,43 @@
 
-import React, { useEffect, useCallback } from 'react';
-import { Card } from '@/components/ui/card';
+import React from 'react';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
-import { getPackageName } from '@/utils/consultation/packageUtils';
-
-import ConsultationFormHeader from './ConsultationFormHeader';
-import BookingErrorAlert from './BookingErrorAlert';
-import ConsultationDetailsForm from './ConsultationDetailsForm';
+import BookingFormContent from './booking/BookingFormContent';
 import PaymentStepContainer from './PaymentStepContainer';
+import { Card } from '@/components/ui/card';
+import { getConsultationTypeLabel } from '@/utils/consultationLabels';
 
 interface ConsultationBookingFormProps {
-  bookingState: ConsultationBookingHook;
+  bookingState: ConsultationBookingHook & {
+    handlePaymentSubmit: (e: React.FormEvent) => Promise<void>;
+  };
 }
 
 const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ bookingState }) => {
   const {
-    date, 
-    setDate,
-    serviceCategory,
-    setServiceCategory,
+    showPaymentStep,
+    setShowPaymentStep,
     selectedServices,
-    setSelectedServices,
-    timeSlot,
-    setTimeSlot,
-    timeframe,
-    setTimeframe,
+    processPayment,
     isProcessing,
-    bookingError,
-    personalDetails,
-    handlePersonalDetailsChange,
     pricing,
     totalPrice,
-    showPaymentStep,
-    proceedToPayment,
-    setShowPaymentStep,
-    processPayment
+    handlePaymentSubmit,
+    serviceCategory
   } = bookingState;
 
-  const isTestService = selectedServices.includes('test-service');
-  const effectivePrice = totalPrice;
-
-  useEffect(() => {
-    console.log("ConsultationBookingForm isTestService:", isTestService);
-    console.log("ConsultationBookingForm effectivePrice:", effectivePrice);
-    console.log("ConsultationBookingForm totalPrice:", totalPrice);
-    console.log("ConsultationBookingForm selectedServices:", selectedServices);
-    
-    const packageName = getPackageName(selectedServices);
-    if (packageName) {
-      const packageId = packageName === "Divorce Prevention Package" 
-        ? 'divorce-prevention' 
-        : 'pre-marriage-clarity';
-      console.log(`Selected package: ${packageName}, packageId: ${packageId}, price: ${pricing?.get(packageId) || 'not found in pricing map'}`);
+  // Helper function to get formatted consultation type
+  const getFormattedConsultationType = () => {
+    if (selectedServices && selectedServices.length > 0) {
+      return getConsultationTypeLabel(selectedServices[0]);
     }
-  }, [pricing, totalPrice, effectivePrice, selectedServices, isTestService]);
-
-  const handlePersonalDetailsFieldChange = useCallback((field: string, value: string) => {
-    handlePersonalDetailsChange({
-      ...personalDetails,
-      [field]: value
-    });
-  }, [personalDetails, handlePersonalDetailsChange]);
-
-  const holisticPackages = [
-    { 
-      id: 'divorce-prevention', 
-      label: 'Divorce Prevention Package', 
-      description: '4 sessions (2 therapy + 1 mediation + 1 legal)',
-      services: ['couples-counselling', 'mental-health-counselling', 'mediation', 'general-legal']
-    },
-    { 
-      id: 'pre-marriage-clarity', 
-      label: 'Pre-Marriage Clarity Package', 
-      description: '3 sessions (1 legal + 2 mental health)',
-      services: ['pre-marriage-legal', 'premarital-counselling-individual', 'mental-health-counselling'] 
-    }
-  ];
-
-  const handleServiceSelection = useCallback((serviceId: string, checked: boolean) => {
-    console.log(`Service ${serviceId} selection changed to ${checked}`);
-    if (checked && serviceId) {
-      setSelectedServices([serviceId]);
-      console.log("New selected service:", serviceId);
-    } else {
-      setSelectedServices([]);
-      console.log("Cleared service selection");
-    }
-  }, [setSelectedServices]);
-
-  const handlePackageSelection = useCallback((packageId: string) => {
-    console.log(`Package ${packageId} selected`);
-    const selectedPackage = holisticPackages.find(pkg => pkg.id === packageId);
-    if (selectedPackage) {
-      setSelectedServices([packageId]);
-      console.log(`Selected package: ${packageId}`);
-    }
-  }, [holisticPackages, setSelectedServices]);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const subServiceParam = urlParams.get('subservice');
-    if (subServiceParam && selectedServices.length === 0) {
-      console.log("Setting service from URL parameter:", subServiceParam);
-      setSelectedServices([subServiceParam]);
-    }
-  }, []); 
-
-  const handlePaymentSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(`Submitting payment with total price: ${effectivePrice}`);
-    processPayment();
-  }, [processPayment, effectivePrice]);
-
-  const getFormattedConsultationType = useCallback(() => {
-    if (!selectedServices || selectedServices.length === 0) {
-      return "Consultation";
-    }
-    return selectedServices[0];
-  }, [selectedServices]);
+    return getConsultationTypeLabel(serviceCategory);
+  };
 
   return (
     <div className="relative">
       <div className="absolute top-0 right-0 w-1/3 h-64 bg-gradient-to-bl from-peacefulBlue/10 to-transparent rounded-full filter blur-3xl"></div>
       <div className="absolute bottom-0 left-0 w-1/3 h-64 bg-gradient-to-tr from-vividPink/10 to-transparent rounded-full filter blur-3xl"></div>
+      
       {showPaymentStep ? (
         <Card className="backdrop-blur-sm bg-white/80 p-6 md:p-8 border border-gray-100 shadow-xl rounded-xl relative z-10">
           <PaymentStepContainer
@@ -132,35 +47,12 @@ const ConsultationBookingForm: React.FC<ConsultationBookingFormProps> = ({ booki
             setShowPaymentStep={setShowPaymentStep}
             handlePaymentSubmit={handlePaymentSubmit}
             isProcessing={isProcessing}
-            totalPrice={effectivePrice}
             pricing={pricing}
+            totalPrice={totalPrice}
           />
         </Card>
       ) : (
-        <Card className="backdrop-blur-sm bg-white/90 p-6 md:p-8 border border-gray-100 shadow-xl rounded-xl relative z-10">
-          <ConsultationFormHeader />
-          <BookingErrorAlert error={bookingError} />
-          <ConsultationDetailsForm
-            serviceCategory={serviceCategory}
-            setServiceCategory={setServiceCategory}
-            selectedServices={selectedServices}
-            setSelectedServices={setSelectedServices}
-            handleServiceSelection={handleServiceSelection}
-            handlePackageSelection={handlePackageSelection}
-            date={date}
-            setDate={setDate}
-            timeSlot={timeSlot}
-            setTimeSlot={setTimeSlot}
-            timeframe={timeframe}
-            setTimeframe={setTimeframe}
-            personalDetails={personalDetails}
-            handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
-            isProcessing={isProcessing}
-            pricing={pricing}
-            totalPrice={effectivePrice}
-            onSubmit={proceedToPayment}
-          />
-        </Card>
+        <BookingFormContent bookingState={bookingState} />
       )}
     </div>
   );

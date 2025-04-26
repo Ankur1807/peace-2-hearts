@@ -13,6 +13,10 @@ interface MobileMenuProps {
 }
 
 const MobileMenu = ({ isLoggedIn, userName, isMenuOpen, onSignOut, onMenuToggle }: MobileMenuProps) => {
+  const handleItemClick = () => {
+    onMenuToggle();
+  };
+
   return (
     <div 
       className={`fixed inset-0 top-[72px] z-[200] ${isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
@@ -36,16 +40,16 @@ const MobileMenu = ({ isLoggedIn, userName, isMenuOpen, onSignOut, onMenuToggle 
       >
         <ScrollArea className="h-full max-h-[calc(100vh-72px)]">
           <div className="container mx-auto py-4 flex flex-col gap-4">
-            <Link to="/" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>Home</Link>
-            <Link to="/about" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>About Us</Link>
-            <Link to="/services" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>Services</Link>
-            <Link to="/resources" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>Resources</Link>
-            <Link to="/contact" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={onMenuToggle}>Contact</Link>
+            <Link to="/" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={handleItemClick}>Home</Link>
+            <Link to="/about" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={handleItemClick}>About Us</Link>
+            <Link to="/services" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={handleItemClick}>Services</Link>
+            <Link to="/resources" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={handleItemClick}>Resources</Link>
+            <Link to="/contact" className="text-white hover:text-white/80 transition-colors py-2 block" onClick={handleItemClick}>Contact</Link>
             
-            <UserMenu isMobile={true} onItemClick={onMenuToggle} />
+            <UserMenu isMobile={true} onItemClick={handleItemClick} />
             
-            <Link to="/book-consultation" onClick={onMenuToggle}>
-              <Button className="bg-white hover:bg-white/90 text-purple-600 rounded-full mt-2">
+            <Link to="/book-consultation" onClick={handleItemClick}>
+              <Button className="bg-white hover:bg-white/90 text-purple-600 rounded-full mt-2 w-full">
                 Book Consultation
               </Button>
             </Link>

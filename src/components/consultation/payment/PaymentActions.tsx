@@ -1,58 +1,48 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { formatPrice } from '@/utils/pricing/priceFormatter';
+import { formatPrice } from '@/utils/pricing';
+import { useEffectivePrice } from '@/hooks/consultation/payment/useEffectivePrice';
 
 interface PaymentActionsProps {
   onPrevStep: () => void;
   onSubmit: (e: React.FormEvent) => void;
-  totalPrice: number;
   selectedServices?: string[];
   pricing?: Map<string, number>;
   isProcessing: boolean;
   acceptTerms: boolean;
   razorpayLoaded: boolean;
+  totalPrice?: number; // Added totalPrice prop
 }
 
 const PaymentActions: React.FC<PaymentActionsProps> = ({
   onPrevStep,
   onSubmit,
-  totalPrice,
   selectedServices = [],
   pricing,
   isProcessing,
   acceptTerms,
-  razorpayLoaded
+  razorpayLoaded,
+  totalPrice // Use the prop
 }) => {
-  // Get price from pricing map if available, or fallback to totalPrice
-  const getEffectivePrice = () => {
-    if (selectedServices.includes('test-service') && pricing && pricing.has('test-service')) {
-      const price = pricing.get('test-service');
-      console.log(`PaymentActions - Using test service price: ${price}`);
-      return price as number;
-    }
-    
-    if (selectedServices.length === 1) {
-      const serviceId = selectedServices[0];
-      if (pricing && pricing.has(serviceId)) {
-        const price = pricing.get(serviceId);
-        console.log(`PaymentActions - Using service price for ${serviceId}: ${price}`);
-        return price as number;
-      }
-    }
-    
-    console.log(`PaymentActions - Using totalPrice: ${totalPrice}`);
-    return totalPrice;
-  };
+  const getEffectivePrice = useEffectivePrice({
+    selectedServices,
+    pricing,
+    totalPrice // Pass to the hook
+  });
   
   const effectivePrice = getEffectivePrice();
   
-  // Extra debug logging
   React.useEffect(() => {
-    console.log(`PaymentActions Debug - selected services: ${selectedServices.join(',')}`);
-    console.log(`PaymentActions Debug - pricing map:`, pricing ? Object.fromEntries(pricing) : "N/A");
-    console.log(`PaymentActions Debug - totalPrice: ${totalPrice}`);
-    console.log(`PaymentActions Debug - effectivePrice: ${effectivePrice}`);
-  }, [effectivePrice, totalPrice, selectedServices, pricing]);
+    console.log("PaymentActions - Price Info:", {
+      selectedServices: selectedServices.join(','),
+      effectivePrice,
+      totalPrice,
+      pricingAvailable: pricing ? Object.fromEntries(pricing) : 'none'
+    });
+  }, [selectedServices, effectivePrice, pricing, totalPrice]);
+
+  const canProceed = razorpayLoaded && acceptTerms && effectivePrice > 0;
   
   return (
     <div className="pt-6 flex justify-between">
@@ -62,15 +52,15 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
       <Button 
         type="submit" 
         className="bg-peacefulBlue hover:bg-peacefulBlue/90"
-        disabled={isProcessing || !acceptTerms || !razorpayLoaded || effectivePrice <= 0}
+        disabled={isProcessing || !canProceed}
         onClick={(e) => {
-          console.log(`Payment button clicked with effectivePrice: ${effectivePrice}`);
+          console.log(`Payment button clicked with price: ${effectivePrice}`);
           onSubmit(e);
         }}
       >
         {!razorpayLoaded ? "Loading Payment..." : 
          isProcessing ? "Processing..." : 
-         effectivePrice <= 0 ? "Price Not Available" : 
+         !effectivePrice ? "Select a service" :
          `Pay ${formatPrice(effectivePrice)}`}
       </Button>
     </div>

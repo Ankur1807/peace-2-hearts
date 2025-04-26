@@ -2,6 +2,7 @@
 import React from 'react';
 import SuccessView from './SuccessView';
 import { BookingDetails } from '@/utils/types';
+import { Card } from '@/components/ui/card';
 
 interface BookingSuccessViewProps {
   referenceId: string | null;
@@ -13,12 +14,12 @@ const BookingSuccessView: React.FC<BookingSuccessViewProps> = ({
   bookingDetails
 }) => {
   return (
-    <div className="container mx-auto px-4 max-w-4xl">
+    <Card className="p-6 md:p-8 bg-white/90 backdrop-blur-sm rounded-xl shadow-md">
       <SuccessView 
         referenceId={referenceId}
         bookingDetails={bookingDetails}
       />
-    </div>
+    </Card>
   );
 };
 

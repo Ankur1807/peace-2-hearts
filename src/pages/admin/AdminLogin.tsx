@@ -23,6 +23,7 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
+      console.log("Attempting admin login...");
       const result = await adminLogin(apiKey);
       
       if (result.success) {

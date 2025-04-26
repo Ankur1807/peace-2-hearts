@@ -26,19 +26,43 @@ export function useConsultationActions({
     const { selectedServices, serviceCategory, date, timeSlot, timeframe, personalDetails } = state;
     let lastResult;
     
+    console.log("processServiceBookings - Starting bookings process with state:", {
+      selectedServices, 
+      serviceCategory, 
+      date: date ? date.toString() : undefined, 
+      timeSlot, 
+      timeframe, 
+      personalDetails
+    });
+
+    if (!selectedServices || selectedServices.length === 0) {
+      throw new Error("No services selected");
+    }
+
     for (const service of selectedServices) {
       console.log(`Creating consultation for service: ${service}`);
-      const result = await saveConsultation(
-        service,
-        serviceCategory === 'holistic' ? undefined : date,
-        serviceCategory === 'holistic' ? timeframe : timeSlot,
-        personalDetails
-      );
-      
-      if (result) {
-        console.log(`Consultation created for ${service}:`, result);
-        lastResult = result;
+      try {
+        const result = await saveConsultation(
+          service,
+          serviceCategory === 'holistic' ? undefined : date,
+          serviceCategory === 'holistic' ? timeframe : timeSlot,
+          personalDetails
+        );
+        
+        if (result) {
+          console.log(`Consultation created for ${service}:`, result);
+          lastResult = result;
+        } else {
+          console.error(`Failed to create consultation for ${service}: No result returned`);
+        }
+      } catch (error) {
+        console.error(`Error creating consultation for ${service}:`, error);
+        throw error;
       }
+    }
+    
+    if (!lastResult) {
+      throw new Error("Failed to create any consultations");
     }
     
     return lastResult;
@@ -51,13 +75,13 @@ export function useConsultationActions({
     setBookingError(null);
     
     try {
-      if (state.selectedServices.length === 0) {
+      if (!state.selectedServices || state.selectedServices.length === 0) {
         throw new Error("Please select at least one service");
       }
 
       console.log("Starting booking process with state:", {
         services: state.selectedServices,
-        date: state.date,
+        date: state.date ? state.date.toString() : undefined,
         timeSlot: state.timeSlot,
         timeframe: state.timeframe,
         personalDetails: state.personalDetails,
@@ -67,7 +91,7 @@ export function useConsultationActions({
       // Process all service bookings
       const lastResult = await processServiceBookings();
       
-      if (lastResult) {
+      if (lastResult && lastResult.referenceId) {
         console.log("All consultations created successfully. Last result:", lastResult);
         setReferenceId(lastResult.referenceId);
         
@@ -78,7 +102,19 @@ export function useConsultationActions({
         
         // Send confirmation email
         try {
-          await sendBookingConfirmationEmail({
+          console.log("Preparing to send booking confirmation email");
+          
+          // Log the date for debugging
+          console.log("Booking date before sending email:", state.date);
+          if (state.date) {
+            console.log("Date type:", typeof state.date);
+            console.log("Is Date instance:", state.date instanceof Date);
+            console.log("Date string representation:", state.date.toString());
+            console.log("Date ISO string:", state.date.toISOString());
+          }
+          
+          // Create email details object
+          const emailDetails = {
             clientName: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
             email: state.personalDetails.email,
             referenceId: lastResult.referenceId,
@@ -91,12 +127,35 @@ export function useConsultationActions({
             timeframe: state.serviceCategory === 'holistic' ? state.timeframe : undefined,
             message: state.personalDetails.message,
             // Include package name if applicable
-            packageName: packageName
-          });
-          console.log("Confirmation email sent successfully");
+            packageName: packageName,
+            // Add service category
+            serviceCategory: state.serviceCategory,
+            // Add amount paid
+            amount: state.totalPrice
+          };
+          
+          console.log("Sending email with details:", JSON.stringify(emailDetails, null, 2));
+          
+          const emailSent = await sendBookingConfirmationEmail(emailDetails);
+          console.log("Confirmation email sent successfully:", emailSent);
+          
+          if (!emailSent) {
+            console.error("Failed to send confirmation email");
+            // Continue with the booking process even if email fails
+            toast({
+              title: "Email Notification",
+              description: "Your booking was successful, but there was an issue sending the confirmation email. You'll still receive details from our team.",
+              variant: "warning"
+            });
+          }
         } catch (emailError) {
           console.error("Error sending confirmation email:", emailError);
           // Continue with the booking process even if email fails
+          toast({
+            title: "Email Notification",
+            description: "Your booking was successful, but there was an issue sending the confirmation email. You'll still receive details from our team.",
+            variant: "warning"
+          });
         }
         
         setSubmitted(true);
@@ -104,8 +163,10 @@ export function useConsultationActions({
         
         toast({
           title: "Booking Confirmed",
-          description: `Your consultation${state.selectedServices.length > 1 ? 's have' : ' has'} been successfully booked.`,
+          description: `Your consultation${state.selectedServices.length > 1 ? 's have' : ' has'} been successfully booked. Reference ID: ${lastResult.referenceId}`,
         });
+      } else {
+        throw new Error("Failed to create consultation: No reference ID generated");
       }
     } catch (error: any) {
       console.error("Error confirming booking:", error);

@@ -16,7 +16,40 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { type, ...data } = await req.json();
+    console.log("Received email request");
+    
+    // Parse the request body
+    const requestText = await req.text();
+    console.log("Request text:", requestText);
+    
+    let requestData;
+    try {
+      // Parse JSON
+      requestData = JSON.parse(requestText);
+    } catch (parseError) {
+      console.error("Error parsing JSON:", parseError);
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+    
+    const { type, ...data } = requestData;
+    
+    if (!type) {
+      console.error("Missing 'type' field in request");
+      return new Response(
+        JSON.stringify({ error: "Missing 'type' field in request" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+    
     console.log(`Processing ${type} email request`, data);
 
     let emailResponse;
@@ -37,7 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email sent successfully:", emailResponse);
 
-    return new Response(JSON.stringify(emailResponse), {
+    return new Response(JSON.stringify({ success: true, ...emailResponse }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -47,7 +80,11 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-email function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message, 
+        stack: error.stack,
+        details: error.response ? error.response : "No additional details"
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

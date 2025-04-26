@@ -33,16 +33,11 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
     prevSelectedServices.current = [...selectedServices];
     prevServiceCategory.current = serviceCategory;
 
-    if (selectedServices.length === 0) {
-      setTotalPrice(0);
-      setPricingError(null);
-      return;
-    }
-
     setIsLoading(true);
     setPricingError(null);
 
     try {
+      console.log(`Fetching pricing data for category: ${serviceCategory}, services: ${selectedServices.join(', ')}`);
       const { pricingMap, finalPrice } = await calculatePricingMap(
         selectedServices, 
         serviceCategory, 
@@ -50,39 +45,41 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
         toast
       );
 
+      console.log(`Received pricing data with ${pricingMap.size} items, final price: ${finalPrice}`);
       setPricing(pricingMap);
       setTotalPrice(finalPrice);
 
-      if (finalPrice === 0 && selectedServices.length > 0 && !selectedServices.includes('test-service')) {
+      if (finalPrice === 0 && selectedServices.length > 0) {
         const errorMsg = 'No pricing information available for selected services';
+        console.warn(errorMsg);
         setPricingError(errorMsg);
       }
     } catch (error) {
-      if (selectedServices.includes('test-service')) {
-        const testPricingMap = new Map([['test-service', 11]]);
-        setPricing(testPricingMap);
-        setTotalPrice(11);
-        setPricingError(null);
-      } else {
-        setPricingError("Failed to fetch pricing information");
-        toast({ 
-          title: "Error retrieving pricing information", 
-          description: "Please try again later or contact support.",
-          variant: "destructive"
-        });
-      }
+      console.error("Error in useConsultationPricing:", error);
+      setPricingError("Failed to fetch pricing information");
+      toast({ 
+        title: "Error retrieving pricing information", 
+        description: "Please try again later or contact support.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
       initialFetchDone.current = true;
     }
   }, [selectedServices, serviceCategory, toast]);
 
+  // Always fetch initial pricing data when component mounts
   useEffect(() => {
-    if (selectedServices.length > 0 || !initialFetchDone.current) {
+    if (!initialFetchDone.current) {
+      console.log("Initial pricing fetch triggered");
+      updatePricing();
+    } else if (selectedServices.length > 0) {
+      console.log("Service selection changed, updating pricing");
       updatePricing();
     }
-  }, [updatePricing]);
+  }, [updatePricing, selectedServices]);
 
+  // Debug hook to log pricing information
   useConsultationPricingDebug(totalPrice, selectedServices, pricing);
 
   return { 

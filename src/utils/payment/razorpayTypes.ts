@@ -12,21 +12,15 @@ export interface CreateOrderParams {
 
 export interface OrderResponse {
   success: boolean;
-  order?: {
-    id: string;
-    entity: string;
-    amount: number;
-    amount_paid: number;
-    amount_due: number;
-    currency: string;
-    receipt: string;
-    status: string;
-    created_at: number;
-    notes?: Record<string, string>;
-  };
-  key_id?: string; // Add key_id to response type
   error?: string;
-  details?: any;
+  order_id?: string;
+  details?: {
+    id: string;
+    amount: number;
+    currency: string;
+    key_id?: string;
+    message?: string;
+  };
 }
 
 export interface VerifyPaymentParams {
@@ -35,9 +29,3 @@ export interface VerifyPaymentParams {
   signature: string;
 }
 
-export interface SavePaymentParams {
-  paymentId: string;
-  orderId: string;
-  amount: number;
-  consultationId: string;
-}

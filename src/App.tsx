@@ -42,6 +42,7 @@ import Dashboard from "./pages/Dashboard";
 import LogoExport from './pages/LogoExport';
 import MobileBookings from './pages/MobileBookings';
 import PaymentConfirmation from './pages/PaymentConfirmation';
+import PaymentVerification from "./pages/PaymentVerification";
 
 // Admin pages
 import AdminLayout from './components/admin/AdminLayout';
@@ -142,7 +143,8 @@ const App = () => {
                 {/* Mobile Bookings Route */}
                 <Route path="/mobile-bookings" element={<MobileBookings />} />
                 
-                {/* Payment Confirmation Route */}
+                {/* Payment Routes */}
+                <Route path="/payment-verification" element={<PaymentVerification />} />
                 <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
               </Routes>
             </BrowserRouter>

@@ -1,39 +1,70 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { CreditCard, Lock } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-const RazorpayCard: React.FC = () => {
+const RazorpayCard = () => {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [hasError, setHasError] = React.useState(false);
+
+  // Check if Razorpay script is loaded
+  React.useEffect(() => {
+    const isRazorpayAvailable = typeof window !== 'undefined' && 
+                               typeof (window as any).Razorpay !== 'undefined';
+    
+    setIsLoaded(isRazorpayAvailable);
+    
+    // If not loaded, we'll assume it will load via the Script component elsewhere
+    if (!isRazorpayAvailable) {
+      const checkRazorpay = setInterval(() => {
+        if (typeof (window as any).Razorpay !== 'undefined') {
+          setIsLoaded(true);
+          clearInterval(checkRazorpay);
+        }
+      }, 1000);
+      
+      // Clear interval after 10 seconds if still not loaded
+      setTimeout(() => {
+        if (!isLoaded) {
+          clearInterval(checkRazorpay);
+          setHasError(true);
+        }
+      }, 10000);
+      
+      return () => clearInterval(checkRazorpay);
+    }
+  }, [isLoaded]);
+
   return (
-    <Card className="p-4 border border-gray-200 bg-white">
-      <div className="flex items-start space-x-4">
-        <div className="bg-gray-50 p-2 rounded-full">
-          <CreditCard className="h-6 w-6 text-peacefulBlue" />
-        </div>
-        <div className="flex-1">
-          <h4 className="text-lg font-medium mb-2">Payment Method</h4>
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                <img 
-                  src="https://cdn.razorpay.com/static/assets/logo/razorpay-logo.svg" 
-                  alt="Razorpay" 
-                  className="h-6 mr-2"
-                />
-                <span className="text-sm text-gray-600">Online Payment</span>
-              </div>
-              <div className="flex items-center text-green-600 text-sm">
-                <Lock className="h-4 w-4 mr-1" />
-                <span>Secure</span>
-              </div>
-            </div>
-            <p className="text-xs text-gray-500">
-              You'll be redirected to a secure payment gateway to complete your transaction.
-              We accept Credit/Debit cards, UPI, Net Banking, and more.
-            </p>
+    <Card className="border border-gray-200 overflow-hidden mb-6">
+      <CardContent className="p-4 bg-gradient-to-b from-white to-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <h3 className="text-lg font-semibold mb-0">Secure Payment via Razorpay</h3>
+          
+          <div className="flex justify-center w-full py-2">
+            <img 
+              src="https://cdn.razorpay.com/static/assets/merchant-badge/badge-light.png"
+              alt="Razorpay secured payment"
+              className="h-10 object-contain"
+            />
           </div>
+          
+          <div className="text-sm text-gray-500 text-center">
+            <p>All transactions are secure and encrypted.</p>
+            <p>You will be redirected to Razorpay to complete your payment.</p>
+          </div>
+          
+          {hasError && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                There was an issue loading the payment gateway. Please refresh the page or try again later.
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
-      </div>
+      </CardContent>
     </Card>
   );
 };

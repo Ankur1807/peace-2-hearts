@@ -15,23 +15,19 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
   const isHolisticPackage = bookingDetails?.serviceCategory === 'holistic';
 
   return (
-    <div className="text-center">
+    <div className="space-y-6">
       <ConfirmationHeader />
       
-      {referenceId && (
-        <BookingReference referenceId={referenceId} />
-      )}
-      
-      {bookingDetails && (
-        <BookingDetailsCard 
-          services={bookingDetails.services}
-          date={bookingDetails.date}
-          timeSlot={bookingDetails.timeSlot}
-          timeframe={bookingDetails.timeframe}
-          packageName={bookingDetails.packageName}
-          isHolisticPackage={isHolisticPackage}
-        />
-      )}
+      <BookingDetailsCard 
+        services={bookingDetails?.services || []}
+        date={bookingDetails?.date}
+        timeSlot={bookingDetails?.timeSlot}
+        timeframe={bookingDetails?.timeframe}
+        packageName={bookingDetails?.packageName}
+        isHolisticPackage={isHolisticPackage}
+        amount={bookingDetails?.amount}
+        referenceId={referenceId || undefined}
+      />
       
       <NextSteps />
       

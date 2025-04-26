@@ -6,29 +6,26 @@ export async function handleVerifyPayment(
   orderData: any,
   auth: string
 ): Promise<Response> {
-  if (!paymentId || !orderData) {
-    console.error("Missing payment verification data");
+  if (!paymentId) {
+    console.error("Missing payment ID");
     return new Response(JSON.stringify({
-      error: 'Missing payment verification data'
+      success: false,
+      verified: false,
+      error: 'Missing payment ID'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400
     });
   }
   
-  // Verify the payment signature
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = orderData;
+  console.log("Verifying payment with ID:", paymentId);
   
-  console.log("Verifying payment:", { 
-    razorpay_order_id, 
-    razorpay_payment_id, 
-    razorpay_signature: razorpay_signature ? "signature-provided" : "missing" 
-  });
-  
-  // Verify signature using crypto
   try {
     // Fetch payment details from Razorpay to confirm it's valid
-    const paymentUrl = `https://api.razorpay.com/v1/payments/${razorpay_payment_id}`;
+    const paymentUrl = `https://api.razorpay.com/v1/payments/${paymentId}`;
+    
+    console.log(`Fetching payment details from: ${paymentUrl}`);
+    
     const paymentResponse = await fetch(paymentUrl, {
       method: 'GET',
       headers: {
@@ -42,7 +39,8 @@ export async function handleVerifyPayment(
       return new Response(JSON.stringify({
         success: false,
         verified: false,
-        error: 'Payment verification failed'
+        error: 'Payment verification failed',
+        details: errorData
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400
@@ -52,8 +50,21 @@ export async function handleVerifyPayment(
     const paymentData = await paymentResponse.json();
     console.log("Payment data retrieved:", JSON.stringify(paymentData));
     
-    // Additional verification if needed
-    // For demo purposes we'll consider it verified if we can fetch the payment
+    // Check if payment is captured or authorized
+    const paymentStatus = paymentData.status;
+    const isPaymentSuccessful = ['captured', 'authorized'].includes(paymentStatus);
+    
+    if (!isPaymentSuccessful) {
+      console.error("Payment is not successful according to Razorpay. Status:", paymentStatus);
+      return new Response(JSON.stringify({
+        success: false,
+        verified: false,
+        error: `Payment not successful. Status: ${paymentStatus}`
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      });
+    }
     
     return new Response(JSON.stringify({
       success: true,

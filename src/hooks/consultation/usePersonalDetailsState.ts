@@ -1,8 +1,9 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { PersonalDetails } from '@/utils/types';
 
 export function usePersonalDetailsState() {
+  // Personal details
   const [personalDetails, setPersonalDetails] = useState<PersonalDetails>({
     firstName: '',
     lastName: '',
@@ -11,13 +12,14 @@ export function usePersonalDetailsState() {
     message: ''
   });
 
-  const handlePersonalDetailsChange = useCallback((details: PersonalDetails) => {
+  // Handler for personal details changes
+  const handlePersonalDetailsChange = (details: PersonalDetails) => {
     console.log("Updating personal details:", details);
     setPersonalDetails(details);
-  }, []);
+  };
 
   return {
     personalDetails,
-    handlePersonalDetailsChange
+    handlePersonalDetailsChange,
   };
 }
