@@ -70,14 +70,17 @@ export async function sendContactEmail(formData: ContactFormData): Promise<boole
 
 export async function sendBookingConfirmationEmail(bookingDetails: BookingDetails): Promise<boolean> {
   try {
-    // Create a serialized version of booking details for API transmission
+    console.log('Started sending booking confirmation email with data:', JSON.stringify(bookingDetails, null, 2));
+    
+    // Create a serialized version without date first
     const serializedBookingDetails: SerializedBookingDetails = { 
-      ...bookingDetails
+      ...bookingDetails,
+      date: undefined // Remove date property initially to avoid type conflicts
     };
     
-    // Handle date conversion - FIXED: Properly convert Date object to string
+    // Handle date conversion
     if (bookingDetails.date instanceof Date) {
-      // Set the date as a string in serialized object
+      // Convert Date to ISO string for API transmission
       serializedBookingDetails.date = bookingDetails.date.toISOString();
       
       // Add a formatted date for display
@@ -88,27 +91,22 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
       });
       serializedBookingDetails.formattedDate = formattedDate;
       
-      console.log('Date converted from Date object to:', {
+      console.log('Date conversion details:', {
         iso: serializedBookingDetails.date,
         formatted: serializedBookingDetails.formattedDate,
-        originalDate: bookingDetails.date
+        originalDate: bookingDetails.date.toString()
       });
     } else if (bookingDetails.date) {
       console.warn('Date is not a Date object:', bookingDetails.date);
       serializedBookingDetails.date = String(bookingDetails.date);
     }
     
-    // Remove the original date property which is of type Date
-    // @ts-ignore - we need to delete this property to avoid type conflicts
-    delete serializedBookingDetails.date;
-    
-    console.log('Sending booking confirmation email with data:', JSON.stringify(serializedBookingDetails, null, 2));
+    console.log('Sending booking confirmation with serialized data:', JSON.stringify(serializedBookingDetails, null, 2));
     
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
         type: 'booking-confirmation',
         ...serializedBookingDetails,
-        date: bookingDetails.date instanceof Date ? bookingDetails.date.toISOString() : bookingDetails.date,
         isResend: bookingDetails.isResend || false
       }
     });
