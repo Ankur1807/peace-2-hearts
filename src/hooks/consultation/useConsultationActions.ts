@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { saveConsultation } from '@/utils/consultationApi';
 import { sendBookingConfirmationEmail } from '@/utils/emailService';
@@ -20,7 +21,7 @@ export const useConsultationActions = ({
   setIsProcessing,
   toast
 }: UseConsultationActionsParams) => {
-  const handleConfirmBooking = async (): Promise<void> => {
+  const handleConfirmBooking = async (): Promise<any> => {  // Changed return type from void to any
     setIsProcessing(true);
     setBookingError(null);
     
@@ -73,7 +74,7 @@ export const useConsultationActions = ({
         setSubmitted(true);
       }
       
-      return result;
+      return result;  // This is now correctly typed as 'any'
     } catch (error) {
       console.error("Error in handleConfirmBooking:", error);
       
