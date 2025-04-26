@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 interface ContactFormData {
@@ -26,7 +25,7 @@ interface BookingDetails {
   amount?: number;
 }
 
-// Create a modified interface that allows for the date to be a string when sending via API
+// Create a modified interface that explicitly allows for the date to be a string when sending via API
 interface SerializedBookingDetails extends Omit<BookingDetails, 'date'> {
   date?: string;
   formattedDate?: string;
@@ -71,10 +70,15 @@ export async function sendContactEmail(formData: ContactFormData): Promise<boole
 export async function sendBookingConfirmationEmail(bookingDetails: BookingDetails): Promise<boolean> {
   try {
     // Create a serialized version of booking details for API transmission
-    const serializedBookingDetails: SerializedBookingDetails = { ...bookingDetails };
+    const serializedBookingDetails: SerializedBookingDetails = { 
+      ...bookingDetails,
+      // Remove the date property temporarily to avoid type clash
+      date: undefined
+    };
     
     // Handle date conversion
     if (bookingDetails.date instanceof Date) {
+      // Set the date as a string in serialized object
       serializedBookingDetails.date = bookingDetails.date.toISOString();
       
       // Add a formatted date for display
