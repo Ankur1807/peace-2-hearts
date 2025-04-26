@@ -189,56 +189,37 @@ export const savePaymentRecord = async (params: {
         return true;
       }
 
-      // Begin transaction for better atomicity
-      // Save the payment record and update consultation status together
-      const { data, error } = await supabase.rpc('create_payment_and_update_consultation', {
-        p_consultation_id: consultationId,
-        p_amount: amount,
-        p_transaction_id: paymentId,
-        p_payment_status: status,
-        p_payment_method: 'razorpay',
-        p_order_id: orderId
-      });
-
-      if (error) {
-        console.error(`Attempt ${retryCount + 1}: Error in transaction:`, error);
-        
-        // Fallback to non-transactional approach if RPC fails
-        console.log("Falling back to non-transactional approach...");
-        
-        // Save the payment record
-        const { data: paymentData, error: paymentError } = await supabase
-          .from('payments')
-          .insert({
-            consultation_id: consultationId,
-            amount: amount,
-            transaction_id: paymentId,
-            order_id: orderId, // Make sure we store the order_id
-            payment_status: status,
-            payment_method: 'razorpay',
-          })
-          .select();
-        
-        if (paymentError) {
-          console.error(`Attempt ${retryCount + 1}: Error saving payment record:`, paymentError);
-          retryCount++;
-          if (retryCount < MAX_RETRIES) {
-            console.log(`Retrying in 1 second... (${retryCount}/${MAX_RETRIES})`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            continue;
-          }
-          return false;
+      // Begin a manual transaction rather than using RPC
+      // Save the payment record
+      const { data: paymentData, error: paymentError } = await supabase
+        .from('payments')
+        .insert({
+          consultation_id: consultationId,
+          amount: amount,
+          transaction_id: paymentId,
+          order_id: orderId,
+          payment_status: status,
+          payment_method: 'razorpay',
+        })
+        .select();
+      
+      if (paymentError) {
+        console.error(`Attempt ${retryCount + 1}: Error saving payment record:`, paymentError);
+        retryCount++;
+        if (retryCount < MAX_RETRIES) {
+          console.log(`Retrying in 1 second... (${retryCount}/${MAX_RETRIES})`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
         }
+        return false;
+      }
 
-        console.log("Payment record inserted successfully:", paymentData);
+      console.log("Payment record inserted successfully:", paymentData);
 
-        // Update consultation status to paid
-        const updated = await updateConsultationStatus(consultationId, status);
-        if (!updated) {
-          console.warn("Payment record saved but consultation status update failed");
-        }
-      } else {
-        console.log("Transaction completed successfully:", data);
+      // Update consultation status to paid
+      const updated = await updateConsultationStatus(consultationId, status);
+      if (!updated) {
+        console.warn("Payment record saved but consultation status update failed");
       }
 
       // Send confirmation email after successful payment record creation
