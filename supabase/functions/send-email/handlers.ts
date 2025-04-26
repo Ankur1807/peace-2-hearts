@@ -15,6 +15,9 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 // Format date function (client-side can be different from Deno formatting)
 function formatDate(dateStr?: string) {
   if (!dateStr) return null;
+  
+  console.log("Formatting date:", dateStr);
+  
   try {
     // Parse the ISO date string
     const date = new Date(dateStr);

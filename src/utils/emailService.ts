@@ -72,12 +72,10 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
   try {
     // Create a serialized version of booking details for API transmission
     const serializedBookingDetails: SerializedBookingDetails = { 
-      ...bookingDetails,
-      // Remove the date property temporarily to avoid type clash
-      date: undefined
+      ...bookingDetails
     };
     
-    // Handle date conversion
+    // Handle date conversion - FIXED: Properly convert Date object to string
     if (bookingDetails.date instanceof Date) {
       // Set the date as a string in serialized object
       serializedBookingDetails.date = bookingDetails.date.toISOString();
@@ -92,12 +90,17 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
       
       console.log('Date converted from Date object to:', {
         iso: serializedBookingDetails.date,
-        formatted: serializedBookingDetails.formattedDate
+        formatted: serializedBookingDetails.formattedDate,
+        originalDate: bookingDetails.date
       });
     } else if (bookingDetails.date) {
       console.warn('Date is not a Date object:', bookingDetails.date);
       serializedBookingDetails.date = String(bookingDetails.date);
     }
+    
+    // Remove the original date property which is of type Date
+    // @ts-ignore - we need to delete this property to avoid type conflicts
+    delete serializedBookingDetails.date;
     
     console.log('Sending booking confirmation email with data:', JSON.stringify(serializedBookingDetails, null, 2));
     
@@ -105,6 +108,7 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
       body: {
         type: 'booking-confirmation',
         ...serializedBookingDetails,
+        date: bookingDetails.date instanceof Date ? bookingDetails.date.toISOString() : bookingDetails.date,
         isResend: bookingDetails.isResend || false
       }
     });
