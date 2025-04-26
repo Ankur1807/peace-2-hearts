@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import BookingSuccessView from "@/components/consultation/BookingSuccessView";
@@ -12,6 +11,7 @@ import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { usePaymentRecovery } from "@/hooks/consultation/usePaymentRecovery";
 import { supabase } from "@/integrations/supabase/client";
 
 const PaymentConfirmation = () => {
@@ -31,6 +31,7 @@ const PaymentConfirmation = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<{success: boolean; message: string} | null>(null);
   const [bookingRecovered, setBookingRecovered] = useState(false);
+  const { isRecovering, recoveryResult, recoverPaymentAndSendEmail } = usePaymentRecovery();
 
   useEffect(() => {
     console.log("Payment Confirmation Page loaded with:", { 
@@ -72,9 +73,11 @@ const PaymentConfirmation = () => {
                   });
                 } else {
                   console.error("Failed to save payment record for referenceId:", referenceId);
+                  await recoverPaymentAndSendEmail(referenceId, paymentId, amount, orderId);
                 }
               } catch (error) {
                 console.error("Error saving payment record:", error);
+                await recoverPaymentAndSendEmail(referenceId, paymentId, amount, orderId);
               }
             }
             
@@ -101,7 +104,7 @@ const PaymentConfirmation = () => {
     };
     
     verifyPayment();
-  }, [paymentId, orderId, referenceId, amount, verificationResult, toast]);
+  }, [paymentId, orderId, referenceId, amount, verificationResult, toast, recoverPaymentAndSendEmail]);
 
   useEffect(() => {
     if (paymentFailed) {
@@ -149,7 +152,6 @@ const PaymentConfirmation = () => {
           } else {
             console.error("No consultation data found for reference ID:", referenceId);
             
-            // Log all consultations for debugging
             const { data: allConsultations } = await supabase
               .from('consultations')
               .select('reference_id, client_name, status')
@@ -169,6 +171,18 @@ const PaymentConfirmation = () => {
     recoverBookingData();
   }, [referenceId, bookingDetails, toast, navigate, location.state]);
 
+  const handleManualRecovery = async () => {
+    if (referenceId && paymentId && amount > 0) {
+      await recoverPaymentAndSendEmail(referenceId, paymentId, amount, orderId);
+    } else {
+      toast({
+        title: "Recovery Failed",
+        description: "Missing required information for recovery",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <>
       <SEO
@@ -178,12 +192,16 @@ const PaymentConfirmation = () => {
       />
       <Navigation />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        {isVerifying ? (
+        {isVerifying || isRecovering ? (
           <div className="flex flex-col items-center justify-center px-4 py-12">
             <Loader2 className="h-8 w-8 animate-spin text-peacefulBlue mb-4" />
-            <h1 className="text-2xl font-semibold mb-2">Verifying Your Payment</h1>
+            <h1 className="text-2xl font-semibold mb-2">
+              {isVerifying ? "Verifying Your Payment" : "Recovering Your Booking"}
+            </h1>
             <p className="text-gray-700">
-              Please wait while we verify your payment details...
+              {isVerifying 
+                ? "Please wait while we verify your payment details..." 
+                : "Please wait while we recover your booking information..."}
             </p>
           </div>
         ) : verificationResult ? (
@@ -222,6 +240,13 @@ const PaymentConfirmation = () => {
                     </div>
                   </div>
                   
+                  {recoveryResult && (
+                    <Alert variant={recoveryResult.success ? "default" : "destructive"} className="my-4">
+                      <AlertTitle>{recoveryResult.success ? "Recovery Successful" : "Recovery Issue"}</AlertTitle>
+                      <AlertDescription>{recoveryResult.message}</AlertDescription>
+                    </Alert>
+                  )}
+                  
                   {bookingDetails ? (
                     <BookingSuccessView
                       referenceId={referenceId}
@@ -235,10 +260,20 @@ const PaymentConfirmation = () => {
                           Your booking record has been successfully recovered.
                         </p>
                       ) : (
-                        <p className="mb-6 text-amber-600">
-                          We couldn't find complete booking details, but your payment has been recorded. 
-                          You will receive a confirmation email shortly.
-                        </p>
+                        <>
+                          <p className="mb-6 text-amber-600">
+                            We couldn't find complete booking details, but your payment has been recorded. 
+                            {!recoveryResult && " You may not have received a confirmation email yet."}
+                          </p>
+                          {!recoveryResult && (
+                            <Button 
+                              onClick={handleManualRecovery} 
+                              className="mb-6 bg-peacefulBlue hover:bg-peacefulBlue/90"
+                            >
+                              Resend Confirmation Email
+                            </Button>
+                          )}
+                        </>
                       )}
                       <Button onClick={() => navigate('/')}>Return to Home</Button>
                     </div>
@@ -303,7 +338,6 @@ const fetchConsultationData = async (referenceId: string): Promise<any> => {
     if (error) {
       console.error("Error fetching consultation data:", error);
       
-      // Try a broader search without exact match to debug
       const { data: similarData, error: searchError } = await supabase
         .from('consultations')
         .select('reference_id, client_name, status')

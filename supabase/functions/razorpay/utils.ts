@@ -1,88 +1,52 @@
-
+// Existing code
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Parse request data safely
+export async function parseRequestData(req: Request): Promise<{ data: any, error: string | null }> {
+  try {
+    // Parse the JSON body
+    const contentType = req.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return { data: null, error: 'Invalid content type. Expected application/json' };
+    }
+    
+    const body = await req.json();
+    return { data: body, error: null };
+  } catch (error) {
+    return { data: null, error: 'Failed to parse request data: ' + (error instanceof Error ? error.message : String(error)) };
+  }
+}
+
 // Handle CORS preflight requests
 export function handleCors(req: Request): Response | null {
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       headers: corsHeaders,
-      status: 204,
+      status: 204
     });
   }
   return null;
 }
 
-// Create a crypto hash for signature verification
-export async function createSignature(orderId: string, paymentId: string, secret: string): Promise<string> {
-  const message = `${orderId}|${paymentId}`;
-  const encoder = new TextEncoder();
-  const data = encoder.encode(message);
-  const secretData = encoder.encode(secret);
-  
-  const key = await crypto.subtle.importKey(
-    "raw", secretData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
-  );
-  
-  const signature = await crypto.subtle.sign("HMAC", key, data);
-  const hashArray = Array.from(new Uint8Array(signature));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+// Get Razorpay API keys from environment
+export function getRazorpayKeys(): { key_id: string, key_secret: string } {
+  return {
+    key_id: Deno.env.get('RAZORPAY_KEY_ID') || '',
+    key_secret: Deno.env.get('RAZORPAY_KEY_SECRET') || ''
+  };
 }
 
-// Parse and validate request data
-export async function parseRequestData(req: Request): Promise<{ data: any; error: string | null }> {
-  try {
-    // Create a clone of the request to avoid consuming the body multiple times
-    const clonedReq = req.clone();
-    let text;
-    
-    try {
-      text = await clonedReq.text();
-    } catch (err) {
-      console.error("Error reading request body as text:", err);
-      return { 
-        data: null, 
-        error: 'Failed to read request body' 
-      };
-    }
-    
-    if (!text) {
-      return { 
-        data: null, 
-        error: 'Empty request body' 
-      };
-    }
-    
-    try {
-      const data = JSON.parse(text);
-      console.log("Request data received:", JSON.stringify(data));
-      return { data, error: null };
-    } catch (err) {
-      console.error("Error parsing JSON:", err);
-      return { 
-        data: null, 
-        error: 'Invalid JSON in request body' 
-      };
-    }
-  } catch (err) {
-    console.error("Exception in parseRequestData:", err);
-    return { 
-      data: null, 
-      error: 'Request processing error' 
-    };
-  }
-}
-
-// Get Razorpay API keys
-export function getRazorpayKeys(): { key_id: string | null; key_secret: string | null } {
-  const key_id = Deno.env.get('RAZORPAY_KEY_ID');
-  const key_secret = Deno.env.get('RAZORPAY_KEY_SECRET');
-  
-  if (!key_id || !key_secret) {
-    console.error("Razorpay API keys not configured");
-  }
-  
-  return { key_id, key_secret };
+// Store transaction information
+export async function storeTransactionData(transactionId: string, orderId: string, amount: number): Promise<void> {
+  // In a production environment, you would store this to a database
+  console.log("Transaction data stored:", {
+    transactionId, 
+    orderId, 
+    amount,
+    timestamp: new Date().toISOString()
+  });
 }

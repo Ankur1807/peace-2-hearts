@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for Razorpay integration
  */
@@ -6,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CreateOrderParams, OrderResponse, VerifyPaymentParams } from "./razorpayTypes";
 import { loadRazorpayScript, isRazorpayAvailable } from "./razorpayLoader";
 import { BookingDetails } from "@/utils/types";
+import { sendBookingConfirmationEmail } from "@/utils/emailService";
 
 /**
  * Create a new Razorpay order
@@ -94,7 +94,7 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
 };
 
 /**
- * Save payment record to database with retry mechanism
+ * Save payment record to database with retry mechanism and transaction support
  */
 export const savePaymentRecord = async (params: {
   paymentId: string;
@@ -121,7 +121,7 @@ export const savePaymentRecord = async (params: {
       // First, find the consultation by reference ID
       const { data: consultationData, error: consultationError } = await supabase
         .from('consultations')
-        .select('id, reference_id')
+        .select('id, reference_id, client_name, client_email, date, time_slot, timeframe, consultation_type, message')
         .eq('reference_id', referenceId)
         .single();
       
@@ -183,39 +183,66 @@ export const savePaymentRecord = async (params: {
         // Update consultation status if needed
         await updateConsultationStatus(consultationId, status);
         
+        // Send confirmation email - even if payment record exists, make sure email is sent
+        await sendEmailForConsultation(consultationData);
+        
         return true;
       }
 
-      // Save the payment record
-      const { data: paymentData, error: paymentError } = await supabase
-        .from('payments')
-        .insert({
-          consultation_id: consultationId,
-          amount: amount,
-          transaction_id: paymentId,
-          payment_status: status,
-          payment_method: 'razorpay',
-        })
-        .select();
-      
-      if (paymentError) {
-        console.error(`Attempt ${retryCount + 1}: Error saving payment record:`, paymentError);
-        retryCount++;
-        if (retryCount < MAX_RETRIES) {
-          console.log(`Retrying in 1 second... (${retryCount}/${MAX_RETRIES})`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          continue;
+      // Begin transaction for better atomicity
+      // Save the payment record and update consultation status together
+      const { data, error } = await supabase.rpc('create_payment_and_update_consultation', {
+        p_consultation_id: consultationId,
+        p_amount: amount,
+        p_transaction_id: paymentId,
+        p_payment_status: status,
+        p_payment_method: 'razorpay',
+        p_order_id: orderId
+      });
+
+      if (error) {
+        console.error(`Attempt ${retryCount + 1}: Error in transaction:`, error);
+        
+        // Fallback to non-transactional approach if RPC fails
+        console.log("Falling back to non-transactional approach...");
+        
+        // Save the payment record
+        const { data: paymentData, error: paymentError } = await supabase
+          .from('payments')
+          .insert({
+            consultation_id: consultationId,
+            amount: amount,
+            transaction_id: paymentId,
+            order_id: orderId, // Make sure we store the order_id
+            payment_status: status,
+            payment_method: 'razorpay',
+          })
+          .select();
+        
+        if (paymentError) {
+          console.error(`Attempt ${retryCount + 1}: Error saving payment record:`, paymentError);
+          retryCount++;
+          if (retryCount < MAX_RETRIES) {
+            console.log(`Retrying in 1 second... (${retryCount}/${MAX_RETRIES})`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+          return false;
         }
-        return false;
+
+        console.log("Payment record inserted successfully:", paymentData);
+
+        // Update consultation status to paid
+        const updated = await updateConsultationStatus(consultationId, status);
+        if (!updated) {
+          console.warn("Payment record saved but consultation status update failed");
+        }
+      } else {
+        console.log("Transaction completed successfully:", data);
       }
 
-      console.log("Payment record inserted successfully:", paymentData);
-
-      // Update consultation status to paid
-      const updated = await updateConsultationStatus(consultationId, status);
-      if (!updated) {
-        console.warn("Payment record saved but consultation status update failed");
-      }
+      // Send confirmation email after successful payment record creation
+      await sendEmailForConsultation(consultationData);
       
       return true;
     } catch (err) {
@@ -231,6 +258,75 @@ export const savePaymentRecord = async (params: {
   }
   
   return false;
+};
+
+/**
+ * Helper function to send confirmation email for a consultation
+ */
+const sendEmailForConsultation = async (consultationData: any): Promise<boolean> => {
+  try {
+    if (!consultationData.client_email) {
+      console.error("Cannot send confirmation email - missing email address");
+      return false;
+    }
+
+    console.log(`Attempting to send confirmation email for consultation: ${consultationData.reference_id}`);
+    
+    // Format booking details for email
+    const bookingDetails = {
+      clientName: consultationData.client_name || '',
+      email: consultationData.client_email || '',
+      referenceId: consultationData.reference_id || '',
+      consultationType: consultationData.consultation_type || '',
+      services: [consultationData.consultation_type || ''],
+      date: consultationData.date ? new Date(consultationData.date) : undefined,
+      timeSlot: consultationData.time_slot || undefined,
+      timeframe: consultationData.timeframe || undefined,
+      message: consultationData.message || '',
+      serviceCategory: determineServiceCategory(consultationData.consultation_type)
+    };
+    
+    console.log("Sending booking confirmation email with details:", bookingDetails);
+    
+    const result = await sendBookingConfirmationEmail(bookingDetails);
+    
+    console.log("Email sending result:", result);
+    return result;
+  } catch (error) {
+    console.error("Error sending confirmation email:", error);
+    return false;
+  }
+};
+
+/**
+ * Helper function to determine service category from consultation type
+ */
+const determineServiceCategory = (consultationType: string): string => {
+  if (!consultationType) return '';
+  
+  if (consultationType.includes('holistic') || 
+      consultationType.includes('divorce-prevention') || 
+      consultationType.includes('pre-marriage-clarity')) {
+    return 'holistic';
+  }
+  
+  if (consultationType.includes('legal') || 
+      consultationType.includes('divorce') || 
+      consultationType.includes('custody')) {
+    return 'legal';
+  }
+  
+  if (consultationType.includes('psychological') || 
+      consultationType.includes('therapy') || 
+      consultationType.includes('counseling')) {
+    return 'psychological';
+  }
+  
+  if (consultationType.includes('test')) {
+    return 'test';
+  }
+  
+  return '';
 };
 
 /**
@@ -318,3 +414,37 @@ export { loadRazorpayScript, isRazorpayAvailable };
 
 // Re-export types for compatibility with existing code
 export type { CreateOrderParams, OrderResponse, VerifyPaymentParams } from './razorpayTypes';
+
+/**
+ * Attempt to recover payment records for consultations that have no payment record
+ * This can be called after payment to ensure we don't miss any confirmation emails
+ */
+export const recoverPaymentRecord = async (referenceId: string, paymentId: string, amount: number, orderId?: string): Promise<boolean> => {
+  try {
+    console.log(`Attempting to recover payment record for consultation ${referenceId} with payment ${paymentId}`);
+    
+    // Step 1: Verify the payment exists and is valid with Razorpay
+    const paymentVerified = await verifyAndSyncPayment(paymentId);
+    
+    if (!paymentVerified) {
+      console.error(`Payment ${paymentId} couldn't be verified with Razorpay`);
+      return false;
+    }
+    
+    console.log(`Payment ${paymentId} verified successfully with Razorpay`);
+    
+    // Step 2: Create payment record and update consultation status
+    const paymentSaved = await savePaymentRecord({
+      paymentId,
+      orderId: orderId || '',
+      amount,
+      referenceId,
+      status: 'completed'
+    });
+    
+    return paymentSaved;
+  } catch (error) {
+    console.error(`Error recovering payment record for ${referenceId}:`, error);
+    return false;
+  }
+};

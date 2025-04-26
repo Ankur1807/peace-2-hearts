@@ -1,11 +1,12 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { MailIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { resendBookingConfirmationEmail } from "@/utils/emailService";
-import { BookingDetails } from "@/utils/types";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { CalendarPlus, FilePlus, Download, Send } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { BookingDetails } from '@/utils/types';
+import { useToast } from '@/hooks/use-toast';
+import { sendBookingConfirmationEmail } from '@/utils/emailService';
+import { usePaymentRecovery } from '@/hooks/consultation/usePaymentRecovery';
 
 interface ActionButtonsProps {
   bookingDetails?: BookingDetails;
@@ -13,35 +14,60 @@ interface ActionButtonsProps {
 }
 
 const ActionButtons = ({ bookingDetails, referenceId }: ActionButtonsProps) => {
-  const [resending, setResending] = useState(false);
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const { recoverPaymentAndSendEmail, isRecovering } = usePaymentRecovery();
 
   const handleResendEmail = async () => {
-    if (!bookingDetails) return;
-    
-    setResending(true);
-    try {
-      const success = await resendBookingConfirmationEmail({
-        clientName: bookingDetails.clientName,
-        email: bookingDetails.email,
-        referenceId,
-        consultationType: bookingDetails.services[0],
-        services: bookingDetails.services,
-        date: bookingDetails.date,
-        timeSlot: bookingDetails.timeSlot,
-        timeframe: bookingDetails.timeframe,
-        packageName: bookingDetails.packageName
+    if (!bookingDetails) {
+      toast({
+        title: "Missing Information",
+        description: "Cannot resend email without booking details",
+        variant: "destructive"
       });
-
-      if (success) {
+      return;
+    }
+    
+    setIsSendingEmail(true);
+    
+    try {
+      // First, try using the recovery mechanism if we have payment details
+      if (bookingDetails.amount && bookingDetails.amount > 0 && referenceId) {
+        const paymentId = sessionStorage.getItem(`payment_id_${referenceId}`) || '';
+        const orderId = sessionStorage.getItem(`order_id_${referenceId}`) || '';
+        
+        if (paymentId) {
+          const result = await recoverPaymentAndSendEmail(
+            referenceId,
+            paymentId,
+            bookingDetails.amount,
+            orderId
+          );
+          
+          if (result) {
+            setIsSendingEmail(false);
+            return;
+          }
+        }
+      }
+      
+      // Fall back to just sending the email
+      const result = await sendBookingConfirmationEmail({
+        ...bookingDetails,
+        referenceId: referenceId,
+        isResend: true
+      });
+      
+      if (result) {
         toast({
           title: "Email Sent",
-          description: "Your booking confirmation has been resent to your email.",
+          description: "Confirmation email has been resent successfully",
         });
       } else {
         toast({
-          title: "Error",
-          description: "Failed to resend the booking confirmation. Please try again.",
+          title: "Failed to Send Email",
+          description: "Please try again or contact support",
           variant: "destructive"
         });
       }
@@ -49,35 +75,44 @@ const ActionButtons = ({ bookingDetails, referenceId }: ActionButtonsProps) => {
       console.error("Error resending email:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: "Failed to resend confirmation email",
         variant: "destructive"
       });
+    } finally {
+      setIsSendingEmail(false);
     }
-    setResending(false);
   };
 
   return (
-    <>
-      {bookingDetails && (
-        <div className="mt-6 mb-8">
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            onClick={handleResendEmail}
-            disabled={resending}
-          >
-            <MailIcon className="h-4 w-4" />
-            {resending ? "Sending..." : "Resend Confirmation Email"}
-          </Button>
-        </div>
-      )}
-      
-      <div className="mt-10">
-        <Link to="/">
-          <Button>Return to Home</Button>
-        </Link>
+    <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3 justify-between">
+      <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+        <Button 
+          onClick={() => navigate('/book-consultation')} 
+          variant="outline" 
+          className="flex items-center"
+        >
+          <CalendarPlus className="mr-2 h-4 w-4" />
+          Book Another Session
+        </Button>
+        
+        <Button
+          variant="outline"
+          className="flex items-center"
+          onClick={handleResendEmail}
+          disabled={isSendingEmail || isRecovering || !bookingDetails?.email}
+        >
+          <Send className="mr-2 h-4 w-4" />
+          {isSendingEmail || isRecovering ? "Sending..." : "Resend Confirmation Email"}
+        </Button>
       </div>
-    </>
+      
+      <Button
+        onClick={() => navigate('/')}
+        className="bg-peacefulBlue hover:bg-peacefulBlue/90"
+      >
+        Return to Home
+      </Button>
+    </div>
   );
 };
 

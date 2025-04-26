@@ -63,6 +63,10 @@ export const useOpenRazorpayCheckout = ({
         console.log("Payment successful:", response);
         
         try {
+          // Store payment IDs in session storage for recovery purposes
+          sessionStorage.setItem(`payment_id_${receiptId}`, response.razorpay_payment_id);
+          sessionStorage.setItem(`order_id_${receiptId}`, response.razorpay_order_id);
+          
           // IMPORTANT: Always create the consultation record first 
           // before verifying payment to ensure data exists
           if (handleConfirmBooking) {
