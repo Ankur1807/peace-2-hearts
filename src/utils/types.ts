@@ -19,6 +19,7 @@ export interface BookingDetails {
   email: string;
   referenceId: string; // Added missing referenceId property
   message?: string; // Added message property to match usage in templates
+  consultationType?: string; // Added consultationType property to resolve the error
 }
 
 export interface PersonalDetails {
