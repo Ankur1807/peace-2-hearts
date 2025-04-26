@@ -12,6 +12,7 @@ import { useAdmin } from '@/hooks/useAdminContext';
 import ServicePricing from '@/components/pricing/ServicePricing';
 import PackagePricing from '@/components/pricing/PackagePricing';
 import DiscountCodes from '@/components/pricing/DiscountCodes';
+import PricingHistory from '@/components/pricing/PricingHistory';
 
 interface PricingTabsProps {
   defaultTab?: string;
@@ -79,10 +80,11 @@ const PricingTabs = ({ defaultTab = 'services' }: PricingTabsProps) => {
         </div>
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="services">Services</TabsTrigger>
             <TabsTrigger value="packages">Packages</TabsTrigger>
             <TabsTrigger value="discounts">Discount Codes</TabsTrigger>
+            <TabsTrigger value="history">Price History</TabsTrigger>
           </TabsList>
           
           <TabsContent value="services" className="py-8">
@@ -95,6 +97,10 @@ const PricingTabs = ({ defaultTab = 'services' }: PricingTabsProps) => {
           
           <TabsContent value="discounts" className="py-8">
             <DiscountCodes />
+          </TabsContent>
+          
+          <TabsContent value="history" className="py-8">
+            <PricingHistory />
           </TabsContent>
         </Tabs>
       )}

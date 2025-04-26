@@ -1,15 +1,16 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ServicePrice, NewServiceFormValues } from '@/utils/pricing/types';
+import { ServicePrice } from '@/utils/pricingTypes';
+import { NewServiceFormValues } from '@/components/pricing/AddServiceForm';
 import { 
+  fetchAllServices, 
   updateServicePrice, 
   toggleServiceActive, 
   createService, 
-  removeService,
-  fetchAllServices,
-  addInitialServices
-} from '@/utils/pricing';
+  removeService 
+} from '@/utils/pricing/serviceOperations';
+import { addInitialServices } from '@/utils/pricing/serviceInitializer';
+import { supabase } from '@/integrations/supabase/client';
 import { useAdmin } from '@/hooks/useAdminContext';
 
 export const usePricingServices = () => {
@@ -33,7 +34,24 @@ export const usePricingServices = () => {
 
     try {
       setLoading(true);
-      console.log("Fetching services with admin status:", isAdmin);
+      
+      // First check if the user is authenticated with Supabase
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      // Check for local admin authentication
+      const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
+      const authTime = parseInt(localStorage.getItem('p2h_admin_auth_time') || '0', 10);
+      const isSessionValid = adminAuthenticated && (Date.now() - authTime < 24 * 60 * 60 * 1000);
+      
+      if (!sessionData.session && !isSessionValid) {
+        toast({
+          title: 'Authentication Required',
+          description: 'You must be logged in as an admin to access pricing data.',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
       
       try {
         // Fetch services data
@@ -48,13 +66,12 @@ export const usePricingServices = () => {
         console.log('Fetched services data:', data);
         setServices(data);
       } catch (error: any) {
-        if (error.code === 'PGRST116' || error.message?.includes('JWT')) {
+        if (error.code === 'PGRST116') {
           toast({
             title: 'Authentication Error',
-            description: 'Your admin session may have expired. Please try logging in again.',
+            description: 'You need to be logged in as an admin to access pricing data.',
             variant: 'destructive',
           });
-          localStorage.removeItem('p2h_admin_authenticated');
         } else {
           throw error;
         }
@@ -83,7 +100,9 @@ export const usePricingServices = () => {
 
   const handleSave = async (id: string) => {
     try {
-      if (!isAdmin) {
+      // Check authentication first
+      const isAuthenticated = await checkAuthStatus();
+      if (!isAuthenticated) {
         toast({
           title: 'Authentication Required',
           description: 'You must be logged in as an admin to update prices.',
@@ -104,7 +123,7 @@ export const usePricingServices = () => {
       const numericPrice = Number(editedPrice);
       console.log(`Saving price ${numericPrice} for service ID ${id}`);
       
-      await updateServicePrice(id, numericPrice);
+      const updatedServices = await updateServicePrice(id, numericPrice);
 
       toast({
         title: 'Price Updated',
@@ -124,7 +143,9 @@ export const usePricingServices = () => {
 
   const toggleServiceStatus = async (id: string, currentStatus: boolean) => {
     try {
-      if (!isAdmin) {
+      // Check authentication first
+      const isAuthenticated = await checkAuthStatus();
+      if (!isAuthenticated) {
         toast({
           title: 'Authentication Required',
           description: 'You must be logged in as an admin to update service status.',
@@ -151,7 +172,9 @@ export const usePricingServices = () => {
 
   const addNewService = async (data: NewServiceFormValues) => {
     try {
-      if (!isAdmin) {
+      // Check authentication first
+      const isAuthenticated = await checkAuthStatus();
+      if (!isAuthenticated) {
         toast({
           title: 'Authentication Required',
           description: 'You must be logged in as an admin to add services.',
@@ -181,7 +204,9 @@ export const usePricingServices = () => {
 
   const deleteService = async (id: string) => {
     try {
-      if (!isAdmin) {
+      // Check authentication first
+      const isAuthenticated = await checkAuthStatus();
+      if (!isAuthenticated) {
         toast({
           title: 'Authentication Required',
           description: 'You must be logged in as an admin to delete services.',
@@ -208,16 +233,16 @@ export const usePricingServices = () => {
     }
   };
 
+  // Helper function to handle operation errors
   const handleOperationError = (error: any, operation: string) => {
     console.error(`Error details for ${operation}:`, error);
     
-    if (error.code === 'PGRST116' || error.message?.includes('JWT')) {
+    if (error.code === 'PGRST116') {
       toast({
-        title: 'Session Expired',
-        description: 'Your admin session has expired. Please log in again.',
+        title: 'Permission Denied',
+        description: `You do not have permission to ${operation}. Please make sure you are logged in as an admin.`,
         variant: 'destructive',
       });
-      localStorage.removeItem('p2h_admin_authenticated');
     } else if (error.message?.includes('Authentication required')) {
       toast({
         title: 'Authentication Required',
@@ -232,6 +257,11 @@ export const usePricingServices = () => {
       });
     }
     console.error(`Error: ${operation}:`, error);
+  };
+
+  const checkAuthStatus = async (): Promise<boolean> => {
+    const { data } = await supabase.auth.getSession();
+    return !!data.session;
   };
 
   return {

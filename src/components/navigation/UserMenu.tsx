@@ -11,16 +11,10 @@ interface UserMenuProps {
 }
 
 const UserMenu = ({ isMobile = false, onItemClick }: UserMenuProps) => {
-  const handleMobileClick = () => {
-    if (isMobile && onItemClick) {
-      onItemClick();
-    }
-  };
-
   if (isMobile) {
     return (
       <>
-        <Link to="/book-consultation" className="text-white hover:text-white/80 transition-colors py-2" onClick={handleMobileClick}>
+        <Link to="/book-consultation" className="text-white hover:text-white/80 transition-colors py-2" onClick={onItemClick}>
           Book Consultation
         </Link>
       </>

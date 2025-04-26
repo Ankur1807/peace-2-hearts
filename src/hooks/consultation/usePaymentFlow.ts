@@ -40,24 +40,11 @@ export function usePaymentFlow({
   // Function to proceed to payment step
   const proceedToPayment = useCallback(() => {
     // Only include if setShowPaymentStep is provided
-    if (!setShowPaymentStep) {
-      console.error("setShowPaymentStep not provided to usePaymentFlow");
-      return;
-    }
+    if (!setShowPaymentStep) return;
     
-    console.log("proceedToPayment called with:", {
-      personalDetails: state.personalDetails,
-      selectedServices: state.selectedServices
-    });
-
     // Validate form first
     if (!validatePersonalDetails(state.personalDetails) || 
         !validateServiceSelection(state.selectedServices)) {
-      console.error("Form validation failed:", {
-        personalDetails: validatePersonalDetails(state.personalDetails),
-        serviceSelection: validateServiceSelection(state.selectedServices)
-      });
-      
       toast({
         title: "Form Incomplete",
         description: "Please fill out all required fields before proceeding to payment.",
@@ -66,26 +53,13 @@ export function usePaymentFlow({
       return;
     }
     
-    // Force setShowPaymentStep to true to ensure the component updates
-    console.log("Form validation passed, proceeding to payment step - SETTING showPaymentStep to TRUE");
     setShowPaymentStep(true);
-    
-    // Add a debug log to confirm the state change
-    console.log("showPaymentStep should now be true");
   }, [state.personalDetails, state.selectedServices, toast, setShowPaymentStep, validatePersonalDetails, validateServiceSelection]);
 
   // Process payment using Razorpay
   const processPayment = useCallback(async () => {
     // Only include if necessary setters are provided
-    if (!setIsProcessing || !handleConfirmBooking) {
-      console.error("Required handlers not provided to processPayment");
-      return;
-    }
-    
-    console.log("processPayment called with:", {
-      selectedServices: state.selectedServices,
-      totalPrice: state.totalPrice
-    });
+    if (!setIsProcessing || !handleConfirmBooking) return;
     
     // Special handling for test service
     const isTestService = state.selectedServices.includes('test-service');
@@ -99,7 +73,6 @@ export function usePaymentFlow({
     
     // Validate payment amount for non-test services
     if (!isTestService && !validatePaymentAmount(effectivePrice)) {
-      console.error("Invalid payment amount:", effectivePrice);
       toast({
         title: "Invalid Amount",
         description: "Cannot process payment for zero amount.",
@@ -130,10 +103,8 @@ export function usePaymentFlow({
       }
       
       // Initialize payment
-      console.log("Initializing Razorpay payment with receipt ID:", receiptId);
       const { order, razorpayKey } = await initializeRazorpayPayment(receiptId);
       
-      console.log("Payment initialized, opening checkout with order:", order);
       // Open checkout
       openRazorpayCheckout(order, razorpayKey, receiptId);
       

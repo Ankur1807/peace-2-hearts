@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import { getServiceLabel } from '@/utils/consultationLabels';
 import { getPackageName } from '@/utils/consultation/packageUtils';
-import { formatPrice } from '@/utils/pricing';
 
 interface PricingSectionProps {
   selectedServices: string[];
@@ -20,20 +19,6 @@ const PricingSection: React.FC<PricingSectionProps> = ({
     return null;
   }
   
-  // Debug pricing information
-  useEffect(() => {
-    console.log("PricingSection rendering with:", {
-      selectedServices,
-      pricingAvailable: !!pricing,
-      pricingSize: pricing ? pricing.size : 0,
-      totalPrice
-    });
-    
-    if (pricing && pricing.size > 0) {
-      console.log("Available prices:", Object.fromEntries(pricing));
-    }
-  }, [selectedServices, pricing, totalPrice]);
-  
   // Check if the selected services match a package
   const packageName = getPackageName(selectedServices);
   const packageId = packageName === "Divorce Prevention Package" 
@@ -41,14 +26,13 @@ const PricingSection: React.FC<PricingSectionProps> = ({
     : packageName === "Pre-Marriage Clarity Package" ? 'pre-marriage-clarity' : null;
   
   // Get appropriate package price if it's a package
-  const packagePrice = packageId && pricing && pricing.has(packageId) 
-    ? pricing.get(packageId)! 
-    : (totalPrice > 0 ? totalPrice : 0);
+  const packagePrice = packageId && pricing ? pricing.get(packageId) || totalPrice : totalPrice;
   
-  // For individual services, use the direct price from the pricing map
-  const servicePrice = selectedServices.length === 1 && pricing && pricing.has(selectedServices[0])
-    ? pricing.get(selectedServices[0])!
-    : totalPrice;
+  // For debugging
+  useEffect(() => {
+    console.log(`PricingSection rendered with packageName: ${packageName}, packageId: ${packageId}, packagePrice: ${packagePrice}, totalPrice: ${totalPrice}`);
+    console.log('Available pricing:', pricing ? Object.fromEntries(pricing) : 'No pricing data');
+  }, [packageName, packageId, packagePrice, totalPrice, pricing]);
   
   return (
     <div className="p-6 bg-gradient-to-r from-peacefulBlue/5 to-white rounded-lg border border-peacefulBlue/20 shadow-md">
@@ -71,7 +55,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({
             <span className="text-gray-700 font-medium">{packageName}</span>
             <span className="font-medium">
               {packagePrice > 0 
-                ? formatPrice(packagePrice)
+                ? `₹${packagePrice.toLocaleString('en-IN')}` 
                 : "Price unavailable"}
             </span>
           </div>
@@ -96,7 +80,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({
                 <span className="text-gray-700">{getServiceLabel(serviceId)}</span>
                 <span className="font-medium">
                   {price > 0 
-                    ? formatPrice(price)
+                    ? `₹${price.toLocaleString('en-IN')}`
                     : "Price unavailable"}
                 </span>
               </div>
@@ -108,8 +92,8 @@ const PricingSection: React.FC<PricingSectionProps> = ({
       <div className="flex justify-between items-center pt-4 border-t border-gray-300">
         <span className="text-lg font-semibold text-gray-800">Total</span>
         <span className="text-xl font-bold text-peacefulBlue">
-          {(packageName && packagePrice > 0) || (!packageName && servicePrice > 0) 
-            ? formatPrice(packageName ? packagePrice : servicePrice)
+          {totalPrice > 0 
+            ? `₹${totalPrice.toLocaleString('en-IN')}`
             : "Price unavailable"}
         </span>
       </div>

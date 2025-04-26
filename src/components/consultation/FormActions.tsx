@@ -6,14 +6,12 @@ interface FormActionsProps {
   isFormValid: boolean;
   isProcessing: boolean;
   totalPrice: number;
-  onProceed?: () => void; // Add an explicit callback prop
 }
 
 const FormActions: React.FC<FormActionsProps> = ({ 
   isFormValid, 
   isProcessing,
-  totalPrice,
-  onProceed
+  totalPrice
 }) => {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6">
@@ -23,15 +21,9 @@ const FormActions: React.FC<FormActionsProps> = ({
         </p>
       </div>
       <Button 
-        type="button" // Change from "submit" to "button" to prevent form submission
+        type="submit" 
         className="bg-peacefulBlue hover:bg-peacefulBlue/90 shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
         disabled={!isFormValid || isProcessing}
-        onClick={() => {
-          console.log("Payment button clicked in FormActions with direct handler");
-          if (onProceed) {
-            onProceed();
-          }
-        }}
       >
         <div className="flex items-center gap-2">
           <span>

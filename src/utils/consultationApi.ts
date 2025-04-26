@@ -1,7 +1,6 @@
 
 import { generateReferenceId } from "./referenceGenerator";
 import { PersonalDetails } from "./types";
-import { supabase } from "@/integrations/supabase/client";
 
 export const saveConsultation = async (
   consultationType: string,
@@ -25,41 +24,31 @@ export const saveConsultation = async (
     const referenceId = generateReferenceId();
     console.log("Generated reference ID:", referenceId);
 
-    // Prepare the consultation data
-    const consultationData = {
-      consultation_type: consultationType,
+    // Since we're removing Supabase, we'll simulate saving the consultation
+    // In a real implementation, you would integrate with a database service here
+    
+    // Simulate a successful creation with a delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Create a mock consultation response
+    const consultation = {
+      id: crypto.randomUUID(),
+      consultationType,
       date: date ? date.toISOString() : null,
-      time_slot: isTimeframe ? null : timeSlotOrTimeframe,
+      timeSlot: isTimeframe ? null : timeSlotOrTimeframe,
       timeframe: isTimeframe ? timeSlotOrTimeframe : null,
-      client_name: `${personalDetails.firstName} ${personalDetails.lastName}`,
-      client_email: personalDetails.email,
-      client_phone: personalDetails.phone,
+      clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
+      clientEmail: personalDetails.email,
+      clientPhone: personalDetails.phone,
       status: 'scheduled',
+      createdAt: new Date().toISOString(),
       message: personalDetails.message,
-      reference_id: referenceId,
+      referenceId
     };
     
-    console.log("Saving consultation to Supabase:", consultationData);
+    console.log("Consultation saved successfully:", consultation);
     
-    // Insert the consultation into Supabase
-    const { data, error } = await supabase
-      .from('consultations')
-      .insert(consultationData)
-      .select();
-    
-    if (error) {
-      console.error("Error inserting consultation into Supabase:", error);
-      throw new Error(`Failed to save consultation: ${error.message}`);
-    }
-    
-    if (!data || data.length === 0) {
-      console.error("No data returned after inserting consultation");
-      throw new Error("Failed to save consultation: No data returned");
-    }
-    
-    console.log("Consultation saved successfully to Supabase:", data);
-    
-    return { ...data[0], referenceId };
+    return { ...consultation, referenceId };
   } catch (error) {
     console.error("Error in saveConsultation:", error);
     throw error;

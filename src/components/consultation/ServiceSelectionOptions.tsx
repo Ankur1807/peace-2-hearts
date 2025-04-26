@@ -2,7 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { formatPrice } from '@/utils/pricing';
+import { formatPrice } from '@/utils/pricing/priceFormatter';
 
 interface ServiceOption {
   id: string;
@@ -27,6 +27,8 @@ interface ServiceSelectionOptionsProps {
 const mentalHealthServices: ServiceOption[] = [
   { id: 'mental-health-counselling', label: 'Mental Health Counselling', description: 'Speak with a therapist about anxiety, depression, or stress related to relationships.' },
   { id: 'family-therapy', label: 'Family Therapy', description: 'Strengthen family bonds by addressing conflicts and fostering understanding.' },
+  { id: 'premarital-counselling-individual', label: 'Premarital Counselling - Individual', description: 'Prepare for a strong marriage through guided personal reflection.' },
+  { id: 'premarital-counselling-couple', label: 'Premarital Counselling - Couple', description: 'Build a foundation for marriage together through guided discussions.' },
   { id: 'couples-counselling', label: 'Couples Counselling', description: 'Professional guidance to strengthen communication and mutual understanding.' },
   { id: 'sexual-health-counselling', label: 'Sexual Health Counselling', description: 'Specialized support for addressing intimacy concerns and enhancing relationship satisfaction.' },
   { id: 'test-service', label: 'Test Service', description: 'For testing payment gateway functionality.' }
@@ -63,18 +65,6 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
   handlePackageSelection,
   pricing
 }) => {
-  // Debug pricing data when component renders
-  React.useEffect(() => {
-    console.log('ServiceSelectionOptions rendered with pricing:', pricing ? Object.fromEntries(pricing) : 'No pricing data');
-    if (pricing) {
-      console.log('Number of pricing items:', pricing.size);
-      // Log some specific prices for debugging
-      pricing.forEach((price, id) => {
-        console.log(`Price for ${id}: ${price}`);
-      });
-    }
-  }, [pricing]);
-
   // For holistic package selection
   if (serviceCategory === 'holistic') {
     return (
@@ -88,7 +78,7 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
           {holisticPackages.map(pkg => {
             // Show package price if available
             const price = pricing?.get(pkg.id);
-            
+
             return (
               <div key={pkg.id} className="flex items-start space-x-2">
                 <RadioGroupItem value={pkg.id} id={pkg.id} />
@@ -120,15 +110,15 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
         value={selectedServices.length > 0 ? selectedServices[0] : undefined}
       >
         {servicesToDisplay.map(service => {
-          // Get price for this service
           const price = pricing?.get(service.id);
-          
           return (
             <div key={service.id} className="flex items-start space-x-2">
               <RadioGroupItem value={service.id} id={service.id} />
               <Label htmlFor={service.id} className="flex flex-col">
                 <span className="font-medium">
                   {service.label}{price !== undefined ? ` - ${formatPrice(price)}` : ''}
+                  {/* Always print 11 if test-service selected and pricing map missing */}
+                  {service.id === "test-service" && price === undefined ? " - ₹11" : null}
                 </span>
                 {service.description && (
                   <span className="text-sm text-gray-500">{service.description}</span>

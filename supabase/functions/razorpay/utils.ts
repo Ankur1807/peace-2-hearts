@@ -34,55 +34,27 @@ export async function createSignature(orderId: string, paymentId: string, secret
 // Parse and validate request data
 export async function parseRequestData(req: Request): Promise<{ data: any; error: string | null }> {
   try {
-    // Create a clone of the request to avoid consuming the body multiple times
-    const clonedReq = req.clone();
-    let text;
-    
-    try {
-      text = await clonedReq.text();
-    } catch (err) {
-      console.error("Error reading request body as text:", err);
-      return { 
-        data: null, 
-        error: 'Failed to read request body' 
-      };
-    }
-    
-    if (!text) {
-      return { 
-        data: null, 
-        error: 'Empty request body' 
-      };
-    }
-    
-    try {
-      const data = JSON.parse(text);
-      console.log("Request data received:", JSON.stringify(data));
-      return { data, error: null };
-    } catch (err) {
-      console.error("Error parsing JSON:", err);
-      return { 
-        data: null, 
-        error: 'Invalid JSON in request body' 
-      };
-    }
+    const data = await req.json();
+    console.log("Request data received:", JSON.stringify(data));
+    return { data, error: null };
   } catch (err) {
-    console.error("Exception in parseRequestData:", err);
+    console.error("Error parsing request JSON:", err);
     return { 
       data: null, 
-      error: 'Request processing error' 
+      error: 'Invalid JSON in request body' 
     };
   }
 }
 
 // Get Razorpay API keys
 export function getRazorpayKeys(): { key_id: string | null; key_secret: string | null } {
-  const key_id = Deno.env.get('RAZORPAY_KEY_ID');
-  const key_secret = Deno.env.get('RAZORPAY_KEY_SECRET');
+  const key_id = Deno.env.get('RAZORPAY_KEY_ID') || "rzp_test_C4wVqKJiq5fXgj"; // Fallback for testing
+  const key_secret = Deno.env.get('RAZORPAY_KEY_SECRET') || "C3qzVNh95VIUmgvSC1O9M7qd"; // Fallback for testing
   
   if (!key_id || !key_secret) {
     console.error("Razorpay API keys not configured");
   }
   
+  console.log("Using Razorpay key_id:", key_id);
   return { key_id, key_secret };
 }

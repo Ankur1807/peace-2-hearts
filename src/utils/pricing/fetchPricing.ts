@@ -1,41 +1,19 @@
 
-// Import from individual modules after refactoring
-import { 
-  mapServicePricing, 
-  mapPackagePricing 
-} from './core/pricingMapperService';
-import { 
-  getPricingCache, 
-  setPricingCache 
-} from './core/cacheService';
-import { 
-  fetchServicePricingData, 
-  fetchPackagePricingData 
-} from './core/pricingFetchService';
-import {
-  expandClientToDbPackageIds
-} from './core/idMappingService';
-export { 
-  clearPricingCache, 
-  formatPrice 
-} from './core/pricingService';
+// Core pricing fetcher/orchestrator
+import { mapServicePricing, mapPackagePricing } from './pricingMapper';
+import { hasTestService, fetchServicePricingFromDb, fetchPackagePricingFromDb } from './servicePriceFetcher';
+import { getPricingCache, setPricingCache, clearPricingCache as clearCacheUtil } from './pricingCache';
+export { formatPrice } from './priceFormatter';
 
 /**
- * Fetch service pricing data.
- * @param serviceIds - Array of service IDs to fetch pricing for
- * @param skipCache - Flag to skip cache and fetch fresh data
- * @returns Map of service ID to price
+ * Fetch service pricing.
  */
 export async function fetchServicePricing(
   serviceIds: string[] = [],
   skipCache = false
 ): Promise<Map<string, number>> {
-  const hasTestService = serviceIds.includes('test-service');
   const cacheKey = `services-${serviceIds.sort().join('-')}`;
-  
-  console.log('fetchServicePricing called with:', { serviceIds, skipCache });
-  
-  if (!skipCache && !hasTestService) {
+  if (!skipCache && !hasTestService(serviceIds)) {
     const cached = getPricingCache(cacheKey);
     if (cached) {
       console.log('Using cached pricing data for services:', serviceIds);
@@ -43,33 +21,21 @@ export async function fetchServicePricing(
     }
   }
 
-  const data = await fetchServicePricingData(serviceIds);
-  console.log('Raw service pricing data from DB:', data);
-  
+  const data = await fetchServicePricingFromDb(serviceIds);
   const pricingMap = mapServicePricing(data, serviceIds);
-  console.log('Mapped service pricing:', Object.fromEntries(pricingMap));
-  
   setPricingCache(cacheKey, pricingMap);
+
+  console.log('Final pricing map:', Object.fromEntries(pricingMap));
   return pricingMap;
 }
 
 /**
- * Fetch package pricing data.
- * @param packageIds - Array of package IDs to fetch pricing for
- * @param skipCache - Flag to skip cache and fetch fresh data
- * @returns Map of package ID to price
+ * Fetch package pricing.
  */
 export async function fetchPackagePricing(
   packageIds: string[] = [],
   skipCache = false
 ): Promise<Map<string, number>> {
-  console.log('fetchPackagePricing called with:', { packageIds, skipCache });
-  
-  if (!packageIds || packageIds.length === 0) {
-    console.log('No package IDs provided, returning empty map');
-    return new Map<string, number>();
-  }
-  
   const cacheKey = `packages-${packageIds.sort().join('-')}`;
   if (!skipCache) {
     const cached = getPricingCache(cacheKey);
@@ -78,23 +44,14 @@ export async function fetchPackagePricing(
       return cached;
     }
   }
-  
-  try {
-    // Expand the client IDs to DB IDs before fetching
-    const expandedIds = expandClientToDbPackageIds(packageIds);
-    console.log('Expanded package IDs:', expandedIds);
-    
-    const data = await fetchPackagePricingData(packageIds);
-    console.log('Raw package pricing data from DB:', data);
-    
-    const pricingMap = mapPackagePricing(data, packageIds);
-    console.log('Mapped package pricing:', Object.fromEntries(pricingMap));
-    
-    setPricingCache(cacheKey, pricingMap);
-    return pricingMap;
-  } catch (error) {
-    console.error('Error in fetchPackagePricing:', error);
-    // Return empty map on error
-    return new Map<string, number>();
-  }
+  const data = await fetchPackagePricingFromDb(packageIds);
+  const pricingMap = mapPackagePricing(data, packageIds);
+  setPricingCache(cacheKey, pricingMap);
+
+  return pricingMap;
+}
+
+// Simple clear cache export
+export function clearPricingCache() {
+  clearCacheUtil();
 }

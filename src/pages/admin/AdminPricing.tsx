@@ -8,7 +8,7 @@ const AdminPricing = () => {
     <>
       <SEO
         title="Pricing Management - Peace2Hearts Admin"
-        description="Manage service pricing and packages"
+        description="Manage service pricing, packages, and discount codes"
       />
       
       <AdminProvider>

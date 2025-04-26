@@ -17,8 +17,6 @@ export interface BookingDetails {
   };
   clientName: string;
   email: string;
-  referenceId: string; // Added missing referenceId property
-  message?: string; // Added message property to match usage in templates
 }
 
 export interface PersonalDetails {

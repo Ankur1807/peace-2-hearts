@@ -1,21 +1,22 @@
 
+// Types for pricing management
+
 export interface ServicePrice {
   id: string;
-  service_id: string;
   service_name: string;
+  service_id: string;
   price: number;
   category: string;
   type: 'service' | 'package';
   is_active: boolean;
-  currency: string;
-  scenario: string;
-  created_at: string;
-  updated_at: string;
-  description?: string;
-  services?: string[]; // Add the services array property
+  currency?: string;
+  created_at?: string;
+  updated_at?: string;
+  services?: string[];
+  scenario?: string;
 }
 
-export interface PricingHistoryEntry {
+export interface PricingHistory {
   id: string;
   entity_id: string;
   entity_type: string;
@@ -25,35 +26,31 @@ export interface PricingHistoryEntry {
   created_at: string;
 }
 
-// Add the missing types used in DiscountCodes.tsx
 export interface DiscountCode {
   id: string;
   code: string;
   discount_type: 'percentage' | 'fixed';
   discount_value: number;
-  description?: string;
+  min_purchase_amount?: number;
+  max_discount_amount?: number;
   is_active: boolean;
+  start_date?: string;
   expiry_date?: string;
   usage_limit?: number;
-  usage_count: number;
-  created_at: string;
+  usage_count?: number;
+  description?: string;
   applicable_services?: string[];
+  created_at: string;
+  updated_at: string;
 }
 
-// Add the missing type used in DiscountCodes.tsx
+// Added missing types
 export interface ServiceOption {
-  id: string;
-  name: string;
+  service_id: string;
+  service_name: string;
   category: string;
 }
 
-// Add the missing type used in PricingHistory.tsx
-export interface PriceChange {
-  id: string;
-  entity_id: string;
+export interface PriceChange extends PricingHistory {
   entity_name?: string;
-  old_price: number;
-  new_price: number;
-  changed_by?: string;
-  created_at: string;
 }

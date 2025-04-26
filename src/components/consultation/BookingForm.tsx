@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { PersonalDetails } from '@/utils/types';
 import ServiceSection from './form/ServiceSection';
 import DateTimeSection from './form/DateTimeSection';
@@ -8,7 +8,6 @@ import PricingSection from './form/PricingSection';
 import FormActions from './FormActions';
 import { isFormValid } from './form/ValidationHelper';
 import { Card } from '@/components/ui/card';
-import { motion } from 'framer-motion';
 
 interface BookingFormProps {
   serviceCategory: string;
@@ -27,7 +26,7 @@ interface BookingFormProps {
   isProcessing: boolean;
   pricing: Map<string, number>;
   totalPrice: number;
-  onSubmit: () => void;
+  onSubmit: (e: React.FormEvent) => void;
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
@@ -49,33 +48,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
   totalPrice,
   onSubmit
 }) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  
-  useEffect(() => {
-    if (selectedServices.length > 0 && currentStep === 1) {
-      setCurrentStep(2);
-    }
-  }, [selectedServices, currentStep]);
-
-  useEffect(() => {
-    if ((date && timeSlot) || (serviceCategory === 'holistic' && timeframe)) {
-      if (currentStep === 2) setCurrentStep(3);
-    }
-  }, [date, timeSlot, timeframe, serviceCategory, currentStep]);
-
-  const fadeInAnimation = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-  };
-
-  const handleProceed = () => {
-    console.log("handleProceed called in BookingForm");
-    // Prevent default form submission - direct action
-    onSubmit();
-  };
-
   return (
-    <div className="space-y-8">
+    <form 
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(e);
+      }}
+      className="space-y-8"
+    >
       <div className="grid grid-cols-1 gap-8">
         <Card className="overflow-hidden border-0 shadow-lg">
           <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
@@ -93,65 +73,41 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </div>
         </Card>
         
-        {currentStep >= 2 && (
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeInAnimation}
-          >
-            <Card className="overflow-hidden border-0 shadow-lg">
-              <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
-                <h3 className="text-xl font-semibold text-white">Choose Your Time</h3>
-              </div>
-              <div className="p-6">
-                <DateTimeSection
-                  serviceCategory={serviceCategory}
-                  date={date}
-                  setDate={setDate}
-                  timeSlot={timeSlot}
-                  setTimeSlot={setTimeSlot}
-                  timeframe={timeframe}
-                  setTimeframe={setTimeframe}
-                />
-              </div>
-            </Card>
-          </motion.div>
-        )}
+        <Card className="overflow-hidden border-0 shadow-lg">
+          <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
+            <h3 className="text-xl font-semibold text-white">Choose Your Time</h3>
+          </div>
+          <div className="p-6">
+            <DateTimeSection
+              serviceCategory={serviceCategory}
+              date={date}
+              setDate={setDate}
+              timeSlot={timeSlot}
+              setTimeSlot={setTimeSlot}
+              timeframe={timeframe}
+              setTimeframe={setTimeframe}
+            />
+          </div>
+        </Card>
         
-        {currentStep >= 3 && (
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeInAnimation}
-          >
-            <Card className="overflow-hidden border-0 shadow-lg">
-              <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
-                <h3 className="text-xl font-semibold text-white">Your Information</h3>
-              </div>
-              <div className="p-6">
-                <PersonalDetailsFields 
-                  personalDetails={personalDetails}
-                  handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
-                />
-              </div>
-            </Card>
-          </motion.div>
-        )}
+        <Card className="overflow-hidden border-0 shadow-lg">
+          <div className="bg-gradient-to-r from-peacefulBlue to-vividPink/20 p-4">
+            <h3 className="text-xl font-semibold text-white">Your Information</h3>
+          </div>
+          <div className="p-6">
+            <PersonalDetailsFields 
+              personalDetails={personalDetails}
+              handlePersonalDetailsFieldChange={handlePersonalDetailsFieldChange}
+            />
+          </div>
+        </Card>
       </div>
       
-      {currentStep >= 3 && (
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={fadeInAnimation}
-        >
-          <PricingSection
-            selectedServices={selectedServices}
-            pricing={pricing}
-            totalPrice={totalPrice}
-          />
-        </motion.div>
-      )}
+      <PricingSection
+        selectedServices={selectedServices}
+        pricing={pricing}
+        totalPrice={totalPrice}
+      />
       
       <FormActions 
         isFormValid={isFormValid(
@@ -163,10 +119,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
           personalDetails
         )} 
         isProcessing={isProcessing} 
-        totalPrice={totalPrice}
-        onProceed={handleProceed}
+        totalPrice={totalPrice} 
       />
-    </div>
+    </form>
   );
 };
 

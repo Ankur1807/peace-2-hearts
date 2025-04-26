@@ -27,7 +27,7 @@ export function useRazorpayPayment({
   const getEffectivePrice = useEffectivePrice({
     selectedServices: state.selectedServices,
     pricing: state.pricing,
-    totalPrice: state.totalPrice
+    totalPrice: state.totalPrice,
   });
 
   const initializeRazorpayPayment = useInitializeRazorpayPayment({
@@ -51,3 +51,4 @@ export function useRazorpayPayment({
     openRazorpayCheckout,
   };
 }
+

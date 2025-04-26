@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Shield, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatPrice } from '@/utils/pricing/priceFormatter';
 import Script from '@/components/Script';
 import { loadRazorpayScript, isRazorpayAvailable } from '@/utils/payment/razorpayService';
 import PaymentTerms from './PaymentTerms';
 import OrderSummary from './OrderSummary';
 import PaymentActions from './PaymentActions';
 import RazorpayCard from './RazorpayCard';
-import { useEffectivePrice } from '@/hooks/consultation/payment/useEffectivePrice';
 
 type PaymentStepProps = {
   consultationType: string;
@@ -37,26 +37,18 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   
-  // Use the hook to calculate the effective price
-  const getEffectivePrice = useEffectivePrice({
-    selectedServices,
-    pricing,
-    totalPrice
-  });
+  const isTestService = selectedServices.includes('test-service');
   
-  const effectivePrice = getEffectivePrice();
+  // Get fixed test price or from pricing map
+  const getTestServicePrice = () => {
+    const mappedPrice = pricing?.get('test-service');
+    console.log(`PaymentStep - test service price from mapping: ${mappedPrice}`);
+    return mappedPrice !== undefined ? mappedPrice : 11;
+  };
   
-  // For debugging
-  useEffect(() => {
-    console.log("PaymentStep - Debug Information:", {
-      selectedServices,
-      effectivePrice,
-      totalPrice,
-      pricing: pricing ? Object.fromEntries(pricing) : {},
-      isTestService: selectedServices.includes('test-service')
-    });
-  }, [selectedServices, effectivePrice, totalPrice, pricing]);
-
+  // Calculate the actual price to use
+  const actualPrice = isTestService ? getTestServicePrice() : totalPrice;
+  
   // Load Razorpay script
   useEffect(() => {
     const checkAndLoadRazorpay = async () => {
@@ -85,12 +77,15 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
 
     checkAndLoadRazorpay();
   }, []);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    console.log("Payment form submitted");
-    e.preventDefault();
-    onSubmit(e);
-  };
+  
+  // For debugging
+  useEffect(() => {
+    console.log("PaymentStep - isTestService:", isTestService);
+    console.log("PaymentStep - fixed test price:", getTestServicePrice());
+    console.log("PaymentStep - actualPrice:", actualPrice);
+    console.log("PaymentStep - totalPrice:", totalPrice);
+    console.log("PaymentStep - Selected services:", selectedServices);
+  }, [isTestService, totalPrice, selectedServices, pricing]);
 
   return (
     <div className="space-y-6">
@@ -117,7 +112,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       
       <OrderSummary 
         consultationType={consultationType}
-        totalPrice={totalPrice}
+        totalPrice={actualPrice}
         selectedServices={selectedServices}
         pricing={pricing}
       />
@@ -129,22 +124,16 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         setAcceptTerms={setAcceptTerms}
       />
       
-      <div className="pt-6 flex justify-between">
-        <Button type="button" variant="outline" onClick={onPrevStep}>
-          Back
-        </Button>
-        <Button 
-          type="submit" 
-          className="bg-peacefulBlue hover:bg-peacefulBlue/90"
-          disabled={isProcessing || !acceptTerms || !razorpayLoaded || effectivePrice <= 0}
-          onClick={handleSubmit}
-        >
-          {!razorpayLoaded ? "Loading Payment..." : 
-           isProcessing ? "Processing..." : 
-           effectivePrice <= 0 ? "Price Not Available" : 
-           `Pay ₹${effectivePrice}`}
-        </Button>
-      </div>
+      <PaymentActions 
+        onPrevStep={onPrevStep}
+        onSubmit={onSubmit}
+        totalPrice={actualPrice}
+        selectedServices={selectedServices}
+        pricing={pricing}
+        isProcessing={isProcessing}
+        acceptTerms={acceptTerms}
+        razorpayLoaded={razorpayLoaded}
+      />
       
       {!razorpayLoaded && !loadError && (
         <div className="text-center text-amber-600 text-sm mt-2">
@@ -152,7 +141,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         </div>
       )}
       
-      {effectivePrice <= 0 && (
+      {actualPrice <= 0 && (
         <div className="text-center text-amber-600 text-sm mt-2">
           Unable to calculate price. Please try selecting your services again or contact support.
         </div>

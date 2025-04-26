@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -17,7 +17,6 @@ interface DateTimePickerProps {
   serviceCategory: string;
   availableTimeSlots: string[];
   minDate: Date;
-  isDateDisabled?: (date: Date) => boolean;
 }
 
 const DateTimePicker: React.FC<DateTimePickerProps> = ({
@@ -27,8 +26,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   setTimeSlot,
   serviceCategory,
   availableTimeSlots,
-  minDate,
-  isDateDisabled
+  minDate
 }) => {
   const [isCalendarOpen, setCalendarOpen] = React.useState(false);
 
@@ -73,7 +71,9 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
               mode="single"
               selected={date}
               onSelect={handleDateSelect}
-              disabled={isDateDisabled || ((date) => date < minDate)}
+              disabled={(date) => {
+                return date < minDate;
+              }}
               initialFocus
               className={cn("p-3 pointer-events-auto")}
             />
@@ -110,3 +110,4 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 };
 
 export default DateTimePicker;
+

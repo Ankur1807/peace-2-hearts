@@ -1,20 +1,20 @@
 
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle2 } from "lucide-react";
 
 const ConfirmationHeader = () => {
   return (
-    <div className="text-center mb-8">
-      <div className="flex justify-center mb-4">
-        <CheckCircle className="h-16 w-16 text-green-500" />
+    <>
+      <div className="flex justify-center mb-6">
+        <CheckCircle2 className="h-16 w-16 text-green-500" />
       </div>
-      <h1 className="text-3xl font-lora font-bold mb-2">Thank You for Booking Your Consultation with Peace2Hearts!</h1>
-      <p className="text-gray-700 text-lg">
-        Your consultation booking and payment have been successfully received.
+      
+      <h1 className="text-3xl font-lora font-semibold mb-4">Booking Confirmed!</h1>
+      
+      <p className="text-lg text-gray-700 mb-8 max-w-xl mx-auto">
+        Thank you for completing the payment and booking a consultation with Peace2Hearts. 
+        We have received your request and will contact you shortly to confirm your appointment.
       </p>
-      <p className="text-gray-700 mt-2">
-        We will now match you with the best consultant based on your request and schedule your consultation slot.
-      </p>
-    </div>
+    </>
   );
 };
 

@@ -115,7 +115,7 @@ export type Database = {
           client_email: string | null
           client_name: string | null
           client_phone: string | null
-          consultant_id: string | null
+          consultant_id: string
           consultation_type: string
           created_at: string
           date: string | null
@@ -126,13 +126,13 @@ export type Database = {
           time_slot: string
           timeframe: string | null
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           client_email?: string | null
           client_name?: string | null
           client_phone?: string | null
-          consultant_id?: string | null
+          consultant_id: string
           consultation_type: string
           created_at?: string
           date?: string | null
@@ -143,13 +143,13 @@ export type Database = {
           time_slot: string
           timeframe?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           client_email?: string | null
           client_name?: string | null
           client_phone?: string | null
-          consultant_id?: string | null
+          consultant_id?: string
           consultation_type?: string
           created_at?: string
           date?: string | null
@@ -160,7 +160,7 @@ export type Database = {
           time_slot?: string
           timeframe?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -329,7 +329,6 @@ export type Database = {
           category: string
           created_at: string
           currency: string
-          description: string | null
           id: string
           is_active: boolean
           price: number
@@ -344,7 +343,6 @@ export type Database = {
           category: string
           created_at?: string
           currency?: string
-          description?: string | null
           id?: string
           is_active?: boolean
           price: number
@@ -359,7 +357,6 @@ export type Database = {
           category?: string
           created_at?: string
           currency?: string
-          description?: string | null
           id?: string
           is_active?: boolean
           price?: number

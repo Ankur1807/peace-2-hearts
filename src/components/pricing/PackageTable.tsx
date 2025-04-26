@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ServicePrice } from '@/utils/pricing/types';
+import { ServicePrice } from '@/utils/pricingTypes';
 import PackageEditForm from './PackageEditForm';
 import PackageStatusToggle from './PackageStatusToggle';
 

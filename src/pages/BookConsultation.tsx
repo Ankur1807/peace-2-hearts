@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -12,7 +11,6 @@ import BookingFormContainer from '@/components/consultation/BookingFormContainer
 import ConsultationInitializer from '@/components/consultation/ConsultationInitializer';
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
 
 const BookConsultation = () => {
   const [searchParams] = useSearchParams();
@@ -29,50 +27,25 @@ const BookConsultation = () => {
     serviceCategory,
     selectedServices,
     personalDetails,
-    totalPrice,
-    showPaymentStep,
-    setShowPaymentStep,
-    isProcessing,
-    setIsProcessing
+    totalPrice
   } = bookingState;
 
   const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  // Track the current step in the UI for debugging
-  const [debugState, setDebugState] = useState({
-    showingPaymentStep: false
-  });
-  
-  // Track state changes for debugging
-  useEffect(() => {
-    if (showPaymentStep !== debugState.showingPaymentStep) {
-      console.log(`showPaymentStep changed from ${debugState.showingPaymentStep} to ${showPaymentStep}`);
-      setDebugState(prev => ({ ...prev, showingPaymentStep: showPaymentStep }));
-    }
-  }, [showPaymentStep, debugState.showingPaymentStep]);
 
   const createBookingDetails = (): BookingDetails => ({
     clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
     email: personalDetails.email,
-    referenceId: referenceId || '',
     services: selectedServices || [], 
     date: date, 
     timeSlot: timeSlot,
     timeframe: timeframe,
     serviceCategory: serviceCategory,
     packageName: getPackageName(selectedServices),
-    amount: totalPrice,
-    message: personalDetails.message
+    amount: totalPrice
   });
 
   React.useEffect(() => {
     if (submitted && referenceId) {
-      console.log("Booking submitted successfully, navigating to confirmation page with:", {
-        referenceId,
-        bookingDetails: createBookingDetails()
-      });
-      
       navigate("/payment-confirmation", {
         state: {
           referenceId,
@@ -81,22 +54,7 @@ const BookConsultation = () => {
         replace: true
       });
     }
-  }, [submitted, referenceId, navigate]);
-
-  const handlePaymentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      console.log("Payment form submitted from BookConsultation page");
-      await bookingState.processPayment();
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast({
-        title: "Payment Error",
-        description: "There was an error processing your payment. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
+  }, [submitted, referenceId]);
 
   if (submitted && referenceId) {
     return (
@@ -109,9 +67,12 @@ const BookConsultation = () => {
   return (
     <>
       <SEO 
-        title="Book a Consultation"
-        description="Schedule a consultation with our relationship counselors or legal experts."
-        keywords="book relationship counseling, legal consultation appointment, therapy session"
+        title={submitted ? "Consultation Confirmed" : "Book a Consultation"}
+        description={submitted 
+          ? "Your consultation with Peace2Hearts has been successfully booked. We look forward to supporting you on your relationship journey."
+          : "Schedule a consultation with our relationship counselors or legal experts. Take the first step towards peace and clarity in your relationship journey."
+        }
+        keywords="book relationship counseling, legal consultation appointment, therapy session, mental health support"
       />
       <Navigation />
       <main className="py-16 md:py-24">
@@ -122,12 +83,7 @@ const BookConsultation = () => {
               subServiceParam={subServiceParam}
               bookingState={bookingState}
             />
-            <BookingFormContainer 
-              bookingState={{
-                ...bookingState,
-                handlePaymentSubmit
-              }}
-            />
+            <BookingFormContainer bookingState={bookingState} />
           </>
         ) : (
           <BookingSuccessView 

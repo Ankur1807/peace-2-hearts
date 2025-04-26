@@ -90,15 +90,15 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick, isLoggedIn }: Mob
           </ul>
         </motion.nav>
         <div className="px-6 mt-10 flex justify-center">
-          <Link to="/book-consultation" onClick={handleLinkClick}>
-            <MandalaButton 
-              variant="secondary" 
-              mandalaType="lotus"
-              className="w-full text-lg"
-            >
-              Book Your Session
-            </MandalaButton>
-          </Link>
+          <MandalaButton 
+            variant="secondary" 
+            mandalaType="lotus"
+            href="/book-consultation"
+            onClick={handleLinkClick}
+            className="w-full text-lg"
+          >
+            Book Your Session
+          </MandalaButton>
         </div>
       </div>
     </motion.div>

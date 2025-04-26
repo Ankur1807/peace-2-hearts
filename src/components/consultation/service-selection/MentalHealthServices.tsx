@@ -27,6 +27,16 @@ const MentalHealthServices: React.FC<MentalHealthServicesProps> = ({
       description: 'Strengthen family bonds by addressing conflicts and fostering understanding.'
     },
     {
+      id: 'premarital-counselling-individual',
+      title: 'Premarital Counselling - Individual',
+      description: 'Prepare for a strong marriage through guided personal reflection.'
+    },
+    {
+      id: 'premarital-counselling-couple',
+      title: 'Premarital Counselling - Couple',
+      description: 'Build a foundation for marriage together through guided discussions.'
+    },
+    {
       id: 'couples-counselling', 
       title: 'Couples Counselling',
       description: 'Professional guidance to strengthen communication and mutual understanding.'
@@ -43,6 +53,7 @@ const MentalHealthServices: React.FC<MentalHealthServicesProps> = ({
     }
   ];
 
+  // Log pricing data for debugging
   useEffect(() => {
     if (pricing) {
       console.log("MentalHealthServices - Pricing data received:", Object.fromEntries(pricing));
@@ -55,13 +66,17 @@ const MentalHealthServices: React.FC<MentalHealthServicesProps> = ({
   return (
     <RadioGroup value={consultationType} onValueChange={handleBoxClick} className="space-y-4">
       {mentalHealthOptions.map(option => {
+        // Get price if available
         const price = pricing?.get(option.id);
+        
+        // Create title with price if available
         const titleWithPrice = price !== undefined
           ? `${option.title} (${formatPrice(price)})`
           : option.title;
         
+        // Special handling for test service - always show price if it's the test service
         const displayTitle = option.id === 'test-service' && price === undefined
-          ? `${option.title} (₹11)` 
+          ? `${option.title} (₹11)` // Hardcoded fallback for test service
           : titleWithPrice;
         
         return (

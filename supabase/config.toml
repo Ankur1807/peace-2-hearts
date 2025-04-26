@@ -1,70 +1,14 @@
 
-# A string used to distinguish different Supabase projects on the same host. Defaults to the
-# working directory name when running `supabase init`.
 project_id = "peace2hearts"
 
-[api]
-enabled = true
-port = 54321
-schemas = ["public", "storage", "graphql_public"]
-extra_search_path = ["public", "extensions"]
-max_rows = 1000
+[functions.send-email]
+verify_jwt = true
 
-[db]
-port = 54322
-shadow_port = 54320
-major_version = 15
-
-[db.pooler]
-enabled = false
-port = 54329
-
-[db.pooler.pgbouncer]
-port = 54323
-database = "postgres"
-user = "supabase_admin"
-password = "postgres"
-
-[studio]
-enabled = true
-port = 54323
-api_url = "http://localhost"
-
-[storage]
-enabled = true
-
-[auth]
-enabled = true
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://localhost:3000"]
-jwt_expiry = 3600
-enable_refresh_token_rotation = true
-refresh_token_reuse_interval = 10
-
-[auth.email]
-enable_signup = true
-double_confirm_changes = true
-enable_confirmations = false
-
-[analytics]
-enabled = false
-port = 54327
-vector_port = 54328
-backend = "postgres"
-
-[experimental]
-kps_enabled = false
-toolbox_postgres_version = 0
-sub_hostname = "localhost"
-trace_propagation = "none"
-
-[realtime]
-enabled = false
-
-[inbucket]
-enabled = true
-port = 54324
-
-[functions]
 [functions.razorpay]
+verify_jwt = true
+
+[functions.admin-auth]
+verify_jwt = false
+
+[functions.admin-update-password]
 verify_jwt = false

@@ -2,7 +2,6 @@
 import { useCallback } from 'react';
 import { usePaymentFlow } from './usePaymentFlow';
 import { useToast } from '@/hooks/use-toast';
-import { useEffectivePrice } from './payment/useEffectivePrice';
 
 interface UseConsultationPaymentProps {
   state: any;
@@ -21,12 +20,6 @@ export function useConsultationPayment({
   handleConfirmBooking,
   setReferenceId
 }: UseConsultationPaymentProps) {
-  const getEffectivePrice = useEffectivePrice({
-    selectedServices: state.selectedServices,
-    pricing: state.pricing,
-    totalPrice: state.totalPrice
-  });
-
   const { proceedToPayment, processPayment } = usePaymentFlow({
     state,
     toast,
@@ -37,37 +30,36 @@ export function useConsultationPayment({
   });
 
   const handleProcessPayment = useCallback(() => {
-    // Get the effective price using our hook
-    const effectivePrice = getEffectivePrice();
+    // Check if test service is selected
+    const isTestService = state.selectedServices.includes('test-service');
+    
+    // Calculate effective price for payment
+    let calculatedPrice = state.totalPrice;
+    
+    if (isTestService) {
+      // Get price from pricing map or use fallback
+      calculatedPrice = state.pricing?.get('test-service') || 11;
+      console.log(`Payment using test service price: ${calculatedPrice}`);
+    } else {
+      console.log(`Payment using total price: ${calculatedPrice}`);
+    }
     
     // Log the processing with calculated price
-    console.log(`Processing payment with effective price: ${effectivePrice}`, {
-      selectedServices: state.selectedServices,
-      pricing: state.pricing ? Object.fromEntries(state.pricing) : {},
-      totalPrice: state.totalPrice
-    });
+    console.log(`Processing payment with calculated price: ${calculatedPrice}`);
     
-    // Check if the price is valid
-    if (effectivePrice <= 0) {
-      console.error("Invalid price detected:", effectivePrice);
+    // Process payment with validation
+    if (calculatedPrice <= 0 && !isTestService) {
       toast({
-        title: "Price Error",
-        description: "Unable to determine price for the selected service. Please try again or contact support.",
+        title: "Unable to process payment",
+        description: "The calculated amount is invalid. Please try again or contact support.",
         variant: "destructive"
       });
       return;
     }
     
-    // Set the calculated price to totalPrice for the state
-    if (state.setTotalPrice) {
-      state.setTotalPrice(effectivePrice);
-      console.log(`Updated totalPrice state to: ${effectivePrice}`);
-    }
-    
     // Proceed with payment processing
-    console.log("Calling processPayment function");
     processPayment();
-  }, [state, processPayment, toast, getEffectivePrice]);
+  }, [state, processPayment, toast]);
 
   return {
     proceedToPayment,

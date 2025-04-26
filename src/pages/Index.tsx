@@ -9,8 +9,8 @@ import HeroSection from '@/components/home/HeroSection';
 import ServicesSection from '@/components/home/ServicesSection';
 import HolisticSolutionsSection from '@/components/home/HolisticSolutionsSection';
 import WhyChooseUsSection from '@/components/home/WhyChooseUsSection';
-import FeaturedResourcesSection from '@/components/home/FeaturedResourcesSection';
 import CTASection from '@/components/home/CTASection';
+// Removed GoogleAnalytics import as it's now in App.tsx
 
 const HomePage = () => {
   // Organization social media links for schema
@@ -23,6 +23,7 @@ const HomePage = () => {
 
   return (
     <>
+      {/* Removed GoogleAnalytics component */}
       <SEO 
         title="Supporting You Before, During & After Marriage" 
         description="Focused on saving Indian marriages, we offer divorce prevention, psychological support, and legal help to manage complex relationship challenges." 
@@ -39,7 +40,6 @@ const HomePage = () => {
       <ServicesSection />
       <HolisticSolutionsSection />
       <WhyChooseUsSection />
-      <FeaturedResourcesSection />
       <CTASection />
       
       <Footer />
