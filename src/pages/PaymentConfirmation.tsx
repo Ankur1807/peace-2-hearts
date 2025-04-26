@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import BookingSuccessView from "@/components/consultation/BookingSuccessView";
@@ -53,6 +54,8 @@ const PaymentConfirmation = () => {
           if (verified) {
             if (referenceId && amount > 0) {
               try {
+                console.log("Attempting to save payment record with reference ID:", referenceId);
+                
                 const paymentSaved = await savePaymentRecord({
                   paymentId,
                   orderId: orderId || '',
@@ -67,6 +70,8 @@ const PaymentConfirmation = () => {
                     title: "Payment Record Saved",
                     description: "Your payment record has been successfully saved."
                   });
+                } else {
+                  console.error("Failed to save payment record for referenceId:", referenceId);
                 }
               } catch (error) {
                 console.error("Error saving payment record:", error);
@@ -141,6 +146,17 @@ const PaymentConfirmation = () => {
                 description: "We've successfully retrieved your booking information."
               });
             }
+          } else {
+            console.error("No consultation data found for reference ID:", referenceId);
+            
+            // Log all consultations for debugging
+            const { data: allConsultations } = await supabase
+              .from('consultations')
+              .select('reference_id, client_name, status')
+              .order('created_at', { ascending: false })
+              .limit(5);
+              
+            console.log("Recent consultations:", allConsultations);
           }
         } catch (error) {
           console.error("Error in booking data recovery:", error);
@@ -286,6 +302,18 @@ const fetchConsultationData = async (referenceId: string): Promise<any> => {
     
     if (error) {
       console.error("Error fetching consultation data:", error);
+      
+      // Try a broader search without exact match to debug
+      const { data: similarData, error: searchError } = await supabase
+        .from('consultations')
+        .select('reference_id, client_name, status')
+        .ilike('reference_id', `%${referenceId.slice(-6)}%`)
+        .limit(5);
+        
+      if (!searchError && similarData && similarData.length > 0) {
+        console.log("Found similar reference IDs:", similarData);
+      }
+      
       return null;
     }
     

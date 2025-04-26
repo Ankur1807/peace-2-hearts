@@ -63,7 +63,8 @@ export const useOpenRazorpayCheckout = ({
         console.log("Payment successful:", response);
         
         try {
-          // First, create the consultation record
+          // IMPORTANT: Always create the consultation record first 
+          // before verifying payment to ensure data exists
           if (handleConfirmBooking) {
             console.log("Creating consultation record via handleConfirmBooking...");
             await handleConfirmBooking();
@@ -82,6 +83,9 @@ export const useOpenRazorpayCheckout = ({
           console.log("Payment verification result:", isVerified);
           
           if (isVerified) {
+            // Create the booking details for passing to confirmation page
+            const bookingDetails = createBookingDetails();
+            
             // If payment is verified, save payment record
             const paymentSaved = await savePaymentRecord({
               paymentId: response.razorpay_payment_id,
@@ -96,9 +100,6 @@ export const useOpenRazorpayCheckout = ({
             if (setPaymentCompleted) {
               setPaymentCompleted(true);
             }
-            
-            // Generate booking details for passing to confirmation page
-            const bookingDetails = createBookingDetails();
             
             // Navigate to final confirmation page
             navigate("/payment-confirmation", {
@@ -154,6 +155,7 @@ export const useOpenRazorpayCheckout = ({
       notes: {
         services: state.selectedServices.join(','),
         consultationId: receiptId,
+        client: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`
       },
       theme: {
         color: "#3399cc",
@@ -200,6 +202,7 @@ export const useOpenRazorpayCheckout = ({
         orderId: options.order_id,
         amount: options.amount,
         currency: options.currency,
+        notes: options.notes
       });
       razorpay.open();
     } catch (err) {
