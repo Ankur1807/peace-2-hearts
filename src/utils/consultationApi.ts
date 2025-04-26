@@ -1,4 +1,3 @@
-
 import { generateReferenceId } from "./referenceGenerator";
 import { PersonalDetails } from "./types";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,29 +38,92 @@ export const saveConsultation = async (
       reference_id: referenceId,
     };
     
-    console.log("Saving consultation to Supabase:", consultationData);
+    console.log("Saving consultation to Supabase with data:", JSON.stringify(consultationData));
     
-    // Insert the consultation into Supabase
-    const { data, error } = await supabase
-      .from('consultations')
-      .insert(consultationData)
-      .select();
+    // Insert the consultation into Supabase with retry mechanism
+    let attempts = 0;
+    const maxAttempts = 3;
     
-    if (error) {
-      console.error("Error inserting consultation into Supabase:", error);
-      throw new Error(`Failed to save consultation: ${error.message}`);
+    while (attempts < maxAttempts) {
+      try {
+        const { data, error } = await supabase
+          .from('consultations')
+          .insert(consultationData)
+          .select();
+        
+        if (error) {
+          console.error(`Attempt ${attempts + 1}: Error inserting consultation:`, error);
+          attempts++;
+          if (attempts < maxAttempts) {
+            console.log(`Retrying in 1 second... (${attempts}/${maxAttempts})`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+          throw error;
+        }
+        
+        if (!data || data.length === 0) {
+          console.error(`Attempt ${attempts + 1}: No data returned after inserting consultation`);
+          attempts++;
+          if (attempts < maxAttempts) {
+            console.log(`Retrying in 1 second... (${attempts}/${maxAttempts})`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+          throw new Error("Failed to save consultation: No data returned");
+        }
+        
+        console.log("Consultation saved successfully to Supabase:", data);
+        
+        // Verify the consultation was actually saved by querying it back
+        const { data: verificationData, error: verificationError } = await supabase
+          .from('consultations')
+          .select('*')
+          .eq('reference_id', referenceId)
+          .single();
+          
+        if (verificationError || !verificationData) {
+          console.error("Verification failed - consultation may not have been saved:", verificationError);
+          attempts++;
+          if (attempts < maxAttempts) {
+            console.log(`Retrying in 1 second... (${attempts}/${maxAttempts})`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+          throw new Error("Failed to verify consultation was saved");
+        }
+        
+        console.log("Consultation verified in database:", verificationData);
+        return { ...data[0], referenceId };
+      } catch (retryError) {
+        console.error(`Attempt ${attempts + 1}: Error in retry loop:`, retryError);
+        attempts++;
+        if (attempts >= maxAttempts) {
+          throw retryError;
+        }
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     }
     
-    if (!data || data.length === 0) {
-      console.error("No data returned after inserting consultation");
-      throw new Error("Failed to save consultation: No data returned");
-    }
-    
-    console.log("Consultation saved successfully to Supabase:", data);
-    
-    return { ...data[0], referenceId };
+    throw new Error("Failed to save consultation after multiple attempts");
   } catch (error) {
     console.error("Error in saveConsultation:", error);
+    // Log additional information about the connection
+    try {
+      const { data: connectionTest, error: connectionError } = await supabase
+        .from('consultations')
+        .select('count(*)')
+        .limit(1);
+        
+      if (connectionError) {
+        console.error("Database connection test failed:", connectionError);
+      } else {
+        console.log("Database connection test succeeded:", connectionTest);
+      }
+    } catch (testError) {
+      console.error("Error testing database connection:", testError);
+    }
+    
     throw error;
   }
 };
