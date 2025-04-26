@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import BookingSuccessView from "@/components/consultation/BookingSuccessView";
@@ -12,15 +11,14 @@ import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/utils/supabase";
 
-// Accept either query params or state for flexibility
 const PaymentConfirmation = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Try getting from state first (safer), fall back to search params
   const referenceId = location.state?.referenceId || searchParams.get("ref") || null;
   const bookingDetails: BookingDetails | undefined = location.state?.bookingDetails;
   const paymentId = searchParams.get("razorpay_payment_id") || location.state?.paymentId;
@@ -33,7 +31,6 @@ const PaymentConfirmation = () => {
   const [verificationResult, setVerificationResult] = useState<{success: boolean; message: string} | null>(null);
   const [bookingRecovered, setBookingRecovered] = useState(false);
 
-  // Debug what data we have
   useEffect(() => {
     console.log("Payment Confirmation Page loaded with:", { 
       referenceId, 
@@ -46,17 +43,14 @@ const PaymentConfirmation = () => {
     });
   }, [referenceId, paymentId, orderId, amount, bookingDetails, paymentFailed, verificationFailed]);
 
-  // If we have a payment ID but no booking details, try to verify and recover the payment
   useEffect(() => {
     const verifyPayment = async () => {
       if (paymentId && !verificationResult) {
         setIsVerifying(true);
         try {
-          // Verify with Razorpay directly
           const verified = await verifyAndSyncPayment(paymentId);
           
           if (verified) {
-            // Try to save the payment record if we have a reference ID
             if (referenceId && amount > 0) {
               try {
                 const paymentSaved = await savePaymentRecord({
@@ -104,7 +98,6 @@ const PaymentConfirmation = () => {
     verifyPayment();
   }, [paymentId, orderId, referenceId, amount, verificationResult, toast]);
 
-  // Handle failed payments
   useEffect(() => {
     if (paymentFailed) {
       setVerificationResult({
@@ -118,6 +111,47 @@ const PaymentConfirmation = () => {
       });
     }
   }, [paymentFailed, verificationFailed]);
+
+  useEffect(() => {
+    const recoverBookingData = async () => {
+      if (referenceId && !bookingDetails) {
+        setIsVerifying(true);
+        try {
+          console.log("Attempting to recover booking data for reference ID:", referenceId);
+          const consultationData = await fetchConsultationData(referenceId);
+          
+          if (consultationData) {
+            console.log("Successfully recovered consultation data:", consultationData);
+            const recoveredBookingDetails = createBookingDetailsFromConsultation(consultationData);
+            
+            if (recoveredBookingDetails) {
+              console.log("Created booking details from recovered data:", recoveredBookingDetails);
+              setBookingRecovered(true);
+              
+              navigate(".", { 
+                state: {
+                  ...location.state,
+                  bookingDetails: recoveredBookingDetails
+                },
+                replace: true
+              });
+              
+              toast({
+                title: "Booking Details Recovered",
+                description: "We've successfully retrieved your booking information."
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error in booking data recovery:", error);
+        } finally {
+          setIsVerifying(false);
+        }
+      }
+    };
+    
+    recoverBookingData();
+  }, [referenceId, bookingDetails, toast, navigate, location.state]);
 
   return (
     <>
@@ -237,6 +271,94 @@ const PaymentConfirmation = () => {
       <Footer />
     </>
   );
+};
+
+const fetchConsultationData = async (referenceId: string): Promise<any> => {
+  if (!referenceId) return null;
+  
+  console.log("Attempting to fetch consultation data for reference ID:", referenceId);
+  try {
+    const { data, error } = await supabase
+      .from('consultations')
+      .select('*, payments(*)')
+      .eq('reference_id', referenceId)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching consultation data:", error);
+      return null;
+    }
+    
+    console.log("Successfully retrieved consultation data:", data);
+    return data;
+  } catch (error) {
+    console.error("Exception fetching consultation data:", error);
+    return null;
+  }
+};
+
+const createBookingDetailsFromConsultation = (consultation: any): BookingDetails | null => {
+  if (!consultation) return null;
+  
+  try {
+    let bookingDate: Date | undefined = undefined;
+    if (consultation.date) {
+      try {
+        bookingDate = new Date(consultation.date);
+      } catch (e) {
+        console.error("Error parsing date:", e);
+      }
+    }
+    
+    let amount = 0;
+    if (consultation.payments && consultation.payments.length > 0) {
+      amount = consultation.payments[0].amount;
+    }
+    
+    const services = consultation.consultation_type ? 
+      [consultation.consultation_type] : [];
+    
+    return {
+      clientName: consultation.client_name || '',
+      email: consultation.client_email || '',
+      referenceId: consultation.reference_id || '',
+      consultationType: consultation.consultation_type || '',
+      services: services,
+      date: bookingDate,
+      timeSlot: consultation.time_slot || undefined,
+      timeframe: consultation.timeframe || undefined,
+      message: consultation.message || '',
+      amount: amount,
+      serviceCategory: getServiceCategoryFromConsultationType(consultation.consultation_type)
+    };
+  } catch (error) {
+    console.error("Error creating booking details from consultation:", error);
+    return null;
+  }
+};
+
+const getServiceCategoryFromConsultationType = (type: string): string => {
+  if (!type) return '';
+  
+  if (type.includes('holistic') || 
+      type.includes('divorce-prevention') || 
+      type.includes('pre-marriage-clarity')) {
+    return 'holistic';
+  }
+  
+  if (type.includes('legal') || 
+      type.includes('divorce') || 
+      type.includes('custody')) {
+    return 'legal';
+  }
+  
+  if (type.includes('psychological') || 
+      type.includes('therapy') || 
+      type.includes('counseling')) {
+    return 'psychological';
+  }
+  
+  return '';
 };
 
 export default PaymentConfirmation;

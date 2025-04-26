@@ -18,6 +18,10 @@ const SuccessView = ({ referenceId, bookingDetails }: SuccessViewProps) => {
     <div className="space-y-6">
       <ConfirmationHeader />
       
+      {referenceId && (
+        <BookingReference referenceId={referenceId} />
+      )}
+      
       <BookingDetailsCard 
         services={bookingDetails?.services || []}
         date={bookingDetails?.date}

@@ -26,6 +26,13 @@ export const useOpenRazorpayCheckout = ({
   
   return (order: any, razorpayKey: string, receiptId: string) => {
     const effectivePrice = getEffectivePrice();
+    console.log("Opening Razorpay checkout with reference ID:", receiptId);
+    
+    // Set reference ID early in the process to ensure it's available
+    if (setReferenceId) {
+      console.log("Setting reference ID early:", receiptId);
+      setReferenceId(receiptId);
+    }
     
     // Create booking details object for passing between pages
     const createBookingDetails = (): BookingDetails => ({
@@ -56,13 +63,16 @@ export const useOpenRazorpayCheckout = ({
         console.log("Payment successful:", response);
         
         try {
-          // Save the reference ID if we have the setter function
-          if (setReferenceId) {
-            console.log("Setting reference ID:", receiptId);
-            setReferenceId(receiptId);
+          // First, create the consultation record
+          if (handleConfirmBooking) {
+            console.log("Creating consultation record via handleConfirmBooking...");
+            await handleConfirmBooking();
+            console.log("Consultation record created successfully");
+          } else {
+            console.warn("handleConfirmBooking function not provided, skipping consultation record creation");
           }
           
-          // First verify the payment
+          // Now verify the payment
           const isVerified = await verifyRazorpayPayment({
             paymentId: response.razorpay_payment_id,
             orderId: response.razorpay_order_id,
@@ -82,17 +92,9 @@ export const useOpenRazorpayCheckout = ({
             });
             
             console.log("Payment record saved:", paymentSaved);
-
-            // Now handle booking confirmation - this creates the consultation record
-            if (handleConfirmBooking) {
-              console.log("Calling handleConfirmBooking to create consultation record");
-              await handleConfirmBooking();
-              
-              if (setPaymentCompleted) {
-                setPaymentCompleted(true);
-              }
-            } else {
-              console.warn("handleConfirmBooking function not provided");
+            
+            if (setPaymentCompleted) {
+              setPaymentCompleted(true);
             }
             
             // Generate booking details for passing to confirmation page
@@ -106,7 +108,8 @@ export const useOpenRazorpayCheckout = ({
                 amount: effectivePrice,
                 referenceId: receiptId,
                 bookingDetails: bookingDetails
-              }
+              },
+              replace: true
             });
           } else {
             // If verification fails, still try to navigate but with error state
@@ -123,7 +126,8 @@ export const useOpenRazorpayCheckout = ({
                 amount: effectivePrice,
                 referenceId: receiptId,
                 verificationFailed: true
-              }
+              },
+              replace: true
             });
           }
         } catch (error) {
@@ -135,7 +139,8 @@ export const useOpenRazorpayCheckout = ({
               amount: effectivePrice,
               referenceId: receiptId,
               error: "Error processing payment"
-            }
+            },
+            replace: true
           });
         } finally {
           setIsProcessing(false);
@@ -178,7 +183,8 @@ export const useOpenRazorpayCheckout = ({
               amount: effectivePrice,
               referenceId: receiptId,
               paymentFailed: true
-            }
+            },
+            replace: true
           });
         }
         

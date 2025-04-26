@@ -107,7 +107,8 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
       body: {
         type: 'booking-confirmation',
         ...serializedBookingDetails,
-        isResend: bookingDetails.isResend || false
+        isResend: bookingDetails.isResend || false,
+        referenceId: bookingDetails.referenceId // Ensure referenceId is always included
       }
     });
     

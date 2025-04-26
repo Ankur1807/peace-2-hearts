@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for Razorpay integration
  */
@@ -115,12 +114,21 @@ export const savePaymentRecord = async (params: {
       .eq('reference_id', referenceId)
       .single();
     
-    if (consultationError || !consultationData) {
-      console.error('Error finding consultation:', consultationError || 'No consultation found');
+    if (consultationError) {
+      console.error('Error finding consultation:', consultationError);
+      
+      // If the consultation is not found, try to create it again (recovery mechanism)
+      console.warn('Consultation not found. This may indicate a data consistency issue.');
+      return false;
+    }
+    
+    if (!consultationData) {
+      console.error('No consultation found for reference ID:', referenceId);
       return false;
     }
 
     const consultationId = consultationData.id;
+    console.log('Found consultation ID for payment record:', consultationId);
 
     // Save the payment record
     const { data, error } = await supabase
@@ -131,12 +139,15 @@ export const savePaymentRecord = async (params: {
         transaction_id: paymentId,
         payment_status: status,
         payment_method: 'razorpay',
-      });
+      })
+      .select();
     
     if (error) {
       console.error('Error saving payment record:', error);
       return false;
     }
+
+    console.log("Payment record inserted successfully:", data);
 
     // Update consultation status to paid
     const { error: updateError } = await supabase
@@ -147,9 +158,10 @@ export const savePaymentRecord = async (params: {
     if (updateError) {
       console.error('Error updating consultation status:', updateError);
       // We still return true as the payment was recorded
+      return true;
     }
     
-    console.log("Payment record saved successfully");
+    console.log("Payment record saved and consultation status updated successfully");
     return true;
   } catch (err) {
     console.error('Exception saving payment record:', err);

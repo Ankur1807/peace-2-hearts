@@ -96,6 +96,7 @@ export const updateConsultationStatus = async (
 // Get consultation details by reference ID
 export const getConsultationByReferenceId = async (referenceId: string) => {
   try {
+    console.log("Fetching consultation with reference ID:", referenceId);
     const { data, error } = await supabase
       .from('consultations')
       .select('*')
@@ -107,6 +108,7 @@ export const getConsultationByReferenceId = async (referenceId: string) => {
       return null;
     }
     
+    console.log("Consultation data retrieved:", data);
     return data;
   } catch (error) {
     console.error("Error in getConsultationByReferenceId:", error);
