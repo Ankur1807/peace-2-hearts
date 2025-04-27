@@ -14,6 +14,14 @@ export const createRazorpayOrder = async (params: CreateOrderParams): Promise<Or
   try {
     const { amount, currency = 'INR', receipt, notes } = params;
     
+    if (!amount || amount <= 0) {
+      console.error('Invalid amount for order creation:', amount);
+      return { 
+        success: false, 
+        error: 'Invalid amount. Must be greater than zero.' 
+      };
+    }
+    
     console.log("Creating Razorpay order with params:", { 
       amount, 
       currency, 
@@ -21,22 +29,36 @@ export const createRazorpayOrder = async (params: CreateOrderParams): Promise<Or
       notes
     });
     
+    // Send a numeric amount to the edge function
+    // The edge function will handle conversion to paise
     const { data, error } = await supabase.functions.invoke('razorpay', {
-      body: JSON.stringify({
+      body: {
         action: 'create_order',
-        amount,
+        amount: Number(amount),
         currency,
         receipt,
         orderData: { notes }
-      })
+      }
     });
     
     if (error) {
-      console.error('Error creating order:', error);
-      return { success: false, error: error.message };
+      console.error('Error invoking Razorpay edge function:', error);
+      return { 
+        success: false, 
+        error: `Edge function error: ${error.message || 'Unknown error'}` 
+      };
     }
     
     console.log("Razorpay order response:", data);
+    
+    if (!data?.success) {
+      console.error('Razorpay order creation failed:', data?.error || 'Unknown error');
+      return { 
+        success: false, 
+        error: data?.error || 'Failed to create payment order'
+      };
+    }
+    
     return data as OrderResponse;
   } catch (err) {
     console.error('Exception creating order:', err);

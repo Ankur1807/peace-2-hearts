@@ -12,19 +12,51 @@ export async function handleCreateOrder(
   try {
     console.log(`Creating order with: amount=${amount}, currency=${currency}, receipt=${receipt}`);
     
-    // Ensure amount is a number and convert to paise (smallest currency unit)
-    const amountInPaise = Math.round(Number(amount) * 100);
-    if (isNaN(amountInPaise) || amountInPaise <= 0) {
-      console.error("Invalid amount:", amount);
+    // Input validation with detailed error messages
+    if (amount === undefined || amount === null) {
+      console.error("Amount is undefined or null");
       return new Response(JSON.stringify({
         success: false,
-        error: 'Invalid amount'
+        error: 'Missing amount parameter'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      });
+    }
+
+    // Convert to number and ensure it's valid
+    const numericAmount = Number(amount);
+    if (isNaN(numericAmount)) {
+      console.error("Invalid amount (not a number):", amount);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Invalid amount format'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400
       });
     }
     
+    // Ensure amount is positive
+    if (numericAmount <= 0) {
+      console.error("Invalid amount (zero or negative):", numericAmount);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Amount must be greater than zero'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      });
+    }
+    
+    // Ensure amount is in paise (smallest currency unit)
+    // If amount is too small (like 11), it's likely in rupees and needs conversion
+    // If it's already large (like 1100), it might already be in paise
+    const amountInPaise = numericAmount < 100 ? Math.round(numericAmount * 100) : Math.round(numericAmount);
+    
+    console.log(`Converting amount ${numericAmount} to paise: ${amountInPaise}`);
+    
+    // Build the order data object
     const orderData = {
       amount: amountInPaise,
       currency,
@@ -36,6 +68,7 @@ export async function handleCreateOrder(
     
     console.log("Sending order creation request to Razorpay:", JSON.stringify(orderData));
     
+    // Make API call to Razorpay
     const response = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
       headers: {
@@ -45,14 +78,20 @@ export async function handleCreateOrder(
       body: JSON.stringify(orderData)
     });
     
+    // Parse response from Razorpay
     const data = await response.json();
-    console.log("Razorpay order response:", JSON.stringify(data));
+    console.log("Razorpay API response status:", response.status);
+    console.log("Razorpay API response body:", JSON.stringify(data));
     
+    // Handle API errors
     if (!response.ok) {
-      console.error("Razorpay order creation failed:", data);
+      const errorMsg = data.error?.description || 'Unknown error from payment gateway';
+      console.error(`Razorpay API error (${response.status}): ${errorMsg}`);
+      
       return new Response(JSON.stringify({
         success: false,
-        error: data.error?.description || 'Failed to create order',
+        error: errorMsg,
+        status: response.status,
         details: data
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -60,6 +99,7 @@ export async function handleCreateOrder(
       });
     }
     
+    // Build success response
     const orderResponse = {
       success: true,
       order_id: data.id,
@@ -71,16 +111,22 @@ export async function handleCreateOrder(
       }
     };
     
+    console.log("Successfully created order:", JSON.stringify(orderResponse));
+    
     return new Response(JSON.stringify(orderResponse), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200
     });
   } catch (err) {
-    console.error("Exception in handleCreateOrder:", err);
+    // Catch and log any unhandled errors
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("Exception in handleCreateOrder:", errorMessage);
+    
     return new Response(JSON.stringify({
       success: false,
       error: 'Error creating order',
-      details: err instanceof Error ? err.message : String(err)
+      message: errorMessage,
+      details: err instanceof Error ? { name: err.name, message: err.message } : { error: String(err) }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500

@@ -26,7 +26,7 @@ export const useInitializeRazorpayPayment = ({
     console.log("Using payment amount:", validAmount);
     
     try {
-      // Create order with validated price
+      // Create order with validated price and improved error handling
       const orderResponse = await createRazorpayOrder({
         amount: validAmount,
         receipt: receiptId,
@@ -90,6 +90,26 @@ export const useInitializeRazorpayPayment = ({
       return { order, razorpayKey };
     } catch (err) {
       console.error("Error during payment initialization:", err);
+      
+      // Provide detailed error information for debugging
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : "Unknown error during payment initialization";
+      
+      if (toast) {
+        toast({
+          title: "Payment Error",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      } else if (internalToast.toast) {
+        internalToast.toast({
+          title: "Payment Error", 
+          description: errorMessage,
+          variant: "destructive"
+        });
+      }
+      
       throw err;
     }
   };
