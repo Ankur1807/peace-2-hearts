@@ -29,3 +29,9 @@ export interface PersonalDetails {
   phone: string;
   message: string;
 }
+
+// Add the VerificationResult type
+export interface VerificationResult {
+  success: boolean;
+  message: string;
+}
