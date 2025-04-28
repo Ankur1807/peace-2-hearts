@@ -1,69 +1,155 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { sendBookingConfirmationEmail } from "./bookingEmails";
-import { fetchConsultationData, createBookingDetailsFromConsultation } from "@/utils/consultation/consultationRecovery";
+import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
+import { BookingDetails } from "@/utils/types";
 
 /**
- * Manually trigger email recovery for a specific reference ID
- * This function can be called from the browser console
+ * Manual recovery function for resending confirmation emails by reference ID
+ * This can be called from the browser console for immediate troubleshooting
  */
 export async function recoverEmailByReferenceId(referenceId: string): Promise<boolean> {
+  console.log(`Starting manual email recovery for reference ID: ${referenceId}`);
+  
   try {
-    console.log(`Attempting to recover email for reference ID: ${referenceId}`);
+    // Step 1: Fetch the consultation details
+    const { data: consultation, error } = await supabase
+      .from('consultations')
+      .select('*')
+      .eq('reference_id', referenceId)
+      .single();
     
-    // First, fetch the consultation data
-    const consultationData = await fetchConsultationData(referenceId);
-    
-    if (!consultationData) {
-      console.error(`No consultation found with reference ID: ${referenceId}`);
+    if (error || !consultation) {
+      console.error(`Could not find consultation with reference ID: ${referenceId}`, error);
       return false;
     }
     
-    // Create booking details from consultation
-    const bookingDetails = createBookingDetailsFromConsultation(consultationData);
-    
-    if (!bookingDetails) {
-      console.error(`Could not create booking details from consultation data`);
-      return false;
-    }
-    
-    // Try to send the email with high priority
-    const emailResult = await sendBookingConfirmationEmail({
-      ...bookingDetails,
-      isRecovery: true,
-      highPriority: true
+    console.log(`Found consultation:`, {
+      id: consultation.id,
+      client: consultation.client_name,
+      email: consultation.client_email,
+      status: consultation.status,
+      paymentStatus: consultation.payment_status,
+      emailSent: consultation.email_sent
     });
     
+    // Step 2: Create booking details from consultation data
+    const serviceCategory = determineServiceCategory(consultation.consultation_type);
+    
+    const bookingDetails: BookingDetails = {
+      clientName: consultation.client_name,
+      email: consultation.client_email,
+      referenceId: consultation.reference_id,
+      consultationType: consultation.consultation_type,
+      services: consultation.consultation_type ? consultation.consultation_type.split(',') : [],
+      date: consultation.date ? new Date(consultation.date) : undefined,
+      timeSlot: consultation.time_slot,
+      timeframe: consultation.timeframe,
+      message: consultation.message,
+      serviceCategory,
+      highPriority: true,
+      isResend: true
+    };
+    
+    // Step 3: Send the email with high priority
+    console.log(`Attempting to send recovery email to ${bookingDetails.email}`);
+    const emailResult = await sendBookingConfirmationEmail(bookingDetails);
+    
     if (emailResult) {
-      console.log(`Successfully sent recovery email for reference ID: ${referenceId}`);
+      console.log(`✅ Email recovery successful for ${referenceId}`);
       
-      // Check if there's a payment record to update
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('id')
-        .eq('consultation_id', consultationData.id);
+      // Step 4: Update the consultation record to mark email as sent
+      const { error: updateError } = await supabase
+        .from('consultations')
+        .update({ 
+          email_sent: true,
+          status: consultation.status === 'payment_received_needs_email' ? 'confirmed' : consultation.status
+        })
+        .eq('reference_id', referenceId);
       
-      if (payments && payments.length > 0) {
-        // Update payment record to mark email as sent
-        await supabase
-          .from('payments')
-          .update({ email_sent: true, recovery_timestamp: new Date().toISOString() })
-          .eq('id', payments[0].id);
+      if (updateError) {
+        console.error(`Could not update consultation record:`, updateError);
+        return false;
       }
       
       return true;
     } else {
-      console.error(`Failed to send recovery email for reference ID: ${referenceId}`);
+      console.error(`❌ Email recovery failed for ${referenceId}`);
       return false;
     }
   } catch (error) {
-    console.error(`Error in manual email recovery:`, error);
+    console.error(`Exception during email recovery:`, error);
     return false;
   }
 }
 
-// Add this function to window so it can be called from the console
+/**
+ * Scheduled recovery function to automatically check and recover any failed emails
+ * This runs on page load to catch any emails that weren't sent during payment processing
+ */
+export async function automatedEmailRecovery(): Promise<void> {
+  console.log(`Running automated email recovery check`);
+  
+  try {
+    // Find consultations that have completed payments but no confirmation email
+    const { data: pendingEmails, error } = await supabase
+      .from('consultations')
+      .select('*')
+      .eq('payment_status', 'completed')
+      .eq('email_sent', false)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    
+    if (error) {
+      console.error(`Error checking for pending emails:`, error);
+      return;
+    }
+    
+    if (!pendingEmails || pendingEmails.length === 0) {
+      console.log(`No pending emails found that need recovery`);
+      return;
+    }
+    
+    console.log(`Found ${pendingEmails.length} consultations needing email recovery`);
+    
+    // Process each consultation in sequence
+    for (const consultation of pendingEmails) {
+      try {
+        const result = await recoverEmailByReferenceId(consultation.reference_id);
+        if (result) {
+          console.log(`Recovered email for ${consultation.reference_id}`);
+        } else {
+          console.error(`Failed to recover email for ${consultation.reference_id}`);
+        }
+        // Add delay between sends to avoid rate limits
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (e) {
+        console.error(`Error processing recovery for ${consultation.reference_id}:`, e);
+      }
+    }
+  } catch (error) {
+    console.error(`Error in automated email recovery:`, error);
+  }
+}
+
+// Add to window object for easy access from console
 if (typeof window !== 'undefined') {
   // @ts-ignore - Window extension
   window.recoverEmailByReferenceId = recoverEmailByReferenceId;
+  window.automatedEmailRecovery = automatedEmailRecovery;
+  
+  // Run recovery check on page load with delay
+  window.addEventListener('load', () => {
+    // Give the app time to initialize
+    setTimeout(() => {
+      const path = window.location.pathname;
+      // Only run on important pages to avoid unnecessary processing
+      if (path.includes('payment-confirmation') || 
+          path.includes('payment-verification') || 
+          path === '/' ||
+          path.includes('dashboard')) {
+        automatedEmailRecovery();
+      }
+    }, 5000);
+  });
 }

@@ -10,17 +10,29 @@ import {
 } from "./templates.ts";
 
 // Initialize Resend with the API key
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const resendApiKey = Deno.env.get("RESEND_API_KEY");
+if (!resendApiKey) {
+  console.error("CRITICAL: RESEND_API_KEY environment variable is not set!");
+}
+
+const resend = new Resend(resendApiKey);
 
 // Format date function (client-side can be different from Deno formatting)
 function formatDate(dateStr?: string) {
   if (!dateStr) return null;
   
-  console.log("Formatting date:", dateStr);
+  console.log(`Formatting date: ${dateStr}`);
   
   try {
     // Parse the ISO date string
     const date = new Date(dateStr);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      console.warn(`Invalid date received: ${dateStr}`);
+      return dateStr;
+    }
+    
     // Format the date as DD/MM/YYYY
     return date.toLocaleDateString('en-GB', {
       day: '2-digit',
@@ -28,7 +40,7 @@ function formatDate(dateStr?: string) {
       year: 'numeric'
     });
   } catch (error) {
-    console.error("Error formatting date:", error);
+    console.error(`Error formatting date: ${error}`);
     return dateStr; // Return original string if parsing fails
   }
 }
@@ -37,7 +49,11 @@ function formatDate(dateStr?: string) {
 export async function handleContactEmail(data: ContactEmailRequest) {
   const { email, subject, isResend } = data;
   
-  console.log("Handling contact email request:", JSON.stringify(data, null, 2));
+  console.log(`Handling contact email request for: ${email}`);
+  
+  if (!email) {
+    throw new Error("Email address is required");
+  }
   
   try {
     // Send email to the user (confirmation)
@@ -48,7 +64,7 @@ export async function handleContactEmail(data: ContactEmailRequest) {
       html: getContactUserEmailTemplate(data),
     });
     
-    console.log("User contact email sent:", userEmailResponse);
+    console.log(`User contact email sent to ${email}: ${JSON.stringify(userEmailResponse)}`);
     
     // Send notification to admin
     const adminEmailResponse = await resend.emails.send({
@@ -58,11 +74,15 @@ export async function handleContactEmail(data: ContactEmailRequest) {
       html: getContactAdminEmailTemplate(data),
     });
     
-    console.log("Admin contact email sent:", adminEmailResponse);
+    console.log(`Admin contact email sent: ${JSON.stringify(adminEmailResponse)}`);
 
-    return { userEmail: userEmailResponse, adminEmail: adminEmailResponse };
+    return { 
+      userEmail: userEmailResponse, 
+      adminEmail: adminEmailResponse,
+      timestamp: new Date().toISOString()
+    };
   } catch (error) {
-    console.error("Error sending contact email:", error);
+    console.error(`Error sending contact email: ${error}`);
     throw error;
   }
 }
@@ -71,9 +91,16 @@ export async function handleContactEmail(data: ContactEmailRequest) {
 export async function handleBookingEmail(data: BookingEmailRequest) {
   const { email, consultationType, isResend, referenceId } = data;
   
-  console.log("Handling booking email request for reference ID:", referenceId);
-  console.log("Email recipient:", email);
-  console.log("Booking data:", JSON.stringify(data, null, 2));
+  console.log(`Handling booking email request for reference ID: ${referenceId}`);
+  console.log(`Email recipient: ${email}`);
+  
+  if (!email) {
+    throw new Error("Email address is required for booking confirmation");
+  }
+  
+  if (!referenceId) {
+    throw new Error("Reference ID is required for booking confirmation");
+  }
   
   // Use provided formatted date or format the date if exists
   if (data.date && !data.formattedDate) {
@@ -82,58 +109,71 @@ export async function handleBookingEmail(data: BookingEmailRequest) {
     data.formattedDate = formattedDate;
   }
   
-  try {
-    // Send confirmation email to client
-    console.log("Sending confirmation email to client:", email);
-    
-    // Add explicit email headers for important emails
-    const emailOptions = {
-      from: "Peace2Hearts <contact@peace2hearts.com>",
-      to: [email],
-      subject: isResend ? "Re: Your Consultation Booking Confirmation - Peace2Hearts" : "Your Consultation Booking Confirmation - Peace2Hearts",
-      html: getBookingUserEmailTemplate(data),
-      headers: {}
-    };
-    
-    // Mark important emails with high priority
-    if (isResend || data.isRecovery) {
-      // @ts-ignore - Headers type is not properly defined
-      emailOptions.headers = {
-        "X-Priority": "1",
-        "X-MSMail-Priority": "High",
-        "Importance": "high"
+  // Implement exponential backoff for retries
+  let attempt = 1;
+  const MAX_RETRIES = 3;
+  const INITIAL_DELAY = 500; // 500ms
+  
+  while (attempt <= MAX_RETRIES) {
+    try {
+      // Send confirmation email to client
+      console.log(`Attempt ${attempt}: Sending confirmation email to client: ${email}`);
+      
+      // Add explicit email headers for important emails
+      const emailOptions = {
+        from: "Peace2Hearts <contact@peace2hearts.com>",
+        to: [email],
+        subject: isResend ? "Re: Your Consultation Booking Confirmation - Peace2Hearts" : "Your Consultation Booking Confirmation - Peace2Hearts",
+        html: getBookingUserEmailTemplate(data),
+        headers: {}
       };
-    }
-    
-    const userEmailResponse = await resend.emails.send(emailOptions);
-    
-    console.log("User booking email sent successfully:", userEmailResponse);
-    
-    // Send notification to admin
-    console.log("Sending notification email to admin");
-    const adminEmailResponse = await resend.emails.send({
-      from: "Peace2Hearts Booking System <contact@peace2hearts.com>",
-      to: ["contact@peace2hearts.com"],
-      subject: `${isResend ? "[RESEND] " : ""}New Consultation Booking: ${consultationType} (Ref: ${referenceId})`,
-      html: getBookingAdminEmailTemplate(data),
-    });
-    
-    console.log("Admin booking email sent successfully:", adminEmailResponse);
+      
+      // Mark important emails with high priority
+      if (isResend || data.isRecovery) {
+        // @ts-ignore - Headers type is not properly defined
+        emailOptions.headers = {
+          "X-Priority": "1",
+          "X-MSMail-Priority": "High",
+          "Importance": "high"
+        };
+      }
+      
+      const userEmailResponse = await resend.emails.send(emailOptions);
+      
+      console.log(`User booking email sent successfully to ${email}: ${JSON.stringify(userEmailResponse)}`);
+      
+      // Send notification to admin
+      console.log("Sending notification email to admin");
+      const adminEmailResponse = await resend.emails.send({
+        from: "Peace2Hearts Booking System <contact@peace2hearts.com>",
+        to: ["contact@peace2hearts.com"],
+        subject: `${isResend ? "[RESEND] " : ""}New Consultation Booking: ${consultationType} (Ref: ${referenceId})`,
+        html: getBookingAdminEmailTemplate(data),
+      });
+      
+      console.log(`Admin booking email sent successfully: ${JSON.stringify(adminEmailResponse)}`);
 
-    return { 
-      userEmail: userEmailResponse, 
-      adminEmail: adminEmailResponse,
-      success: true
-    };
-  } catch (error) {
-    console.error("Error sending booking email:", error);
-    console.error("Error details:", error.message);
-    
-    // Try to provide more details about the error
-    if (error.response) {
-      console.error("Response error:", error.response);
+      return { 
+        userEmail: userEmailResponse, 
+        adminEmail: adminEmailResponse,
+        success: true,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error(`Attempt ${attempt}: Error sending booking email: ${error.message}`);
+      
+      if (attempt < MAX_RETRIES) {
+        // Exponential backoff
+        const delay = INITIAL_DELAY * Math.pow(2, attempt - 1);
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        attempt++;
+      } else {
+        console.error(`Failed to send email after ${MAX_RETRIES} attempts`);
+        throw error;
+      }
     }
-    
-    throw error;
   }
+  
+  throw new Error(`Failed to send email after ${MAX_RETRIES} attempts`);
 }

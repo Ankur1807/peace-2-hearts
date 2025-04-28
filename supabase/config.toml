@@ -42,6 +42,12 @@ port = 54327
 vector_port = 54328
 backend = "postgres"
 
+# Configure the send-email function with increased timeouts and no JWT verification
+[functions.send-email]
+verify_jwt = false
+timeout_seconds = 30
+memory_size = 256
+
 # Add execution permission for the admin-migration function
 [functions.admin-migration]
 verify_jwt = false

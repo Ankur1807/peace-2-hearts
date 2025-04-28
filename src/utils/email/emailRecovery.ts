@@ -17,6 +17,7 @@ export async function checkAndRecoverEmails(): Promise<void> {
       .select('*')
       .eq('payment_status', 'completed')
       .eq('email_sent', false)
+      .order('created_at', { ascending: false })
       .limit(10);
     
     if (fetchError) {
@@ -29,12 +30,12 @@ export async function checkAndRecoverEmails(): Promise<void> {
       return;
     }
     
-    console.log(`Found ${consultationsWithoutEmails.length} consultations with completed payment status`);
+    console.log(`Found ${consultationsWithoutEmails.length} consultations with completed payment status that need email recovery`);
     
     // Process each consultation and send confirmation email
     for (const consultation of consultationsWithoutEmails) {
       try {
-        console.log(`Processing consultation ${consultation.id}`);
+        console.log(`Processing consultation ${consultation.id} (${consultation.reference_id})`);
         
         if (!consultation.reference_id) {
           console.log(`Consultation ${consultation.id} has no reference ID, skipping`);
@@ -60,24 +61,33 @@ export async function checkAndRecoverEmails(): Promise<void> {
         };
         
         // Try to send the email
+        console.log(`Attempting recovery email for ${consultation.client_email} (${consultation.reference_id})`);
         const emailResult = await sendBookingConfirmationEmail(bookingDetails);
         
         if (emailResult) {
           console.log(`Successfully sent recovery email for consultation ${consultation.id}`);
           
           // Mark email as sent
-          await supabase
+          const { error: updateError } = await supabase
             .from('consultations')
             .update({ 
-              email_sent: true
+              email_sent: true,
+              status: consultation.status === 'payment_received_needs_email' ? 'confirmed' : consultation.status
             })
             .eq('id', consultation.id);
+            
+          if (updateError) {
+            console.error(`Error updating consultation ${consultation.id} after email recovery:`, updateError);
+          }
         } else {
           console.error(`Failed to send recovery email for consultation ${consultation.id}`);
         }
       } catch (emailError) {
         console.error(`Error processing recovery email for consultation ${consultation.id}:`, emailError);
       }
+      
+      // Add delay between sends to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 1500));
     }
     
     console.log("Email recovery process completed");
@@ -101,7 +111,8 @@ if (typeof window !== 'undefined') {
       const path = window.location.pathname;
       if (path.includes('payment-confirmation') || 
           path.includes('payment-verification') || 
-          path === '/') {
+          path === '/' ||
+          path.includes('dashboard')) {
         checkAndRecoverEmails();
       }
     }, 5000);
