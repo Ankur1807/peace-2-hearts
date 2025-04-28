@@ -12,29 +12,28 @@ export interface PersonalDetails {
 }
 
 export interface BookingDetails {
-  clientName: string;
-  email: string;
-  referenceId: string;
-  consultationType: string;
-  services: string[];
-  date?: string | Date;  // Allow both string and Date
+  clientName?: string;
+  email?: string;
+  phone?: string;
+  referenceId?: string;
+  consultationType?: string;
+  services?: string[];
+  date?: Date | string;
   timeSlot?: string;
   timeframe?: string;
-  packageName?: string | null;
-  serviceCategory: string;
-  amount?: number;
+  serviceCategory?: string;
   message?: string;
-  phone?: string;
-  personalDetails?: PersonalDetails;
-  selectedServices?: string[];
+  amount?: number;
+  highPriority?: boolean;
   isResend?: boolean;
   isRecovery?: boolean;
-  highPriority?: boolean;
+  [key: string]: any;
 }
 
 export interface SerializedBookingDetails extends Omit<BookingDetails, 'date'> {
   date?: string;
-  formattedDate?: string;
+  type?: string;
+  failedAt?: string;
 }
 
 export interface PaymentRecord {

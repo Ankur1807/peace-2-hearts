@@ -4,8 +4,10 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { VerifyPaymentParams } from "../razorpayTypes";
-import { savePaymentRecord } from "../razorpayService";
+import { savePaymentRecord } from "./paymentRecordService";
+import { sendEmailForConsultation } from "./emailNotificationService";
 import { BookingDetails } from "@/utils/types";
+import { createBookingDetailsFromConsultation } from "@/utils/consultation/consultationRecovery";
 
 /**
  * Verify Razorpay payment with signature
@@ -125,14 +127,44 @@ export const verifyAndRecordPayment = async (
     // First check if this payment has already been verified
     const { data: existingPayment } = await supabase
       .from('consultations')
-      .select('payment_status, payment_id')
+      .select('payment_status, payment_id, email_sent, client_email')
       .eq('reference_id', referenceId)
       .eq('payment_id', paymentId)
-      .eq('payment_status', 'completed')
       .single();
       
     if (existingPayment) {
       console.log("Payment already verified and recorded");
+      
+      // If payment is recorded but email wasn't sent, try to send it now
+      if (existingPayment.payment_status === 'completed' && !existingPayment.email_sent) {
+        console.log("Payment recorded but email not sent, attempting to send email now");
+        
+        // If we don't have booking details but have reference ID, fetch them
+        let detailsToUse = bookingDetails;
+        if (!detailsToUse || !detailsToUse.email) {
+          console.log("Fetching consultation data to create booking details");
+          const consultationData = await supabase
+            .from('consultations')
+            .select('*')
+            .eq('reference_id', referenceId)
+            .single()
+            .then(res => res.data);
+            
+          if (consultationData) {
+            detailsToUse = createBookingDetailsFromConsultation(consultationData);
+          }
+        }
+        
+        if (detailsToUse) {
+          // Set high priority for recovery emails
+          detailsToUse.highPriority = true;
+          
+          // Try to send the email
+          const emailSent = await sendEmailForConsultation(detailsToUse);
+          console.log("Email recovery attempt result:", emailSent);
+        }
+      }
+      
       return true;
     }
     
@@ -154,10 +186,10 @@ export const verifyAndRecordPayment = async (
     }
     
     // If verification was successful, ensure payment details are recorded
-    if (isVerified && bookingDetails) {
+    if (isVerified) {
       console.log("Payment verified, saving record");
       
-      await savePaymentRecord({
+      const savedRecord = await savePaymentRecord({
         paymentId,
         orderId: orderId || '',
         amount,
@@ -166,12 +198,68 @@ export const verifyAndRecordPayment = async (
         bookingDetails
       });
       
+      // After saving record, send confirmation email with high priority
+      if (savedRecord && bookingDetails) {
+        bookingDetails.highPriority = true;
+        const emailResult = await sendEmailForConsultation(bookingDetails);
+        console.log("Email sending result:", emailResult);
+      }
+      
       return true;
     }
     
-    return isVerified;
-  } catch (error) {
-    console.error("Error verifying and recording payment:", error);
+    console.log("Payment verification failed");
+    return false;
+  } catch (err) {
+    console.error('Exception in verifyAndRecordPayment:', err);
     return false;
   }
 };
+
+/**
+ * Expose a global function to recover emails for specific reference IDs
+ * This can be called from the browser console for manual recovery
+ */
+export const recoverEmailByReferenceId = async (referenceId: string): Promise<boolean> => {
+  try {
+    console.log(`Manual email recovery attempt for reference ID: ${referenceId}`);
+    
+    // Fetch consultation data
+    const { data: consultation, error } = await supabase
+      .from('consultations')
+      .select('*')
+      .eq('reference_id', referenceId)
+      .single();
+      
+    if (error || !consultation) {
+      console.error("Could not find consultation with reference ID:", referenceId);
+      return false;
+    }
+    
+    // Create booking details from consultation
+    const bookingDetails = createBookingDetailsFromConsultation(consultation);
+    if (!bookingDetails) {
+      console.error("Could not create booking details from consultation data");
+      return false;
+    }
+    
+    // Set high priority for manual recovery
+    bookingDetails.highPriority = true;
+    bookingDetails.isRecovery = true;
+    
+    // Send the email
+    const emailResult = await sendEmailForConsultation(bookingDetails);
+    console.log("Email recovery result:", emailResult);
+    
+    return emailResult;
+  } catch (err) {
+    console.error('Exception in recoverEmailByReferenceId:', err);
+    return false;
+  }
+};
+
+// Expose the recovery function globally for debugging and manual recovery
+if (typeof window !== 'undefined') {
+  // @ts-ignore
+  window.recoverEmailByReferenceId = recoverEmailByReferenceId;
+}

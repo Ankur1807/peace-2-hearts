@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { verifyAndRecordPayment } from "@/utils/payment/services/paymentVerificationService";
-import { fetchConsultationByReferenceId, checkConsultationStatus } from "@/utils/consultation/consultationRecovery";
+import { fetchConsultationData, createBookingDetailsFromConsultation } from "@/utils/consultation/consultationRecovery";
 
 export function usePaymentRecovery() {
   const [isRecovering, setIsRecovering] = useState(false);
@@ -34,7 +34,7 @@ export function usePaymentRecovery() {
       console.log(`Starting payment recovery for ${referenceId} with payment ${paymentId}`);
       
       // Step 1: Check the current status in the database
-      const consultation = await fetchConsultationByReferenceId(referenceId);
+      const consultation = await fetchConsultationData(referenceId);
       
       if (!consultation) {
         console.error("No consultation found with reference ID:", referenceId);
@@ -81,22 +81,13 @@ export function usePaymentRecovery() {
       let bookingDetails = null;
       if (consultation) {
         // Create booking details from consultation
-        bookingDetails = {
-          clientName: consultation.client_name,
-          email: consultation.client_email,
-          phone: consultation.client_phone,
-          referenceId,
-          consultationType: consultation.consultation_type || 'general',
-          services: consultation.consultation_type ? consultation.consultation_type.split(',') : [],
-          date: consultation.date ? new Date(consultation.date) : undefined,
-          timeSlot: consultation.time_slot,
-          timeframe: consultation.timeframe,
-          serviceCategory: consultation.consultation_type?.toLowerCase().includes('legal') ? 
-            'legal' : consultation.consultation_type?.toLowerCase().includes('holistic') ? 
-            'holistic' : 'mental-health',
-          message: consultation.message,
-          amount: amount
-        };
+        bookingDetails = createBookingDetailsFromConsultation(consultation);
+        
+        // Add additional recovery flags
+        if (bookingDetails) {
+          bookingDetails.highPriority = true;
+          bookingDetails.isRecovery = true;
+        }
       }
       
       // Step 2: Verify and record the payment again to ensure payment details are saved

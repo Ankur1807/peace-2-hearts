@@ -38,7 +38,9 @@ export async function sendEmailForConsultation(
             timeframe: data.timeframe,
             message: data.message,
             serviceCategory: determineServiceCategory(data.consultation_type),
-            highPriority: bookingDetails.highPriority
+            highPriority: bookingDetails.highPriority,
+            isResend: bookingDetails.isResend,
+            isRecovery: bookingDetails.isRecovery
           };
         }
       }
@@ -53,6 +55,8 @@ export async function sendEmailForConsultation(
         console.error("Cannot send email: missing reference ID");
         return false;
       }
+      
+      console.log(`Sending email to ${bookingDetails.email} for reference ${bookingDetails.referenceId}`);
       
       // Add high-priority flag for emails
       const emailResult = await sendBookingConfirmationEmail({
@@ -111,4 +115,53 @@ export async function sendEmailForConsultation(
   }
   
   return false;
+}
+
+/**
+ * Function to manually trigger resending of confirmation email 
+ */
+export async function resendConfirmationEmail(referenceId: string): Promise<boolean> {
+  try {
+    console.log(`Attempting to resend confirmation email for ${referenceId}`);
+    
+    // Fetch the consultation data
+    const { data: consultation } = await supabase
+      .from('consultations')
+      .select('*')
+      .eq('reference_id', referenceId)
+      .single();
+    
+    if (!consultation) {
+      console.error("Could not find consultation with reference ID:", referenceId);
+      return false;
+    }
+    
+    // Create booking details for the email
+    const bookingDetails: BookingDetails = {
+      clientName: consultation.client_name,
+      email: consultation.client_email,
+      referenceId: consultation.reference_id,
+      consultationType: consultation.consultation_type,
+      services: consultation.consultation_type ? consultation.consultation_type.split(',') : [],
+      date: consultation.date ? new Date(consultation.date) : undefined,
+      timeSlot: consultation.time_slot,
+      timeframe: consultation.timeframe,
+      message: consultation.message,
+      serviceCategory: determineServiceCategory(consultation.consultation_type),
+      highPriority: true,
+      isResend: true
+    };
+    
+    // Send the email
+    return sendEmailForConsultation(bookingDetails);
+  } catch (error) {
+    console.error("Error resending confirmation email:", error);
+    return false;
+  }
+}
+
+// Expose the email resend function globally for debugging and manual recovery
+if (typeof window !== 'undefined') {
+  // @ts-ignore
+  window.resendConfirmationEmail = resendConfirmationEmail;
 }
