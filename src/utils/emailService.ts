@@ -159,19 +159,28 @@ async function sendBookingConfirmationEmailInternal(bookingDetails: SerializedBo
     
     // Handle date conversion
     if (bookingDetails.date) {
-      // Check if date is a Date object using typeof for proper type narrowing
+      // Properly check for Date object with type guards
       const dateValue = bookingDetails.date;
-      if (typeof dateValue === 'object' && dateValue && 'getTime' in dateValue && typeof dateValue.getTime === 'function' && !isNaN(dateValue.getTime())) {
-        // Convert Date to ISO string for API transmission
-        serializedBookingDetails.date = dateValue.toISOString();
-        
-        // Add a formatted date for display
-        const formattedDate = dateValue.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        });
-        serializedBookingDetails.formattedDate = formattedDate;
+      
+      // First check if it's an object
+      if (typeof dateValue === 'object' && dateValue !== null) {
+        // Then check if it has getTime method which is specific to Date objects
+        if ('getTime' in dateValue && typeof dateValue.getTime === 'function') {
+          const dateObject = dateValue as Date;
+          // Check if it's a valid date
+          if (!isNaN(dateObject.getTime())) {
+            // Convert Date to ISO string for API transmission
+            serializedBookingDetails.date = dateObject.toISOString();
+            
+            // Add a formatted date for display
+            const formattedDate = dateObject.toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            });
+            serializedBookingDetails.formattedDate = formattedDate;
+          }
+        }
       } else if (typeof bookingDetails.date === 'string') {
         // Keep string as is
         serializedBookingDetails.date = bookingDetails.date;
@@ -228,7 +237,8 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
   const serializedBookingDetails: SerializedBookingDetails = {
     ...bookingDetails,
     date: bookingDetails.date ? 
-      (typeof bookingDetails.date === 'object' && bookingDetails.date && 'toISOString' in bookingDetails.date) ? 
+      (typeof bookingDetails.date === 'object' && bookingDetails.date !== null && 
+       'toISOString' in bookingDetails.date && typeof bookingDetails.date.toISOString === 'function') ? 
         bookingDetails.date.toISOString() : 
         String(bookingDetails.date) : 
       undefined
