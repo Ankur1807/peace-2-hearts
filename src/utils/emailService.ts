@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { BookingDetails, SerializedBookingDetails } from '@/utils/types';
 
@@ -158,13 +159,14 @@ async function sendBookingConfirmationEmailInternal(bookingDetails: SerializedBo
     
     // Handle date conversion
     if (bookingDetails.date) {
-      // Check if date is a Date object using typeof and proper type guards
-      if (typeof bookingDetails.date === 'object' && bookingDetails.date instanceof Date && !isNaN(bookingDetails.date.getTime())) {
+      // Check if date is a Date object using typeof for proper type narrowing
+      const dateValue = bookingDetails.date;
+      if (typeof dateValue === 'object' && dateValue && 'getTime' in dateValue && typeof dateValue.getTime === 'function' && !isNaN(dateValue.getTime())) {
         // Convert Date to ISO string for API transmission
-        serializedBookingDetails.date = bookingDetails.date.toISOString();
+        serializedBookingDetails.date = dateValue.toISOString();
         
         // Add a formatted date for display
-        const formattedDate = bookingDetails.date.toLocaleDateString('en-GB', {
+        const formattedDate = dateValue.toLocaleDateString('en-GB', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric'
@@ -226,7 +228,7 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
   const serializedBookingDetails: SerializedBookingDetails = {
     ...bookingDetails,
     date: bookingDetails.date ? 
-      (typeof bookingDetails.date === 'object' && bookingDetails.date instanceof Date) ? 
+      (typeof bookingDetails.date === 'object' && bookingDetails.date && 'toISOString' in bookingDetails.date) ? 
         bookingDetails.date.toISOString() : 
         String(bookingDetails.date) : 
       undefined
