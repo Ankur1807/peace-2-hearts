@@ -1,6 +1,7 @@
+
 import { verifyRazorpayPayment, savePaymentRecord } from '@/utils/payment/razorpayService';
 import { useNavigate } from 'react-router-dom';
-import { BookingDetails } from '@/utils/types';
+import { BookingDetails, SavePaymentRecordParams } from '@/utils/types';
 import { storePaymentDetailsInSession } from '@/utils/payment/services/paymentRecordService';
 
 interface OpenRazorpayCheckoutArgs {
@@ -111,7 +112,7 @@ export const useOpenRazorpayCheckout = ({
               referenceId: receiptId,
               status: 'completed',
               bookingDetails: bookingDetails,
-              highPriority: true
+              highPriority: true // This is now properly typed
             });
             
             console.log("Payment record saved:", paymentSaved);

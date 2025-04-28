@@ -3,20 +3,13 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { sendBookingConfirmationEmail } from "@/utils/emailService";
-import { BookingDetails, PaymentRecord } from "@/utils/types";
+import { BookingDetails, PaymentRecord, SavePaymentRecordParams } from "@/utils/types";
 import { createConsultationFromBookingDetails } from "@/utils/consultation/consultationRecovery";
 
 /**
  * Save payment record to database with retry mechanism and transaction support
  */
-export const savePaymentRecord = async (params: {
-  paymentId: string;
-  orderId: string;
-  amount: number;
-  referenceId: string;
-  status?: string;
-  bookingDetails?: BookingDetails;
-}): Promise<boolean> => {
+export const savePaymentRecord = async (params: SavePaymentRecordParams): Promise<boolean> => {
   const MAX_RETRIES = 3;
   let retryCount = 0;
   let emailSent = false;

@@ -1,4 +1,3 @@
-
 export interface VerificationResult {
   success: boolean;
   message: string;
@@ -50,4 +49,14 @@ export interface PaymentRecord {
   created_at?: string;
   updated_at?: string;
   currency?: string;
+}
+
+export interface SavePaymentRecordParams {
+  paymentId: string;
+  orderId: string;
+  amount: number;
+  referenceId: string;
+  status?: string;
+  bookingDetails?: BookingDetails;
+  highPriority?: boolean;
 }
