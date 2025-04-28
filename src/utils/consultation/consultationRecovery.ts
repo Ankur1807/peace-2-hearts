@@ -27,6 +27,42 @@ export async function fetchConsultationData(referenceId: string): Promise<any> {
 }
 
 /**
+ * Fetch consultation by reference ID - alias for fetchConsultationData
+ * for backward compatibility
+ */
+export async function fetchConsultationByReferenceId(referenceId: string): Promise<any> {
+  return fetchConsultationData(referenceId);
+}
+
+/**
+ * Check consultation payment status
+ */
+export async function checkConsultationStatus(referenceId: string): Promise<{
+  exists: boolean;
+  status?: string;
+  paymentStatus?: string;
+  emailSent?: boolean;
+}> {
+  try {
+    const consultation = await fetchConsultationData(referenceId);
+    
+    if (!consultation) {
+      return { exists: false };
+    }
+    
+    return {
+      exists: true,
+      status: consultation.status,
+      paymentStatus: consultation.payment_status,
+      emailSent: consultation.email_sent
+    };
+  } catch (error) {
+    console.error("Error checking consultation status:", error);
+    return { exists: false };
+  }
+}
+
+/**
  * Create booking details from consultation record
  */
 export function createBookingDetailsFromConsultation(consultation: any): BookingDetails | null {

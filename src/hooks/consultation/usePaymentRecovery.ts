@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { verifyAndRecordPayment } from "@/utils/payment/services/paymentVerificationService";
-import { checkConsultationStatus, fetchConsultationByReferenceId } from "@/utils/consultation/consultationRecovery";
+import { fetchConsultationByReferenceId, checkConsultationStatus } from "@/utils/consultation/consultationRecovery";
 
 export function usePaymentRecovery() {
   const [isRecovering, setIsRecovering] = useState(false);
