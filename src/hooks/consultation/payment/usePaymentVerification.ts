@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { verifyRazorpayPayment } from '@/utils/payment/razorpayService';
-import { storePaymentDetailsInSession } from '@/utils/payment/services/paymentRecordService';
+import { storePaymentDetailsInSession } from '@/utils/payment/services/paymentStorageService';
 import { usePaymentRecord } from './usePaymentRecord';
 
 interface UsePaymentVerificationProps {

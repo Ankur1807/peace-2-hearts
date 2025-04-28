@@ -2,6 +2,7 @@
 /**
  * Utility functions for payment service
  */
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Determine service category from consultation type

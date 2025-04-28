@@ -7,7 +7,8 @@ import {
   createBookingDetailsFromConsultation, 
   createConsultationFromBookingDetails 
 } from '@/utils/consultation/consultationRecovery';
-import { savePaymentRecord, getPaymentDetailsFromSession } from '@/utils/payment/services/paymentRecordService';
+import { savePaymentRecord } from '@/utils/payment/services/paymentRecordService';
+import { getPaymentDetailsFromSession } from '@/utils/payment/services/paymentStorageService';
 import { verifyAndSyncPayment } from '@/utils/payment/razorpayService';
 
 interface RecoveryResult {
