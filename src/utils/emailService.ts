@@ -158,18 +158,13 @@ async function sendBookingConfirmationEmailInternal(bookingDetails: SerializedBo
     
     // Handle date conversion
     if (bookingDetails.date) {
-      // Check if date is a Date object (safely)
-      const isDateObj = bookingDetails.date && 
-                      Object.prototype.toString.call(bookingDetails.date) === '[object Date]' &&
-                      !isNaN(bookingDetails.date.getTime());
-      
-      if (isDateObj) {
+      // Check if date is a Date object using typeof and proper type guards
+      if (typeof bookingDetails.date === 'object' && bookingDetails.date instanceof Date && !isNaN(bookingDetails.date.getTime())) {
         // Convert Date to ISO string for API transmission
-        const dateObj = bookingDetails.date as unknown as Date;
-        serializedBookingDetails.date = dateObj.toISOString();
+        serializedBookingDetails.date = bookingDetails.date.toISOString();
         
         // Add a formatted date for display
-        const formattedDate = dateObj.toLocaleDateString('en-GB', {
+        const formattedDate = bookingDetails.date.toLocaleDateString('en-GB', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric'
@@ -227,14 +222,13 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
     return false;
   }
   
-  // Convert to serialized version
+  // Convert to serialized version with proper type handling
   const serializedBookingDetails: SerializedBookingDetails = {
     ...bookingDetails,
-    // Safely handle date conversion if it's a Date object
     date: bookingDetails.date ? 
-      (typeof bookingDetails.date === 'string' ? 
-        bookingDetails.date : 
-        (bookingDetails.date as Date).toISOString()) : 
+      (typeof bookingDetails.date === 'object' && bookingDetails.date instanceof Date) ? 
+        bookingDetails.date.toISOString() : 
+        String(bookingDetails.date) : 
       undefined
   };
   
