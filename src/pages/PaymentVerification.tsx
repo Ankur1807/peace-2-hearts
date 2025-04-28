@@ -1,4 +1,3 @@
-
 import { useSearchParams, useLocation } from "react-router-dom";
 import { usePaymentVerification } from "@/hooks/payment/usePaymentVerification";
 import PaymentVerificationContent from "@/components/payment/verification/PaymentVerificationContent";
@@ -6,6 +5,7 @@ import PaymentVerificationLoader from "@/components/payment/verification/Payment
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
+import PaymentProcessingLoader from "@/components/consultation/payment/PaymentProcessingLoader";
 
 const PaymentVerification = () => {
   const [searchParams] = useSearchParams();
@@ -26,6 +26,15 @@ const PaymentVerification = () => {
     referenceId
   });
 
+  useEffect(() => {
+    if (location.state?.isVerifying) {
+      const timer = setTimeout(() => {
+        location.state.isVerifying = false;
+      }, 7000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   return (
     <>
       <SEO
@@ -35,8 +44,8 @@ const PaymentVerification = () => {
       />
       <Navigation />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        {isVerifying ? (
-          <PaymentVerificationLoader />
+        {location.state?.isVerifying ? (
+          <PaymentProcessingLoader />
         ) : (
           <PaymentVerificationContent
             verificationResult={verificationResult}

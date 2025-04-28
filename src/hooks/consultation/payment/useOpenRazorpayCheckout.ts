@@ -1,4 +1,3 @@
-
 import { verifyRazorpayPayment, savePaymentRecord } from '@/utils/payment/razorpayService';
 import { useNavigate } from 'react-router-dom';
 import { BookingDetails } from '@/utils/types';
@@ -29,9 +28,8 @@ export const useOpenRazorpayCheckout = ({
     const effectivePrice = getEffectivePrice();
     console.log("Opening Razorpay checkout with reference ID:", receiptId);
     
-    // Set reference ID early in the process to ensure it's available
+    // Set reference ID early in the process
     if (setReferenceId) {
-      console.log("Setting reference ID early:", receiptId);
       setReferenceId(receiptId);
     }
     
@@ -54,7 +52,7 @@ export const useOpenRazorpayCheckout = ({
       phone: state.personalDetails.phone
     });
     
-    // Create booking details and store them in session storage early
+    // Store booking details in session storage early
     const bookingDetails = createBookingDetails();
     storePaymentDetailsInSession(receiptId, '', order.id, effectivePrice, bookingDetails);
     
@@ -69,7 +67,10 @@ export const useOpenRazorpayCheckout = ({
         console.log("Payment successful:", response);
         
         try {
-          // Update session storage with the actual payment ID
+          // Show processing loader immediately
+          setIsProcessing(true);
+          
+          // Update session storage with payment ID
           storePaymentDetailsInSession(
             receiptId, 
             response.razorpay_payment_id, 
@@ -78,34 +79,39 @@ export const useOpenRazorpayCheckout = ({
             bookingDetails
           );
           
-          // IMPORTANT: Always create the consultation record first 
-          // before verifying payment to ensure data exists
+          // Create consultation record first
           if (handleConfirmBooking) {
-            console.log("Creating consultation record via handleConfirmBooking...");
+            console.log("Creating consultation record...");
             await handleConfirmBooking();
-            console.log("Consultation record created successfully");
-          } else {
-            console.warn("handleConfirmBooking function not provided, skipping consultation record creation");
           }
           
-          // Now verify the payment
-          const isVerified = await verifyRazorpayPayment({
-            paymentId: response.razorpay_payment_id,
-            orderId: response.razorpay_order_id,
-            signature: response.razorpay_signature,
+          // Verify payment with increased timeout
+          const verificationPromise = new Promise<boolean>(async (resolve) => {
+            // Add delay for better UX and to ensure payment processing
+            await new Promise(r => setTimeout(r, 5000));
+            
+            const isVerified = await verifyRazorpayPayment({
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature,
+            });
+            
+            resolve(isVerified);
           });
           
+          const isVerified = await verificationPromise;
           console.log("Payment verification result:", isVerified);
           
           if (isVerified) {
-            // If payment is verified, save payment record with booking details
+            // Save payment record with high priority
             const paymentSaved = await savePaymentRecord({
               paymentId: response.razorpay_payment_id,
               orderId: response.razorpay_order_id,
               amount: effectivePrice,
               referenceId: receiptId,
               status: 'completed',
-              bookingDetails: bookingDetails
+              bookingDetails: bookingDetails,
+              highPriority: true
             });
             
             console.log("Payment record saved:", paymentSaved);
@@ -114,26 +120,26 @@ export const useOpenRazorpayCheckout = ({
               setPaymentCompleted(true);
             }
             
-            // Navigate to final confirmation page
-            navigate("/payment-confirmation", {
+            // Navigate to confirmation with loading state
+            navigate("/payment-verification", {
               state: {
                 paymentId: response.razorpay_payment_id,
                 orderId: response.razorpay_order_id,
                 amount: effectivePrice,
                 referenceId: receiptId,
-                bookingDetails: bookingDetails
+                bookingDetails: bookingDetails,
+                isVerifying: true
               },
               replace: true
             });
           } else {
-            // If verification fails, still try to navigate but with error state
             toast({
               title: "Payment Verification Failed",
               description: "We couldn't verify your payment. Please contact support.",
               variant: "destructive"
             });
             
-            navigate("/payment-confirmation", {
+            navigate("/payment-verification", {
               state: {
                 paymentId: response.razorpay_payment_id,
                 orderId: response.razorpay_order_id,
@@ -147,7 +153,7 @@ export const useOpenRazorpayCheckout = ({
           }
         } catch (error) {
           console.error("Error processing payment confirmation:", error);
-          navigate("/payment-confirmation", {
+          navigate("/payment-verification", {
             state: {
               paymentId: response.razorpay_payment_id,
               orderId: response.razorpay_order_id,
