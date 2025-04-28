@@ -6,10 +6,12 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import { usePaymentRecovery } from "@/hooks/consultation/usePaymentRecovery";
 import { usePaymentConfirmation } from "@/hooks/payment/usePaymentConfirmation";
 import PaymentProcessing from "@/components/payment/confirmation/PaymentProcessing";
 import PaymentConfirmationContainer from "@/components/payment/confirmation/PaymentConfirmationContainer";
+import BookingSuccessView from "@/components/consultation/BookingSuccessView";
 import { fetchConsultationData, createBookingDetailsFromConsultation } from "@/utils/consultation/consultationRecovery";
 
 const PaymentConfirmation = () => {

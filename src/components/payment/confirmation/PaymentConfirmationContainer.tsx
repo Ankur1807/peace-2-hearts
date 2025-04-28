@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import PaymentStatusMessage from './PaymentStatusMessage';
 import PaymentInformation from './PaymentInformation';
 import RecoveryMessage from './RecoveryMessage';
