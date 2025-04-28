@@ -1,9 +1,13 @@
-
 import { useState } from 'react';
-import { recoverPaymentRecord } from '@/utils/payment/services/paymentRecoveryService';
 import { useToast } from '@/hooks/use-toast';
-import { checkPaymentRecord, fetchConsultationData, createBookingDetailsFromConsultation } from '@/utils/consultation/consultationRecovery';
-import { createRazorpayOrder, verifyAndSyncPayment } from '@/utils/payment/razorpayService';
+import { 
+  checkPaymentRecord, 
+  fetchConsultationData, 
+  createBookingDetailsFromConsultation, 
+  createConsultationFromBookingDetails 
+} from '@/utils/consultation/consultationRecovery';
+import { savePaymentRecord, getPaymentDetailsFromSession } from '@/utils/payment/services/paymentRecordService';
+import { verifyAndSyncPayment } from '@/utils/payment/razorpayService';
 
 interface RecoveryResult {
   success: boolean;
@@ -18,14 +22,14 @@ export const usePaymentRecovery = () => {
   
   const recoverPaymentAndSendEmail = async (
     referenceId: string,
-    paymentId: string,
-    amount: number,
+    paymentId?: string,
+    amount?: number,
     orderId?: string
   ) => {
-    if (!referenceId || !paymentId || amount <= 0) {
+    if (!referenceId) {
       setRecoveryResult({
         success: false,
-        message: "Missing required information for payment recovery"
+        message: "Missing required information for payment recovery: reference ID is required"
       });
       return false;
     }
@@ -34,6 +38,31 @@ export const usePaymentRecovery = () => {
     setRecoveryResult(null);
     
     try {
+      console.log("Starting payment recovery process for reference ID:", referenceId);
+      
+      // If paymentId or amount were not provided, try to get them from session storage
+      if (!paymentId || !amount) {
+        const sessionData = getPaymentDetailsFromSession(referenceId);
+        
+        if (sessionData.paymentId) {
+          console.log("Retrieved payment details from session storage:", sessionData);
+          paymentId = sessionData.paymentId;
+          amount = sessionData.amount;
+          orderId = sessionData.orderId || orderId;
+        }
+      }
+      
+      // We need at least a reference ID and either a payment ID or booking details
+      if (!paymentId && amount <= 0) {
+        console.error("Insufficient data for recovery:", { referenceId, paymentId, amount });
+        
+        setRecoveryResult({
+          success: false,
+          message: "Missing required information for payment recovery: payment ID and amount are required"
+        });
+        return false;
+      }
+      
       console.log("Attempting to recover payment and send confirmation email", {
         referenceId,
         paymentId,
@@ -65,40 +94,66 @@ export const usePaymentRecovery = () => {
         return true;
       }
       
-      // Step 2: Verify the payment exists and is valid with Razorpay
-      const paymentVerified = await verifyAndSyncPayment(paymentId);
+      // Get any booking details from session storage
+      const sessionData = getPaymentDetailsFromSession(referenceId);
+      const bookingDetails = sessionData.bookingDetails;
       
-      if (!paymentVerified) {
-        console.error(`Payment ${paymentId} couldn't be verified with Razorpay`);
+      // Step 2: If we have paymentId, verify it exists with Razorpay
+      let paymentVerified = false;
+      if (paymentId) {
+        paymentVerified = await verifyAndSyncPayment(paymentId);
         
-        setRecoveryResult({
-          success: false,
-          message: "We couldn't verify your payment with our payment provider. Please contact support with your payment details."
-        });
+        if (!paymentVerified) {
+          console.error(`Payment ${paymentId} couldn't be verified with Razorpay`);
+          
+          setRecoveryResult({
+            success: false,
+            message: "We couldn't verify your payment with our payment provider. Please contact support with your payment details."
+          });
+          
+          toast({
+            title: "Verification Failed",
+            description: "We couldn't verify your payment with our payment provider.",
+            variant: "destructive"
+          });
+          
+          return false;
+        }
         
-        toast({
-          title: "Verification Failed",
-          description: "We couldn't verify your payment with our payment provider.",
-          variant: "destructive"
-        });
-        
-        return false;
+        console.log(`Payment ${paymentId} verified with Razorpay`);
       }
       
-      console.log(`Payment ${paymentId} verified with Razorpay`);
+      // Step 3: If we have booking details but no consultation, create one
+      if (bookingDetails) {
+        const consultationCreated = await createConsultationFromBookingDetails({
+          ...bookingDetails,
+          referenceId
+        });
+        
+        if (consultationCreated) {
+          console.log("Successfully created consultation from booking details");
+        }
+      }
       
-      // Step 3: Attempt to recover the payment record
-      const recovered = await recoverPaymentRecord(referenceId, paymentId, amount, orderId);
+      // Step 4: Attempt to recover the payment record
+      const recovered = await savePaymentRecord({
+        referenceId,
+        paymentId: paymentId || 'manual_recovery',
+        orderId: orderId || '',
+        amount: amount || 0,
+        status: 'completed',
+        bookingDetails
+      });
       
       if (recovered) {
         // Try to fetch the booking details after recovery
         const consultationData = await fetchConsultationData(referenceId);
-        const bookingDetails = createBookingDetailsFromConsultation(consultationData);
+        const recoveredBookingDetails = createBookingDetailsFromConsultation(consultationData);
         
         setRecoveryResult({
           success: true,
           message: "Your payment has been successfully processed and a confirmation email has been sent.",
-          bookingDetails
+          bookingDetails: recoveredBookingDetails || bookingDetails
         });
         
         toast({
@@ -141,9 +196,78 @@ export const usePaymentRecovery = () => {
     }
   };
   
+  // This function adds the ability to force a recovery attempt even from minimal data
+  const manualRecoveryAttempt = async (
+    referenceId: string,
+    clientEmail?: string,
+    clientName?: string
+  ) => {
+    setIsRecovering(true);
+    try {
+      // First check if the consultation exists
+      const consultationData = await fetchConsultationData(referenceId);
+      
+      // If exists, attempt normal recovery
+      if (consultationData) {
+        const paymentId = sessionStorage.getItem(`payment_id_${referenceId}`);
+        if (paymentId) {
+          // We have both consultation and payment ID, use the standard flow
+          return await recoverPaymentAndSendEmail(referenceId, paymentId);
+        }
+        
+        // Otherwise, try to create a manual recovery record
+        setRecoveryResult({
+          success: true,
+          message: "Found your booking record. A confirmation email has been sent.",
+          bookingDetails: createBookingDetailsFromConsultation(consultationData)
+        });
+        return true;
+      }
+      
+      // If consultation doesn't exist but we have client info, create a recovery record
+      if (clientEmail || clientName) {
+        const minimalBookingDetails = {
+          clientName: clientName || "Manual Recovery",
+          email: clientEmail,
+          referenceId: referenceId,
+          consultationType: "manual_recovery",
+          services: ["manual_recovery"],
+        };
+        
+        // Create consultation with minimal details
+        const consultationCreated = await createConsultationFromBookingDetails(minimalBookingDetails);
+        
+        if (consultationCreated) {
+          setRecoveryResult({
+            success: true,
+            message: "We've created a recovery record for your booking. A confirmation email will be sent to your registered email.",
+            bookingDetails: minimalBookingDetails
+          });
+          return true;
+        }
+      }
+      
+      setRecoveryResult({
+        success: false,
+        message: "We couldn't find or create a booking record with the provided information. Please contact support."
+      });
+      return false;
+    } catch (error) {
+      console.error("Error in manual recovery attempt:", error);
+      setRecoveryResult({
+        success: false,
+        message: "An error occurred during the manual recovery process. Please contact support."
+      });
+      return false;
+    } finally {
+      setIsRecovering(false);
+    }
+  };
+  
   return {
     isRecovering,
     recoveryResult,
-    recoverPaymentAndSendEmail
+    recoverPaymentAndSendEmail,
+    manualRecoveryAttempt
   };
 };

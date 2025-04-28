@@ -2,6 +2,7 @@
 import { verifyRazorpayPayment, savePaymentRecord } from '@/utils/payment/razorpayService';
 import { useNavigate } from 'react-router-dom';
 import { BookingDetails } from '@/utils/types';
+import { storePaymentDetailsInSession } from '@/utils/payment/services/paymentRecordService';
 
 interface OpenRazorpayCheckoutArgs {
   getEffectivePrice: () => number;
@@ -49,8 +50,13 @@ export const useOpenRazorpayCheckout = ({
         state.selectedServices.includes('pre-marriage-clarity') ? 'Pre-Marriage Clarity Package' : null) : null,
       serviceCategory: state.serviceCategory,
       amount: effectivePrice,
-      message: state.personalDetails.message
+      message: state.personalDetails.message,
+      phone: state.personalDetails.phone
     });
+    
+    // Create booking details and store them in session storage early
+    const bookingDetails = createBookingDetails();
+    storePaymentDetailsInSession(receiptId, '', order.id, effectivePrice, bookingDetails);
     
     const options = {
       key: razorpayKey,
@@ -63,9 +69,14 @@ export const useOpenRazorpayCheckout = ({
         console.log("Payment successful:", response);
         
         try {
-          // Store payment IDs in session storage for recovery purposes
-          sessionStorage.setItem(`payment_id_${receiptId}`, response.razorpay_payment_id);
-          sessionStorage.setItem(`order_id_${receiptId}`, response.razorpay_order_id);
+          // Update session storage with the actual payment ID
+          storePaymentDetailsInSession(
+            receiptId, 
+            response.razorpay_payment_id, 
+            response.razorpay_order_id, 
+            effectivePrice,
+            bookingDetails
+          );
           
           // IMPORTANT: Always create the consultation record first 
           // before verifying payment to ensure data exists
@@ -87,16 +98,14 @@ export const useOpenRazorpayCheckout = ({
           console.log("Payment verification result:", isVerified);
           
           if (isVerified) {
-            // Create the booking details for passing to confirmation page
-            const bookingDetails = createBookingDetails();
-            
-            // If payment is verified, save payment record
+            // If payment is verified, save payment record with booking details
             const paymentSaved = await savePaymentRecord({
               paymentId: response.razorpay_payment_id,
               orderId: response.razorpay_order_id,
               amount: effectivePrice,
               referenceId: receiptId,
-              status: 'completed'
+              status: 'completed',
+              bookingDetails: bookingDetails
             });
             
             console.log("Payment record saved:", paymentSaved);
@@ -130,6 +139,7 @@ export const useOpenRazorpayCheckout = ({
                 orderId: response.razorpay_order_id,
                 amount: effectivePrice,
                 referenceId: receiptId,
+                bookingDetails: bookingDetails,
                 verificationFailed: true
               },
               replace: true
@@ -143,6 +153,7 @@ export const useOpenRazorpayCheckout = ({
               orderId: response.razorpay_order_id,
               amount: effectivePrice,
               referenceId: receiptId,
+              bookingDetails: bookingDetails,
               error: "Error processing payment"
             },
             replace: true
@@ -188,6 +199,7 @@ export const useOpenRazorpayCheckout = ({
               orderId: order.id,
               amount: effectivePrice,
               referenceId: receiptId,
+              bookingDetails: bookingDetails,
               paymentFailed: true
             },
             replace: true

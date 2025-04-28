@@ -4,6 +4,8 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { sendBookingConfirmationEmail } from "@/utils/emailService";
+import { BookingDetails } from "@/utils/types";
+import { createConsultationFromBookingDetails } from "@/utils/consultation/consultationRecovery";
 
 /**
  * Save payment record to database with retry mechanism and transaction support
@@ -14,28 +16,55 @@ export const savePaymentRecord = async (params: {
   amount: number;
   referenceId: string;
   status?: string;
+  bookingDetails?: BookingDetails;
 }): Promise<boolean> => {
   const MAX_RETRIES = 3;
   let retryCount = 0;
   
   while (retryCount < MAX_RETRIES) {
     try {
-      const { paymentId, orderId, amount, referenceId, status = 'completed' } = params;
+      const { paymentId, orderId, amount, referenceId, status = 'completed', bookingDetails } = params;
       
       console.log(`Saving payment record (attempt ${retryCount + 1}):`, { 
         paymentId, 
         orderId, 
         amount, 
         referenceId,
-        status 
+        status,
+        hasBookingDetails: !!bookingDetails
       });
+      
+      // Store payment details in session storage as a backup
+      storePaymentDetailsInSession(referenceId, paymentId, orderId, amount, bookingDetails);
 
       // First, find the consultation by reference ID
-      const { data: consultationData, error: consultationError } = await supabase
+      let { data: consultationData, error: consultationError } = await supabase
         .from('consultations')
         .select('id, reference_id, client_name, client_email, date, time_slot, timeframe, consultation_type, message')
         .eq('reference_id', referenceId)
         .single();
+      
+      // If consultation not found but we have booking details, create it
+      if (consultationError && bookingDetails) {
+        console.log("Consultation not found, attempting to create from booking details:", bookingDetails);
+        
+        const createdConsultation = await createConsultationFromBookingDetails(bookingDetails);
+        if (createdConsultation) {
+          console.log("Successfully created consultation from booking details:", createdConsultation);
+          
+          // Retry fetching the newly created consultation
+          const { data: newConsultation, error: newError } = await supabase
+            .from('consultations')
+            .select('id, reference_id, client_name, client_email, date, time_slot, timeframe, consultation_type, message')
+            .eq('reference_id', referenceId)
+            .single();
+            
+          if (!newError && newConsultation) {
+            consultationData = newConsultation;
+            consultationError = null;
+          }
+        }
+      }
       
       if (consultationError) {
         console.error(`Attempt ${retryCount + 1}: Error finding consultation:`, consultationError);
@@ -71,67 +100,11 @@ export const savePaymentRecord = async (params: {
           await new Promise(resolve => setTimeout(resolve, 1000));
           continue;
         }
-        return false;
-      }
-      
-      if (!consultationData) {
-        console.error(`Attempt ${retryCount + 1}: No consultation found for reference ID: ${referenceId}`);
         
-        // If we can't find the consultation, try to create one with minimal information
-        if (retryCount === MAX_RETRIES - 1) {
-          console.log("Attempting to create a recovery consultation record");
-          
-          try {
-            const { data: recoveryData, error: recoveryError } = await supabase
-              .from('consultations')
-              .insert({
-                reference_id: referenceId,
-                status: 'payment_received_needs_details',
-                consultation_type: 'recovery_needed',
-                time_slot: 'recovery_needed',
-                client_name: 'Payment Received - Recovery Needed',
-                message: `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`
-              })
-              .select();
-              
-            if (recoveryError) {
-              console.error("Failed to create recovery consultation:", recoveryError);
-            } else if (recoveryData) {
-              console.log("Created recovery consultation:", recoveryData);
-              
-              // Use this newly created consultation for the payment record
-              const recoveryConsultationId = recoveryData[0]?.id;
-              if (recoveryConsultationId) {
-                const { data: paymentData, error: paymentError } = await supabase
-                  .from('payments')
-                  .insert({
-                    consultation_id: recoveryConsultationId,
-                    amount: amount,
-                    transaction_id: paymentId,
-                    order_id: orderId,
-                    payment_status: 'completed',
-                    payment_method: 'razorpay',
-                  })
-                  .select();
-                  
-                if (paymentError) {
-                  console.error("Failed to save payment for recovery consultation:", paymentError);
-                } else {
-                  console.log("Created payment record for recovery consultation:", paymentData);
-                  return true;
-                }
-              }
-            }
-          } catch (recoveryException) {
-            console.error("Exception in recovery process:", recoveryException);
-          }
-        }
-        
-        retryCount++;
-        if (retryCount < MAX_RETRIES) {
-          console.log(`Retrying in 1 second... (${retryCount}/${MAX_RETRIES})`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          continue;
+        // If we made it here, we need to create a recovery record
+        const recovery = await createRecoveryConsultation(referenceId, paymentId, amount, bookingDetails);
+        if (recovery) {
+          return true; // Recovery record created successfully
         }
         return false;
       }
@@ -158,7 +131,7 @@ export const savePaymentRecord = async (params: {
         await updateConsultationStatus(consultationId, status);
         
         // Send confirmation email - even if payment record exists, make sure email is sent
-        await sendEmailForConsultation(consultationData);
+        await sendEmailForConsultation(consultationData, bookingDetails);
         
         return true;
       }
@@ -196,7 +169,10 @@ export const savePaymentRecord = async (params: {
       }
 
       // Send confirmation email after successful payment record creation
-      await sendEmailForConsultation(consultationData);
+      await sendEmailForConsultation(consultationData, bookingDetails);
+      
+      // Clear the backup from session storage on successful save
+      clearPaymentDetailsFromSession(referenceId);
       
       return true;
     } catch (err) {
@@ -215,19 +191,175 @@ export const savePaymentRecord = async (params: {
 };
 
 /**
+ * Store payment details in sessionStorage as a backup
+ */
+export const storePaymentDetailsInSession = (
+  referenceId: string,
+  paymentId: string,
+  orderId: string,
+  amount: number,
+  bookingDetails?: any
+) => {
+  try {
+    // Store payment IDs for recovery purposes
+    sessionStorage.setItem(`payment_id_${referenceId}`, paymentId);
+    sessionStorage.setItem(`order_id_${referenceId}`, orderId);
+    sessionStorage.setItem(`amount_${referenceId}`, amount.toString());
+    
+    // Store booking details if available
+    if (bookingDetails) {
+      sessionStorage.setItem(
+        `booking_details_${referenceId}`, 
+        JSON.stringify(bookingDetails)
+      );
+    }
+    
+    // Store timestamp for cleanup purposes
+    sessionStorage.setItem(
+      `payment_timestamp_${referenceId}`, 
+      new Date().toISOString()
+    );
+    
+    console.log("Payment details stored in session storage for reference ID:", referenceId);
+  } catch (error) {
+    console.error("Error storing payment details in session:", error);
+  }
+};
+
+/**
+ * Retrieve payment details from sessionStorage
+ */
+export const getPaymentDetailsFromSession = (referenceId: string) => {
+  try {
+    const paymentId = sessionStorage.getItem(`payment_id_${referenceId}`);
+    const orderId = sessionStorage.getItem(`order_id_${referenceId}`);
+    const amountStr = sessionStorage.getItem(`amount_${referenceId}`);
+    const bookingDetailsStr = sessionStorage.getItem(`booking_details_${referenceId}`);
+    
+    const amount = amountStr ? parseFloat(amountStr) : 0;
+    const bookingDetails = bookingDetailsStr ? JSON.parse(bookingDetailsStr) : null;
+    
+    return {
+      paymentId,
+      orderId,
+      amount,
+      bookingDetails
+    };
+  } catch (error) {
+    console.error("Error retrieving payment details from session:", error);
+    return { paymentId: null, orderId: null, amount: 0, bookingDetails: null };
+  }
+};
+
+/**
+ * Clear payment details from sessionStorage after successful processing
+ */
+export const clearPaymentDetailsFromSession = (referenceId: string) => {
+  try {
+    sessionStorage.removeItem(`payment_id_${referenceId}`);
+    sessionStorage.removeItem(`order_id_${referenceId}`);
+    sessionStorage.removeItem(`amount_${referenceId}`);
+    sessionStorage.removeItem(`booking_details_${referenceId}`);
+    sessionStorage.removeItem(`payment_timestamp_${referenceId}`);
+    
+    console.log("Payment details cleared from session storage for reference ID:", referenceId);
+  } catch (error) {
+    console.error("Error clearing payment details from session:", error);
+  }
+};
+
+/**
+ * Create a recovery consultation for orphaned payments
+ */
+export const createRecoveryConsultation = async (
+  referenceId: string, 
+  paymentId: string, 
+  amount: number,
+  bookingDetails?: any
+): Promise<boolean> => {
+  try {
+    console.log("Attempting to create a recovery consultation record");
+    
+    const clientName = bookingDetails?.clientName || 'Payment Received - Recovery Needed';
+    const clientEmail = bookingDetails?.email || null;
+    const consultationType = bookingDetails?.consultationType || 'recovery_needed';
+    let message = `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`;
+    
+    if (bookingDetails) {
+      message += `. Additional details: ${JSON.stringify(bookingDetails)}`;
+    }
+    
+    const { data: recoveryData, error: recoveryError } = await supabase
+      .from('consultations')
+      .insert({
+        reference_id: referenceId,
+        status: 'payment_received_needs_details',
+        consultation_type: consultationType,
+        time_slot: bookingDetails?.timeSlot || 'recovery_needed',
+        timeframe: bookingDetails?.timeframe || null,
+        client_name: clientName,
+        client_email: clientEmail,
+        message: message
+      })
+      .select();
+      
+    if (recoveryError) {
+      console.error("Failed to create recovery consultation:", recoveryError);
+      return false;
+    } else if (recoveryData) {
+      console.log("Created recovery consultation:", recoveryData);
+      
+      // Use this newly created consultation for the payment record
+      const recoveryConsultationId = recoveryData[0]?.id;
+      if (recoveryConsultationId) {
+        const { data: paymentData, error: paymentError } = await supabase
+          .from('payments')
+          .insert({
+            consultation_id: recoveryConsultationId,
+            amount: amount,
+            transaction_id: paymentId,
+            order_id: '',
+            payment_status: 'completed',
+            payment_method: 'razorpay',
+          })
+          .select();
+          
+        if (paymentError) {
+          console.error("Failed to save payment for recovery consultation:", paymentError);
+          return false;
+        } else {
+          console.log("Created payment record for recovery consultation:", paymentData);
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  } catch (recoveryException) {
+    console.error("Exception in recovery process:", recoveryException);
+    return false;
+  }
+};
+
+/**
  * Helper function to send confirmation email for a consultation
  */
-const sendEmailForConsultation = async (consultationData: any): Promise<boolean> => {
+const sendEmailForConsultation = async (
+  consultationData: any,
+  bookingDetails?: any
+): Promise<boolean> => {
   try {
-    if (!consultationData.client_email) {
+    const email = bookingDetails?.email || consultationData.client_email;
+    
+    if (!email) {
       console.error("Cannot send confirmation email - missing email address");
       return false;
     }
 
     console.log(`Attempting to send confirmation email for consultation: ${consultationData.reference_id}`);
     
-    // Format booking details for email
-    const bookingDetails = {
+    // Use booking details if available, otherwise format from consultation data
+    const emailBookingDetails = bookingDetails || {
       clientName: consultationData.client_name || '',
       email: consultationData.client_email || '',
       referenceId: consultationData.reference_id || '',
@@ -240,9 +372,9 @@ const sendEmailForConsultation = async (consultationData: any): Promise<boolean>
       serviceCategory: determineServiceCategory(consultationData.consultation_type)
     };
     
-    console.log("Sending booking confirmation email with details:", bookingDetails);
+    console.log("Sending booking confirmation email with details:", emailBookingDetails);
     
-    const result = await sendBookingConfirmationEmail(bookingDetails);
+    const result = await sendBookingConfirmationEmail(emailBookingDetails);
     
     console.log("Email sending result:", result);
     return result;
