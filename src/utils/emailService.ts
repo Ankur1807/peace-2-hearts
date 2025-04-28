@@ -165,7 +165,8 @@ async function sendBookingConfirmationEmailInternal(bookingDetails: SerializedBo
       // First check if it's an object
       if (typeof dateValue === 'object' && dateValue !== null) {
         // Then check if it has getTime method which is specific to Date objects
-        if ('getTime' in dateValue && typeof dateValue.getTime === 'function') {
+        // Using non-null assertion after explicit null check
+        if (dateValue && 'getTime' in dateValue && typeof dateValue.getTime === 'function') {
           const dateObject = dateValue as Date;
           // Check if it's a valid date
           if (!isNaN(dateObject.getTime())) {
