@@ -5,9 +5,10 @@ import { Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
-import { verifyRazorpayPayment } from "@/utils/payment/razorpayService";
+import { verifyRazorpayPayment, verifyAndSyncPayment } from "@/utils/payment/razorpayService";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import PaymentErrorMessage from "@/components/consultation/payment/PaymentErrorMessage";
 
 const PaymentVerification = () => {
   const [searchParams] = useSearchParams();
@@ -25,6 +26,53 @@ const PaymentVerification = () => {
   const [isVerifying, setIsVerifying] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
+  
+  // Retry verification logic for QR code/UPI payments
+  const handleRetryVerification = async () => {
+    if (paymentId) {
+      setIsRetrying(true);
+      
+      try {
+        console.log(`Retry ${retryCount + 1}: Re-verifying payment: ${paymentId}`);
+        // Use direct verification against Razorpay API
+        const verified = await verifyAndSyncPayment(paymentId);
+        
+        if (verified) {
+          setIsVerified(true);
+          setError(null);
+          
+          toast({
+            title: "Payment Verified",
+            description: "Your payment has been successfully verified on retry.",
+          });
+          
+          // Redirect to the confirmation page
+          setTimeout(() => {
+            navigate("/payment-confirmation", {
+              state: {
+                paymentId,
+                orderId,
+                amount,
+                referenceId: receiptId,
+                recoveryAttempted: true
+              }
+            });
+          }, 1500);
+        } else {
+          // Still failed after retry
+          setError(`Verification still failed after retry ${retryCount + 1}. Payment may still be processing.`);
+        }
+      } catch (error: any) {
+        console.error(`Retry ${retryCount + 1} error:`, error);
+        setError(`Error during retry: ${error.message}`);
+      } finally {
+        setIsRetrying(false);
+        setRetryCount(prev => prev + 1);
+      }
+    }
+  };
   
   // Verify payment on component mount
   useEffect(() => {
@@ -61,7 +109,38 @@ const PaymentVerification = () => {
               });
             }, 1500);
           } else {
-            setError("We couldn't verify your payment. Please contact support with your payment ID.");
+            // Check if payment is valid directly with Razorpay (might be a QR code payment)
+            try {
+              console.log("Attempting direct payment verification with Razorpay API");
+              const directVerified = await verifyAndSyncPayment(paymentId);
+              
+              if (directVerified) {
+                setIsVerified(true);
+                
+                toast({
+                  title: "Payment Verified",
+                  description: "Your payment was verified directly with Razorpay.",
+                });
+                
+                // Redirect to confirmation
+                setTimeout(() => {
+                  navigate("/payment-confirmation", {
+                    state: {
+                      paymentId,
+                      orderId,
+                      amount,
+                      referenceId: receiptId,
+                      altVerification: true
+                    }
+                  });
+                }, 1500);
+              } else {
+                setError("We couldn't verify your payment. If you paid via QR code, the payment may take a few minutes to process.");
+              }
+            } catch (directError: any) {
+              console.error("Direct verification error:", directError);
+              setError("Payment verification failed. If you've already paid, please contact support with your payment ID.");
+            }
           }
         } catch (error: any) {
           console.error("Payment verification error:", error);
@@ -119,23 +198,63 @@ const PaymentVerification = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </div>
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">Verification Failed</h2>
-              <p className="text-red-600 mb-6">{error}</p>
-              <p className="text-sm text-gray-600 mb-2">Payment ID: {paymentId || 'Not available'}</p>
-              <p className="text-sm text-gray-600 mb-6">Order ID: {orderId || 'Not available'}</p>
-              <div className="flex flex-col space-y-4">
-                <Button 
-                  className="bg-peacefulBlue hover:bg-peacefulBlue/90" 
-                  onClick={() => navigate("/book-consultation")}
-                >
-                  Return to Booking
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate("/")}
-                >
-                  Go to Homepage
-                </Button>
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Verification Issue</h2>
+              
+              <PaymentErrorMessage 
+                message={error || "Verification failed"} 
+                details="If you paid with UPI or QR code, the payment might still be processing."
+                paymentId={paymentId || undefined}
+                orderId={orderId || undefined}
+              />
+              
+              <div className="mt-6 space-y-4">
+                {paymentId && retryCount < 3 && (
+                  <Button
+                    onClick={handleRetryVerification}
+                    className="w-full bg-amber-500 hover:bg-amber-600"
+                    disabled={isRetrying}
+                  >
+                    {isRetrying ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Retrying...
+                      </>
+                    ) : (
+                      `Retry Verification${retryCount > 0 ? ` (${retryCount + 1}/3)` : ''}`
+                    )}
+                  </Button>
+                )}
+                
+                <div className="flex flex-col space-y-4">
+                  <Button 
+                    className="bg-peacefulBlue hover:bg-peacefulBlue/90" 
+                    onClick={() => navigate("/payment-confirmation", {
+                      state: {
+                        paymentId,
+                        orderId,
+                        amount,
+                        referenceId: receiptId,
+                        verificationFailed: true
+                      }
+                    })}
+                  >
+                    Continue to Confirmation
+                  </Button>
+                  
+                  <Button 
+                    className="bg-peacefulBlue hover:bg-peacefulBlue/90" 
+                    onClick={() => navigate("/book-consultation")}
+                  >
+                    Return to Booking
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate("/")}
+                  >
+                    Go to Homepage
+                  </Button>
+                </div>
               </div>
             </div>
           )}

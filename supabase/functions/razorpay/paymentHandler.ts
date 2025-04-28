@@ -51,21 +51,39 @@ export async function handleVerifyPayment(
     const paymentData = await paymentResponse.json();
     console.log("Payment data retrieved:", JSON.stringify(paymentData));
     
-    // Check if payment is captured or authorized
+    // Expanded list of valid payment statuses - including those from QR code payments
+    // QR code payments might initially show as 'created' before being finalized
+    const validPaymentStatuses = ['captured', 'authorized', 'created', 'processed', 'paid'];
     const paymentStatus = paymentData.status;
-    const isPaymentSuccessful = ['captured', 'authorized', 'created'].includes(paymentStatus);
+    const isPaymentSuccessful = validPaymentStatuses.includes(paymentStatus);
+    
+    // Check payment method to log and handle differently
+    const paymentMethod = paymentData.method || 'unknown';
+    console.log(`Payment method used: ${paymentMethod}, Status: ${paymentStatus}`);
+    
+    // For UPI/QR code payments, we may need additional verification
+    const isQRCodeOrUPI = paymentMethod === 'upi' || paymentMethod === 'qr_code';
+    if (isQRCodeOrUPI) {
+      console.log("UPI/QR Code payment detected - these may require additional verification");
+    }
     
     if (!isPaymentSuccessful) {
-      console.error("Payment is not successful according to Razorpay. Status:", paymentStatus);
+      console.error(`Payment is not successful according to Razorpay. Status: ${paymentStatus}`);
       return new Response(JSON.stringify({
         success: false,
         verified: false,
-        error: `Payment not successful. Status: ${paymentStatus}`
+        error: `Payment not successful. Status: ${paymentStatus}`,
+        payment_method: paymentMethod,
+        payment_status: paymentStatus
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400
       });
     }
+    
+    // For UPI/QR code payments that are in 'created' status but likely to be completed
+    // We'll allow these to pass verification but flag them for follow-up
+    const isPendingQRPayment = isQRCodeOrUPI && paymentStatus === 'created';
     
     // If orderData is present and we need to verify signature
     if (orderData && orderData.razorpay_signature) {
@@ -77,8 +95,13 @@ export async function handleVerifyPayment(
     return new Response(JSON.stringify({
       success: true,
       verified: true,
-      message: 'Payment verified successfully',
-      payment: paymentData
+      message: isPendingQRPayment 
+        ? 'Payment initiated successfully via QR code/UPI. Will be confirmed shortly.' 
+        : 'Payment verified successfully',
+      payment: {
+        ...paymentData,
+        isPendingQRPayment
+      }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200

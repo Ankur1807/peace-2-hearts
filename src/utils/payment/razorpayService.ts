@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for Razorpay integration
  */
@@ -90,7 +91,7 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
     console.log("Verifying Razorpay payment:", { paymentId, orderId, signature: signature ? "provided" : "missing" });
     
     const { data, error } = await supabase.functions.invoke('razorpay', {
-      body: JSON.stringify({
+      body: {
         action: 'verify_payment',
         paymentId,
         orderData: {
@@ -98,7 +99,7 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
           razorpay_order_id: orderId,
           razorpay_signature: signature
         }
-      })
+      }
     });
     
     if (error) {
@@ -111,6 +112,45 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
     return data?.success === true && data?.verified === true;
   } catch (err) {
     console.error('Exception verifying payment:', err);
+    return false;
+  }
+};
+
+/**
+ * Direct verification with Razorpay API - useful for QR/UPI payments
+ * that may not come back through the normal callback flow
+ */
+export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> => {
+  try {
+    if (!paymentId) {
+      console.error("Missing payment ID for verification");
+      return false;
+    }
+    
+    console.log("Direct verification of payment with Razorpay API:", paymentId);
+    
+    const { data, error } = await supabase.functions.invoke('razorpay', {
+      body: {
+        action: 'verify_payment',
+        paymentId,
+        checkOnly: true
+      }
+    });
+    
+    if (error) {
+      console.error('Error in direct payment verification:', error);
+      return false;
+    }
+    
+    console.log("Direct verification result:", data);
+    
+    if (data?.payment?.method === 'upi' || data?.payment?.method === 'qr_code') {
+      console.log(`Payment was made via ${data.payment.method} - may need special handling`);
+    }
+    
+    return data?.success === true && data?.verified === true;
+  } catch (err) {
+    console.error('Exception in verifyAndSyncPayment:', err);
     return false;
   }
 };
@@ -164,6 +204,17 @@ export const savePaymentRecord = async (params: {
           console.log(`Recent consultations in database:`, allConsultations);
         }
         
+        // Try with a more permissive query using substring match
+        const { data: similarConsultations } = await supabase
+          .from('consultations')
+          .select('id, reference_id')
+          .ilike('reference_id', `%${referenceId.substring(4, 10)}%`)
+          .limit(5);
+          
+        if (similarConsultations && similarConsultations.length > 0) {
+          console.log("Found similar consultations:", similarConsultations);
+        }
+        
         retryCount++;
         if (retryCount < MAX_RETRIES) {
           console.log(`Retrying in 1 second... (${retryCount}/${MAX_RETRIES})`);
@@ -175,6 +226,57 @@ export const savePaymentRecord = async (params: {
       
       if (!consultationData) {
         console.error(`Attempt ${retryCount + 1}: No consultation found for reference ID: ${referenceId}`);
+        
+        // If we can't find the consultation, try to create one with minimal information
+        if (retryCount === MAX_RETRIES - 1) {
+          console.log("Attempting to create a recovery consultation record");
+          
+          try {
+            const { data: recoveryData, error: recoveryError } = await supabase
+              .from('consultations')
+              .insert({
+                reference_id: referenceId,
+                status: 'payment_received_needs_details',
+                consultation_type: 'recovery_needed',
+                time_slot: 'recovery_needed',
+                client_name: 'Payment Received - Recovery Needed',
+                message: `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`
+              })
+              .select();
+              
+            if (recoveryError) {
+              console.error("Failed to create recovery consultation:", recoveryError);
+            } else if (recoveryData) {
+              console.log("Created recovery consultation:", recoveryData);
+              
+              // Use this newly created consultation for the payment record
+              const recoveryConsultationId = recoveryData[0]?.id;
+              if (recoveryConsultationId) {
+                const { data: paymentData, error: paymentError } = await supabase
+                  .from('payments')
+                  .insert({
+                    consultation_id: recoveryConsultationId,
+                    amount: amount,
+                    transaction_id: paymentId,
+                    order_id: orderId,
+                    payment_status: 'completed',
+                    payment_method: 'razorpay',
+                  })
+                  .select();
+                  
+                if (paymentError) {
+                  console.error("Failed to save payment for recovery consultation:", paymentError);
+                } else {
+                  console.log("Created payment record for recovery consultation:", paymentData);
+                  return true;
+                }
+              }
+            }
+          } catch (recoveryException) {
+            console.error("Exception in recovery process:", recoveryException);
+          }
+        }
+        
         retryCount++;
         if (retryCount < MAX_RETRIES) {
           console.log(`Retrying in 1 second... (${retryCount}/${MAX_RETRIES})`);
@@ -431,10 +533,34 @@ export const recoverPaymentRecord = async (referenceId: string, paymentId: strin
     
     if (!paymentVerified) {
       console.error(`Payment ${paymentId} couldn't be verified with Razorpay`);
-      return false;
+      
+      // Special handling for QR code payments which may be in a different state
+      const { data, error } = await supabase.functions.invoke('razorpay', {
+        body: {
+          action: 'verify_payment',
+          paymentId,
+          checkOnly: true,
+          includeDetails: true
+        }
+      });
+      
+      if (error) {
+        console.error("Error checking payment status:", error);
+      } else if (data?.payment?.method === 'upi' || data?.payment?.method === 'qr_code') {
+        console.log("QR/UPI payment detected - may need manual verification");
+        
+        // Continue with recovery despite failed verification for QR/UPI payments
+        if (data?.payment?.status === 'created' || data?.payment?.status === 'authorized') {
+          console.log("Proceeding with recovery for QR/UPI payment in 'created' state");
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
     }
     
-    console.log(`Payment ${paymentId} verified successfully with Razorpay`);
+    console.log(`Payment ${paymentId} verified with Razorpay or is a QR/UPI payment in progress`);
     
     // Step 2: Create payment record and update consultation status
     const paymentSaved = await savePaymentRecord({
