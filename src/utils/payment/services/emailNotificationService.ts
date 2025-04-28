@@ -18,6 +18,19 @@ export async function sendEmailForConsultation(
     try {
       console.log("Attempting to send confirmation email (attempt " + (emailRetryCount + 1) + ")");
       
+      // If bookingDetails not provided, try to fetch them from consultation data
+      if (!bookingDetails && consultationData?.reference_id) {
+        const { data } = await supabase
+          .from('consultations')
+          .select('*')
+          .eq('reference_id', consultationData.reference_id)
+          .single();
+          
+        if (data) {
+          consultationData = data;
+        }
+      }
+      
       // Use booking details if available, otherwise create from consultation data
       const emailData = bookingDetails || {
         clientName: consultationData.client_name,

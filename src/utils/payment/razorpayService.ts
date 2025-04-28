@@ -11,8 +11,6 @@ import { BookingDetails } from "@/utils/types";
 import { loadRazorpayScript, isRazorpayAvailable } from "./razorpayLoader";
 import { createRazorpayOrder } from "./services/paymentOrderService";
 import { verifyRazorpayPayment, verifyAndSyncPayment } from "./services/paymentVerificationService";
-import { recoverPaymentRecord, completeBookingAfterPayment } from "./services/paymentRecoveryService";
-import { savePaymentRecord } from "./services/paymentRecordService";
 
 // Re-export types for compatibility with existing code
 export type { CreateOrderParams, OrderResponse, VerifyPaymentParams } from './razorpayTypes';
@@ -28,12 +26,5 @@ export {
   
   // Payment verification
   verifyRazorpayPayment,
-  verifyAndSyncPayment,
-  
-  // Payment record management
-  savePaymentRecord,
-  
-  // Recovery and booking completion
-  recoverPaymentRecord,
-  completeBookingAfterPayment
+  verifyAndSyncPayment
 };

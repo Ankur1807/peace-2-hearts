@@ -1,6 +1,8 @@
 
-import { savePaymentRecord } from '@/utils/payment/razorpayService';
-import { BookingDetails, SavePaymentRecordParams } from '@/utils/types';
+import { updateConsultationStatus } from '@/utils/payment/services/serviceUtils';
+import { sendEmailForConsultation } from '@/utils/payment/services/emailNotificationService';
+import { storePaymentDetailsInSession } from '@/utils/payment/services/paymentStorageService';
+import { BookingDetails } from '@/utils/types';
 import { useToast } from '@/hooks/use-toast';
 
 interface PaymentRecordParams {
@@ -16,27 +18,38 @@ export const usePaymentRecord = () => {
 
   const createPaymentRecord = async (params: PaymentRecordParams) => {
     try {
-      console.log("Attempting to save payment record with reference ID:", params.referenceId);
+      console.log("Handling payment record for reference ID:", params.referenceId);
       
-      const paymentSaved = await savePaymentRecord({
-        paymentId: params.paymentId,
-        orderId: params.orderId,
-        amount: params.amount,
-        referenceId: params.referenceId,
-        status: 'completed',
-        bookingDetails: params.bookingDetails,
-        highPriority: true
-      });
+      // Store payment details in session
+      storePaymentDetailsInSession(
+        params.referenceId,
+        params.paymentId,
+        params.amount,
+        params.orderId,
+        params.bookingDetails
+      );
       
-      if (paymentSaved) {
-        console.log("Payment record saved successfully");
+      // Update consultation status
+      const statusUpdated = await updateConsultationStatus(params.referenceId, 'paid');
+      
+      if (statusUpdated) {
+        console.log("Consultation status updated successfully");
+        
+        // Send confirmation email
+        const emailSent = await sendEmailForConsultation(null, {
+          ...params.bookingDetails,
+          referenceId: params.referenceId,
+          amount: params.amount
+        });
+        
+        console.log("Email sending result:", emailSent);
         return true;
       } else {
-        console.error("Failed to save payment record");
+        console.error("Failed to update consultation status");
         return false;
       }
     } catch (error) {
-      console.error("Error saving payment record:", error);
+      console.error("Error processing payment record:", error);
       return false;
     }
   };
