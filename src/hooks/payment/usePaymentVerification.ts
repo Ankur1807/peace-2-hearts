@@ -1,11 +1,13 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { verifyRazorpayPayment, verifyAndSyncPayment } from "@/utils/payment/razorpayService";
+import { verifyRazorpayPayment, verifyAndSyncPayment, savePaymentRecord } from "@/utils/payment/razorpayService";
 import { storePaymentDetailsInSession } from "@/utils/payment/services/paymentStorageService";
 import { updateConsultationStatus } from "@/utils/payment/services/serviceUtils";
 import { sendEmailForConsultation } from "@/utils/payment/services/emailNotificationService";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { BookingDetails } from "@/utils/types";
 
 interface UsePaymentVerificationProps {
   paymentId: string | null;
@@ -50,33 +52,28 @@ export const usePaymentVerification = ({
           if (referenceId && amount > 0) {
             try {
               // Store payment details in session for recovery
-              storePaymentDetailsInSession(
+              storePaymentDetailsInSession({
                 referenceId,
                 paymentId,
                 amount,
-                orderId || ''
-              );
-              
-              // Update consultation status directly
-              const statusUpdated = await updateConsultationStatus(referenceId, 'paid');
-              console.log(`Consultation status updated: ${statusUpdated}`);
-              
-              // Fetch consultation data to send email
-              const { data: consultationData } = await supabase
-                .from('consultations')
-                .select('*')
-                .eq('reference_id', referenceId)
-                .single();
-                
-              if (consultationData) {
-                // Send email notification
-                await sendEmailForConsultation(consultationData);
-              }
-
-              toast({
-                title: "Booking Confirmed",
-                description: "Your payment has been processed and booking confirmed."
+                orderId: orderId || ''
               });
+              
+              // Update consultation with payment info
+              const success = await savePaymentRecord({
+                paymentId,
+                orderId: orderId || '',
+                amount,
+                referenceId,
+                status: 'paid'
+              });
+
+              if (success) {
+                toast({
+                  title: "Booking Confirmed",
+                  description: "Your payment has been processed and booking confirmed."
+                });
+              }
             } catch (error) {
               console.error("Error processing payment confirmation:", error);
             }

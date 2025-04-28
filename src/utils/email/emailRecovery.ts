@@ -4,64 +4,41 @@ import { sendBookingConfirmationEmail } from "./bookingEmails";
 import { fetchConsultationData, createBookingDetailsFromConsultation } from "@/utils/consultation/consultationRecovery";
 
 /**
- * Check for payments without confirmation emails and attempt recovery
+ * Check for consultations without confirmation emails and attempt recovery
  */
 export async function checkAndRecoverEmails(): Promise<void> {
   try {
-    console.log("Checking for payments without confirmation emails...");
+    console.log("Checking for consultations without confirmation emails...");
     
-    // Find payments where email_sent is false
-    const { data: paymentsWithoutEmails, error: fetchError } = await supabase
-      .from('payments')
-      .select(`
-        id,
-        transaction_id,
-        amount,
-        payment_status,
-        consultations:consultation_id (
-          id,
-          reference_id,
-          client_name,
-          client_email,
-          consultation_type,
-          date,
-          time_slot,
-          timeframe,
-          message,
-          status
-        )
-      `)
+    // Find consultations where email_sent is false and payment_status is completed
+    const { data: consultationsWithoutEmails, error: fetchError } = await supabase
+      .from('consultations')
+      .select('*')
       .eq('email_sent', false)
+      .eq('payment_status', 'completed')
       .limit(10);
     
     if (fetchError) {
-      console.error("Error fetching payments without emails:", fetchError);
+      console.error("Error fetching consultations without emails:", fetchError);
       return;
     }
     
-    if (!paymentsWithoutEmails || paymentsWithoutEmails.length === 0) {
+    if (!consultationsWithoutEmails || consultationsWithoutEmails.length === 0) {
       console.log("No pending emails to recover");
       return;
     }
     
-    console.log(`Found ${paymentsWithoutEmails.length} payments without confirmation emails`);
+    console.log(`Found ${consultationsWithoutEmails.length} consultations without confirmation emails`);
     
-    // Process each payment and send confirmation email
-    for (const payment of paymentsWithoutEmails) {
-      if (!payment.consultations) {
-        console.log(`Payment ${payment.id} has no associated consultation, skipping`);
-        continue;
-      }
-      
-      const consultation = payment.consultations;
-      
-      if (!consultation.reference_id) {
-        console.log(`Consultation for payment ${payment.id} has no reference ID, skipping`);
-        continue;
-      }
-      
+    // Process each consultation and send confirmation email
+    for (const consultation of consultationsWithoutEmails) {
       try {
-        console.log(`Attempting to recover email for payment ${payment.id}, reference ID ${consultation.reference_id}`);
+        console.log(`Attempting to recover email for consultation ${consultation.id}`);
+        
+        if (!consultation.reference_id) {
+          console.log(`Consultation ${consultation.id} has no reference ID, skipping`);
+          continue;
+        }
         
         // Create booking details from consultation
         const bookingDetails = createBookingDetailsFromConsultation(consultation);
@@ -79,18 +56,18 @@ export async function checkAndRecoverEmails(): Promise<void> {
         });
         
         if (emailResult) {
-          console.log(`Successfully sent recovery email for payment ${payment.id}`);
+          console.log(`Successfully sent recovery email for consultation ${consultation.id}`);
           
-          // Update payment record to mark email as sent
+          // Update consultation record to mark email as sent
           await supabase
-            .from('payments')
-            .update({ email_sent: true, recovery_timestamp: new Date().toISOString() })
-            .eq('id', payment.id);
+            .from('consultations')
+            .update({ email_sent: true })
+            .eq('id', consultation.id);
         } else {
-          console.error(`Failed to send recovery email for payment ${payment.id}`);
+          console.error(`Failed to send recovery email for consultation ${consultation.id}`);
         }
       } catch (emailError) {
-        console.error(`Error processing recovery email for payment ${payment.id}:`, emailError);
+        console.error(`Error processing recovery email for consultation ${consultation.id}:`, emailError);
       }
     }
     

@@ -4,18 +4,16 @@
  */
 import { BookingDetails } from '@/utils/types';
 
-interface PaymentDetailsParams {
+/**
+ * Store payment details in session storage
+ */
+export function storePaymentDetailsInSession(params: {
   referenceId: string;
   paymentId: string;
   amount: number;
   orderId: string;
   bookingDetails?: BookingDetails;
-}
-
-/**
- * Store payment details in session storage
- */
-export function storePaymentDetailsInSession(params: PaymentDetailsParams): void {
+}): void {
   try {
     const { referenceId, paymentId, amount, orderId, bookingDetails } = params;
     

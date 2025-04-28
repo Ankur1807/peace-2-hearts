@@ -8,8 +8,7 @@ import { determineServiceCategory } from "./serviceUtils";
  * Send confirmation email for a consultation with better error handling
  */
 export async function sendEmailForConsultation(
-  consultationData: any,
-  bookingDetails?: BookingDetails | null
+  bookingDetails: BookingDetails
 ): Promise<boolean> {
   const MAX_EMAIL_RETRIES = 3;
   let emailRetryCount = 0;
@@ -18,38 +17,42 @@ export async function sendEmailForConsultation(
     try {
       console.log("Attempting to send confirmation email (attempt " + (emailRetryCount + 1) + ")");
       
-      // If bookingDetails not provided, try to fetch them from consultation data
-      if (!bookingDetails && consultationData?.reference_id) {
+      // If we have a reference ID but incomplete booking details, fetch the consultation data
+      if (bookingDetails.referenceId && (!bookingDetails.email || !bookingDetails.clientName)) {
         const { data } = await supabase
           .from('consultations')
           .select('*')
-          .eq('reference_id', consultationData.reference_id)
+          .eq('reference_id', bookingDetails.referenceId)
           .single();
           
         if (data) {
-          consultationData = data;
+          // Create email data from consultation record
+          bookingDetails = {
+            clientName: data.client_name || bookingDetails.clientName,
+            email: data.client_email || bookingDetails.email,
+            referenceId: data.reference_id,
+            consultationType: data.consultation_type,
+            services: data.consultation_type.split(','),
+            date: data.date ? new Date(data.date) : undefined,
+            timeSlot: data.time_slot,
+            timeframe: data.timeframe,
+            message: data.message,
+            serviceCategory: determineServiceCategory(data.consultation_type),
+            highPriority: bookingDetails.highPriority
+          };
         }
       }
       
-      // Use booking details if available, otherwise create from consultation data
-      const emailData = bookingDetails || {
-        clientName: consultationData.client_name,
-        email: consultationData.client_email,
-        referenceId: consultationData.reference_id,
-        consultationType: consultationData.consultation_type,
-        services: consultationData.consultation_type.split(','),
-        date: consultationData.date ? new Date(consultationData.date) : undefined,
-        timeSlot: consultationData.time_slot,
-        timeframe: consultationData.timeframe,
-        message: consultationData.message,
-        serviceCategory: determineServiceCategory(consultationData.consultation_type)
-      };
-      
       // Add high-priority flag for emails
-      const emailResult = await sendBookingConfirmationEmail({
-        ...emailData,
-        highPriority: true
-      });
+      const emailResult = await sendBookingConfirmationEmail(bookingDetails);
+      
+      if (emailResult && bookingDetails.referenceId) {
+        // Update the consultation record to mark email as sent
+        await supabase
+          .from('consultations')
+          .update({ email_sent: true })
+          .eq('reference_id', bookingDetails.referenceId);
+      }
       
       console.log("Email sending result:", emailResult);
       return !!emailResult;

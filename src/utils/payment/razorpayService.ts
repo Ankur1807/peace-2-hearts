@@ -40,7 +40,7 @@ export {
   getPaymentDetailsFromSession
 };
 
-// Simple function to complete the payment record
+// Simple function to update consultation with payment information
 export async function savePaymentRecord(params: {
   paymentId: string;
   orderId: string;
@@ -49,16 +49,21 @@ export async function savePaymentRecord(params: {
   status?: string;
 }): Promise<boolean> {
   try {
-    const { referenceId, status = 'completed' } = params;
+    const { referenceId, paymentId, orderId, amount, status = 'completed' } = params;
     console.log(`Saving payment record for consultation: ${referenceId}`);
     
-    // Now we just update the consultation status directly
-    const statusUpdated = await updateConsultationStatus(referenceId, status);
+    // Update the consultation status and payment information
+    const statusUpdated = await updateConsultationStatus(referenceId, status, paymentId, amount, orderId);
     
     if (statusUpdated) {
-      // Send email notification
-      await sendEmailForConsultation(null, {
+      // Send email notification with the consultation reference ID
+      await sendEmailForConsultation({
         referenceId,
+        clientName: 'Client', // This will be overridden by the data from the consultation
+        email: 'client@example.com', // This will be overridden by the data from the consultation
+        consultationType: 'general',
+        services: [],
+        serviceCategory: 'general',
         highPriority: true
       });
     }

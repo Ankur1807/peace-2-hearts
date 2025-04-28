@@ -22,16 +22,44 @@ export function determineServiceCategory(consultationType: string): string {
 }
 
 /**
- * Update the status of a consultation
+ * Update the status and payment information of a consultation
  */
-export async function updateConsultationStatus(consultationId: string, status: string): Promise<boolean> {
+export async function updateConsultationStatus(
+  consultationId: string, 
+  status: string,
+  paymentId?: string,
+  amount?: number,
+  orderId?: string
+): Promise<boolean> {
   try {
     // First check if consultationId is a UUID or a reference_id
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(consultationId);
     
+    // Prepare update data
+    const updateData: any = { 
+      status: status === 'completed' ? 'paid' : status 
+    };
+    
+    // Add payment information if provided
+    if (paymentId) {
+      updateData.payment_id = paymentId;
+    }
+    
+    if (amount) {
+      updateData.amount = amount;
+    }
+    
+    if (orderId) {
+      updateData.order_id = orderId;
+    }
+    
+    if (status === 'paid' || status === 'completed') {
+      updateData.payment_status = 'completed';
+    }
+    
     const { error } = await supabase
       .from('consultations')
-      .update({ status: status === 'completed' ? 'paid' : status })
+      .update(updateData)
       .eq(isUuid ? 'id' : 'reference_id', consultationId);
     
     if (error) {
@@ -66,5 +94,28 @@ export async function getConsultationByReferenceId(referenceId: string): Promise
   } catch (error) {
     console.error("Exception fetching consultation:", error);
     return null;
+  }
+}
+
+/**
+ * Check if consultation has payment information
+ */
+export async function hasPaymentInformation(consultationId: string): Promise<boolean> {
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(consultationId);
+    
+    const { data, error } = await supabase
+      .from('consultations')
+      .select('payment_id, payment_status')
+      .eq(isUuid ? 'id' : 'reference_id', consultationId)
+      .single();
+    
+    if (error || !data) {
+      return false;
+    }
+    
+    return !!data.payment_id && data.payment_status === 'completed';
+  } catch (error) {
+    return false;
   }
 }
