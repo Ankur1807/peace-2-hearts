@@ -10,6 +10,7 @@ export const usePaymentNavigation = () => {
   const navigateToVerification = ({
     paymentId,
     orderId,
+    signature,
     amount,
     referenceId,
     bookingDetails,
@@ -18,6 +19,7 @@ export const usePaymentNavigation = () => {
   }: {
     paymentId: string;
     orderId: string;
+    signature?: string; // Make signature optional
     amount: number;
     referenceId: string;
     bookingDetails: any;
@@ -38,6 +40,7 @@ export const usePaymentNavigation = () => {
       state: {
         paymentId,
         orderId,
+        signature,
         referenceId,
         amount,
         isVerifying,

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
 import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
@@ -33,7 +34,7 @@ export const verifyPaymentAndCreateBooking = async (
           referenceId: bookingDetails.referenceId,
           consultationType: bookingDetails.consultationType,
           services: bookingDetails.services || [],
-          date: bookingDetails.date ? bookingDetails.date.toISOString() : undefined,
+          date: bookingDetails.date instanceof Date ? bookingDetails.date.toISOString() : bookingDetails.date,
           timeSlot: bookingDetails.timeSlot,
           timeframe: bookingDetails.timeframe,
           serviceCategory: bookingDetails.serviceCategory || determineServiceCategory(bookingDetails.consultationType),

@@ -11,6 +11,7 @@ interface OpenRazorpayCheckoutArgs {
   setPaymentCompleted?: (completed: boolean) => void;
   setReferenceId?: (id: string) => void;
   toast: any;
+  verifyPaymentAndCreateBooking?: any; // Add this property as optional
 }
 
 export const useOpenRazorpayCheckout = ({

@@ -1,3 +1,4 @@
+
 import { useEffectivePrice } from './payment/useEffectivePrice';
 import { useInitializeRazorpayPayment } from './payment/useInitializeRazorpayPayment';
 import { useOpenRazorpayCheckout } from './payment/useOpenRazorpayCheckout';
@@ -40,8 +41,7 @@ export function useRazorpayPayment({
     setIsProcessing,
     setPaymentCompleted,
     setReferenceId,
-    toast,
-    verifyPaymentAndCreateBooking
+    toast
   });
 
   return {
