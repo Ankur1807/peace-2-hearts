@@ -232,9 +232,11 @@ export type Database = {
           consultation_id: string
           created_at: string
           currency: string
+          email_sent: boolean | null
           id: string
           payment_method: string | null
           payment_status: string
+          recovery_timestamp: string | null
           transaction_id: string | null
           updated_at: string
         }
@@ -243,9 +245,11 @@ export type Database = {
           consultation_id: string
           created_at?: string
           currency?: string
+          email_sent?: boolean | null
           id?: string
           payment_method?: string | null
           payment_status?: string
+          recovery_timestamp?: string | null
           transaction_id?: string | null
           updated_at?: string
         }
@@ -254,9 +258,11 @@ export type Database = {
           consultation_id?: string
           created_at?: string
           currency?: string
+          email_sent?: boolean | null
           id?: string
           payment_method?: string | null
           payment_status?: string
+          recovery_timestamp?: string | null
           transaction_id?: string | null
           updated_at?: string
         }

@@ -3,8 +3,8 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { sendBookingConfirmationEmail } from "@/utils/emailService";
-import { BookingDetails } from "@/utils/types";
-import { createConsultationFromBookingDetails, createRecoveryConsultation } from "@/utils/consultation/consultationRecovery";
+import { BookingDetails, PaymentRecord } from "@/utils/types";
+import { createConsultationFromBookingDetails } from "@/utils/consultation/consultationRecovery";
 
 /**
  * Save payment record to database with retry mechanism and transaction support
@@ -176,9 +176,9 @@ export const savePaymentRecord = async (params: {
           order_id: orderId,
           payment_status: status,
           payment_method: 'razorpay',
-          email_sent: false // Initialize as false, will update after sending
+          email_sent: false
         })
-        .select();
+        .select<'payments', PaymentRecord>();
       
       if (paymentError) {
         console.error(`Attempt ${retryCount + 1}: Error saving payment record:`, paymentError);

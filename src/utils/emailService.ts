@@ -1,5 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
+import { BookingDetails, SerializedBookingDetails } from '@/utils/types';
 
 interface ContactFormData {
   name: string;
@@ -8,30 +8,6 @@ interface ContactFormData {
   subject: string;
   message: string;
   isResend?: boolean;
-}
-
-interface BookingDetails {
-  clientName: string;
-  email: string;
-  referenceId: string;
-  consultationType?: string;
-  services: string[];
-  date?: Date;
-  timeSlot?: string;
-  timeframe?: string;
-  message?: string;
-  isResend?: boolean;
-  isRecovery?: boolean;
-  packageName?: string;
-  serviceCategory?: string;
-  amount?: number;
-  highPriority?: boolean; // Added for high-priority emails
-}
-
-// Create a modified interface that explicitly allows for the date to be a string when sending via API
-interface SerializedBookingDetails extends Omit<BookingDetails, 'date'> {
-  date?: string;
-  formattedDate?: string;
 }
 
 // Email sending queue to handle retries
@@ -244,8 +220,14 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
     return false;
   }
   
-  const result = await sendBookingConfirmationEmailInternal({
+  // Convert date to string if it's a Date object
+  const serializedBookingDetails: SerializedBookingDetails = {
     ...bookingDetails,
+    date: bookingDetails.date instanceof Date ? bookingDetails.date.toISOString() : bookingDetails.date
+  };
+  
+  const result = await sendBookingConfirmationEmailInternal({
+    ...serializedBookingDetails,
     type: 'booking-confirmation'
   });
   
