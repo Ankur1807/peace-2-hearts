@@ -102,13 +102,13 @@ const PaymentVerification = () => {
                   <>
                     <strong>Service:</strong> {bookingDetails.consultationType}<br />
                     {bookingDetails.date && (
-                      <strong>Date:</strong> {new Date(bookingDetails.date).toLocaleDateString()}<br />
+                      <><strong>Date:</strong> {new Date(bookingDetails.date).toLocaleDateString()}<br /></>
                     )}
                     {bookingDetails.timeSlot && (
-                      <strong>Time:</strong> {bookingDetails.timeSlot}<br />
+                      <><strong>Time:</strong> {bookingDetails.timeSlot}<br /></>
                     )}
                     {bookingDetails.timeframe && (
-                      <strong>Timeframe:</strong> {bookingDetails.timeframe}<br />
+                      <><strong>Timeframe:</strong> {bookingDetails.timeframe}<br /></>
                     )}
                   </>
                 )}
