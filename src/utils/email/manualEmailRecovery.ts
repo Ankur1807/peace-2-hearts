@@ -134,7 +134,7 @@ export async function automatedEmailRecovery(): Promise<void> {
 
 // Add to window object for easy access from console
 if (typeof window !== 'undefined') {
-  // @ts-ignore - Window extension
+  // The type casting is no longer needed since we've declared these properties in the Window interface
   window.recoverEmailByReferenceId = recoverEmailByReferenceId;
   window.automatedEmailRecovery = automatedEmailRecovery;
   

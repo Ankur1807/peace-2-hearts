@@ -100,7 +100,7 @@ export async function checkAndRecoverEmails(): Promise<void> {
  * Add this function to window so it can be called from the console for manual recovery
  */
 if (typeof window !== 'undefined') {
-  // @ts-ignore - Window extension
+  // Type is handled by our Window interface extension
   window.recoverEmails = checkAndRecoverEmails;
 
   // Run a check on page load if in a supported environment (with supabase client)
