@@ -118,6 +118,8 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
 /**
  * Direct verification with Razorpay API - useful for QR/UPI payments
  * that may not come back through the normal callback flow
+ * 
+ * This can also be used to check a payment status by ID after the fact
  */
 export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> => {
   try {
@@ -136,14 +138,14 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
         includeDetails: true
       }
     });
-
+    
     if (error) {
       console.error('Error in direct payment verification:', error);
       return false;
     }
-
+    
     console.log("Direct verification result:", data);
-
+    
     // Handle different payment methods and statuses
     if (data?.payment?.method === 'upi' || data?.payment?.method === 'qr_code') {
       console.log(`Payment was made via ${data.payment.method} - may need special handling`);
@@ -154,7 +156,7 @@ export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> 
         return true;
       }
     }
-
+    
     return data?.success === true && data?.verified === true;
   } catch (err) {
     console.error('Exception in verifyAndSyncPayment:', err);
@@ -489,34 +491,6 @@ export const completeBookingAfterPayment = async (
     return true;
   } catch (err) {
     console.error('Exception completing booking after payment:', err);
-    return false;
-  }
-};
-
-/**
- * Verify payment by ID
- */
-export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> => {
-  try {
-    console.log("Verifying payment by ID:", paymentId);
-    
-    // Check payment status in Razorpay
-    const { data, error } = await supabase.functions.invoke('razorpay', {
-      body: JSON.stringify({
-        action: 'verify_payment',
-        paymentId,
-        checkOnly: true
-      })
-    });
-    
-    if (error || !data?.success) {
-      console.error('Error verifying payment by ID:', error || data?.error);
-      return false;
-    }
-    
-    return data.verified || false;
-  } catch (err) {
-    console.error('Exception in verifyAndSyncPayment:', err);
     return false;
   }
 };
