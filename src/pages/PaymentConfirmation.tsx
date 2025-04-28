@@ -32,7 +32,7 @@ const PaymentConfirmation = () => {
   const [bookingRecovered, setBookingRecovered] = useState(false);
   const { isRecovering, recoveryResult, recoverPaymentAndSendEmail } = usePaymentRecovery();
   
-  const { isVerifying, verificationResult } = usePaymentConfirmation({
+  const { isVerifying, setIsVerifying, verificationResult } = usePaymentConfirmation({
     referenceId,
     paymentId,
     orderId,
@@ -74,6 +74,8 @@ const PaymentConfirmation = () => {
           }
         } catch (error) {
           console.error("Error in booking data recovery:", error);
+        } finally {
+          setIsVerifying(false);
         }
       }
     };

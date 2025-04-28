@@ -29,18 +29,6 @@ export const usePaymentConfirmation = ({
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<{success: boolean; message: string} | null>(null);
   const { toast } = useToast();
-  const { recoverPaymentAndSendEmail } = usePaymentRecovery();
-
-  useEffect(() => {
-    console.log("Payment Confirmation initialized with:", { 
-      referenceId, 
-      paymentId, 
-      orderId, 
-      amount,
-      paymentFailed,
-      verificationFailed
-    });
-  }, [referenceId, paymentId, orderId, amount, paymentFailed, verificationFailed]);
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -70,11 +58,9 @@ export const usePaymentConfirmation = ({
                   });
                 } else {
                   console.error("Failed to save payment record for referenceId:", referenceId);
-                  await recoverPaymentAndSendEmail(referenceId, paymentId, amount, orderId);
                 }
               } catch (error) {
                 console.error("Error saving payment record:", error);
-                await recoverPaymentAndSendEmail(referenceId, paymentId, amount, orderId);
               }
             }
             
@@ -101,24 +87,12 @@ export const usePaymentConfirmation = ({
     };
     
     verifyPayment();
-  }, [paymentId, orderId, referenceId, amount, verificationResult, toast, recoverPaymentAndSendEmail]);
+  }, [paymentId, orderId, referenceId, amount, verificationResult, toast, setBookingRecovered]);
 
-  useEffect(() => {
-    if (paymentFailed) {
-      setVerificationResult({
-        success: false,
-        message: "Your payment was not completed. Please try again or contact support."
-      });
-    } else if (verificationFailed) {
-      setVerificationResult({
-        success: false,
-        message: "We couldn't verify your payment. Please contact our support team."
-      });
-    }
-  }, [paymentFailed, verificationFailed]);
-
+  // Return both isVerifying state and setter
   return {
     isVerifying,
+    setIsVerifying,
     verificationResult
   };
 };
