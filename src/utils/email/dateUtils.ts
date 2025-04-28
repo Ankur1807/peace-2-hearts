@@ -13,9 +13,9 @@ export function processBookingDate(bookingDetails: SerializedBookingDetails): Se
     // First check if it's an object
     if (typeof dateValue === 'object' && dateValue !== null) {
       // Then check if it has getTime method which is specific to Date objects
-      if (dateValue !== null && 'getTime' in dateValue) {
+      if ('getTime' in dateValue) {
         // Ensure getTime is a function before attempting to cast
-        const getTimeProperty = dateValue.getTime;
+        const getTimeProperty = (dateValue as any).getTime;
         if (typeof getTimeProperty === 'function') {
           // Now we can safely cast to Date
           const dateObject = dateValue as unknown as Date;
