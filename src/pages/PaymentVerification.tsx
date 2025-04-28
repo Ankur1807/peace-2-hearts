@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
@@ -29,7 +28,8 @@ const PaymentVerification = () => {
     orderId, 
     signature,
     amount: amount || 0,
-    referenceId
+    referenceId,
+    bookingDetails
   });
 
   // Redirect to home if no payment data

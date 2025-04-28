@@ -5,7 +5,7 @@ import { BookingDetails } from "@/utils/types";
 import { determineServiceCategory } from "./serviceUtils";
 
 /**
- * Send confirmation email for a consultation with better error handling
+ * Send confirmation email for a consultation with better error handling and retry mechanism
  */
 export async function sendEmailForConsultation(
   bookingDetails: BookingDetails
@@ -43,17 +43,39 @@ export async function sendEmailForConsultation(
         }
       }
       
+      // Validate critical fields before sending
+      if (!bookingDetails.email) {
+        console.error("Cannot send email: missing email address");
+        return false;
+      }
+      
+      if (!bookingDetails.referenceId) {
+        console.error("Cannot send email: missing reference ID");
+        return false;
+      }
+      
       // Add high-priority flag for emails
-      const emailResult = await sendBookingConfirmationEmail(bookingDetails);
+      const emailResult = await sendBookingConfirmationEmail({
+        ...bookingDetails,
+        highPriority: true
+      });
       
       if (emailResult && bookingDetails.referenceId) {
         // Update the consultation record to mark email as sent
-        await supabase
-          .from('consultations')
-          .update({ 
-            status: 'email_sent' 
-          })
-          .eq('reference_id', bookingDetails.referenceId);
+        try {
+          await supabase
+            .from('consultations')
+            .update({ 
+              email_sent: true,
+              status: 'confirmed' 
+            })
+            .eq('reference_id', bookingDetails.referenceId);
+            
+          console.log(`Consultation ${bookingDetails.referenceId} marked as email_sent=true`);
+        } catch (updateError) {
+          console.error("Error updating email_sent status:", updateError);
+          // Not failing the overall operation if just the status update fails
+        }
       }
       
       console.log("Email sending result:", emailResult);
@@ -63,10 +85,26 @@ export async function sendEmailForConsultation(
       emailRetryCount++;
       
       if (emailRetryCount < MAX_EMAIL_RETRIES) {
-        console.log(`Retrying email in ${emailRetryCount * 2} seconds...`);
-        await new Promise(resolve => setTimeout(resolve, emailRetryCount * 2000));
+        const backoffDelay = emailRetryCount * 2000; // Exponential backoff
+        console.log(`Retrying email in ${backoffDelay/1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, backoffDelay));
       } else {
-        console.error("All email sending attempts failed, will need manual recovery");
+        console.error("All email sending attempts failed, adding to recovery queue");
+        
+        // Store the booking details for recovery
+        try {
+          if (bookingDetails.referenceId) {
+            await supabase
+              .from('consultations')
+              .update({ 
+                status: 'payment_received_needs_email'
+              })
+              .eq('reference_id', bookingDetails.referenceId);
+          }
+        } catch (e) {
+          console.error("Error updating consultation for recovery:", e);
+        }
+        
         return false;
       }
     }

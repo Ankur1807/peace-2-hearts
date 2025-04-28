@@ -2,7 +2,6 @@
 import { useRazorpayInit } from './useRazorpayInit';
 import { useCheckoutOptions } from './useCheckoutOptions';
 import { usePaymentNavigation } from './usePaymentNavigation';
-import { verifyPaymentAndCreateBooking } from '@/utils/payment/verificationService';
 
 interface OpenRazorpayCheckoutArgs {
   getEffectivePrice: () => number;
@@ -11,7 +10,6 @@ interface OpenRazorpayCheckoutArgs {
   setPaymentCompleted?: (completed: boolean) => void;
   setReferenceId?: (id: string) => void;
   toast: any;
-  verifyPaymentAndCreateBooking?: any; // Add this property as optional
 }
 
 export const useOpenRazorpayCheckout = ({
@@ -71,6 +69,10 @@ export const useOpenRazorpayCheckout = ({
         handler: async function (response: any) {
           console.log("Payment successful:", response);
           setIsProcessing(true);
+          
+          if (setPaymentCompleted) {
+            setPaymentCompleted(true);
+          }
           
           // Navigate to verification page that will handle the verification and booking creation
           navigateToVerification({

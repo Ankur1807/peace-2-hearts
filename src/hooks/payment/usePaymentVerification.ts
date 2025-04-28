@@ -1,12 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { verifyRazorpayPayment, verifyAndSyncPayment, savePaymentRecord } from "@/utils/payment/razorpayService";
-import { storePaymentDetailsInSession } from "@/utils/payment/services/paymentStorageService";
-import { updateConsultationStatus } from "@/utils/payment/services/serviceUtils";
-import { sendEmailForConsultation } from "@/utils/payment/services/emailNotificationService";
+import { verifyAndRecordPayment } from "@/utils/payment/services/paymentVerificationService";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
 
 interface UsePaymentVerificationProps {
@@ -15,6 +11,7 @@ interface UsePaymentVerificationProps {
   signature: string | null;
   amount: number;
   referenceId: string | null;
+  bookingDetails?: BookingDetails;
 }
 
 export const usePaymentVerification = ({
@@ -22,90 +19,109 @@ export const usePaymentVerification = ({
   orderId,
   signature,
   amount,
-  referenceId
+  referenceId,
+  bookingDetails
 }: UsePaymentVerificationProps) => {
   const [isVerifying, setIsVerifying] = useState(true);
   const [verificationResult, setVerificationResult] = useState<{success: boolean; message: string} | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRY = 3;
 
   const verifyPayment = async () => {
-    if (paymentId) {
-      setIsVerifying(true);
-      try {
-        // First try standard verification
-        let verified = false;
-        if (orderId && signature) {
-          verified = await verifyRazorpayPayment({
-            paymentId,
-            orderId,
-            signature
-          });
+    if (!paymentId || !referenceId) {
+      setIsVerifying(false);
+      setVerificationResult({
+        success: false,
+        message: "Missing payment details. Please check your payment status or contact support."
+      });
+      return;
+    }
+
+    setIsVerifying(true);
+    
+    try {
+      console.log(`Verifying payment ${paymentId} for reference ${referenceId} (attempt ${retryCount + 1}/${MAX_RETRY})`);
+      
+      const verified = await verifyAndRecordPayment(
+        paymentId,
+        orderId,
+        amount,
+        referenceId,
+        bookingDetails
+      );
+
+      if (verified) {
+        console.log("Payment verified successfully");
+        
+        setVerificationResult({
+          success: true,
+          message: "Your payment has been verified and your booking is confirmed."
+        });
+        
+        toast({
+          title: "Booking Confirmed",
+          description: "Your payment has been processed and booking confirmed."
+        });
+      } else {
+        console.error("Payment verification failed");
+        
+        // If we haven't reached max retries, schedule another attempt
+        if (retryCount < MAX_RETRY - 1) {
+          console.log(`Scheduling retry attempt ${retryCount + 2}/${MAX_RETRY}`);
+          setRetryCount(prev => prev + 1);
+          return; // Don't update verification result yet
         }
-
-        // If standard verification fails, try direct verification
-        if (!verified) {
-          verified = await verifyAndSyncPayment(paymentId);
-        }
-
-        if (verified) {
-          if (referenceId && amount > 0) {
-            try {
-              // Store payment details in session for recovery
-              storePaymentDetailsInSession({
-                referenceId,
-                paymentId,
-                amount,
-                orderId: orderId || ''
-              });
-              
-              // Update consultation with payment info
-              const success = await savePaymentRecord({
-                paymentId,
-                orderId: orderId || '',
-                amount,
-                referenceId,
-                status: 'paid'
-              });
-
-              if (success) {
-                toast({
-                  title: "Booking Confirmed",
-                  description: "Your payment has been processed and booking confirmed."
-                });
-              }
-            } catch (error) {
-              console.error("Error processing payment confirmation:", error);
-            }
-          }
-
-          setVerificationResult({
-            success: true,
-            message: "Your payment has been verified and your booking is confirmed."
-          });
-        } else {
-          setVerificationResult({
-            success: false,
-            message: "We could not verify your payment. Please contact support with your payment ID."
-          });
-        }
-      } catch (error) {
-        console.error("Payment verification error:", error);
+        
         setVerificationResult({
           success: false,
-          message: "An error occurred while verifying your payment. Please contact support."
+          message: "We could not verify your payment. Please contact support with your payment ID."
         });
-      } finally {
+        
+        toast({
+          title: "Verification Issue",
+          description: "We're having trouble confirming your payment. Please contact support with your reference number.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Payment verification error:", error);
+      
+      // If we haven't reached max retries, schedule another attempt
+      if (retryCount < MAX_RETRY - 1) {
+        console.log(`Scheduling retry attempt ${retryCount + 2}/${MAX_RETRY} after error`);
+        setRetryCount(prev => prev + 1);
+        return; // Don't update verification result yet
+      }
+      
+      setVerificationResult({
+        success: false,
+        message: "An error occurred while verifying your payment. Please contact support."
+      });
+    } finally {
+      if (retryCount >= MAX_RETRY - 1 || verificationResult?.success) {
         setIsVerifying(false);
       }
-    } else {
-      setIsVerifying(false);
     }
   };
 
+  // Effect for initial verification and retries
   useEffect(() => {
     verifyPayment();
-  }, [paymentId, orderId, signature]);
+  }, [paymentId, orderId, signature, retryCount]);
+
+  // Set up retry with delay
+  useEffect(() => {
+    if (retryCount > 0 && retryCount < MAX_RETRY && !verificationResult?.success) {
+      const retryDelay = 2000 * retryCount; // Increasing delay for each retry
+      const retryTimer = setTimeout(() => {
+        verifyPayment();
+      }, retryDelay);
+      
+      return () => clearTimeout(retryTimer);
+    }
+  }, [retryCount]);
 
   return {
     isVerifying,
