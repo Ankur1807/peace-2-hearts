@@ -47,10 +47,12 @@ export async function sendEmailForConsultation(
       const emailResult = await sendBookingConfirmationEmail(bookingDetails);
       
       if (emailResult && bookingDetails.referenceId) {
-        // Update the consultation record to mark email as sent
+        // Update the consultation record to mark email as sent using status field
         await supabase
           .from('consultations')
-          .update({ email_sent: true })
+          .update({ 
+            status: 'email_sent'
+          })
           .eq('reference_id', bookingDetails.referenceId);
       }
       

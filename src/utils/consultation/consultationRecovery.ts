@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
 import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
@@ -134,8 +135,7 @@ export async function createRecoveryConsultation(
         client_name: clientName,
         message: message,
         payment_id: paymentId,
-        amount: amount,
-        payment_status: 'completed'
+        amount: amount
       })
       .select();
       

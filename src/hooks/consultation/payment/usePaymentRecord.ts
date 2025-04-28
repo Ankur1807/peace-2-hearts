@@ -21,13 +21,13 @@ export const usePaymentRecord = () => {
       console.log("Handling payment record for reference ID:", params.referenceId);
       
       // Store payment details in session
-      storePaymentDetailsInSession(
-        params.referenceId,
-        params.paymentId,
-        params.orderId,
-        params.amount,
-        params.bookingDetails
-      );
+      storePaymentDetailsInSession({
+        referenceId: params.referenceId,
+        paymentId: params.paymentId,
+        orderId: params.orderId,
+        amount: params.amount,
+        bookingDetails: params.bookingDetails
+      });
       
       // Update consultation status
       const statusUpdated = await updateConsultationStatus(

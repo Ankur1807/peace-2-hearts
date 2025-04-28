@@ -19,14 +19,18 @@ export interface SavePaymentRecordParams {
  * Store payment details in session storage as a backup
  */
 export function storePaymentDetailsInSession(
-  referenceId: string, 
-  paymentId: string, 
-  orderId?: string, 
-  amount?: number, 
-  bookingDetails?: BookingDetails
+  params: {
+    referenceId: string,
+    paymentId: string,
+    orderId?: string,
+    amount?: number,
+    bookingDetails?: BookingDetails
+  }
 ): void {
   try {
     // Store essential payment details
+    const { referenceId, paymentId, orderId, amount, bookingDetails } = params;
+    
     sessionStorage.setItem(`payment_id_${referenceId}`, paymentId);
     if (orderId) sessionStorage.setItem(`order_id_${referenceId}`, orderId);
     if (amount) sessionStorage.setItem(`amount_${referenceId}`, amount.toString());
@@ -80,7 +84,13 @@ export const savePaymentRecord = async (params: SavePaymentRecordParams): Promis
       });
       
       // Store payment details in session storage as a backup
-      storePaymentDetailsInSession(referenceId, paymentId, orderId, amount, bookingDetails);
+      storePaymentDetailsInSession({
+        referenceId,
+        paymentId,
+        orderId,
+        amount,
+        bookingDetails
+      });
 
       // Find the consultation by reference ID
       let { data: consultationData, error: consultationError } = await supabase
@@ -134,20 +144,32 @@ export const savePaymentRecord = async (params: SavePaymentRecordParams): Promis
 
       // Send confirmation email if we have either consultation data or booking details
       if (consultationData || bookingDetails) {
-        const emailSent = await sendEmailForConsultation(
-          bookingDetails || {
+        // Make sure we have a complete booking details object with serviceCategory
+        let completeBookingDetails: BookingDetails;
+        
+        if (bookingDetails) {
+          completeBookingDetails = bookingDetails;
+        } else {
+          // Create booking details from consultation data
+          const serviceCategory = consultationData.consultation_type?.toLowerCase().includes('legal') ? 
+            'legal' : consultationData.consultation_type?.toLowerCase().includes('holistic') ? 
+            'holistic' : 'mental-health';
+            
+          completeBookingDetails = {
             clientName: consultationData.client_name,
             email: consultationData.client_email,
             referenceId: consultationData.reference_id,
             consultationType: consultationData.consultation_type,
-            services: consultationData.consultation_type.split(','),
+            services: consultationData.consultation_type ? consultationData.consultation_type.split(',') : [],
             date: consultationData.date ? new Date(consultationData.date) : undefined,
             timeSlot: consultationData.time_slot,
             timeframe: consultationData.timeframe,
-            message: consultationData.message
-          }
-        );
+            message: consultationData.message,
+            serviceCategory: serviceCategory
+          };
+        }
         
+        const emailSent = await sendEmailForConsultation(completeBookingDetails);
         console.log("Email sending result:", emailSent);
       }
       

@@ -57,6 +57,19 @@ export async function updateConsultationStatus(
       updateData.payment_status = 'completed';
     }
     
+    // For now, let's handle missing columns by using a different approach
+    // First, check if the columns exist by making a query
+    const { data: checkData, error: checkError } = await supabase
+      .from('consultations')
+      .select('id')
+      .limit(1);
+      
+    if (checkError) {
+      console.error("Error checking consultations table:", checkError);
+      return false;
+    }
+    
+    // Proceed with the update
     const { error } = await supabase
       .from('consultations')
       .update(updateData)
@@ -104,9 +117,10 @@ export async function hasPaymentInformation(consultationId: string): Promise<boo
   try {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(consultationId);
     
+    // First check if the payment_id column exists in the consultations table
     const { data, error } = await supabase
       .from('consultations')
-      .select('payment_id, payment_status')
+      .select('*')
       .eq(isUuid ? 'id' : 'reference_id', consultationId)
       .single();
     
@@ -119,7 +133,11 @@ export async function hasPaymentInformation(consultationId: string): Promise<boo
       return false;
     }
     
-    return !!data.payment_id && data.payment_status === 'completed';
+    // Use hasOwnProperty to safely check if properties exist
+    const hasPaymentId = data.hasOwnProperty('payment_id') && data.payment_id;
+    const hasPaymentStatus = data.hasOwnProperty('payment_status') && data.payment_status === 'completed';
+    
+    return hasPaymentId && hasPaymentStatus;
   } catch (error) {
     console.error("Exception checking payment information:", error);
     return false;

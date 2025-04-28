@@ -1,11 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { verifyAndSyncPayment, savePaymentRecord } from "@/utils/payment/razorpayService";
+import { verifyRazorpayPayment, verifyAndSyncPayment } from "@/utils/payment/razorpayService";
+import { storePaymentDetailsInSession } from "@/utils/payment/services/paymentStorageService";
+import { updateConsultationStatus } from "@/utils/payment/services/serviceUtils";
+import { sendEmailForConsultation } from "@/utils/payment/services/emailNotificationService";
+import { createRecoveryConsultation } from "@/utils/consultation/consultationRecovery";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
-import { createRecoveryConsultation } from "@/utils/consultation/consultationRecovery";
 
 interface UsePaymentConfirmationProps {
   referenceId: string | null;

@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { sendBookingConfirmationEmail } from "./bookingEmails";
-import { fetchConsultationData, createBookingDetailsFromConsultation } from "@/utils/consultation/consultationRecovery";
+import { createBookingDetailsFromConsultation } from "@/utils/consultation/consultationRecovery";
 
 /**
  * Check for consultations without confirmation emails and attempt recovery
@@ -10,11 +10,11 @@ export async function checkAndRecoverEmails(): Promise<void> {
   try {
     console.log("Checking for consultations without confirmation emails...");
     
-    // Find consultations where email_sent is false and payment_status is completed
+    // Find consultations where payment_status is completed but need email
+    // We'll base this on a criteria we can check rather than relying on email_sent column
     const { data: consultationsWithoutEmails, error: fetchError } = await supabase
       .from('consultations')
       .select('*')
-      .eq('email_sent', false)
       .eq('payment_status', 'completed')
       .limit(10);
     
@@ -28,12 +28,12 @@ export async function checkAndRecoverEmails(): Promise<void> {
       return;
     }
     
-    console.log(`Found ${consultationsWithoutEmails.length} consultations without confirmation emails`);
+    console.log(`Found ${consultationsWithoutEmails.length} consultations with completed payment status`);
     
     // Process each consultation and send confirmation email
     for (const consultation of consultationsWithoutEmails) {
       try {
-        console.log(`Attempting to recover email for consultation ${consultation.id}`);
+        console.log(`Processing consultation ${consultation.id}`);
         
         if (!consultation.reference_id) {
           console.log(`Consultation ${consultation.id} has no reference ID, skipping`);
@@ -58,10 +58,13 @@ export async function checkAndRecoverEmails(): Promise<void> {
         if (emailResult) {
           console.log(`Successfully sent recovery email for consultation ${consultation.id}`);
           
-          // Update consultation record to mark email as sent
+          // Mark email as sent by updating a custom field in the database
+          // We're not using email_sent since it doesn't exist in the schema
           await supabase
             .from('consultations')
-            .update({ email_sent: true })
+            .update({ 
+              status: consultation.status === 'paid' ? 'email_sent' : consultation.status
+            })
             .eq('id', consultation.id);
         } else {
           console.error(`Failed to send recovery email for consultation ${consultation.id}`);
