@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { handleContactEmail, handleBookingEmail } from "./handlers.ts";
-import type { ContactEmailRequest, BookingEmailRequest } from "./templates.ts";
 
 // Set up CORS headers for browser requests
 const corsHeaders = {
@@ -57,11 +56,11 @@ const handler = async (req: Request): Promise<Response> => {
     // Handle different email types
     switch (type) {
       case "contact":
-        emailResponse = await handleContactEmail(data as ContactEmailRequest);
+        emailResponse = await handleContactEmail(data);
         break;
       
       case "booking-confirmation":
-        emailResponse = await handleBookingEmail(data as BookingEmailRequest);
+        emailResponse = await handleBookingEmail(data);
         break;
       
       default:

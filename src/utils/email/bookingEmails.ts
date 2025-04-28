@@ -14,7 +14,8 @@ export async function sendBookingConfirmationEmailInternal(bookingDetails: Seria
       email: bookingDetails.email,
       clientName: bookingDetails.clientName,
       isResend: bookingDetails.isResend,
-      isRecovery: bookingDetails.isRecovery
+      isRecovery: bookingDetails.isRecovery,
+      date: bookingDetails.date
     }, null, 2));
     
     // Process dates first
@@ -45,8 +46,8 @@ export async function sendBookingConfirmationEmailInternal(bookingDetails: Seria
       return false;
     }
     
-    console.log('Booking confirmation email sent successfully:', data);
-    return true;
+    console.log('Email sending response:', data);
+    return data?.success === true;
   } catch (error) {
     console.error('Exception sending booking confirmation email:', error);
     return false;
@@ -57,7 +58,9 @@ export async function sendBookingConfirmationEmailInternal(bookingDetails: Seria
  * Convert booking details to serialized format for API transmission
  */
 export function serializeBookingDetails(bookingDetails: BookingDetails): SerializedBookingDetails {
-  return {
+  console.log('Serializing booking details:', bookingDetails);
+  
+  const serialized = {
     ...bookingDetails,
     date: bookingDetails.date ? 
       (typeof bookingDetails.date === 'object' && bookingDetails.date !== null && 
@@ -66,12 +69,23 @@ export function serializeBookingDetails(bookingDetails: BookingDetails): Seriali
         String(bookingDetails.date) : 
       undefined
   };
+  
+  console.log('Serialized booking details:', serialized);
+  return serialized;
 }
 
 /**
  * Public function to send booking confirmation email
  */
 export async function sendBookingConfirmationEmail(bookingDetails: BookingDetails): Promise<boolean> {
+  // Log the incoming request
+  console.log('Sending confirmation email for booking:', {
+    referenceId: bookingDetails.referenceId,
+    email: bookingDetails.email,
+    clientName: bookingDetails.clientName,
+    date: bookingDetails.date
+  });
+  
   // Ensure required fields are present
   if (!bookingDetails.email || !bookingDetails.referenceId) {
     console.error('Missing required fields for booking email:', {
@@ -84,6 +98,7 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
   // Convert to serialized version
   const serializedBookingDetails = serializeBookingDetails(bookingDetails);
   
+  // Attempt to send the email
   const result = await sendBookingConfirmationEmailInternal({
     ...serializedBookingDetails,
     type: 'booking-confirmation'
@@ -92,8 +107,15 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
   if (!result) {
     // Add to retry queue if failed
     const emailId = `booking-${bookingDetails.referenceId}-${Date.now()}`;
-    addToEmailQueue(emailId, { ...serializedBookingDetails, type: 'booking-confirmation' });
-    console.log(`Added booking confirmation email to retry queue with ID ${emailId}`);
+    console.log(`Adding failed email to retry queue with ID: ${emailId}`);
+    
+    addToEmailQueue(emailId, { 
+      ...serializedBookingDetails, 
+      type: 'booking-confirmation',
+      failedAt: new Date().toISOString()
+    });
+  } else {
+    console.log('Email sent successfully for reference ID:', bookingDetails.referenceId);
   }
   
   return result;
@@ -103,8 +125,14 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
  * Resend a booking confirmation email
  */
 export async function resendBookingConfirmationEmail(bookingDetails: BookingDetails): Promise<boolean> {
+  console.log('Attempting to resend email for booking:', {
+    referenceId: bookingDetails.referenceId,
+    email: bookingDetails.email
+  });
+  
   return sendBookingConfirmationEmail({
     ...bookingDetails,
-    isResend: true
+    isResend: true,
+    highPriority: true
   });
 }
