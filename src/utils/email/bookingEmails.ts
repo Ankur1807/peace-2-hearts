@@ -1,0 +1,110 @@
+
+import { supabase } from '@/integrations/supabase/client';
+import { BookingDetails, SerializedBookingDetails } from '@/utils/types';
+import { addToEmailQueue } from './emailQueue';
+import { processBookingDate } from './dateUtils';
+
+/**
+ * Internal function to send booking confirmation email
+ */
+export async function sendBookingConfirmationEmailInternal(bookingDetails: SerializedBookingDetails & { type: string }): Promise<boolean> {
+  try {
+    console.log('Sending booking confirmation email with data:', JSON.stringify({
+      referenceId: bookingDetails.referenceId,
+      email: bookingDetails.email,
+      clientName: bookingDetails.clientName,
+      isResend: bookingDetails.isResend,
+      isRecovery: bookingDetails.isRecovery
+    }, null, 2));
+    
+    // Process dates first
+    const serializedBookingDetails = processBookingDate(bookingDetails);
+    
+    // Add priority header if high priority
+    const invokeOptions = {
+      body: {
+        type: 'booking-confirmation',
+        ...serializedBookingDetails,
+        isResend: bookingDetails.isResend || bookingDetails.isRecovery || false,
+        referenceId: bookingDetails.referenceId // Ensure referenceId is always included
+      }
+    };
+    
+    // Add timeout for high priority emails
+    if (bookingDetails.highPriority) {
+      // @ts-ignore - Adding optional property
+      invokeOptions.headers = {
+        'X-Priority': 'high'
+      };
+    }
+    
+    const { data, error } = await supabase.functions.invoke('send-email', invokeOptions);
+    
+    if (error) {
+      console.error('Error sending booking confirmation email:', error);
+      return false;
+    }
+    
+    console.log('Booking confirmation email sent successfully:', data);
+    return true;
+  } catch (error) {
+    console.error('Exception sending booking confirmation email:', error);
+    return false;
+  }
+}
+
+/**
+ * Convert booking details to serialized format for API transmission
+ */
+export function serializeBookingDetails(bookingDetails: BookingDetails): SerializedBookingDetails {
+  return {
+    ...bookingDetails,
+    date: bookingDetails.date ? 
+      (typeof bookingDetails.date === 'object' && bookingDetails.date !== null && 
+       'toISOString' in bookingDetails.date && typeof bookingDetails.date.toISOString === 'function') ? 
+        bookingDetails.date.toISOString() : 
+        String(bookingDetails.date) : 
+      undefined
+  };
+}
+
+/**
+ * Public function to send booking confirmation email
+ */
+export async function sendBookingConfirmationEmail(bookingDetails: BookingDetails): Promise<boolean> {
+  // Ensure required fields are present
+  if (!bookingDetails.email || !bookingDetails.referenceId) {
+    console.error('Missing required fields for booking email:', {
+      hasEmail: !!bookingDetails.email,
+      hasReferenceId: !!bookingDetails.referenceId
+    });
+    return false;
+  }
+  
+  // Convert to serialized version
+  const serializedBookingDetails = serializeBookingDetails(bookingDetails);
+  
+  const result = await sendBookingConfirmationEmailInternal({
+    ...serializedBookingDetails,
+    type: 'booking-confirmation'
+  });
+  
+  if (!result) {
+    // Add to retry queue if failed
+    const emailId = `booking-${bookingDetails.referenceId}-${Date.now()}`;
+    addToEmailQueue(emailId, { ...serializedBookingDetails, type: 'booking-confirmation' });
+    console.log(`Added booking confirmation email to retry queue with ID ${emailId}`);
+  }
+  
+  return result;
+}
+
+/**
+ * Resend a booking confirmation email
+ */
+export async function resendBookingConfirmationEmail(bookingDetails: BookingDetails): Promise<boolean> {
+  return sendBookingConfirmationEmail({
+    ...bookingDetails,
+    isResend: true
+  });
+}
