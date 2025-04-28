@@ -112,6 +112,7 @@ export type Database = {
       }
       consultations: {
         Row: {
+          amount: number | null
           client_email: string | null
           client_name: string | null
           client_phone: string | null
@@ -119,8 +120,12 @@ export type Database = {
           consultation_type: string
           created_at: string
           date: string | null
+          email_sent: boolean | null
           id: string
           message: string | null
+          order_id: string | null
+          payment_id: string | null
+          payment_status: string | null
           reference_id: string | null
           status: string
           time_slot: string
@@ -129,6 +134,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          amount?: number | null
           client_email?: string | null
           client_name?: string | null
           client_phone?: string | null
@@ -136,8 +142,12 @@ export type Database = {
           consultation_type: string
           created_at?: string
           date?: string | null
+          email_sent?: boolean | null
           id?: string
           message?: string | null
+          order_id?: string | null
+          payment_id?: string | null
+          payment_status?: string | null
           reference_id?: string | null
           status?: string
           time_slot: string
@@ -146,6 +156,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          amount?: number | null
           client_email?: string | null
           client_name?: string | null
           client_phone?: string | null
@@ -153,8 +164,12 @@ export type Database = {
           consultation_type?: string
           created_at?: string
           date?: string | null
+          email_sent?: boolean | null
           id?: string
           message?: string | null
+          order_id?: string | null
+          payment_id?: string | null
+          payment_status?: string | null
           reference_id?: string | null
           status?: string
           time_slot?: string

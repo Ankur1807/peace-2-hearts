@@ -11,12 +11,12 @@ export async function checkAndRecoverEmails(): Promise<void> {
   try {
     console.log("Checking for consultations without confirmation emails...");
     
-    // Find paid consultations where status isn't email_sent
+    // Find paid consultations where email_sent is false
     const { data: consultationsWithoutEmails, error: fetchError } = await supabase
       .from('consultations')
       .select('*')
       .eq('payment_status', 'completed')
-      .neq('status', 'email_sent')
+      .eq('email_sent', false)
       .limit(10);
     
     if (fetchError) {
@@ -69,7 +69,7 @@ export async function checkAndRecoverEmails(): Promise<void> {
           await supabase
             .from('consultations')
             .update({ 
-              status: 'email_sent'
+              email_sent: true
             })
             .eq('id', consultation.id);
         } else {

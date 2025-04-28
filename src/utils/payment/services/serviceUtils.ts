@@ -57,31 +57,10 @@ export async function updateConsultationStatus(
       updateData.payment_status = 'completed';
     }
     
-    // Check if columns exist by first fetching the schema
-    const { data: columns, error: schemaError } = await supabase
-      .from('consultations')
-      .select('*')
-      .limit(1);
-
-    if (schemaError) {
-      console.error("Error checking consultations schema:", schemaError);
-      return false;
-    }
-    
-    // Filter update data to only include existing columns
-    const safeUpdateData: any = {};
-    for (const key in updateData) {
-      if (columns && columns[0] && key in columns[0]) {
-        safeUpdateData[key] = updateData[key];
-      } else {
-        console.warn(`Column ${key} does not exist in consultations table, skipping`);
-      }
-    }
-    
     // Proceed with the update
     const { error } = await supabase
       .from('consultations')
-      .update(safeUpdateData)
+      .update(updateData)
       .eq(isUuid ? 'id' : 'reference_id', consultationId);
     
     if (error) {
@@ -128,7 +107,7 @@ export async function hasPaymentInformation(consultationId: string): Promise<boo
     
     const { data, error } = await supabase
       .from('consultations')
-      .select('*')
+      .select('payment_id, payment_status')
       .eq(isUuid ? 'id' : 'reference_id', consultationId)
       .single();
     
