@@ -1,8 +1,8 @@
 
 import { useRazorpayInit } from './useRazorpayInit';
 import { useCheckoutOptions } from './useCheckoutOptions';
-import { usePaymentVerification } from './usePaymentVerification';
 import { usePaymentNavigation } from './usePaymentNavigation';
+import { verifyPaymentAndCreateBooking } from '@/utils/payment/verificationService';
 
 interface OpenRazorpayCheckoutArgs {
   getEffectivePrice: () => number;
@@ -10,7 +10,6 @@ interface OpenRazorpayCheckoutArgs {
   setIsProcessing: (processing: boolean) => void;
   setPaymentCompleted?: (completed: boolean) => void;
   setReferenceId?: (id: string) => void;
-  handleConfirmBooking?: () => Promise<void>;
   toast: any;
 }
 
@@ -20,16 +19,10 @@ export const useOpenRazorpayCheckout = ({
   setIsProcessing,
   setPaymentCompleted,
   setReferenceId,
-  handleConfirmBooking,
   toast,
 }: OpenRazorpayCheckoutArgs) => {
   const { initializeRazorpay } = useRazorpayInit();
   const { createCheckoutOptions } = useCheckoutOptions();
-  const { verifyPayment } = usePaymentVerification({
-    handleConfirmBooking,
-    setIsProcessing,
-    setPaymentCompleted
-  });
   const { navigateToVerification, handlePaymentError } = usePaymentNavigation();
   
   return async (order: any, razorpayKey: string, receiptId: string) => {
@@ -78,16 +71,15 @@ export const useOpenRazorpayCheckout = ({
           console.log("Payment successful:", response);
           setIsProcessing(true);
           
-          const { success } = await verifyPayment(response, effectivePrice, bookingDetails, receiptId);
-          
+          // Navigate to verification page that will handle the verification and booking creation
           navigateToVerification({
             paymentId: response.razorpay_payment_id,
             orderId: response.razorpay_order_id,
+            signature: response.razorpay_signature,
             amount: effectivePrice,
             referenceId: receiptId,
             bookingDetails,
-            isVerifying: success,
-            verificationFailed: !success
+            isVerifying: true
           });
         }
       });

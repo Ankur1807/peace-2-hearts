@@ -48,6 +48,12 @@ verify_jwt = false
 timeout_seconds = 30
 memory_size = 256
 
+# Configure the verify-payment function with increased timeouts and no JWT verification
+[functions.verify-payment]
+verify_jwt = false
+timeout_seconds = 60
+memory_size = 256
+
 # Add execution permission for the admin-migration function
 [functions.admin-migration]
 verify_jwt = false

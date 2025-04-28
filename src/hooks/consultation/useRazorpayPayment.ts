@@ -1,9 +1,7 @@
-
-// Reorganized to delegate detailed logic to dedicated hooks
-
 import { useEffectivePrice } from './payment/useEffectivePrice';
 import { useInitializeRazorpayPayment } from './payment/useInitializeRazorpayPayment';
 import { useOpenRazorpayCheckout } from './payment/useOpenRazorpayCheckout';
+import { verifyPaymentAndCreateBooking } from '@/utils/payment/verificationService';
 
 interface RazorpayPaymentProps {
   state: any;
@@ -42,8 +40,8 @@ export function useRazorpayPayment({
     setIsProcessing,
     setPaymentCompleted,
     setReferenceId,
-    handleConfirmBooking,
     toast,
+    verifyPaymentAndCreateBooking
   });
 
   return {
