@@ -8,6 +8,7 @@ import './styles/buttons.css';
 import './styles/animations.css';
 import './styles/borders.css';
 import { fetchInitialServices } from './utils/pricing/serviceInitializer';
+import { HelmetProvider } from 'react-helmet-async';
 
 // Initialize default services if needed
 fetchInitialServices()
@@ -18,6 +19,8 @@ if (!rootElement) throw new Error('Failed to find the root element');
 
 createRoot(rootElement).render(
   <React.StrictMode>
-    <App />
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>
   </React.StrictMode>
 );

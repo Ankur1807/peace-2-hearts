@@ -5,7 +5,6 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
-// Removed GoogleAnalytics import as it's now in App.tsx
 
 const NotFound = () => {
   const location = useLocation();
@@ -19,7 +18,6 @@ const NotFound = () => {
 
   return (
     <>
-      {/* Removed GoogleAnalytics component */}
       <SEO 
         title="Page Not Found - Peace2Hearts"
         description="The page you are looking for could not be found."
