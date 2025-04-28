@@ -1,11 +1,8 @@
 
-import { verifyRazorpayPayment } from '@/utils/payment/razorpayService';
-import { useNavigate } from 'react-router-dom';
-import { BookingDetails } from '@/utils/types';
-import { storePaymentDetailsInSession } from '@/utils/payment/services/paymentRecordService';
 import { useRazorpayInit } from './useRazorpayInit';
-import { usePaymentRecord } from './usePaymentRecord';
 import { useCheckoutOptions } from './useCheckoutOptions';
+import { usePaymentVerification } from './usePaymentVerification';
+import { usePaymentNavigation } from './usePaymentNavigation';
 
 interface OpenRazorpayCheckoutArgs {
   getEffectivePrice: () => number;
@@ -26,10 +23,14 @@ export const useOpenRazorpayCheckout = ({
   handleConfirmBooking,
   toast,
 }: OpenRazorpayCheckoutArgs) => {
-  const navigate = useNavigate();
   const { initializeRazorpay } = useRazorpayInit();
-  const { createPaymentRecord } = usePaymentRecord();
   const { createCheckoutOptions } = useCheckoutOptions();
+  const { verifyPayment } = usePaymentVerification({
+    handleConfirmBooking,
+    setIsProcessing,
+    setPaymentCompleted
+  });
+  const { navigateToVerification, handlePaymentError } = usePaymentNavigation();
   
   return async (order: any, razorpayKey: string, receiptId: string) => {
     const effectivePrice = getEffectivePrice();
@@ -56,134 +57,50 @@ export const useOpenRazorpayCheckout = ({
       message: state.personalDetails.message,
       phone: state.personalDetails.phone
     };
-    
-    storePaymentDetailsInSession(receiptId, '', order.id, effectivePrice, bookingDetails);
-
-    const options = createCheckoutOptions({
-      razorpayKey,
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      personalDetails: state.personalDetails,
-      selectedServices: state.selectedServices,
-      receiptId
-    });
 
     try {
       const isLoaded = await initializeRazorpay();
       if (!isLoaded) return;
 
+      const options = createCheckoutOptions({
+        razorpayKey,
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        personalDetails: state.personalDetails,
+        selectedServices: state.selectedServices,
+        receiptId
+      });
+
       const razorpay = new window.Razorpay({
         ...options,
         handler: async function (response: any) {
           console.log("Payment successful:", response);
+          setIsProcessing(true);
           
-          try {
-            setIsProcessing(true);
-            
-            if (handleConfirmBooking) {
-              console.log("Creating consultation record...");
-              await handleConfirmBooking();
-            }
-            
-            const verificationPromise = new Promise<boolean>(async (resolve) => {
-              await new Promise(r => setTimeout(r, 5000));
-              
-              const isVerified = await verifyRazorpayPayment({
-                paymentId: response.razorpay_payment_id,
-                orderId: response.razorpay_order_id,
-                signature: response.razorpay_signature,
-              });
-              
-              resolve(isVerified);
-            });
-            
-            const isVerified = await verificationPromise;
-            console.log("Payment verification result:", isVerified);
-            
-            if (isVerified) {
-              const paymentSaved = await createPaymentRecord({
-                paymentId: response.razorpay_payment_id,
-                orderId: response.razorpay_order_id,
-                amount: effectivePrice,
-                referenceId: receiptId,
-                bookingDetails
-              });
-              
-              if (setPaymentCompleted) {
-                setPaymentCompleted(true);
-              }
-              
-              navigate("/payment-verification", {
-                state: {
-                  paymentId: response.razorpay_payment_id,
-                  orderId: response.razorpay_order_id,
-                  amount: effectivePrice,
-                  referenceId: receiptId,
-                  bookingDetails,
-                  isVerifying: true
-                },
-                replace: true
-              });
-            } else {
-              toast({
-                title: "Payment Verification Failed",
-                description: "We couldn't verify your payment. Please contact support.",
-                variant: "destructive"
-              });
-              
-              navigate("/payment-verification", {
-                state: {
-                  paymentId: response.razorpay_payment_id,
-                  orderId: response.razorpay_order_id,
-                  amount: effectivePrice,
-                  referenceId: receiptId,
-                  bookingDetails,
-                  verificationFailed: true
-                },
-                replace: true
-              });
-            }
-          } catch (error) {
-            console.error("Error processing payment confirmation:", error);
-            navigate("/payment-verification", {
-              state: {
-                paymentId: response.razorpay_payment_id,
-                orderId: response.razorpay_order_id,
-                amount: effectivePrice,
-                referenceId: receiptId,
-                bookingDetails,
-                error: "Error processing payment"
-              },
-              replace: true
-            });
-          } finally {
-            setIsProcessing(false);
-          }
+          const { success } = await verifyPayment(response, effectivePrice, bookingDetails, receiptId);
+          
+          navigateToVerification({
+            paymentId: response.razorpay_payment_id,
+            orderId: response.razorpay_order_id,
+            amount: effectivePrice,
+            referenceId: receiptId,
+            bookingDetails,
+            isVerifying: success,
+            verificationFailed: !success
+          });
         }
       });
       
       razorpay.on("payment.failed", function (response: any) {
-        console.error("Payment failed:", response.error);
-        
-        if (response.error?.metadata?.payment_id) {
-          navigate("/payment-confirmation", {
-            state: {
-              paymentId: response.error.metadata.payment_id,
-              orderId: order.id,
-              amount: effectivePrice,
-              referenceId: receiptId,
-              bookingDetails,
-              paymentFailed: true
-            },
-            replace: true
-          });
-        }
-        
-        toast({
-          title: "Payment Failed",
-          description: response.error.description || "Your payment could not be processed. Please try again.",
-        });
+        handlePaymentError(
+          response.error,
+          response.error?.metadata?.payment_id || '',
+          order.id,
+          effectivePrice,
+          receiptId,
+          bookingDetails
+        );
         setIsProcessing(false);
       });
       
