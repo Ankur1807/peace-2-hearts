@@ -42,7 +42,7 @@ const RecoveryMessage = ({
 
   return (
     <div className="space-y-4">
-      <Alert variant="warning" className="mb-4 bg-amber-50 border-amber-200">
+      <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200 text-amber-800">
         <AlertTitle>Booking Details Unavailable</AlertTitle>
         <AlertDescription>
           We couldn't find your complete booking details, but your payment has been recorded. 
