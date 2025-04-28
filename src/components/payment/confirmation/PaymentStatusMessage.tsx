@@ -25,7 +25,7 @@ const PaymentStatusMessage = ({ success, message, paymentId, orderId }: PaymentS
   return (
     <div className="text-center">
       {paymentId && <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>}
-      {orderId && <p className="mb-4">Order ID: <strong>{orderId}</p>}
+      {orderId && <p className="mb-4">Order ID: <strong>{orderId}</strong></p>}
       <p className="mb-6">Please save these details for your reference when contacting support.</p>
       <div className="space-y-3">
         <Button onClick={() => navigate('/book-consultation')} className="w-full sm:w-auto">
