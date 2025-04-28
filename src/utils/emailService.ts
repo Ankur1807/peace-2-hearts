@@ -153,29 +153,32 @@ async function sendBookingConfirmationEmailInternal(bookingDetails: SerializedBo
     
     // Create a serialized version without date first
     const serializedBookingDetails: SerializedBookingDetails = { 
-      ...bookingDetails,
-      date: typeof bookingDetails.date === 'string' 
-        ? bookingDetails.date 
-        : bookingDetails.date instanceof Date 
-          ? bookingDetails.date.toISOString() 
-          : undefined
+      ...bookingDetails
     };
     
     // Handle date conversion
-    if (bookingDetails.date instanceof Date) {
-      // Convert Date to ISO string for API transmission
-      serializedBookingDetails.date = bookingDetails.date.toISOString();
+    if (bookingDetails.date) {
+      // Check if date is a Date object (safely)
+      const isDateObj = bookingDetails.date && 
+                      Object.prototype.toString.call(bookingDetails.date) === '[object Date]' &&
+                      !isNaN(bookingDetails.date.getTime());
       
-      // Add a formatted date for display
-      const formattedDate = bookingDetails.date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-      serializedBookingDetails.formattedDate = formattedDate;
-    } else if (bookingDetails.date) {
-      console.warn('Date is not a Date object:', bookingDetails.date);
-      serializedBookingDetails.date = String(bookingDetails.date);
+      if (isDateObj) {
+        // Convert Date to ISO string for API transmission
+        const dateObj = bookingDetails.date as unknown as Date;
+        serializedBookingDetails.date = dateObj.toISOString();
+        
+        // Add a formatted date for display
+        const formattedDate = dateObj.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        serializedBookingDetails.formattedDate = formattedDate;
+      } else if (typeof bookingDetails.date === 'string') {
+        // Keep string as is
+        serializedBookingDetails.date = bookingDetails.date;
+      }
     }
     
     // Add priority header if high priority
@@ -224,10 +227,15 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
     return false;
   }
   
-  // Convert date to string if it's a Date object
+  // Convert to serialized version
   const serializedBookingDetails: SerializedBookingDetails = {
     ...bookingDetails,
-    date: bookingDetails.date instanceof Date ? bookingDetails.date.toISOString() : bookingDetails.date
+    // Safely handle date conversion if it's a Date object
+    date: bookingDetails.date ? 
+      (typeof bookingDetails.date === 'string' ? 
+        bookingDetails.date : 
+        (bookingDetails.date as Date).toISOString()) : 
+      undefined
   };
   
   const result = await sendBookingConfirmationEmailInternal({

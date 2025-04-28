@@ -22,11 +22,7 @@ const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({
   amount,
   referenceId
 }) => {
-  const formattedDate = date 
-    ? typeof date === 'string' 
-      ? new Date(date).toLocaleDateString('en-GB')
-      : date.toLocaleDateString('en-GB')
-    : undefined;
+  const formattedDate = date ? formatDate(date) : undefined;
 
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-6">

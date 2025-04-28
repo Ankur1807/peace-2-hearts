@@ -1,3 +1,4 @@
+
 export interface VerificationResult {
   success: boolean;
   message: string;
