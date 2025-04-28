@@ -64,6 +64,9 @@ const PaymentVerificationContent = ({
                 </div>
               )}
             </div>
+            <div className="mt-2 text-sm text-gray-600">
+              <p>Please save these details for your reference. You will also receive a confirmation email shortly.</p>
+            </div>
           </div>
 
           {bookingDetails ? (
@@ -74,7 +77,21 @@ const PaymentVerificationContent = ({
           ) : (
             <div className="text-center py-6">
               <p className="mb-4">Your payment has been successfully processed.</p>
-              <Button onClick={() => navigate('/')}>Return to Home</Button>
+              <p className="mb-6 text-sm text-gray-600">
+                You'll be redirected to the confirmation page.
+              </p>
+              <Button 
+                onClick={() => navigate('/payment-confirmation', { 
+                  state: {
+                    paymentId,
+                    orderId,
+                    amount,
+                    referenceId
+                  }
+                })}
+              >
+                View Confirmation
+              </Button>
             </div>
           )}
         </div>

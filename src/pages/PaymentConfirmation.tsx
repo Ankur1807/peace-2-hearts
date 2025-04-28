@@ -20,6 +20,7 @@ const PaymentConfirmation = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
+  // Extract payment information from URL params or location state
   const referenceId = location.state?.referenceId || searchParams.get("ref") || null;
   const bookingDetails: BookingDetails | undefined = location.state?.bookingDetails;
   const paymentId = searchParams.get("razorpay_payment_id") || location.state?.paymentId;
@@ -41,16 +42,22 @@ const PaymentConfirmation = () => {
     setBookingRecovered
   });
 
+  // Try to recover booking data if we have a reference ID but no booking details
   useEffect(() => {
     const recoverBookingData = async () => {
       if (referenceId && !bookingDetails) {
         setIsVerifying(true);
         try {
+          console.log("Attempting to recover booking data for reference ID:", referenceId);
+          
           const consultationData = await fetchConsultationData(referenceId);
           if (consultationData) {
             const recoveredBookingDetails = createBookingDetailsFromConsultation(consultationData);
             if (recoveredBookingDetails) {
               setBookingRecovered(true);
+              console.log("Booking details recovered successfully:", recoveredBookingDetails);
+              
+              // Update location state with recovered booking details
               navigate(".", { 
                 state: {
                   ...location.state,
@@ -58,10 +65,22 @@ const PaymentConfirmation = () => {
                 },
                 replace: true
               });
+              
               toast({
                 title: "Booking Details Recovered",
                 description: "We've successfully retrieved your booking information."
               });
+            } else {
+              console.log("Could not create booking details from consultation data");
+            }
+          } else {
+            console.log("No consultation data found for reference ID:", referenceId);
+            
+            // Check if we have a payment ID - might be an orphaned payment
+            if (paymentId && !recoveryResult) {
+              console.log("This might be an orphaned payment. Recovering payment data...");
+              
+              // We'll let the payment confirmation hook handle this case
             }
           }
         } catch (error) {
@@ -72,13 +91,19 @@ const PaymentConfirmation = () => {
       }
     };
     
-    recoverBookingData();
-  }, [referenceId, bookingDetails, toast, navigate, location.state]);
+    // Only try to recover if we have essential information
+    if (referenceId || paymentId) {
+      recoverBookingData();
+    }
+  }, [referenceId, bookingDetails, toast, navigate, location.state, paymentId, recoveryResult]);
 
+  // Handle manual recovery attempt
   const handleManualRecovery = async () => {
     if (referenceId && paymentId && amount > 0) {
+      console.log("Manual recovery requested for:", { referenceId, paymentId, amount });
       await recoverPaymentAndSendEmail(referenceId, paymentId, amount, orderId);
     } else {
+      console.error("Missing required information for recovery:", { referenceId, paymentId, amount });
       toast({
         title: "Recovery Failed",
         description: "Missing required information for recovery",
@@ -86,6 +111,28 @@ const PaymentConfirmation = () => {
       });
     }
   };
+
+  // Try to recover payment ID from session storage if it's not in the URL or state
+  useEffect(() => {
+    if (!paymentId && referenceId) {
+      const storedPaymentId = sessionStorage.getItem(`payment_id_${referenceId}`);
+      const storedOrderId = sessionStorage.getItem(`order_id_${referenceId}`);
+      
+      if (storedPaymentId) {
+        console.log("Found payment ID in session storage:", storedPaymentId);
+        
+        // Update location state with stored payment information
+        navigate(".", {
+          state: {
+            ...location.state,
+            paymentId: storedPaymentId,
+            orderId: storedOrderId || null
+          },
+          replace: true
+        });
+      }
+    }
+  }, [paymentId, referenceId, navigate, location.state]);
 
   return (
     <>

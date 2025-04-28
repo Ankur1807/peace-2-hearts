@@ -44,20 +44,13 @@ const PaymentConfirmationContainer = ({
       
       {verificationResult.success && (
         <div className="space-y-6">
-          {paymentId && referenceId && (
+          {paymentId && (
             <PaymentInformation
               paymentId={paymentId}
               orderId={orderId}
               amount={amount}
               referenceId={referenceId}
             />
-          )}
-          
-          {recoveryResult && (
-            <Alert variant={recoveryResult.success ? "default" : "destructive"} className="my-4">
-              <AlertTitle>{recoveryResult.success ? "Recovery Successful" : "Recovery Issue"}</AlertTitle>
-              <AlertDescription>{recoveryResult.message}</AlertDescription>
-            </Alert>
           )}
           
           {bookingDetails ? (
@@ -72,6 +65,8 @@ const PaymentConfirmationContainer = ({
                 bookingRecovered={bookingRecovered}
                 recoveryResult={recoveryResult}
                 onManualRecovery={onManualRecovery}
+                referenceId={referenceId}
+                paymentId={paymentId}
               />
             </div>
           )}
