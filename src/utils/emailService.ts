@@ -166,20 +166,25 @@ async function sendBookingConfirmationEmailInternal(bookingDetails: SerializedBo
       if (typeof dateValue === 'object' && dateValue !== null) {
         // Then check if it has getTime method which is specific to Date objects
         // Using non-null assertion after explicit null check
-        if (dateValue && 'getTime' in dateValue && typeof dateValue.getTime === 'function') {
-          const dateObject = dateValue as Date;
-          // Check if it's a valid date
-          if (!isNaN(dateObject.getTime())) {
-            // Convert Date to ISO string for API transmission
-            serializedBookingDetails.date = dateObject.toISOString();
-            
-            // Add a formatted date for display
-            const formattedDate = dateObject.toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric'
-            });
-            serializedBookingDetails.formattedDate = formattedDate;
+        if (dateValue && 'getTime' in dateValue) {
+          // Ensure getTime is a function before attempting to cast
+          const getTimeProperty = dateValue.getTime;
+          if (typeof getTimeProperty === 'function') {
+            // Now we can safely cast to Date
+            const dateObject = dateValue as Date;
+            // Check if it's a valid date
+            if (!isNaN(dateObject.getTime())) {
+              // Convert Date to ISO string for API transmission
+              serializedBookingDetails.date = dateObject.toISOString();
+              
+              // Add a formatted date for display
+              const formattedDate = dateObject.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+              });
+              serializedBookingDetails.formattedDate = formattedDate;
+            }
           }
         }
       } else if (typeof bookingDetails.date === 'string') {
