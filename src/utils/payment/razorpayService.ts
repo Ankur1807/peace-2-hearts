@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for Razorpay integration
  */
@@ -122,32 +121,40 @@ export const verifyRazorpayPayment = async (params: VerifyPaymentParams): Promis
  */
 export const verifyAndSyncPayment = async (paymentId: string): Promise<boolean> => {
   try {
+    console.log("Verifying payment by ID:", paymentId);
+    
     if (!paymentId) {
       console.error("Missing payment ID for verification");
       return false;
     }
-    
-    console.log("Direct verification of payment with Razorpay API:", paymentId);
-    
+
     const { data, error } = await supabase.functions.invoke('razorpay', {
       body: {
         action: 'verify_payment',
         paymentId,
-        checkOnly: true
+        checkOnly: true,
+        includeDetails: true
       }
     });
-    
+
     if (error) {
       console.error('Error in direct payment verification:', error);
       return false;
     }
-    
+
     console.log("Direct verification result:", data);
-    
+
+    // Handle different payment methods and statuses
     if (data?.payment?.method === 'upi' || data?.payment?.method === 'qr_code') {
       console.log(`Payment was made via ${data.payment.method} - may need special handling`);
+      
+      // For UPI/QR payments, we consider 'created' or 'authorized' as valid states
+      if (data.payment?.status === 'created' || data.payment?.status === 'authorized') {
+        console.log("QR/UPI payment in valid initial state");
+        return true;
+      }
     }
-    
+
     return data?.success === true && data?.verified === true;
   } catch (err) {
     console.error('Exception in verifyAndSyncPayment:', err);
