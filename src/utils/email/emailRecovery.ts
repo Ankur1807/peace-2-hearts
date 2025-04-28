@@ -1,7 +1,8 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { sendBookingConfirmationEmail } from "./bookingEmails";
-import { createBookingDetailsFromConsultation } from "@/utils/consultation/consultationRecovery";
+import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
+import { BookingDetails } from "@/utils/types";
 
 /**
  * Check for consultations without confirmation emails and attempt recovery
@@ -10,12 +11,12 @@ export async function checkAndRecoverEmails(): Promise<void> {
   try {
     console.log("Checking for consultations without confirmation emails...");
     
-    // Find consultations where payment_status is completed but need email
-    // We'll base this on a criteria we can check rather than relying on email_sent column
+    // Find paid consultations where status isn't email_sent
     const { data: consultationsWithoutEmails, error: fetchError } = await supabase
       .from('consultations')
       .select('*')
       .eq('payment_status', 'completed')
+      .neq('status', 'email_sent')
       .limit(10);
     
     if (fetchError) {
@@ -41,29 +42,34 @@ export async function checkAndRecoverEmails(): Promise<void> {
         }
         
         // Create booking details from consultation
-        const bookingDetails = createBookingDetailsFromConsultation(consultation);
+        const serviceCategory = determineServiceCategory(consultation.consultation_type);
         
-        if (!bookingDetails) {
-          console.log(`Could not create booking details for consultation ${consultation.id}, skipping`);
-          continue;
-        }
+        const bookingDetails: BookingDetails = {
+          clientName: consultation.client_name,
+          email: consultation.client_email,
+          referenceId: consultation.reference_id,
+          consultationType: consultation.consultation_type,
+          services: consultation.consultation_type ? consultation.consultation_type.split(',') : [],
+          date: consultation.date ? new Date(consultation.date) : undefined,
+          timeSlot: consultation.time_slot,
+          timeframe: consultation.timeframe,
+          message: consultation.message,
+          serviceCategory,
+          highPriority: true,
+          isRecovery: true
+        };
         
         // Try to send the email
-        const emailResult = await sendBookingConfirmationEmail({
-          ...bookingDetails,
-          isRecovery: true,
-          highPriority: true
-        });
+        const emailResult = await sendBookingConfirmationEmail(bookingDetails);
         
         if (emailResult) {
           console.log(`Successfully sent recovery email for consultation ${consultation.id}`);
           
-          // Mark email as sent by updating a custom field in the database
-          // We're not using email_sent since it doesn't exist in the schema
+          // Mark email as sent
           await supabase
             .from('consultations')
             .update({ 
-              status: consultation.status === 'paid' ? 'email_sent' : consultation.status
+              status: 'email_sent'
             })
             .eq('id', consultation.id);
         } else {

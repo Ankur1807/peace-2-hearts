@@ -13,7 +13,7 @@ import { createRazorpayOrder } from "./services/paymentOrderService";
 import { verifyRazorpayPayment, verifyAndSyncPayment } from "./services/paymentVerificationService";
 import { updateConsultationStatus } from "./services/serviceUtils";
 import { sendEmailForConsultation } from "./services/emailNotificationService";
-import { storePaymentDetailsInSession, getPaymentDetailsFromSession } from "./services/paymentStorageService";
+import { storePaymentDetailsInSession } from "./services/paymentStorageService";
 
 // Re-export types for compatibility with existing code
 export type { CreateOrderParams, OrderResponse, VerifyPaymentParams } from './razorpayTypes';
@@ -36,11 +36,16 @@ export {
   sendEmailForConsultation,
   
   // Storage services
-  storePaymentDetailsInSession,
-  getPaymentDetailsFromSession
+  storePaymentDetailsInSession
 };
 
-// Simple function to update consultation with payment information
+// Add missing import for supabase
+import { supabase } from "@/integrations/supabase/client";
+import { determineServiceCategory } from "./services/serviceUtils";
+
+/**
+ * Simple function to update consultation with payment information
+ */
 export async function savePaymentRecord(params: {
   paymentId: string;
   orderId: string;
@@ -53,7 +58,13 @@ export async function savePaymentRecord(params: {
     console.log(`Saving payment record for consultation: ${referenceId}`);
     
     // Update the consultation status and payment information
-    const statusUpdated = await updateConsultationStatus(referenceId, status, paymentId, amount, orderId);
+    const statusUpdated = await updateConsultationStatus(
+      referenceId, 
+      status, 
+      paymentId, 
+      amount, 
+      orderId
+    );
     
     if (statusUpdated) {
       // Create booking details for email
@@ -65,13 +76,15 @@ export async function savePaymentRecord(params: {
         
       if (consultation) {
         // Send email notification
-        const bookingDetails = {
+        const serviceCategory = determineServiceCategory(consultation.consultation_type);
+        
+        const bookingDetails: BookingDetails = {
           referenceId,
           clientName: consultation.client_name || 'Client',
           email: consultation.client_email || 'client@example.com',
           consultationType: consultation.consultation_type || 'general',
           services: consultation.consultation_type ? consultation.consultation_type.split(',') : [],
-          serviceCategory: 'general',
+          serviceCategory,
           highPriority: true
         };
         
@@ -85,6 +98,3 @@ export async function savePaymentRecord(params: {
     return false;
   }
 }
-
-// Add missing import for supabase
-import { supabase } from "@/integrations/supabase/client";

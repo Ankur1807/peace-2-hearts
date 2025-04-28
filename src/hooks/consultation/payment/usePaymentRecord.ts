@@ -43,11 +43,7 @@ export const usePaymentRecord = () => {
         
         // Send confirmation email
         if (params.bookingDetails) {
-          const emailSent = await sendEmailForConsultation({
-            ...params.bookingDetails,
-            referenceId: params.referenceId,
-            amount: params.amount
-          });
+          const emailSent = await sendEmailForConsultation(params.bookingDetails);
           
           console.log("Email sending result:", emailSent);
         }

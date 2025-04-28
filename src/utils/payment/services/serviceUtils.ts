@@ -57,22 +57,31 @@ export async function updateConsultationStatus(
       updateData.payment_status = 'completed';
     }
     
-    // For now, let's handle missing columns by using a different approach
-    // First, check if the columns exist by making a query
-    const { data: checkData, error: checkError } = await supabase
+    // Check if columns exist by first fetching the schema
+    const { data: columns, error: schemaError } = await supabase
       .from('consultations')
-      .select('id')
+      .select('*')
       .limit(1);
-      
-    if (checkError) {
-      console.error("Error checking consultations table:", checkError);
+
+    if (schemaError) {
+      console.error("Error checking consultations schema:", schemaError);
       return false;
+    }
+    
+    // Filter update data to only include existing columns
+    const safeUpdateData: any = {};
+    for (const key in updateData) {
+      if (columns && columns[0] && key in columns[0]) {
+        safeUpdateData[key] = updateData[key];
+      } else {
+        console.warn(`Column ${key} does not exist in consultations table, skipping`);
+      }
     }
     
     // Proceed with the update
     const { error } = await supabase
       .from('consultations')
-      .update(updateData)
+      .update(safeUpdateData)
       .eq(isUuid ? 'id' : 'reference_id', consultationId);
     
     if (error) {
@@ -117,7 +126,6 @@ export async function hasPaymentInformation(consultationId: string): Promise<boo
   try {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(consultationId);
     
-    // First check if the payment_id column exists in the consultations table
     const { data, error } = await supabase
       .from('consultations')
       .select('*')
@@ -133,11 +141,11 @@ export async function hasPaymentInformation(consultationId: string): Promise<boo
       return false;
     }
     
-    // Use hasOwnProperty to safely check if properties exist
-    const hasPaymentId = data.hasOwnProperty('payment_id') && data.payment_id;
-    const hasPaymentStatus = data.hasOwnProperty('payment_status') && data.payment_status === 'completed';
+    // Check for payment fields safely
+    const hasPaymentId = data.payment_id !== undefined && data.payment_id !== null;
+    const hasPaymentStatus = data.payment_status !== undefined && data.payment_status === 'completed';
     
-    return hasPaymentId && hasPaymentStatus;
+    return hasPaymentId || hasPaymentStatus;
   } catch (error) {
     console.error("Exception checking payment information:", error);
     return false;

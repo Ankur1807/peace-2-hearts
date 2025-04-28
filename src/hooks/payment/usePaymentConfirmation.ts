@@ -1,10 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { verifyRazorpayPayment, verifyAndSyncPayment } from "@/utils/payment/razorpayService";
 import { storePaymentDetailsInSession } from "@/utils/payment/services/paymentStorageService";
 import { updateConsultationStatus } from "@/utils/payment/services/serviceUtils";
 import { sendEmailForConsultation } from "@/utils/payment/services/emailNotificationService";
-import { createRecoveryConsultation } from "@/utils/consultation/consultationRecovery";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
@@ -49,26 +49,56 @@ export const usePaymentConfirmation = ({
             // Store payment IDs in session storage for recovery purposes
             if (referenceId) {
               console.log("Storing payment IDs in session storage");
-              sessionStorage.setItem(`payment_id_${referenceId}`, paymentId);
-              if (orderId) sessionStorage.setItem(`order_id_${referenceId}`, orderId);
+              storePaymentDetailsInSession({
+                referenceId,
+                paymentId,
+                orderId,
+                amount
+              });
             }
             
             // Step 2: Save payment record if we have enough details
             if (referenceId && amount > 0) {
               try {
-                console.log("Attempting to save payment record with reference ID:", referenceId);
+                console.log("Attempting to update consultation status with reference ID:", referenceId);
                 
-                const paymentSaved = await savePaymentRecord({
-                  paymentId,
-                  orderId: orderId || '',
-                  amount,
+                // Update consultation with payment status
+                const statusUpdated = await updateConsultationStatus(
                   referenceId,
-                  status: 'completed'
-                });
+                  'paid',
+                  paymentId,
+                  amount,
+                  orderId || undefined
+                );
                 
-                if (paymentSaved) {
-                  console.log("Payment record saved successfully");
+                if (statusUpdated) {
+                  console.log("Consultation status updated successfully");
                   setBookingRecovered(true);
+                  
+                  // Get consultation data for email
+                  const { data: consultation } = await supabase
+                    .from('consultations')
+                    .select('*')
+                    .eq('reference_id', referenceId)
+                    .single();
+                  
+                  if (consultation) {
+                    // Create booking details for email
+                    const bookingDetails: BookingDetails = {
+                      referenceId,
+                      clientName: consultation.client_name,
+                      email: consultation.client_email,
+                      consultationType: consultation.consultation_type,
+                      services: consultation.consultation_type ? consultation.consultation_type.split(',') : [],
+                      serviceCategory: consultation.consultation_type?.toLowerCase().includes('legal') ? 
+                        'legal' : consultation.consultation_type?.toLowerCase().includes('holistic') ? 
+                        'holistic' : 'mental-health',
+                      highPriority: true
+                    };
+                    
+                    // Send email notification
+                    await sendEmailForConsultation(bookingDetails);
+                  }
                   
                   toast({
                     title: "Payment Record Saved",
@@ -78,23 +108,23 @@ export const usePaymentConfirmation = ({
                   console.error("Failed to save payment record for referenceId:", referenceId);
                   
                   // Try to create a recovery consultation if payment record couldn't be saved
-                  const recoveryCreated = await createRecoveryConsultation(
-                    referenceId, 
-                    paymentId, 
-                    amount, 
-                    orderId || undefined
-                  );
-                  
-                  if (recoveryCreated) {
-                    console.log("Created recovery consultation for reference ID:", referenceId);
-                    // Try again to save the payment with the recovery consultation
-                    await savePaymentRecord({
-                      paymentId,
-                      orderId: orderId || '',
-                      amount,
-                      referenceId,
-                      status: 'completed'
-                    });
+                  // Note: We're handling this directly instead of depending on createRecoveryConsultation
+                  const { data: recoveryData, error: recoveryError } = await supabase
+                    .from('consultations')
+                    .insert({
+                      reference_id: referenceId,
+                      status: 'payment_received_needs_details',
+                      payment_status: 'completed',
+                      payment_id: paymentId,
+                      amount: amount,
+                      consultation_type: 'recovery_needed',
+                      client_name: 'Payment Received - Recovery Needed',
+                      message: `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`
+                    })
+                    .select();
+                    
+                  if (!recoveryError && recoveryData) {
+                    console.log("Created recovery consultation record:", recoveryData);
                   }
                 }
               } catch (error) {
