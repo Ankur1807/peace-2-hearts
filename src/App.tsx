@@ -1,158 +1,51 @@
 import React from 'react';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
-import GoogleAnalytics from "./components/GoogleAnalytics";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import AboutUs from "./pages/AboutUs";
-import Services from "./pages/Services";
-import Resources from "./pages/Resources";
-import News from "./pages/News";
-import Contact from "./pages/Contact";
-import Terms from "./pages/Terms";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import CancellationRefund from "./pages/CancellationRefund";
-import ShippingDelivery from "./pages/ShippingDelivery";
-import MentalHealthService from "./pages/services/MentalHealthService";
-import LegalSupportService from "./pages/services/LegalSupportService";
-import MentalHealthCounselling from "./pages/services/mentalhealth/MentalHealthCounselling";
-import FamilyTherapy from "./pages/services/mentalhealth/FamilyTherapy";
-import PremaritalCounselling from "./pages/services/mentalhealth/PremaritalCounselling";
-import CouplesCounselling from "./pages/services/mentalhealth/CouplesCounselling";
-import SexualHealthCounselling from "./pages/services/mentalhealth/SexualHealthCounselling";
-import PreMarriageLegal from "./pages/services/legal/PreMarriageLegal";
-import MediationServices from "./pages/services/legal/MediationServices";
-import DivorceConsultation from "./pages/services/legal/DivorceConsultation";
-import ChildCustodyConsultation from "./pages/services/legal/ChildCustodyConsultation";
-import MaintenanceConsultation from "./pages/services/legal/MaintenanceConsultation";
-import GeneralConsultation from "./pages/services/legal/GeneralConsultation";
-import DivorcePreventionPackage from "./pages/services/holistic/DivorcePreventionPackage";
-import PreMarriageClarityPackage from "./pages/services/holistic/PreMarriageClarityPackage";
-import TherapyService from "./pages/services/TherapyService";
-import DivorceService from "./pages/services/DivorceService";
-import CustodyService from "./pages/services/CustodyService";
-import BookConsultation from "./pages/BookConsultation";
-import ConsultantListing from "./pages/ConsultantListing";
-import ConsultantDetail from "./pages/ConsultantDetail";
-import Dashboard from "./pages/Dashboard";
-import LogoExport from './pages/LogoExport';
-import MobileBookings from './pages/MobileBookings';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import BookConsultation from './pages/BookConsultation';
+import Contact from './pages/Contact';
+import About from './pages/About';
+import Terms from './pages/Terms';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import CancellationRefund from './pages/CancellationRefund';
+import ShippingDelivery from './pages/ShippingDelivery';
 import PaymentConfirmation from './pages/PaymentConfirmation';
-import PaymentVerification from "./pages/PaymentVerification";
+import PaymentVerification from './pages/PaymentVerification';
+import BookingSuccess from './pages/BookingSuccess';
+import BookingHistory from './pages/BookingHistory';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useToast } from "@/hooks/use-toast"
+import { Toaster } from "@/components/ui/toaster"
 
 // Admin pages
-import AdminLayout from './components/admin/AdminLayout';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminConsultants from './pages/admin/AdminConsultants';
-import AdminPricing from './pages/admin/AdminPricing';
-import AdminBookings from './pages/admin/AdminBookings';
-import AdminSettings from './pages/admin/AdminSettings';
-import AdminLogin from './pages/admin/AdminLogin';
-import { AdminProvider } from "@/hooks/useAdminContext";
+import PaymentSystemMigration from './pages/admin/PaymentSystemMigration';
 
-const queryClient = new QueryClient();
+function App() {
+  const { toast } = useToast()
 
-const App = () => {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <HelmetProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <GoogleAnalytics />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/about" element={<AboutUs />} />
-                
-                {/* Main Services Route */}
-                <Route path="/services" element={<Services />} />
-                
-                {/* Main Service Category Pages */}
-                <Route path="/services/mental-health" element={<MentalHealthService />} />
-                <Route path="/services/legal-support" element={<LegalSupportService />} />
-                
-                {/* Mental Health Sub-Services */}
-                <Route path="/services/mental-health/counselling" element={<MentalHealthCounselling />} />
-                <Route path="/services/mental-health/family-therapy" element={<FamilyTherapy />} />
-                <Route path="/services/mental-health/premarital-counselling" element={<PremaritalCounselling />} />
-                <Route path="/services/mental-health/couples-counselling" element={<CouplesCounselling />} />
-                <Route path="/services/mental-health/sexual-health-counselling" element={<SexualHealthCounselling />} />
-                
-                {/* Legal Sub-Services */}
-                <Route path="/services/legal-support/pre-marriage" element={<PreMarriageLegal />} />
-                <Route path="/services/legal-support/mediation" element={<MediationServices />} />
-                <Route path="/services/legal-support/divorce" element={<DivorceConsultation />} />
-                <Route path="/services/legal-support/custody" element={<ChildCustodyConsultation />} />
-                <Route path="/services/legal-support/maintenance" element={<MaintenanceConsultation />} />
-                <Route path="/services/legal-support/general" element={<GeneralConsultation />} />
-                
-                {/* Holistic Service Pages */}
-                <Route path="/services/holistic/divorce-prevention" element={<DivorcePreventionPackage />} />
-                <Route path="/services/holistic/pre-marriage-clarity" element={<PreMarriageClarityPackage />} />
-                
-                {/* Legacy Service Pages - kept for backward compatibility */}
-                <Route path="/services/therapy" element={<TherapyService />} />
-                <Route path="/services/divorce" element={<DivorceService />} />
-                <Route path="/services/custody" element={<CustodyService />} />
-                
-                {/* Consultant Routes */}
-                <Route path="/consultants" element={<ConsultantListing />} />
-                <Route path="/consultants/:id" element={<ConsultantDetail />} />
-                
-                {/* Booking Route */}
-                <Route path="/book-consultation" element={<BookConsultation />} />
-                
-                {/* Admin Routes */}
-                <Route path="/admin/login" element={
-                  <AdminProvider>
-                    <AdminLogin />
-                  </AdminProvider>
-                } />
-                
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="consultants" element={<AdminConsultants />} />
-                  <Route path="pricing" element={<AdminPricing />} />
-                  <Route path="bookings" element={<AdminBookings />} />
-                  <Route path="settings" element={<AdminSettings />} />
-                </Route>
-                
-                {/* Legal Pages */}
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/cancellation-refund" element={<CancellationRefund />} />
-                <Route path="/shipping-delivery" element={<ShippingDelivery />} />
-                
-                {/* Other Pages */}
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/resources" element={<Resources />} />
-                <Route path="/news" element={<News />} />
-                
-                {/* Logo Export Page */}
-                <Route path="/logo-export" element={<LogoExport />} />
-                
-                {/* Catch-all route for 404 */}
-                <Route path="*" element={<NotFound />} />
-                
-                {/* Mobile Bookings Route */}
-                <Route path="/mobile-bookings" element={<MobileBookings />} />
-                
-                {/* Payment Routes */}
-                <Route path="/payment-verification" element={<PaymentVerification />} />
-                <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </HelmetProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/book-consultation" element={<BookConsultation />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/cancellation-refund" element={<CancellationRefund />} />
+        <Route path="/shipping-delivery" element={<ShippingDelivery />} />
+        <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
+        <Route path="/payment-verification" element={<PaymentVerification />} />
+        <Route path="/booking-success" element={<BookingSuccess />} />
+        <Route path="/booking-history" element={<BookingHistory />} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin/payment-migration" element={<PaymentSystemMigration />} />
+        
+      </Routes>
+      <Toaster />
+    </Router>
   );
-};
+}
 
 export default App;
