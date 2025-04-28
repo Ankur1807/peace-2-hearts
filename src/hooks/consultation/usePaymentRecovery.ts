@@ -1,83 +1,82 @@
 
-import { useState, useCallback } from 'react';
-import { recoverPaymentRecord } from '@/utils/payment/razorpayService';
+import { useState } from 'react';
+import { recoverPaymentRecord } from '@/utils/payment/services/paymentRecoveryService';
 import { useToast } from '@/hooks/use-toast';
 
-/**
- * Hook to handle payment recovery operations
- */
-export const usePaymentRecovery = () => {
-  const { toast } = useToast();
-  const [isRecovering, setIsRecovering] = useState(false);
-  const [recoveryResult, setRecoveryResult] = useState<{success: boolean, message: string} | null>(null);
+interface RecoveryResult {
+  success: boolean;
+  message: string;
+}
 
-  /**
-   * Attempt to recover a payment record and send confirmation email
-   */
-  const recoverPaymentAndSendEmail = useCallback(async (
+export const usePaymentRecovery = () => {
+  const [isRecovering, setIsRecovering] = useState(false);
+  const [recoveryResult, setRecoveryResult] = useState<RecoveryResult | null>(null);
+  const { toast } = useToast();
+  
+  const recoverPaymentAndSendEmail = async (
     referenceId: string,
     paymentId: string,
     amount: number,
     orderId?: string
   ) => {
-    if (!referenceId || !paymentId) {
+    if (!referenceId || !paymentId || amount <= 0) {
       setRecoveryResult({
         success: false,
-        message: "Missing required information for recovery"
+        message: "Missing required information for payment recovery"
       });
       return false;
     }
-
+    
     setIsRecovering(true);
     setRecoveryResult(null);
     
     try {
-      console.log(`Starting recovery process for payment ${paymentId}, consultation ${referenceId}`);
-      
-      const recovered = await recoverPaymentRecord(
+      console.log("Attempting to recover payment and send confirmation email", {
         referenceId,
         paymentId,
         amount,
-        orderId
-      );
+        orderId: orderId || 'N/A'
+      });
+      
+      const recovered = await recoverPaymentRecord(referenceId, paymentId, amount, orderId);
       
       if (recovered) {
         setRecoveryResult({
           success: true,
-          message: "Payment record recovered successfully and confirmation email sent"
+          message: "Your payment has been successfully processed and a confirmation email has been sent."
         });
         
         toast({
           title: "Recovery Successful",
-          description: "Payment record has been recovered and confirmation email sent",
+          description: "Your booking has been confirmed and a confirmation email has been sent.",
         });
         
         return true;
       } else {
         setRecoveryResult({
           success: false,
-          message: "Failed to recover payment record"
+          message: "We couldn't verify your payment or send a confirmation. Please contact support with your payment details."
         });
         
         toast({
           title: "Recovery Failed",
-          description: "Could not recover payment record. Please contact support.",
+          description: "We couldn't process your payment details. Please contact our support team.",
           variant: "destructive"
         });
         
         return false;
       }
     } catch (error) {
-      console.error("Error in payment recovery:", error);
+      console.error("Error in payment recovery process:", error);
       
       setRecoveryResult({
         success: false,
-        message: error instanceof Error ? error.message : "Unknown error during recovery"
+        message: "An error occurred during the recovery process. Please contact support."
       });
       
       toast({
         title: "Recovery Error",
-        description: "An error occurred during payment recovery. Please try again.",
+        description: "An unexpected error occurred. Please try again later or contact support.",
         variant: "destructive"
       });
       
@@ -85,8 +84,8 @@ export const usePaymentRecovery = () => {
     } finally {
       setIsRecovering(false);
     }
-  }, [toast]);
-
+  };
+  
   return {
     isRecovering,
     recoveryResult,
