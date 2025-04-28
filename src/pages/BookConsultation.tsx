@@ -56,6 +56,7 @@ const BookConsultation = () => {
     clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
     email: personalDetails.email,
     referenceId: referenceId || '',
+    consultationType: selectedServices.length > 1 ? 'multiple' : selectedServices[0] || serviceCategory, // Add consultationType
     services: selectedServices || [], 
     date: date, 
     timeSlot: timeSlot,

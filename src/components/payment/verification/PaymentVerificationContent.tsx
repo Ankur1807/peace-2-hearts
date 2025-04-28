@@ -1,12 +1,10 @@
-
-import { VerificationResult } from "@/utils/types";
+import { VerificationResult, BookingDetails } from "@/utils/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
 import PaymentErrorMessage from "@/components/consultation/payment/PaymentErrorMessage";
 import BookingSuccessView from "@/components/consultation/BookingSuccessView";
-import { BookingDetails } from "@/utils/types";
 
 interface PaymentVerificationContentProps {
   verificationResult: VerificationResult | null;

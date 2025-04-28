@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -232,6 +233,7 @@ export const usePaymentRecovery = () => {
           referenceId: referenceId,
           consultationType: "manual_recovery",
           services: ["manual_recovery"],
+          serviceCategory: "recovery" // Add the missing serviceCategory property
         };
         
         // Create consultation with minimal details

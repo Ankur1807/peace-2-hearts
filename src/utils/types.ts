@@ -1,3 +1,4 @@
+
 export interface PersonalDetails {
   firstName: string;
   lastName: string;
@@ -20,4 +21,15 @@ export interface BookingDetails {
   amount?: number;
   message?: string;
   phone?: string;
+  personalDetails?: PersonalDetails; // Add this for bookingInitializer.ts
+  selectedServices?: string[]; // Add this for bookingInitializer.ts
+}
+
+export interface VerificationResult {
+  success: boolean;
+  message: string;
+  paymentId?: string;
+  orderId?: string;
+  amount?: number;
+  referenceId?: string;
 }
