@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
 import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
@@ -106,5 +105,53 @@ export async function createConsultationFromBookingDetails(bookingDetails: Booki
   } catch (error) {
     console.error("Exception in createConsultationFromBookingDetails:", error);
     return null;
+  }
+}
+
+/**
+ * Create a recovery consultation for orphaned payments
+ */
+export async function createRecoveryConsultation(
+  referenceId: string, 
+  paymentId: string, 
+  amount: number,
+  orderId?: string
+): Promise<boolean> {
+  try {
+    console.log("Attempting to create a recovery consultation record");
+    
+    const clientName = 'Payment Received - Recovery Needed';
+    const consultationType = 'recovery_needed';
+    const message = `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`;
+    
+    const { data: recoveryData, error: recoveryError } = await supabase
+      .from('consultations')
+      .insert({
+        reference_id: referenceId,
+        status: 'payment_received_needs_details',
+        consultation_type: consultationType,
+        time_slot: 'recovery_needed',
+        client_name: clientName,
+        message: message,
+        payment_id: paymentId,
+        amount: amount,
+        payment_status: 'completed'
+      })
+      .select();
+      
+    if (recoveryError) {
+      console.error("Failed to create recovery consultation:", recoveryError);
+      return false;
+    }
+    
+    if (recoveryData) {
+      console.log("Created recovery consultation:", recoveryData);
+      return true;
+    }
+    
+    return false;
+  } catch (recoveryException) {
+    console.error("Exception in recovery process:", recoveryException);
+    return false;
   }
 }

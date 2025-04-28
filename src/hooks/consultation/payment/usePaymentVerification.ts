@@ -44,16 +44,22 @@ export const usePaymentVerification = ({
       
       if (isVerified) {
         // Store payment ID in session for potential recovery
-        storePaymentDetailsInSession({
+        storePaymentDetailsInSession(
           referenceId,
-          paymentId: response.razorpay_payment_id,
+          response.razorpay_payment_id,
+          response.razorpay_order_id,
           amount,
-          orderId: response.razorpay_order_id,
           bookingDetails
-        });
+        );
         
         // Update consultation status directly
-        const statusUpdated = await updateConsultationStatus(referenceId, 'paid');
+        const statusUpdated = await updateConsultationStatus(
+          referenceId, 
+          'paid',
+          response.razorpay_payment_id,
+          amount,
+          response.razorpay_order_id
+        );
         console.log(`Consultation status updated: ${statusUpdated}`);
         
         // Send email notification directly

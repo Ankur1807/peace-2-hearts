@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { sendBookingConfirmationEmail } from "@/utils/emailService";
+import { sendBookingConfirmationEmail } from "@/utils/email/bookingEmails";
 import { BookingDetails } from "@/utils/types";
 import { determineServiceCategory } from "./serviceUtils";
 
@@ -32,7 +32,7 @@ export async function sendEmailForConsultation(
             email: data.client_email || bookingDetails.email,
             referenceId: data.reference_id,
             consultationType: data.consultation_type,
-            services: data.consultation_type.split(','),
+            services: data.consultation_type ? data.consultation_type.split(',') : [],
             date: data.date ? new Date(data.date) : undefined,
             timeSlot: data.time_slot,
             timeframe: data.timeframe,
