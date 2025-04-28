@@ -57,12 +57,14 @@ export const usePaymentVerification = ({
         console.log(`Consultation status updated: ${statusUpdated}`);
         
         // Send email notification directly
-        const emailSent = await sendEmailForConsultation(null, {
-          ...bookingDetails,
-          referenceId
-        });
-        
-        console.log(`Email notification sent: ${emailSent}`);
+        if (bookingDetails) {
+          const emailSent = await sendEmailForConsultation({
+            ...bookingDetails,
+            referenceId
+          });
+          
+          console.log(`Email notification sent: ${emailSent}`);
+        }
 
         if (setPaymentCompleted) {
           setPaymentCompleted(true);

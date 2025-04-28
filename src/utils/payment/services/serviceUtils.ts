@@ -110,12 +110,18 @@ export async function hasPaymentInformation(consultationId: string): Promise<boo
       .eq(isUuid ? 'id' : 'reference_id', consultationId)
       .single();
     
-    if (error || !data) {
+    if (error) {
+      console.log("Error checking payment information:", error.message);
+      return false;
+    }
+    
+    if (!data) {
       return false;
     }
     
     return !!data.payment_id && data.payment_status === 'completed';
   } catch (error) {
+    console.error("Exception checking payment information:", error);
     return false;
   }
 }

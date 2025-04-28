@@ -36,13 +36,15 @@ export const usePaymentRecord = () => {
         console.log("Consultation status updated successfully");
         
         // Send confirmation email
-        const emailSent = await sendEmailForConsultation(null, {
-          ...params.bookingDetails,
-          referenceId: params.referenceId,
-          amount: params.amount
-        });
-        
-        console.log("Email sending result:", emailSent);
+        if (params.bookingDetails) {
+          const emailSent = await sendEmailForConsultation({
+            ...params.bookingDetails,
+            referenceId: params.referenceId,
+            amount: params.amount
+          });
+          
+          console.log("Email sending result:", emailSent);
+        }
         return true;
       } else {
         console.error("Failed to update consultation status");

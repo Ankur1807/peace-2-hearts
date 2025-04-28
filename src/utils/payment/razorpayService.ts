@@ -56,16 +56,27 @@ export async function savePaymentRecord(params: {
     const statusUpdated = await updateConsultationStatus(referenceId, status, paymentId, amount, orderId);
     
     if (statusUpdated) {
-      // Send email notification with the consultation reference ID
-      await sendEmailForConsultation({
-        referenceId,
-        clientName: 'Client', // This will be overridden by the data from the consultation
-        email: 'client@example.com', // This will be overridden by the data from the consultation
-        consultationType: 'general',
-        services: [],
-        serviceCategory: 'general',
-        highPriority: true
-      });
+      // Create booking details for email
+      const { data: consultation } = await supabase
+        .from('consultations')
+        .select('*')
+        .eq('reference_id', referenceId)
+        .single();
+        
+      if (consultation) {
+        // Send email notification
+        const bookingDetails = {
+          referenceId,
+          clientName: consultation.client_name || 'Client',
+          email: consultation.client_email || 'client@example.com',
+          consultationType: consultation.consultation_type || 'general',
+          services: consultation.consultation_type ? consultation.consultation_type.split(',') : [],
+          serviceCategory: 'general',
+          highPriority: true
+        };
+        
+        await sendEmailForConsultation(bookingDetails);
+      }
     }
     
     return statusUpdated;
@@ -74,3 +85,6 @@ export async function savePaymentRecord(params: {
     return false;
   }
 }
+
+// Add missing import for supabase
+import { supabase } from "@/integrations/supabase/client";
