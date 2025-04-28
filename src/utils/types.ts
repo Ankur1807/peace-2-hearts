@@ -21,8 +21,11 @@ export interface BookingDetails {
   amount?: number;
   message?: string;
   phone?: string;
-  personalDetails?: PersonalDetails; // Add this for bookingInitializer.ts
-  selectedServices?: string[]; // Add this for bookingInitializer.ts
+  personalDetails?: PersonalDetails; // For bookingInitializer.ts
+  selectedServices?: string[]; // For bookingInitializer.ts
+  isResend?: boolean; // Flag for resent emails
+  isRecovery?: boolean; // Flag for recovery emails
+  highPriority?: boolean; // For prioritizing important emails
 }
 
 export interface VerificationResult {

@@ -1,11 +1,10 @@
-
 /**
  * Service for handling payment records in the database
  */
 import { supabase } from "@/integrations/supabase/client";
 import { sendBookingConfirmationEmail } from "@/utils/emailService";
 import { BookingDetails } from "@/utils/types";
-import { createConsultationFromBookingDetails } from "@/utils/consultation/consultationRecovery";
+import { createConsultationFromBookingDetails, createRecoveryConsultation } from "@/utils/consultation/consultationRecovery";
 
 /**
  * Save payment record to database with retry mechanism and transaction support
@@ -20,6 +19,7 @@ export const savePaymentRecord = async (params: {
 }): Promise<boolean> => {
   const MAX_RETRIES = 3;
   let retryCount = 0;
+  let emailSent = false;
   
   while (retryCount < MAX_RETRIES) {
     try {
@@ -104,6 +104,20 @@ export const savePaymentRecord = async (params: {
         // If we made it here, we need to create a recovery record
         const recovery = await createRecoveryConsultation(referenceId, paymentId, amount, bookingDetails);
         if (recovery) {
+          // Even if we couldn't find the consultation, try to send email with the booking details
+          if (bookingDetails) {
+            try {
+              emailSent = await sendBookingConfirmationEmail({
+                ...bookingDetails,
+                referenceId,
+                amount,
+                isRecovery: true
+              });
+              console.log("Recovery email sending result:", emailSent);
+            } catch (emailError) {
+              console.error("Failed to send recovery email:", emailError);
+            }
+          }
           return true; // Recovery record created successfully
         }
         return false;
@@ -115,7 +129,7 @@ export const savePaymentRecord = async (params: {
       // Check if payment record already exists for this consultation
       const { data: existingPayment, error: checkPaymentError } = await supabase
         .from('payments')
-        .select('id, transaction_id')
+        .select('id, transaction_id, email_sent')
         .eq('consultation_id', consultationId)
         .eq('transaction_id', paymentId)
         .maybeSingle();
@@ -130,13 +144,29 @@ export const savePaymentRecord = async (params: {
         // Update consultation status if needed
         await updateConsultationStatus(consultationId, status);
         
-        // Send confirmation email - even if payment record exists, make sure email is sent
-        await sendEmailForConsultation(consultationData, bookingDetails);
+        // Check if email was already sent
+        const emailAlreadySent = existingPayment.email_sent === true;
+        
+        // Send confirmation email if not already sent
+        if (!emailAlreadySent) {
+          emailSent = await sendEmailForConsultation(consultationData, bookingDetails);
+          
+          if (emailSent) {
+            // Update payment record to indicate email was sent
+            await supabase
+              .from('payments')
+              .update({ email_sent: true })
+              .eq('id', existingPayment.id);
+          }
+        } else {
+          console.log("Email was already sent for this payment");
+          emailSent = true;
+        }
         
         return true;
       }
 
-      // Save the payment record
+      // Save the payment record with email_sent field
       const { data: paymentData, error: paymentError } = await supabase
         .from('payments')
         .insert({
@@ -146,6 +176,7 @@ export const savePaymentRecord = async (params: {
           order_id: orderId,
           payment_status: status,
           payment_method: 'razorpay',
+          email_sent: false // Initialize as false, will update after sending
         })
         .select();
       
@@ -169,7 +200,15 @@ export const savePaymentRecord = async (params: {
       }
 
       // Send confirmation email after successful payment record creation
-      await sendEmailForConsultation(consultationData, bookingDetails);
+      emailSent = await sendEmailForConsultation(consultationData, bookingDetails);
+      
+      // Update the payment record to indicate email has been sent
+      if (emailSent && paymentData && paymentData.length > 0) {
+        await supabase
+          .from('payments')
+          .update({ email_sent: true })
+          .eq('id', paymentData[0].id);
+      }
       
       // Clear the backup from session storage on successful save
       clearPaymentDetailsFromSession(referenceId);
@@ -189,6 +228,99 @@ export const savePaymentRecord = async (params: {
   
   return false;
 };
+
+/**
+ * Send confirmation email for a consultation with better error handling
+ */
+async function sendEmailForConsultation(
+  consultationData: any,
+  bookingDetails?: BookingDetails | null
+): Promise<boolean> {
+  const MAX_EMAIL_RETRIES = 3;
+  let emailRetryCount = 0;
+  
+  while (emailRetryCount < MAX_EMAIL_RETRIES) {
+    try {
+      console.log("Attempting to send confirmation email (attempt " + (emailRetryCount + 1) + ")");
+      
+      // Use booking details if available, otherwise create from consultation data
+      const emailData = bookingDetails || {
+        clientName: consultationData.client_name,
+        email: consultationData.client_email,
+        referenceId: consultationData.reference_id,
+        consultationType: consultationData.consultation_type,
+        services: consultationData.consultation_type.split(','),
+        date: consultationData.date ? new Date(consultationData.date) : undefined,
+        timeSlot: consultationData.time_slot,
+        timeframe: consultationData.timeframe,
+        message: consultationData.message,
+        serviceCategory: determineServiceCategory(consultationData.consultation_type)
+      };
+      
+      // Add high-priority flag for emails
+      const emailResult = await sendBookingConfirmationEmail({
+        ...emailData,
+        highPriority: true
+      });
+      
+      console.log("Email sending result:", emailResult);
+      return !!emailResult;
+    } catch (error) {
+      console.error(`Email sending attempt ${emailRetryCount + 1} failed:`, error);
+      emailRetryCount++;
+      
+      if (emailRetryCount < MAX_EMAIL_RETRIES) {
+        console.log(`Retrying email in ${emailRetryCount * 2} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, emailRetryCount * 2000));
+      } else {
+        // Log failed email attempt for recovery
+        console.error("All email sending attempts failed, will need manual recovery");
+        return false;
+      }
+    }
+  }
+  
+  return false;
+}
+
+/**
+ * Update the status of a consultation
+ */
+async function updateConsultationStatus(consultationId: string, status: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('consultations')
+      .update({ status: status === 'completed' ? 'paid' : status })
+      .eq('id', consultationId);
+    
+    if (error) {
+      console.error("Error updating consultation status:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Exception updating consultation status:", error);
+    return false;
+  }
+}
+
+/**
+ * Determine service category from consultation type
+ */
+function determineServiceCategory(consultationType: string): string {
+  if (!consultationType) return 'mental-health';
+  
+  const lowerCaseType = consultationType.toLowerCase();
+  
+  if (lowerCaseType.includes('legal') || lowerCaseType.includes('divorce')) {
+    return 'legal';
+  } else if (lowerCaseType.includes('holistic')) {
+    return 'holistic';
+  } else {
+    return 'mental-health';
+  }
+}
 
 /**
  * Store payment details in sessionStorage as a backup
@@ -337,105 +469,6 @@ export const createRecoveryConsultation = async (
     return false;
   } catch (recoveryException) {
     console.error("Exception in recovery process:", recoveryException);
-    return false;
-  }
-};
-
-/**
- * Helper function to send confirmation email for a consultation
- */
-const sendEmailForConsultation = async (
-  consultationData: any,
-  bookingDetails?: any
-): Promise<boolean> => {
-  try {
-    const email = bookingDetails?.email || consultationData.client_email;
-    
-    if (!email) {
-      console.error("Cannot send confirmation email - missing email address");
-      return false;
-    }
-
-    console.log(`Attempting to send confirmation email for consultation: ${consultationData.reference_id}`);
-    
-    // Use booking details if available, otherwise format from consultation data
-    const emailBookingDetails = bookingDetails || {
-      clientName: consultationData.client_name || '',
-      email: consultationData.client_email || '',
-      referenceId: consultationData.reference_id || '',
-      consultationType: consultationData.consultation_type || '',
-      services: [consultationData.consultation_type || ''],
-      date: consultationData.date ? new Date(consultationData.date) : undefined,
-      timeSlot: consultationData.time_slot || undefined,
-      timeframe: consultationData.timeframe || undefined,
-      message: consultationData.message || '',
-      serviceCategory: determineServiceCategory(consultationData.consultation_type)
-    };
-    
-    console.log("Sending booking confirmation email with details:", emailBookingDetails);
-    
-    const result = await sendBookingConfirmationEmail(emailBookingDetails);
-    
-    console.log("Email sending result:", result);
-    return result;
-  } catch (error) {
-    console.error("Error sending confirmation email:", error);
-    return false;
-  }
-};
-
-/**
- * Helper function to determine service category from consultation type
- */
-const determineServiceCategory = (consultationType: string): string => {
-  if (!consultationType) return '';
-  
-  if (consultationType.includes('holistic') || 
-      consultationType.includes('divorce-prevention') || 
-      consultationType.includes('pre-marriage-clarity')) {
-    return 'holistic';
-  }
-  
-  if (consultationType.includes('legal') || 
-      consultationType.includes('divorce') || 
-      consultationType.includes('custody')) {
-    return 'legal';
-  }
-  
-  if (consultationType.includes('psychological') || 
-      consultationType.includes('therapy') || 
-      consultationType.includes('counseling')) {
-    return 'psychological';
-  }
-  
-  if (consultationType.includes('test')) {
-    return 'test';
-  }
-  
-  return '';
-};
-
-/**
- * Helper function to update consultation status
- */
-const updateConsultationStatus = async (consultationId: string, status: string): Promise<boolean> => {
-  try {
-    console.log(`Updating consultation ${consultationId} status to: ${status}`);
-    
-    const { error } = await supabase
-      .from('consultations')
-      .update({ status: status === 'completed' ? 'paid' : status })
-      .eq('id', consultationId);
-    
-    if (error) {
-      console.error('Error updating consultation status:', error);
-      return false;
-    }
-    
-    console.log(`Consultation ${consultationId} status updated to: ${status}`);
-    return true;
-  } catch (err) {
-    console.error('Exception updating consultation status:', err);
     return false;
   }
 };

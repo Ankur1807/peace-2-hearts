@@ -85,12 +85,27 @@ export async function handleBookingEmail(data: BookingEmailRequest) {
   try {
     // Send confirmation email to client
     console.log("Sending confirmation email to client:", email);
-    const userEmailResponse = await resend.emails.send({
+    
+    // Add explicit email headers for important emails
+    const emailOptions = {
       from: "Peace2Hearts <contact@peace2hearts.com>",
       to: [email],
       subject: isResend ? "Re: Your Consultation Booking Confirmation - Peace2Hearts" : "Your Consultation Booking Confirmation - Peace2Hearts",
       html: getBookingUserEmailTemplate(data),
-    });
+      headers: {}
+    };
+    
+    // Mark important emails with high priority
+    if (isResend || data.isRecovery) {
+      // @ts-ignore - Headers type is not properly defined
+      emailOptions.headers = {
+        "X-Priority": "1",
+        "X-MSMail-Priority": "High",
+        "Importance": "high"
+      };
+    }
+    
+    const userEmailResponse = await resend.emails.send(emailOptions);
     
     console.log("User booking email sent successfully:", userEmailResponse);
     
