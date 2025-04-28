@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { BookingDetails, SerializedBookingDetails } from '@/utils/types';
 
@@ -165,13 +164,12 @@ async function sendBookingConfirmationEmailInternal(bookingDetails: SerializedBo
       // First check if it's an object
       if (typeof dateValue === 'object' && dateValue !== null) {
         // Then check if it has getTime method which is specific to Date objects
-        // Using non-null assertion after explicit null check
-        if (dateValue && 'getTime' in dateValue) {
+        if ('getTime' in dateValue) {
           // Ensure getTime is a function before attempting to cast
           const getTimeProperty = dateValue.getTime;
           if (typeof getTimeProperty === 'function') {
             // Now we can safely cast to Date
-            const dateObject = dateValue as Date;
+            const dateObject = dateValue as unknown as Date;
             // Check if it's a valid date
             if (!isNaN(dateObject.getTime())) {
               // Convert Date to ISO string for API transmission
