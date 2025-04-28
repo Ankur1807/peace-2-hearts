@@ -75,13 +75,20 @@ export async function createConsultationFromBookingDetails(bookingDetails: Booki
   try {
     console.log("Creating consultation from booking details:", bookingDetails);
     
+    // Fix: Convert Date object to ISO string for Supabase
+    const dateValue = bookingDetails.date ? 
+      (typeof bookingDetails.date === 'string' ? 
+        bookingDetails.date : 
+        bookingDetails.date.toISOString()) : 
+      null;
+    
     const consultationData = {
       reference_id: bookingDetails.referenceId,
       client_name: bookingDetails.clientName,
       client_email: bookingDetails.email,
       client_phone: bookingDetails.phone || null,
       consultation_type: bookingDetails.consultationType,
-      date: bookingDetails.date || null,
+      date: dateValue,
       time_slot: bookingDetails.timeSlot || null,
       timeframe: bookingDetails.timeframe || null,
       message: bookingDetails.message || null,
@@ -100,6 +107,47 @@ export async function createConsultationFromBookingDetails(bookingDetails: Booki
     return true;
   } catch (error) {
     console.error("Exception creating consultation:", error);
+    return false;
+  }
+}
+
+/**
+ * Create a recovery consultation for orphaned payments
+ */
+export async function createRecoveryConsultation(
+  referenceId: string, 
+  paymentId: string, 
+  amount: number
+): Promise<boolean> {
+  try {
+    console.log("Attempting to create a recovery consultation record");
+    
+    const clientName = 'Payment Received - Recovery Needed';
+    const consultationType = 'recovery_needed';
+    const message = `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`;
+    
+    const { error } = await supabase
+      .from('consultations')
+      .insert({
+        reference_id: referenceId,
+        status: 'payment_received_needs_details',
+        consultation_type: consultationType,
+        time_slot: 'recovery_needed',
+        timeframe: null,
+        client_name: clientName,
+        client_email: null,
+        message: message
+      });
+      
+    if (error) {
+      console.error("Failed to create recovery consultation:", error);
+      return false;
+    }
+    
+    console.log("Created recovery consultation successfully");
+    return true;
+  } catch (error) {
+    console.error("Exception in recovery process:", error);
     return false;
   }
 }

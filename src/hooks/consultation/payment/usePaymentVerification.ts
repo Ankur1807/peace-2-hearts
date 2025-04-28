@@ -44,13 +44,13 @@ export const usePaymentVerification = ({
       
       if (isVerified) {
         // Store payment ID in session for potential recovery
-        storePaymentDetailsInSession(
-          referenceId, 
-          response.razorpay_payment_id, 
-          amount, 
-          response.razorpay_order_id,
+        storePaymentDetailsInSession({
+          referenceId,
+          paymentId: response.razorpay_payment_id,
+          amount,
+          orderId: response.razorpay_order_id,
           bookingDetails
-        );
+        });
         
         // Update consultation status directly
         const statusUpdated = await updateConsultationStatus(referenceId, 'paid');

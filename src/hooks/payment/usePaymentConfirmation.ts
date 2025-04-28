@@ -76,10 +76,10 @@ export const usePaymentConfirmation = ({
                   console.error("Failed to save payment record for referenceId:", referenceId);
                   
                   // Try to create a recovery consultation if payment record couldn't be saved
-                  const recoveryId = await createRecoveryConsultation(referenceId, paymentId, amount);
+                  const recoveryCreated = await createRecoveryConsultation(referenceId, paymentId, amount);
                   
-                  if (recoveryId) {
-                    console.log("Created recovery consultation:", recoveryId);
+                  if (recoveryCreated) {
+                    console.log("Created recovery consultation for reference ID:", referenceId);
                     // Try again to save the payment with the recovery consultation
                     await savePaymentRecord({
                       paymentId,

@@ -1,51 +1,43 @@
 
 /**
- * Service for managing payment data in session storage
+ * Utility for storing payment details in session storage for potential recovery
  */
-import { BookingDetails, SerializedBookingDetails } from '@/utils/types';
+import { BookingDetails } from '@/utils/types';
+
+interface PaymentDetailsParams {
+  referenceId: string;
+  paymentId: string;
+  amount: number;
+  orderId: string;
+  bookingDetails?: BookingDetails;
+}
 
 /**
- * Store payment details in session storage for potential recovery
+ * Store payment details in session storage
  */
-export function storePaymentDetailsInSession(
-  referenceId: string,
-  paymentId: string,
-  amount: number,
-  orderId: string,
-  bookingDetails?: BookingDetails | null
-): void {
+export function storePaymentDetailsInSession(params: PaymentDetailsParams): void {
   try {
-    console.log("Storing payment details in session:", { 
-      referenceId, 
-      paymentId, 
-      amount, 
-      orderId,
-      hasBookingDetails: !!bookingDetails
-    });
+    const { referenceId, paymentId, amount, orderId, bookingDetails } = params;
     
-    // Store individual values
+    // Store essential payment details
     sessionStorage.setItem(`payment_id_${referenceId}`, paymentId);
-    sessionStorage.setItem(`payment_amount_${referenceId}`, amount.toString());
     sessionStorage.setItem(`order_id_${referenceId}`, orderId);
+    sessionStorage.setItem(`amount_${referenceId}`, amount.toString());
     
-    // Store serialized booking details
+    // Store booking details if available
     if (bookingDetails) {
-      const serializedBookingDetails = JSON.stringify(bookingDetails);
-      sessionStorage.setItem(`booking_details_${referenceId}`, serializedBookingDetails);
+      sessionStorage.setItem(`booking_details_${referenceId}`, JSON.stringify({
+        ...bookingDetails,
+        date: bookingDetails.date ? 
+          (bookingDetails.date instanceof Date ? 
+            bookingDetails.date.toISOString() : bookingDetails.date) : 
+          null
+      }));
     }
     
-    // Also store everything as a single JSON object
-    const paymentData = {
-      paymentId,
-      amount,
-      orderId,
-      bookingDetails,
-      timestamp: new Date().toISOString()
-    };
-    
-    sessionStorage.setItem(`payment_data_${referenceId}`, JSON.stringify(paymentData));
+    console.log(`Payment details stored in session for ${referenceId}`);
   } catch (error) {
-    console.error("Error storing payment details in session:", error);
+    console.error('Error storing payment details in session:', error);
   }
 }
 
@@ -53,57 +45,24 @@ export function storePaymentDetailsInSession(
  * Get payment details from session storage
  */
 export function getPaymentDetailsFromSession(referenceId: string): {
-  paymentId: string;
+  paymentId: string | null;
+  orderId: string | null;
   amount: number;
-  orderId: string;
-  bookingDetails?: any;
+  bookingDetails: any | null;
 } {
   try {
-    console.log("Retrieving payment details from session for reference ID:", referenceId);
+    const paymentId = sessionStorage.getItem(`payment_id_${referenceId}`);
+    const orderId = sessionStorage.getItem(`order_id_${referenceId}`);
+    const amountStr = sessionStorage.getItem(`amount_${referenceId}`);
+    const bookingDetailsStr = sessionStorage.getItem(`booking_details_${referenceId}`);
     
-    // Try to get the consolidated data first
-    const paymentDataJson = sessionStorage.getItem(`payment_data_${referenceId}`);
-    if (paymentDataJson) {
-      try {
-        const paymentData = JSON.parse(paymentDataJson);
-        console.log("Found consolidated payment data:", paymentData);
-        return paymentData;
-      } catch (e) {
-        console.error("Error parsing consolidated payment data:", e);
-      }
-    }
+    const amount = amountStr ? parseFloat(amountStr) : 0;
+    const bookingDetails = bookingDetailsStr ? JSON.parse(bookingDetailsStr) : null;
     
-    // Fall back to individual items
-    const paymentId = sessionStorage.getItem(`payment_id_${referenceId}`) || '';
-    const amountStr = sessionStorage.getItem(`payment_amount_${referenceId}`) || '0';
-    const orderId = sessionStorage.getItem(`order_id_${referenceId}`) || '';
-    
-    const amount = parseInt(amountStr, 10) || 0;
-    
-    // Try to get booking details
-    let bookingDetails;
-    const bookingDetailsJson = sessionStorage.getItem(`booking_details_${referenceId}`);
-    if (bookingDetailsJson) {
-      try {
-        bookingDetails = JSON.parse(bookingDetailsJson);
-      } catch (e) {
-        console.error("Error parsing booking details:", e);
-      }
-    }
-    
-    return {
-      paymentId,
-      amount,
-      orderId,
-      bookingDetails
-    };
+    return { paymentId, orderId, amount, bookingDetails };
   } catch (error) {
-    console.error("Error getting payment details from session:", error);
-    return {
-      paymentId: '',
-      amount: 0,
-      orderId: '',
-    };
+    console.error('Error retrieving payment details from session:', error);
+    return { paymentId: null, orderId: null, amount: 0, bookingDetails: null };
   }
 }
 
@@ -113,11 +72,12 @@ export function getPaymentDetailsFromSession(referenceId: string): {
 export function clearPaymentDetailsFromSession(referenceId: string): void {
   try {
     sessionStorage.removeItem(`payment_id_${referenceId}`);
-    sessionStorage.removeItem(`payment_amount_${referenceId}`);
     sessionStorage.removeItem(`order_id_${referenceId}`);
+    sessionStorage.removeItem(`amount_${referenceId}`);
     sessionStorage.removeItem(`booking_details_${referenceId}`);
-    sessionStorage.removeItem(`payment_data_${referenceId}`);
+    
+    console.log(`Payment details cleared from session for ${referenceId}`);
   } catch (error) {
-    console.error("Error clearing payment details from session:", error);
+    console.error('Error clearing payment details from session:', error);
   }
 }
