@@ -1,3 +1,4 @@
+
 import { SerializedBookingDetails } from '@/utils/types';
 
 /**
@@ -12,7 +13,7 @@ export function processBookingDate(bookingDetails: SerializedBookingDetails): Se
     // First check if it's an object
     if (typeof dateValue === 'object' && dateValue !== null) {
       // Then check if it has getTime method which is specific to Date objects
-      if ('getTime' in dateValue && dateValue !== null) {
+      if (dateValue !== null && 'getTime' in dateValue) {
         // Ensure getTime is a function before attempting to cast
         const getTimeProperty = dateValue.getTime;
         if (typeof getTimeProperty === 'function') {
