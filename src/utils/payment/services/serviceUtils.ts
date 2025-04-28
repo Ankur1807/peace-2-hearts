@@ -120,11 +120,9 @@ export async function hasPaymentInformation(consultationId: string): Promise<boo
       return false;
     }
     
-    // Check for payment fields safely
-    const hasPaymentId = data.payment_id !== undefined && data.payment_id !== null;
-    const hasPaymentStatus = data.payment_status !== undefined && data.payment_status === 'completed';
-    
-    return hasPaymentId || hasPaymentStatus;
+    // Access the properties directly without type checking
+    // This will work now that we've added these fields to the database
+    return !!(data.payment_id || (data.payment_status === 'completed'));
   } catch (error) {
     console.error("Exception checking payment information:", error);
     return false;

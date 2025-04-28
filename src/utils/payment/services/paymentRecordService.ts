@@ -167,14 +167,38 @@ export const savePaymentRecord = async (params: SavePaymentRecordParams): Promis
         }
       }
       
+      // If consultation still not found, create a minimal placeholder
       if (consultationError) {
-        console.error(`Attempt ${retryCount + 1}: Error finding consultation:`, consultationError);
-        retryCount++;
-        if (retryCount < MAX_RETRIES) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          continue;
+        console.log("Creating a minimal placeholder consultation record");
+        
+        const { data: placeholderData, error: placeholderError } = await supabase
+          .from('consultations')
+          .insert({
+            reference_id: referenceId,
+            payment_id: paymentId,
+            order_id: orderId,
+            amount: amount,
+            payment_status: status,
+            status: 'payment_received_needs_details',
+            consultation_type: 'recovery_needed',
+            client_name: 'Payment Received - Recovery Needed',
+            message: `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`,
+            time_slot: 'to_be_scheduled' // Adding the required time_slot field
+          })
+          .select();
+          
+        if (placeholderError) {
+          console.error(`Attempt ${retryCount + 1}: Error creating placeholder consultation:`, placeholderError);
+          retryCount++;
+          if (retryCount < MAX_RETRIES) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+          return false;
+        } else {
+          consultationData = placeholderData[0];
+          consultationError = null;
         }
-        return false;
       }
 
       // Update consultation with payment details

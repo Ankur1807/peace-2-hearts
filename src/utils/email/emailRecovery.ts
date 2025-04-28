@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { sendBookingConfirmationEmail } from "./bookingEmails";
 import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
-import { BookingDetails } from "@/utils/types";
+import type { BookingDetails } from "@/utils/types";
 
 /**
  * Check for consultations without confirmation emails and attempt recovery

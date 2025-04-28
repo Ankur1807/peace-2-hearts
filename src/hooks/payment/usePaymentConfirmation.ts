@@ -119,12 +119,15 @@ export const usePaymentConfirmation = ({
                       amount: amount,
                       consultation_type: 'recovery_needed',
                       client_name: 'Payment Received - Recovery Needed',
-                      message: `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`
+                      message: `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`,
+                      time_slot: 'to_be_scheduled' // Adding the required time_slot field
                     })
                     .select();
                     
                   if (!recoveryError && recoveryData) {
                     console.log("Created recovery consultation record:", recoveryData);
+                  } else if (recoveryError) {
+                    console.error("Error creating recovery record:", recoveryError);
                   }
                 }
               } catch (error) {
