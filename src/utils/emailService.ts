@@ -154,7 +154,11 @@ async function sendBookingConfirmationEmailInternal(bookingDetails: SerializedBo
     // Create a serialized version without date first
     const serializedBookingDetails: SerializedBookingDetails = { 
       ...bookingDetails,
-      date: undefined // Remove date property initially to avoid type conflicts
+      date: typeof bookingDetails.date === 'string' 
+        ? bookingDetails.date 
+        : bookingDetails.date instanceof Date 
+          ? bookingDetails.date.toISOString() 
+          : undefined
     };
     
     // Handle date conversion

@@ -1,3 +1,8 @@
+export interface VerificationResult {
+  success: boolean;
+  message: string;
+}
+
 export interface PersonalDetails {
   firstName: string;
   lastName: string;
@@ -20,9 +25,9 @@ export interface BookingDetails {
   amount?: number;
   message?: string;
   phone?: string;
-  personalDetails?: PersonalDetails; // For bookingInitializer.ts
-  selectedServices?: string[]; // For bookingInitializer.ts
-  isResend?: boolean; // Flag for resent emails
+  personalDetails?: PersonalDetails;
+  selectedServices?: string[];
+  isResend?: boolean;
   isRecovery?: boolean;
   highPriority?: boolean;
 }

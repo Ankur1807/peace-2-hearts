@@ -1,62 +1,75 @@
 
-import PackageDetails from './PackageDetails';
-import ServiceDetails from './ServiceDetails';
-import { formatPrice } from '@/utils/pricing';
+import { formatDate } from '@/utils/dateFormatters';
 
 interface BookingDetailsCardProps {
   services: string[];
-  date?: Date;
+  date?: string | Date;
   timeSlot?: string;
   timeframe?: string;
-  packageName?: string;
+  packageName?: string | null;
   isHolisticPackage: boolean;
   amount?: number;
   referenceId?: string;
 }
 
-const BookingDetailsCard = ({ 
-  services, 
-  date, 
-  timeSlot, 
+const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({
+  services,
+  date,
+  timeSlot,
   timeframe,
   packageName,
   isHolisticPackage,
   amount,
   referenceId
-}: BookingDetailsCardProps) => {
+}) => {
+  const formattedDate = date 
+    ? typeof date === 'string' 
+      ? new Date(date).toLocaleDateString('en-GB')
+      : date.toLocaleDateString('en-GB')
+    : undefined;
+
   return (
-    <div className="mb-8 max-w-lg mx-auto text-left">
-      <h3 className="text-xl font-semibold mb-3">Booking Information:</h3>
-      <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-        {referenceId && (
-          <div className="mb-4">
-            <p className="font-medium mb-1">Reference ID:</p>
-            <p className="bg-white px-3 py-2 rounded border border-gray-200 font-mono text-sm">
-              {referenceId}
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              Please save this ID for future reference
-            </p>
+    <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-6">
+      <h3 className="text-xl font-semibold mb-4">Booking Details</h3>
+      
+      <div className="space-y-4">
+        {services && services.length > 0 && (
+          <div>
+            <h4 className="font-medium text-gray-700">Services</h4>
+            <ul className="list-disc list-inside text-gray-600 ml-2">
+              {services.map((service, index) => (
+                <li key={index}>{service}</li>
+              ))}
+            </ul>
           </div>
         )}
-        
-        {isHolisticPackage && packageName && timeframe ? (
-          <PackageDetails 
-            packageName={packageName} 
-            timeframe={timeframe} 
-          />
-        ) : (
-          <ServiceDetails 
-            services={services}
-            date={date}
-            timeSlot={timeSlot}
-          />
+
+        {(formattedDate || timeSlot || timeframe) && (
+          <div>
+            <h4 className="font-medium text-gray-700">Scheduling</h4>
+            {formattedDate && (
+              <p className="text-gray-600">Date: {formattedDate}</p>
+            )}
+            {timeSlot && (
+              <p className="text-gray-600">Time: {timeSlot}</p>
+            )}
+            {timeframe && (
+              <p className="text-gray-600">Timeframe: {timeframe}</p>
+            )}
+          </div>
         )}
-        
-        {amount !== undefined && amount > 0 && (
-          <div className="border-t pt-4 mt-4">
-            <p className="font-medium mb-2">Payment Amount:</p>
-            <p className="text-green-700 font-semibold">{formatPrice(amount)} (Paid)</p>
+
+        {amount && (
+          <div>
+            <h4 className="font-medium text-gray-700">Payment</h4>
+            <p className="text-gray-600">Amount paid: ₹{amount}</p>
+          </div>
+        )}
+
+        {referenceId && (
+          <div>
+            <h4 className="font-medium text-gray-700">Reference ID</h4>
+            <p className="text-gray-600 font-mono">{referenceId}</p>
           </div>
         )}
       </div>
