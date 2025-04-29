@@ -1,23 +1,14 @@
 
-import { SEO } from '@/components/SEO';
-import PricingTabs from "@/components/admin/PricingTabs";
-import { AdminProvider } from "@/hooks/useAdminContext";
+import React from 'react';
 
-const AdminPricing = () => {
+const AdminPricing: React.FC = () => {
   return (
-    <>
-      <SEO
-        title="Pricing Management - Peace2Hearts Admin"
-        description="Manage service pricing and packages"
-      />
-      
-      <AdminProvider>
-        <div className="space-y-6">
-          <h1 className="text-3xl font-bold">Pricing Management</h1>
-          <PricingTabs />
-        </div>
-      </AdminProvider>
-    </>
+    <div>
+      <h1 className="text-2xl font-bold mb-6">Pricing Management</h1>
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <p className="text-gray-500">No pricing data available.</p>
+      </div>
+    </div>
   );
 };
 

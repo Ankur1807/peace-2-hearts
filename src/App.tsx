@@ -1,6 +1,5 @@
-
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Home from '@/pages/Index';
 import About from '@/pages/AboutUs';
@@ -39,8 +38,28 @@ import ChildCustodyConsultation from '@/pages/services/legal/ChildCustodyConsult
 import MaintenanceConsultation from '@/pages/services/legal/MaintenanceConsultation';
 import GeneralConsultation from '@/pages/services/legal/GeneralConsultation';
 
+// Holistic package pages
+import PreMarriageClarityPackage from '@/pages/services/holistic/PreMarriageClarityPackage';
+import DivorcePreventionPackage from '@/pages/services/holistic/DivorcePreventionPackage';
+
 // Admin pages
 import AdminLogin from '@/pages/admin/AdminLogin';
+import AdminLayout from '@/components/admin/AdminLayout';
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import AdminConsultants from '@/pages/admin/AdminConsultants';
+import AdminPricing from '@/pages/admin/AdminPricing';
+import AdminBookings from '@/pages/admin/AdminBookings';
+import AdminSettings from '@/pages/admin/AdminSettings';
+import AdminPaymentMigration from '@/pages/admin/AdminPaymentMigration';
+
+// Other pages
+import News from '@/pages/News';
+import Consultants from '@/pages/Consultants';
+import ConsultantDetail from '@/pages/ConsultantDetail';
+import Resources from '@/pages/Resources';
+import ShippingDelivery from '@/pages/ShippingDelivery';
+import MobileBookings from '@/pages/MobileBookings';
+import LogoExport from '@/pages/LogoExport';
 
 function App() {
   useEffect(() => {
@@ -78,6 +97,10 @@ function App() {
         <Route path="/services/legal-support/maintenance" element={<MaintenanceConsultation />} />
         <Route path="/services/legal-support/general" element={<GeneralConsultation />} />
         
+        {/* Holistic package pages */}
+        <Route path="/services/holistic/pre-marriage-clarity" element={<PreMarriageClarityPackage />} />
+        <Route path="/services/holistic/divorce-prevention" element={<DivorcePreventionPackage />} />
+        
         <Route path="/book-consultation" element={<BookConsultation />} />
         <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
         <Route path="/payment-verification" element={<PaymentVerification />} />
@@ -87,8 +110,28 @@ function App() {
         <Route path="/refund" element={<Refund />} />
         <Route path="/dashboard" element={<Dashboard />} />
         
+        {/* Other pages */}
+        <Route path="/news" element={<News />} />
+        <Route path="/consultants" element={<Consultants />} />
+        <Route path="/consultants/:id" element={<ConsultantDetail />} />
+        <Route path="/resources" element={<Resources />} />
+        <Route path="/shipping-delivery" element={<ShippingDelivery />} />
+        <Route path="/mobile-bookings" element={<MobileBookings />} />
+        <Route path="/logo-export" element={<LogoExport />} />
+        
         {/* Admin routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        
+        {/* Protected admin routes with AdminLayout */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="consultants" element={<AdminConsultants />} />
+          <Route path="pricing" element={<AdminPricing />} />
+          <Route path="bookings" element={<AdminBookings />} />
+          <Route path="settings" element={<AdminSettings />} />
+          <Route path="payment-migration" element={<AdminPaymentMigration />} />
+        </Route>
         
         <Route path="*" element={<NotFound />} />
       </Routes>

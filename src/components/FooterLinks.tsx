@@ -11,6 +11,9 @@ const FooterLinks = () => {
           <li><Link to="/" className="hover:underline">Home</Link></li>
           <li><Link to="/about" className="hover:underline">About Us</Link></li>
           <li><Link to="/services" className="hover:underline">Services</Link></li>
+          <li><Link to="/consultants" className="hover:underline">Our Consultants</Link></li>
+          <li><Link to="/resources" className="hover:underline">Resources</Link></li>
+          <li><Link to="/news" className="hover:underline">News</Link></li>
           <li><Link to="/contact" className="hover:underline">Contact</Link></li>
         </ul>
       </div>
@@ -23,6 +26,8 @@ const FooterLinks = () => {
           <li><Link to="/services/therapy" className="hover:underline">Relationship Therapy</Link></li>
           <li><Link to="/services/divorce" className="hover:underline">Divorce Support</Link></li>
           <li><Link to="/services/custody" className="hover:underline">Child Custody Support</Link></li>
+          <li><Link to="/services/holistic/divorce-prevention" className="hover:underline">Divorce Prevention</Link></li>
+          <li><Link to="/services/holistic/pre-marriage-clarity" className="hover:underline">Pre-Marriage Clarity</Link></li>
         </ul>
       </div>
       
@@ -32,6 +37,8 @@ const FooterLinks = () => {
           <li><Link to="/terms" className="hover:underline">Terms & Conditions</Link></li>
           <li><Link to="/privacy" className="hover:underline">Privacy Policy</Link></li>
           <li><Link to="/refund" className="hover:underline">Cancellation & Refund</Link></li>
+          <li><Link to="/shipping-delivery" className="hover:underline">Shipping & Delivery</Link></li>
+          <li><Link to="/mobile-bookings" className="hover:underline">Mobile Bookings</Link></li>
           <li><Link to="/admin/login" className="hover:underline text-xs text-gray-400">Admin Portal</Link></li>
         </ul>
       </div>
