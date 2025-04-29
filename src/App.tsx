@@ -1,16 +1,17 @@
+
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import Home from '@/pages/Home';
-import About from '@/pages/About';
+import Home from '@/pages/Index';
+import About from '@/pages/AboutUs';
 import Services from '@/pages/Services';
 import BookConsultation from '@/pages/BookConsultation';
 import PaymentConfirmation from '@/pages/PaymentConfirmation';
 import PaymentVerification from '@/pages/PaymentVerification';
 import Contact from '@/pages/Contact';
 import Terms from '@/pages/Terms';
-import Privacy from '@/pages/Privacy';
-import Refund from '@/pages/Refund';
+import Privacy from '@/pages/PrivacyPolicy';
+import Refund from '@/pages/CancellationRefund';
 import Dashboard from '@/pages/Dashboard';
 import NotFound from '@/pages/NotFound';
 import '@/App.css';

@@ -1,3 +1,4 @@
+
 export interface VerificationResult {
   success: boolean;
   message: string;
@@ -34,6 +35,7 @@ export interface SerializedBookingDetails extends Omit<BookingDetails, 'date'> {
   date?: string;
   type?: string;
   failedAt?: string;
+  formattedDate?: string;
 }
 
 export interface PaymentRecord {
