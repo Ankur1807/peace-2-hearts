@@ -16,9 +16,9 @@ export interface Booking {
   payment_id?: string;
   payment_status?: string;
   email_sent: boolean;
-  service_category: string;  // Added this property
-  timeframe: string;         // Added this property
-  time_slot: string;         // Added this property
+  service_category?: string;  // Made optional to match database schema
+  timeframe?: string;         // Made optional to match database schema
+  time_slot: string;          // Keep as required since it's non-nullable in DB
 }
 
 export function useBookings() {
@@ -43,7 +43,7 @@ export function useBookings() {
 
       if (data) {
         console.log(`Fetched ${data.length} bookings:`, data);
-        // Explicitly cast the data to our Booking type
+        // Explicitly cast the data to our Booking type with proper handling of optional fields
         const typedBookings = data.map(booking => ({
           id: booking.id,
           client_name: booking.client_name || "",
@@ -57,9 +57,9 @@ export function useBookings() {
           payment_id: booking.payment_id,
           payment_status: booking.payment_status,
           email_sent: booking.email_sent || false,
-          service_category: booking.service_category || "",
-          timeframe: booking.timeframe || "",
-          time_slot: booking.time_slot || ""
+          service_category: booking.service_category, // Handled as optional
+          timeframe: booking.timeframe,              // Handled as optional
+          time_slot: booking.time_slot || ""        // Provide default if somehow missing
         })) as Booking[];
         
         setBookings(typedBookings);
@@ -130,7 +130,7 @@ export function useBookings() {
       
       console.log("Booking details for email resend:", booking);
       
-      // Ensure type safety for all properties we're accessing
+      // Handle optional fields safely
       const bookingWithSafeProps = {
         ...booking,
         service_category: booking.service_category || 'general',
