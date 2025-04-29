@@ -1,19 +1,13 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
-import { determineServiceCategory } from "./utils.ts";
+import { corsHeaders, determineServiceCategory, handleFetchResponse } from "./utils.ts";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 const razorpayKeyId = Deno.env.get('RAZORPAY_KEY_ID') || '';
 const razorpayKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET') || '';
-
-// Set up CORS headers for browser requests
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 // Create Supabase client with service role for admin access
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -58,31 +52,38 @@ async function verifyPaymentWithRazorpay(paymentId: string): Promise<{
   error?: string;
 }> {
   try {
+    if (!razorpayKeyId || !razorpayKeySecret) {
+      console.error("Razorpay credentials not configured");
+      return { verified: false, error: "Payment gateway credentials not configured" };
+    }
+
+    console.log(`Verifying payment with Razorpay API: ${paymentId}`);
     const auth = btoa(`${razorpayKeyId}:${razorpayKeySecret}`);
     
-    const response = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Razorpay API error: ${response.status} ${errorText}`);
+    try {
+      const response = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Use the helper function to handle the response
+      const paymentDetails = await handleFetchResponse(response, "Razorpay payment verification");
+      console.log("Payment details from Razorpay:", paymentDetails);
+      
+      // Consider payment verified if status is authorized or captured
+      const validStatuses = ['authorized', 'captured'];
+      const verified = validStatuses.includes(paymentDetails.status);
+      
+      return { verified, details: paymentDetails };
+    } catch (fetchError) {
+      console.error("Error fetching from Razorpay API:", fetchError);
+      return { verified: false, error: fetchError.message };
     }
-    
-    const paymentDetails = await response.json();
-    console.log("Payment details from Razorpay:", paymentDetails);
-    
-    // Consider payment verified if status is authorized or captured
-    const validStatuses = ['authorized', 'captured'];
-    const verified = validStatuses.includes(paymentDetails.status);
-    
-    return { verified, details: paymentDetails };
   } catch (error) {
-    console.error("Error verifying payment with Razorpay:", error);
+    console.error("Exception in verifyPaymentWithRazorpay:", error);
     return { verified: false, error: error.message };
   }
 }
@@ -169,35 +170,64 @@ async function createConsultationRecord(
         amount
       });
       
-      const { data: newConsultation, error: insertError } = await supabase
-        .from('consultations')
-        .insert({
-          client_name: clientName,
-          client_email: email,
-          client_phone: phone,
-          reference_id: referenceId,
-          consultation_type: consultationType || services.join(','),
-          service_category: effectiveServiceCategory,
-          date: date ? new Date(date).toISOString() : null,
-          time_slot: timeSlot || null,
-          timeframe: timeframe || null,
-          message: message || null,
-          payment_id: paymentId,
-          order_id: orderId,
-          amount: amount,
-          payment_status: paymentStatus,
-          status: bookingStatus,
-          email_sent: false // Will be updated after email is sent
-        })
-        .select('id')
-        .single();
-      
-      if (insertError) {
-        console.error("Error creating consultation record:", insertError);
-        return { success: false, error: insertError.message };
+      // Prepare the consultation data
+      const consultationData = {
+        client_name: clientName,
+        client_email: email,
+        client_phone: phone,
+        reference_id: referenceId,
+        consultation_type: consultationType || services.join(','),
+        date: date ? new Date(date).toISOString() : null,
+        time_slot: timeSlot || null,
+        timeframe: timeframe || null,
+        message: message || null,
+        payment_id: paymentId,
+        order_id: orderId,
+        amount: amount,
+        payment_status: paymentStatus,
+        status: bookingStatus,
+        email_sent: false // Will be updated after email is sent
+      };
+
+      // Check if we need to add service_category (conditionally)
+      if (effectiveServiceCategory) {
+        try {
+          const { data: insertData, error: insertError } = await supabase
+            .from('consultations')
+            .insert(consultationData)
+            .select('id')
+            .single();
+          
+          if (insertError) {
+            console.error("Error creating consultation record:", insertError);
+            return { success: false, error: insertError.message };
+          }
+          
+          return { success: true, consultationId: insertData.id };
+        } catch (e) {
+          console.error("Exception during insert operation:", e);
+          return { success: false, error: e.message };
+        }
+      } else {
+        // Try insert without service_category
+        try {
+          const { data: insertData, error: insertError } = await supabase
+            .from('consultations')
+            .insert(consultationData)
+            .select('id')
+            .single();
+          
+          if (insertError) {
+            console.error("Error creating consultation record:", insertError);
+            return { success: false, error: insertError.message };
+          }
+          
+          return { success: true, consultationId: insertData.id };
+        } catch (e) {
+          console.error("Exception during insert operation:", e);
+          return { success: false, error: e.message };
+        }
       }
-      
-      return { success: true, consultationId: newConsultation.id };
     }
   } catch (error) {
     console.error("Error in createConsultationRecord:", error);
@@ -269,16 +299,40 @@ async function sendConfirmationEmail(
 
 // Main handler function
 const handler = async (req: Request): Promise<Response> => {
+  console.log("Verify payment function called");
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
   
   try {
-    const requestData = await req.json() as VerifyPaymentRequest;
+    // Parse request body
+    let requestData: VerifyPaymentRequest;
+    try {
+      requestData = await req.json() as VerifyPaymentRequest;
+    } catch (parseError) {
+      console.error("Error parsing request body:", parseError);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Invalid JSON in request body" 
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        }
+      );
+    }
+    
     const { paymentId, orderId, signature, bookingDetails } = requestData;
     
     if (!paymentId || !bookingDetails || !bookingDetails.referenceId) {
+      console.error("Missing required parameters:", { 
+        paymentId: !!paymentId,
+        bookingDetails: !!bookingDetails,
+        referenceId: bookingDetails?.referenceId 
+      });
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -385,4 +439,5 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
+console.log("Verify payment handler initialized");
 serve(handler);

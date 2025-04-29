@@ -44,3 +44,49 @@ export function determineServiceCategory(serviceId: string): string {
 export function formatPrice(price: number): string {
   return `₹${price}`;
 }
+
+/**
+ * Helper function to safely parse JSON
+ */
+export function safeJsonParse(text: string): any {
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error("Failed to parse JSON:", e);
+    return null;
+  }
+}
+
+/**
+ * Helper function to handle fetch responses
+ */
+export async function handleFetchResponse(response: Response, apiName: string): Promise<any> {
+  const contentType = response.headers.get('content-type') || '';
+  
+  if (!response.ok) {
+    const statusCode = response.status;
+    let errorText = `API Error (${statusCode})`;
+    
+    try {
+      // Try to extract error details based on content type
+      if (contentType.includes('application/json')) {
+        const errorJson = await response.json();
+        errorText = `API Error (${statusCode}): ${JSON.stringify(errorJson)}`;
+      } else {
+        errorText = `API Error (${statusCode}): ${await response.text()}`;
+      }
+    } catch (parseError) {
+      errorText = `API Error (${statusCode}): Could not parse error response`;
+    }
+    
+    console.error(`${apiName} request failed:`, errorText);
+    throw new Error(errorText);
+  }
+  
+  // Return appropriate format based on content type
+  if (contentType.includes('application/json')) {
+    return await response.json();
+  }
+  
+  return await response.text();
+}

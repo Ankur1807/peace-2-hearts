@@ -26,58 +26,103 @@ export async function verifyPaymentAndCreateBooking(
       console.warn("Missing signature in verification call, attempting to proceed anyway");
     }
     
-    // Call our verify-payment edge function
-    const { data, error } = await supabase.functions.invoke('verify-payment', {
-      body: {
-        paymentId,
-        orderId,
-        signature,
-        bookingDetails: {
-          clientName: bookingDetails.clientName,
-          email: bookingDetails.email,
-          phone: bookingDetails.phone,
-          referenceId: bookingDetails.referenceId,
-          consultationType: bookingDetails.consultationType,
-          services: bookingDetails.services || [bookingDetails.consultationType],
-          date: bookingDetails.date instanceof Date ? bookingDetails.date.toISOString() : bookingDetails.date,
-          timeSlot: bookingDetails.timeSlot,
-          timeframe: bookingDetails.timeframe,
-          serviceCategory: bookingDetails.serviceCategory,
-          message: bookingDetails.message,
-          amount: bookingDetails.amount
-        }
-      }
-    });
-    
-    if (error) {
-      console.error("Error verifying payment with edge function:", error);
+    // Add specific validation for critical fields
+    if (!paymentId) {
+      console.error("Payment ID is missing");
       return { 
         success: false, 
         verified: false, 
-        error: error.message 
+        error: "Payment ID is missing" 
       };
     }
     
-    console.log("Verification result:", data);
+    if (!bookingDetails.referenceId) {
+      console.error("Reference ID is missing");
+      return { 
+        success: false, 
+        verified: false, 
+        error: "Reference ID is missing" 
+      };
+    }
     
-    // If email failed but payment verified, still return success
-    if (data.verified && !data.emailSent) {
-      console.warn("Payment verified but email sending failed");
+    // Call our verify-payment edge function
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-payment', {
+        body: {
+          paymentId,
+          orderId,
+          signature,
+          bookingDetails: {
+            clientName: bookingDetails.clientName,
+            email: bookingDetails.email,
+            phone: bookingDetails.phone,
+            referenceId: bookingDetails.referenceId,
+            consultationType: bookingDetails.consultationType,
+            services: bookingDetails.services || [bookingDetails.consultationType],
+            date: bookingDetails.date instanceof Date ? bookingDetails.date.toISOString() : bookingDetails.date,
+            timeSlot: bookingDetails.timeSlot,
+            timeframe: bookingDetails.timeframe,
+            serviceCategory: bookingDetails.serviceCategory,
+            message: bookingDetails.message,
+            amount: bookingDetails.amount
+          }
+        }
+      });
+      
+      if (error) {
+        console.error("Error verifying payment with edge function:", error);
+        
+        // Store payment details in database even if verification fails
+        // This ensures we don't lose payment information
+        try {
+          await storeEmergencyPaymentRecord(paymentId, orderId, bookingDetails);
+        } catch (emergencyError) {
+          console.error("Failed to store emergency payment record:", emergencyError);
+        }
+        
+        return { 
+          success: false, 
+          verified: false, 
+          error: error.message || "Payment verification failed" 
+        };
+      }
+      
+      console.log("Verification result:", data);
+      
+      // If email failed but payment verified, still return success
+      if (data.verified && !data.emailSent) {
+        console.warn("Payment verified but email sending failed");
+        return {
+          success: true,
+          verified: true,
+          details: {
+            ...data,
+            emailWarning: true
+          }
+        };
+      }
+      
       return {
         success: true,
-        verified: true,
-        details: {
-          ...data,
-          emailWarning: true
-        }
+        verified: data.verified || false,
+        details: data
+      };
+    } catch (invokeError) {
+      console.error("Error invoking verify-payment function:", invokeError);
+      
+      // Store payment details in database even if verification fails
+      try {
+        await storeEmergencyPaymentRecord(paymentId, orderId, bookingDetails);
+      } catch (emergencyError) {
+        console.error("Failed to store emergency payment record:", emergencyError);
+      }
+      
+      return { 
+        success: false, 
+        verified: false, 
+        error: invokeError instanceof Error ? invokeError.message : String(invokeError) 
       };
     }
-    
-    return {
-      success: true,
-      verified: data.verified || false,
-      details: data
-    };
   } catch (err) {
     console.error("Error in verifyPaymentAndCreateBooking:", err);
     return {
@@ -85,5 +130,40 @@ export async function verifyPaymentAndCreateBooking(
       verified: false,
       error: err instanceof Error ? err.message : String(err)
     };
+  }
+}
+
+/**
+ * Emergency fallback to store payment details in case verification fails
+ */
+async function storeEmergencyPaymentRecord(
+  paymentId: string,
+  orderId: string,
+  bookingDetails: BookingDetails
+): Promise<void> {
+  try {
+    console.log("Storing emergency payment record for", paymentId);
+    
+    const { error } = await supabase.from('consultations').insert({
+      client_name: bookingDetails.clientName || "Emergency Recovery",
+      client_email: bookingDetails.email || "recovery-needed@payment.error",
+      reference_id: bookingDetails.referenceId || `emergency-${Date.now()}`,
+      payment_id: paymentId,
+      order_id: orderId,
+      amount: bookingDetails.amount || 0,
+      payment_status: "needs_verification",
+      status: "payment_needs_verification",
+      consultation_type: bookingDetails.consultationType || "emergency-recovery",
+      time_slot: bookingDetails.timeSlot || "to_be_confirmed",
+      message: `Emergency payment record created due to verification failure. Payment ID: ${paymentId}`
+    });
+    
+    if (error) {
+      console.error("Failed to store emergency payment record:", error);
+    } else {
+      console.log("Successfully stored emergency payment record");
+    }
+  } catch (e) {
+    console.error("Exception in storeEmergencyPaymentRecord:", e);
   }
 }
