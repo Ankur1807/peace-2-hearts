@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -65,6 +66,21 @@ function App() {
   useEffect(() => {
     // Log that the app is ready
     console.log('Peace2Hearts application initialized');
+    
+    // Optionally add automated recovery
+    if (typeof window !== 'undefined' && window.automatedEmailRecovery) {
+      const path = window.location.pathname;
+      // Only run on important pages to avoid unnecessary processing
+      if (path.includes('payment-confirmation') || 
+          path.includes('payment-verification') || 
+          path === '/' ||
+          path.includes('/admin')) {
+        console.log('Running automated email recovery...');
+        setTimeout(() => {
+          window.automatedEmailRecovery();
+        }, 5000);
+      }
+    }
   }, []);
 
   return (

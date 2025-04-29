@@ -32,6 +32,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
   const [isAdminChecking, setIsAdminChecking] = useState(true);
   const { toast } = useToast();
 
+  // Check admin status on mount
   useEffect(() => {
     checkAdminStatus();
     
@@ -68,7 +69,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
       console.log('Admin check - Supabase auth:', !!sessionData.session);
       
       if (sessionData.session) {
-        const adminStatus = await checkSuperbaseAdminStatus();
+        const adminStatus = await checkSupabaseAdminStatus();
         console.log("Checked Supabase admin status:", adminStatus);
         
         if (adminStatus) {
@@ -133,7 +134,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
   };
 
   // Check if the user is an admin via Supabase
-  const checkSuperbaseAdminStatus = async (): Promise<boolean> => {
+  const checkSupabaseAdminStatus = async (): Promise<boolean> => {
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return false;

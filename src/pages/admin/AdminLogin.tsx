@@ -30,9 +30,9 @@ const AdminLogin = () => {
         // Set the session with 24-hour expiration
         localStorage.setItem('p2h_admin_authenticated', 'true');
         localStorage.setItem('p2h_admin_auth_time', Date.now().toString());
-        console.log("Admin login successful - session valid for 24 hours");
+        console.log("Admin login successful - redirecting to dashboard");
         
-        navigate("/admin");
+        navigate("/admin/dashboard");
       } else {
         throw new Error(result.error || "Invalid API key");
       }

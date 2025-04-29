@@ -13,7 +13,25 @@ serve(async (req) => {
   }
 
   try {
-    const { apiKey, email, password } = await req.json();
+    // Parse the request body
+    let body;
+    try {
+      body = await req.json();
+    } catch (error) {
+      console.error("Failed to parse request body:", error);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid request body' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
+        }
+      );
+    }
+    
+    const { apiKey, email, password } = body || {};
     console.log('Auth request received', { hasApiKey: !!apiKey, hasEmail: !!email, hasPassword: !!password });
     
     // For API key-based authentication

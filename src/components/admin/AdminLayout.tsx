@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +11,7 @@ export const AdminLayoutContent = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Only redirect if we've finished checking and user is not admin
     if (!isAdminChecking && !isAdmin) {
       toast({
         title: "Access denied",
@@ -20,6 +22,7 @@ export const AdminLayoutContent = () => {
     }
   }, [isAdmin, isAdminChecking, navigate, toast]);
 
+  // Show loading state while checking admin status
   if (isAdminChecking) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -28,6 +31,7 @@ export const AdminLayoutContent = () => {
     );
   }
 
+  // If we're still here and not checking, user must be admin
   return (
     <div className="flex min-h-screen bg-gray-100">
       <AdminSidebar />
