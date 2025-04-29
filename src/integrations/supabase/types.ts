@@ -274,56 +274,6 @@ export type Database = {
         }
         Relationships: []
       }
-      payments: {
-        Row: {
-          amount: number
-          consultation_id: string
-          created_at: string
-          currency: string
-          email_sent: boolean | null
-          id: string
-          payment_method: string | null
-          payment_status: string
-          recovery_timestamp: string | null
-          transaction_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          amount: number
-          consultation_id: string
-          created_at?: string
-          currency?: string
-          email_sent?: boolean | null
-          id?: string
-          payment_method?: string | null
-          payment_status?: string
-          recovery_timestamp?: string | null
-          transaction_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          amount?: number
-          consultation_id?: string
-          created_at?: string
-          currency?: string
-          email_sent?: boolean | null
-          id?: string
-          payment_method?: string | null
-          payment_status?: string
-          recovery_timestamp?: string | null
-          transaction_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payments_consultation_id_fkey"
-            columns: ["consultation_id"]
-            isOneToOne: false
-            referencedRelation: "consultations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       pricing_history: {
         Row: {
           changed_by: string | null

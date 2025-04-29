@@ -1,128 +1,59 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { CalendarPlus, Send, RefreshCw } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { BookingDetails } from '@/utils/types';
-import { useToast } from '@/hooks/use-toast';
-import { sendBookingConfirmationEmail } from '@/utils/email/bookingEmailService';
+import { useNavigate } from 'react-router-dom';
+import { Share2 } from 'lucide-react';
 
 interface ActionButtonsProps {
   bookingDetails?: BookingDetails;
   referenceId: string;
 }
 
-const ActionButtons = ({ bookingDetails, referenceId }: ActionButtonsProps) => {
+const ActionButtons: React.FC<ActionButtonsProps> = ({
+  bookingDetails,
+  referenceId
+}) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-
-  const handleResendEmail = async () => {
-    if (!bookingDetails) {
-      toast({
-        title: "Missing Information",
-        description: "Cannot resend email without booking details",
-        variant: "destructive"
+  
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'My Peace2Hearts Consultation Booking',
+        text: `I've booked a consultation with Peace2Hearts. My reference ID is ${referenceId}.`,
+        url: window.location.href,
       });
-      return;
-    }
-    
-    setIsSendingEmail(true);
-    
-    try {
-      // Send confirmation email with high priority and resend flag
-      const result = await sendBookingConfirmationEmail({
-        ...bookingDetails,
-        referenceId: referenceId,
-        highPriority: true,
-        isResend: true
-      });
-      
-      if (result) {
-        setEmailSent(true);
-        toast({
-          title: "Email Sent",
-          description: "Confirmation email has been sent successfully",
-        });
-      } else {
-        toast({
-          title: "Failed to Send Email",
-          description: "Please try again or contact support",
-          variant: "destructive"
-        });
+    } else {
+      // Fallback for browsers that don't support the Web Share API
+      try {
+        navigator.clipboard.writeText(
+          `I've booked a consultation with Peace2Hearts. My reference ID is ${referenceId}.`
+        );
+        alert('Booking details copied to clipboard!');
+      } catch (err) {
+        console.error('Failed to copy: ', err);
       }
-    } catch (error) {
-      console.error("Error sending email:", error);
-      toast({
-        title: "Error",
-        description: "Failed to send confirmation email",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSendingEmail(false);
     }
   };
 
   return (
-    <div className="flex flex-col space-y-3 sm:space-y-4">
-      {!emailSent && !isSendingEmail && (
-        <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-800 text-sm">
-          <p className="font-medium">If you haven't received your booking confirmation email:</p>
-          <p className="mt-1">Please check your spam folder or click "Send Confirmation Email" below.</p>
-        </div>
-      )}
+    <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-6">
+      <Button
+        variant="default"
+        className="bg-peacefulBlue hover:bg-peacefulBlue/90"
+        onClick={() => navigate('/')}
+      >
+        Return to Home
+      </Button>
       
-      {emailSent && (
-        <div className="bg-green-50 border border-green-200 rounded-md p-3 text-green-800 text-sm">
-          <p className="font-medium">Email sent!</p>
-          <p className="mt-1">Please check your inbox. If you don't see it, check your spam folder.</p>
-        </div>
-      )}
-      
-      <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3 justify-between">
-        <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
-          <Button 
-            onClick={() => navigate('/book-consultation')} 
-            variant="outline" 
-            className="flex items-center"
-          >
-            <CalendarPlus className="mr-2 h-4 w-4" />
-            Book Another Session
-          </Button>
-          
-          <Button
-            variant="outline"
-            className="flex items-center"
-            onClick={handleResendEmail}
-            disabled={isSendingEmail || !bookingDetails?.email}
-          >
-            {isSendingEmail ? (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                Sending...
-              </>
-            ) : emailSent ? (
-              <>
-                <Send className="mr-2 h-4 w-4" />
-                Send Again
-              </>
-            ) : (
-              <>
-                <Send className="mr-2 h-4 w-4" />
-                Send Confirmation Email
-              </>
-            )}
-          </Button>
-        </div>
-        
-        <Button
-          onClick={() => navigate('/')}
-          className="bg-peacefulBlue hover:bg-peacefulBlue/90"
-        >
-          Return to Home
-        </Button>
-      </div>
+      <Button
+        variant="outline"
+        className="border-peacefulBlue text-peacefulBlue hover:bg-peacefulBlue/10"
+        onClick={handleShare}
+      >
+        <Share2 className="mr-2 h-4 w-4" />
+        Share Booking
+      </Button>
     </div>
   );
 };
