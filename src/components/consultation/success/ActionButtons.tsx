@@ -5,7 +5,7 @@ import { CalendarPlus, FilePlus, Download, Send, RefreshCw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 import { BookingDetails } from '@/utils/types';
 import { useToast } from '@/hooks/use-toast';
-import { sendBookingConfirmationEmail } from '@/utils/emailService';
+import { sendBookingConfirmationEmail } from '@/utils/email/bookingEmails';
 import { usePaymentRecovery } from '@/hooks/consultation/usePaymentRecovery';
 
 interface ActionButtonsProps {

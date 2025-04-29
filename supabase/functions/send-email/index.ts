@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { handleContactEmail, handleBookingEmail } from "./handlers.ts";
 
@@ -82,6 +83,9 @@ const handler = async (req: Request): Promise<Response> => {
         }
       );
     }
+    
+    // Log RESEND_API_KEY availability (without revealing the actual key)
+    console.log(`RESEND_API_KEY is ${Deno.env.get("RESEND_API_KEY") ? "available" : "NOT available"}`);
     
     console.log(`Processing ${type} email request for ${data.email || 'unknown recipient'}`);
     
