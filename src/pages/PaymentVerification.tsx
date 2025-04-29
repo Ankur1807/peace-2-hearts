@@ -8,21 +8,27 @@ import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { usePaymentVerification } from '@/hooks/payment/usePaymentVerification';
 import { BookingDetails } from '@/utils/types';
+import PaymentVerificationLoader from '@/components/consultation/payment/PaymentVerificationLoader';
+import { useToast } from '@/hooks/use-toast';
 
 const PaymentVerification = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  
   const { 
     paymentId, 
     orderId, 
     signature, 
     amount, 
     referenceId,
-    bookingDetails 
+    bookingDetails,
+    isVerifying: initiallyVerifying = false
   } = location.state || {};
   
   const [isProcessing, setIsProcessing] = useState(true);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [manualVerification, setManualVerification] = useState(false);
   
   const {
     isVerifying,
@@ -45,89 +51,57 @@ const PaymentVerification = () => {
     }
   }, [paymentId, location.state, navigate]);
 
-  // Create booking details object from location state
-  const getBookingDetails = (): BookingDetails | undefined => {
-    if (!bookingDetails) return undefined;
+  // Automatically redirect to the confirmation page after short timeout
+  useEffect(() => {
+    if (paymentId && !isVerifying && !initiallyVerifying) {
+      const timer = setTimeout(() => {
+        navigate('/payment-confirmation', {
+          state: {
+            paymentId,
+            orderId,
+            signature,
+            referenceId,
+            amount,
+            bookingDetails,
+            verificationResult
+          },
+          replace: true
+        });
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isVerifying, initiallyVerifying, paymentId, navigate, orderId, signature, referenceId, amount, bookingDetails, verificationResult]);
+
+  // Try manual verification if needed
+  const handleManualVerification = () => {
+    setManualVerification(true);
     
-    return {
-      clientName: bookingDetails.clientName,
-      email: bookingDetails.email,
-      referenceId: referenceId || '',
-      consultationType: bookingDetails.consultationType || '',
-      services: bookingDetails.services || [],
-      serviceCategory: bookingDetails.serviceCategory,
-      date: bookingDetails.date ? new Date(bookingDetails.date) : undefined,
-      timeSlot: bookingDetails.timeSlot,
-      timeframe: bookingDetails.timeframe,
-      message: bookingDetails.message,
-      amount: amount
-    };
+    // Navigate to confirmation page with available data
+    navigate('/payment-confirmation', {
+      state: {
+        paymentId,
+        orderId,
+        referenceId,
+        amount,
+        bookingDetails,
+        needsRecovery: true
+      },
+      replace: true
+    });
+    
+    toast({
+      title: "Recovery Started",
+      description: "We're trying to recover your booking information."
+    });
   };
 
-  if (isVerifying) {
+  if (isVerifying || isProcessing) {
     return (
       <>
         <SEO title="Verifying Payment" description="Verifying your payment" />
         <Navigation />
-        <div className="container mx-auto px-4 py-20 text-center">
-          <div className="max-w-lg mx-auto bg-white rounded-xl shadow-lg p-8 backdrop-blur-lg bg-white/70">
-            <Loader2 className="h-12 w-12 text-peacefulBlue mx-auto animate-spin mb-6" />
-            <h1 className="text-2xl font-semibold mb-4">Verifying Your Payment</h1>
-            <p className="text-gray-600 mb-6">
-              Please wait while we confirm your payment and complete your booking.
-            </p>
-            <p className="text-sm text-gray-500">
-              Payment ID: {paymentId}
-              <br />
-              Reference: {referenceId}
-            </p>
-          </div>
-        </div>
-        <Footer />
-      </>
-    );
-  }
-
-  if (verificationResult?.success) {
-    return (
-      <>
-        <SEO title="Payment Successful" description="Your payment was successful and your booking has been confirmed" />
-        <Navigation />
-        <div className="container mx-auto px-4 py-20 text-center">
-          <div className="max-w-lg mx-auto bg-white rounded-xl shadow-lg p-8 backdrop-blur-lg bg-white/70">
-            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-6" />
-            <h1 className="text-2xl font-semibold mb-4">Payment Successful!</h1>
-            <p className="text-gray-600 mb-6">
-              Your booking has been confirmed and a confirmation email has been sent to your email address.
-            </p>
-            <div className="bg-gray-50 p-4 rounded-lg mb-6 text-left">
-              <p className="text-sm">
-                <strong>Booking Reference:</strong> {referenceId}<br />
-                <strong>Payment ID:</strong> {paymentId}<br />
-                {bookingDetails && (
-                  <>
-                    <strong>Service:</strong> {bookingDetails.consultationType}<br />
-                    {bookingDetails.date && (
-                      <><strong>Date:</strong> {new Date(bookingDetails.date).toLocaleDateString()}<br /></>
-                    )}
-                    {bookingDetails.timeSlot && (
-                      <><strong>Time:</strong> {bookingDetails.timeSlot}<br /></>
-                    )}
-                    {bookingDetails.timeframe && (
-                      <><strong>Timeframe:</strong> {bookingDetails.timeframe}<br /></>
-                    )}
-                  </>
-                )}
-              </p>
-            </div>
-            <Button 
-              onClick={() => navigate('/')}
-              className="bg-peacefulBlue hover:bg-peacefulBlue/80"
-            >
-              Return to Home
-            </Button>
-          </div>
-        </div>
+        <PaymentVerificationLoader />
         <Footer />
       </>
     );
@@ -135,33 +109,50 @@ const PaymentVerification = () => {
 
   return (
     <>
-      <SEO title="Payment Verification Failed" description="There was an issue verifying your payment" />
+      <SEO title="Payment Processed" description="Your payment has been processed" />
       <Navigation />
       <div className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-lg mx-auto bg-white rounded-xl shadow-lg p-8 backdrop-blur-lg bg-white/70">
-          <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-6" />
-          <h1 className="text-2xl font-semibold mb-4">Payment Verification Issue</h1>
+          <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-6" />
+          <h1 className="text-2xl font-semibold mb-4">Payment Processed!</h1>
           <p className="text-gray-600 mb-6">
-            We couldn't verify your payment. If the amount was deducted from your account,
-            please contact us with the details below.
+            Your payment has been received and your booking information is being saved.
+            You'll be redirected to the confirmation page in a moment.
           </p>
           <div className="bg-gray-50 p-4 rounded-lg mb-6 text-left">
-            <p className="text-sm mb-2"><strong>Payment ID:</strong> {paymentId}</p>
-            <p className="text-sm"><strong>Reference:</strong> {referenceId}</p>
+            <p className="text-sm">
+              <strong>Payment ID:</strong> {paymentId}<br />
+              {referenceId && <><strong>Reference:</strong> {referenceId}<br /></>}
+              <strong>Amount:</strong> ₹{amount}
+            </p>
           </div>
-          <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3 justify-center">
+          <div className="space-y-3">
             <Button 
-              onClick={() => navigate('/book-consultation')}
-              variant="outline"
+              onClick={() => navigate('/payment-confirmation', { 
+                state: {
+                  paymentId,
+                  orderId,
+                  signature,
+                  referenceId,
+                  amount,
+                  bookingDetails,
+                  verificationResult
+                }
+              })}
+              className="w-full bg-peacefulBlue hover:bg-peacefulBlue/80"
             >
-              Try Again
+              View Confirmation
             </Button>
-            <Button 
-              onClick={() => navigate('/contact')}
-              className="bg-peacefulBlue hover:bg-peacefulBlue/80"
-            >
-              Contact Support
-            </Button>
+            
+            {!manualVerification && (
+              <Button 
+                onClick={handleManualVerification}
+                variant="outline" 
+                className="w-full"
+              >
+                Manual Recovery
+              </Button>
+            )}
           </div>
         </div>
       </div>

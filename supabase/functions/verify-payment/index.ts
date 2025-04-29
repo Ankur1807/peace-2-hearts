@@ -165,6 +165,7 @@ async function createConsultationRecord(
           client_phone: phone,
           reference_id: referenceId,
           consultation_type: consultationType || services.join(','),
+          service_category: serviceCategory || determineServiceCategory(services[0]),
           date: date ? new Date(date).toISOString() : null,
           time_slot: timeSlot || null,
           timeframe: timeframe || null,
@@ -204,40 +205,51 @@ async function sendConfirmationEmail(
   try {
     console.log(`Sending confirmation email for booking ${bookingDetails.referenceId}`);
     
-    const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-email', {
-      body: {
-        type: 'booking-confirmation',
-        clientName: bookingDetails.clientName,
-        email: bookingDetails.email,
-        referenceId: bookingDetails.referenceId,
-        consultationType: bookingDetails.consultationType,
-        services: bookingDetails.services,
-        date: bookingDetails.date,
-        timeSlot: bookingDetails.timeSlot,
-        timeframe: bookingDetails.timeframe,
-        serviceCategory: bookingDetails.serviceCategory,
-        highPriority: true
+    // Add additional error handling for email sending
+    try {
+      const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-email', {
+        body: {
+          type: 'booking-confirmation',
+          clientName: bookingDetails.clientName,
+          email: bookingDetails.email,
+          referenceId: bookingDetails.referenceId,
+          consultationType: bookingDetails.consultationType,
+          services: bookingDetails.services,
+          date: bookingDetails.date,
+          timeSlot: bookingDetails.timeSlot,
+          timeframe: bookingDetails.timeframe,
+          serviceCategory: bookingDetails.serviceCategory,
+          highPriority: true
+        }
+      });
+      
+      if (emailError) {
+        console.error("Error sending confirmation email:", emailError);
+        return { success: false, error: emailError.message };
       }
-    });
-    
-    if (emailError) {
-      console.error("Error sending confirmation email:", emailError);
-      return { success: false, error: emailError.message };
+      
+      console.log("Email sent successfully:", emailResponse);
+    } catch (emailErr) {
+      // Don't fail the entire process if email sending fails
+      console.error("Exception in email sending:", emailErr);
+      return { success: false, error: emailErr.message };
     }
     
-    console.log("Email sent successfully:", emailResponse);
-    
-    // Update the consultation record to mark email as sent
-    const { error: updateError } = await supabase
-      .from('consultations')
-      .update({ email_sent: true })
-      .eq('reference_id', bookingDetails.referenceId);
-    
-    if (updateError) {
-      console.error("Error updating email_sent status:", updateError);
-      // Not returning error here as the email was sent successfully
+    // Update the consultation record to mark email as sent - don't fail if this doesn't work
+    try {
+      const { error: updateError } = await supabase
+        .from('consultations')
+        .update({ email_sent: true })
+        .eq('reference_id', bookingDetails.referenceId);
+      
+      if (updateError) {
+        console.error("Error updating email_sent status:", updateError);
+      }
+    } catch (updateErr) {
+      console.error("Exception updating email_sent status:", updateErr);
     }
     
+    // Return success even if there were errors updating the database
     return { success: true };
   } catch (error) {
     console.error("Exception in sendConfirmationEmail:", error);

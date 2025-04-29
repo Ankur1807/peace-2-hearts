@@ -1,12 +1,14 @@
 
-import { useRazorpayInit } from './useRazorpayInit';
-import { useCheckoutOptions } from './useCheckoutOptions';
-import { usePaymentNavigation } from './usePaymentNavigation';
+import { useNavigate } from 'react-router-dom';
+import { storePaymentDetailsInSession } from '@/utils/payment/services/paymentStorageService';
+import { usePaymentNavigation } from '../payment/usePaymentNavigation';
+import { usePaymentVerification } from './usePaymentVerification';
+import { useConsultationState } from '../useConsultationState';
 
-interface OpenRazorpayCheckoutArgs {
+interface UseOpenRazorpayCheckoutProps {
   getEffectivePrice: () => number;
   state: any;
-  setIsProcessing: (processing: boolean) => void;
+  setIsProcessing: (isProcessing: boolean) => void;
   setPaymentCompleted?: (completed: boolean) => void;
   setReferenceId?: (id: string) => void;
   toast: any;
@@ -18,92 +20,170 @@ export const useOpenRazorpayCheckout = ({
   setIsProcessing,
   setPaymentCompleted,
   setReferenceId,
-  toast,
-}: OpenRazorpayCheckoutArgs) => {
-  const { initializeRazorpay } = useRazorpayInit();
-  const { createCheckoutOptions } = useCheckoutOptions();
+  toast
+}: UseOpenRazorpayCheckoutProps) => {
   const { navigateToVerification, handlePaymentError } = usePaymentNavigation();
+  const navigate = useNavigate();
   
-  return async (order: any, razorpayKey: string, receiptId: string) => {
-    const effectivePrice = getEffectivePrice();
-    console.log("Opening Razorpay checkout with reference ID:", receiptId);
-    
-    if (setReferenceId) {
-      setReferenceId(receiptId);
-    }
-    
-    const bookingDetails = {
-      clientName: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
-      email: state.personalDetails.email,
-      referenceId: receiptId,
-      consultationType: state.selectedServices.length > 1 ? 'multiple' : state.selectedServices[0],
-      services: state.selectedServices || [],
-      date: state.serviceCategory === 'holistic' ? undefined : state.date,
-      timeSlot: state.serviceCategory === 'holistic' ? undefined : state.timeSlot,
-      timeframe: state.serviceCategory === 'holistic' ? state.timeframe : undefined,
-      packageName: state.serviceCategory === 'holistic' ? 
-        (state.selectedServices.includes('divorce-prevention') ? 'Divorce Prevention Package' : 
-        state.selectedServices.includes('pre-marriage-clarity') ? 'Pre-Marriage Clarity Package' : null) : null,
-      serviceCategory: state.serviceCategory,
-      amount: effectivePrice,
-      message: state.personalDetails.message,
-      phone: state.personalDetails.phone
-    };
-
+  const { verifyPayment, isVerifying } = usePaymentVerification({
+    setIsProcessing,
+    setPaymentCompleted
+  });
+  
+  const handleSuccess = async (response: any, receiptId: string) => {
     try {
-      const isLoaded = await initializeRazorpay();
-      if (!isLoaded) return;
-
-      const options = createCheckoutOptions({
-        razorpayKey,
-        orderId: order.id,
-        amount: order.amount,
-        currency: order.currency,
-        personalDetails: state.personalDetails,
-        selectedServices: state.selectedServices,
+      console.log("Payment successful, processing verification:", response);
+      
+      // Create booking details object
+      const bookingDetails = {
+        clientName: `${state.personalDetails.firstName || ''} ${state.personalDetails.lastName || ''}`.trim(),
+        email: state.personalDetails.email,
+        phone: state.personalDetails.phone,
+        referenceId: receiptId,
+        consultationType: state.serviceCategory,
+        services: state.selectedServices || [state.serviceCategory],
+        date: state.date,
+        timeSlot: state.timeSlot,
+        timeframe: state.timeframe,
+        message: state.personalDetails.message,
+        serviceCategory: state.serviceCategory,
+        amount: getEffectivePrice()
+      };
+      
+      // Store payment details in session for recovery if needed
+      storePaymentDetailsInSession({
+        referenceId: receiptId,
+        paymentId: response.razorpay_payment_id,
+        orderId: response.razorpay_order_id,
+        amount: getEffectivePrice(),
+        bookingDetails
+      });
+      
+      if (setReferenceId) {
+        setReferenceId(receiptId);
+      }
+      
+      // Always navigate to verification/confirmation page, even if verification hasn't completed
+      // This ensures users see a confirmation screen regardless of email sending status
+      navigateToVerification({
+        paymentId: response.razorpay_payment_id,
+        orderId: response.razorpay_order_id,
+        signature: response.razorpay_signature,
+        amount: getEffectivePrice(),
+        referenceId: receiptId,
+        bookingDetails,
+        isVerifying
+      });
+      
+      // Start verification process
+      const verificationResult = await verifyPayment(
+        response, 
+        getEffectivePrice(), 
+        bookingDetails, 
         receiptId
-      });
-
-      const razorpay = new window.Razorpay({
-        ...options,
-        handler: async function (response: any) {
-          console.log("Payment successful:", response);
-          setIsProcessing(true);
-          
-          if (setPaymentCompleted) {
-            setPaymentCompleted(true);
-          }
-          
-          // Navigate to verification page that will handle the verification and booking creation
-          navigateToVerification({
-            paymentId: response.razorpay_payment_id,
-            orderId: response.razorpay_order_id,
-            signature: response.razorpay_signature,
-            amount: effectivePrice,
-            referenceId: receiptId,
-            bookingDetails,
-            isVerifying: true
-          });
-        }
+      );
+      
+      // If verification failed but we've already navigated, we need to update the state
+      if (!verificationResult.success) {
+        toast({
+          title: "Payment Verification Warning",
+          description: "Your payment was received, but we're having trouble with our system. Please contact support if you don't receive a confirmation email.",
+          variant: "warning"
+        });
+      }
+      
+    } catch (error) {
+      console.error("Error in payment success handler:", error);
+      
+      // Even if an error occurs, navigate to confirmation with warning state
+      navigateToVerification({
+        paymentId: response.razorpay_payment_id,
+        orderId: response.razorpay_order_id,
+        signature: response.razorpay_signature,
+        amount: getEffectivePrice(),
+        referenceId: receiptId,
+        bookingDetails: {
+          clientName: `${state.personalDetails.firstName || ''} ${state.personalDetails.lastName || ''}`.trim(),
+          email: state.personalDetails.email,
+          referenceId: receiptId,
+          consultationType: state.serviceCategory,
+          services: state.selectedServices || [state.serviceCategory],
+          serviceCategory: state.serviceCategory,
+          date: state.date,
+          timeSlot: state.timeSlot,
+          timeframe: state.timeframe,
+          amount: getEffectivePrice()
+        },
+        isVerifying: false,
+        verificationFailed: true
       });
       
-      razorpay.on("payment.failed", function (response: any) {
-        handlePaymentError(
-          response.error,
-          response.error?.metadata?.payment_id || '',
-          order.id,
-          effectivePrice,
-          receiptId,
-          bookingDetails
-        );
-        setIsProcessing(false);
+      toast({
+        title: "Payment Processing Warning",
+        description: "Your payment was received, but we couldn't complete the booking process. Please contact support.",
+        variant: "warning"
       });
-      
-      razorpay.open();
-    } catch (err) {
-      console.error("Error initializing Razorpay:", err);
+    } finally {
       setIsProcessing(false);
-      throw new Error("Failed to initialize payment gateway");
     }
   };
+  
+  const openRazorpayCheckout = (order: any, razorpayKey: string, receiptId: string) => {
+    try {
+      if (!window.Razorpay) {
+        throw new Error('Razorpay not available');
+      }
+      
+      const options = {
+        key: razorpayKey,
+        amount: getEffectivePrice() * 100, // Razorpay expects amount in paise
+        currency: 'INR',
+        name: 'Peace2Hearts',
+        description: `Consultation Booking: ${receiptId}`,
+        order_id: order.id,
+        handler: (response: any) => {
+          handleSuccess(response, receiptId);
+        },
+        prefill: {
+          name: `${state.personalDetails.firstName || ''} ${state.personalDetails.lastName || ''}`.trim(),
+          email: state.personalDetails.email,
+          contact: state.personalDetails.phone || ''
+        },
+        notes: {
+          reference_id: receiptId,
+          consultationType: state.selectedServices[0] || state.serviceCategory
+        },
+        theme: {
+          color: '#3B82F6'
+        },
+        modal: {
+          ondismiss: () => {
+            console.log("Payment dismissed");
+            setIsProcessing(false);
+            toast({
+              title: "Payment Cancelled",
+              description: "You've cancelled your payment. You can try again when you're ready.",
+              variant: "default"
+            });
+          }
+        }
+      };
+      
+      const razorpayInstance = new window.Razorpay(options);
+      razorpayInstance.open();
+      
+      console.log("Razorpay checkout opened");
+      
+    } catch (error) {
+      console.error("Error opening Razorpay checkout:", error);
+      setIsProcessing(false);
+      toast({
+        title: "Payment Gateway Error",
+        description: "Could not open payment gateway. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  return openRazorpayCheckout;
 };

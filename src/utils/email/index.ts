@@ -1,26 +1,29 @@
 
 /**
- * Email utilities and services exports
+ * Email Service
+ * 
+ * This file handles email-related functionality and re-exports from specialized modules.
  */
-
 import { 
   sendBookingConfirmationEmail,
   resendBookingConfirmationEmail,
   fetchBookingDetailsByReference,
-  retryFailedEmails
+  fetchBookingDetailsByPaymentId
 } from './bookingEmailService';
 
-import {
-  sendContactEmail,
-  resendContactEmail
-} from './contactEmails';
+import { 
+  sendContactEmail, 
+  resendContactEmail 
+} from './contactEmailService';
 
-// Re-export all email services
 export {
+  // Booking email functions
   sendBookingConfirmationEmail,
   resendBookingConfirmationEmail,
   fetchBookingDetailsByReference,
-  retryFailedEmails,
+  fetchBookingDetailsByPaymentId,
+  
+  // Contact email functions
   sendContactEmail,
   resendContactEmail
 };
