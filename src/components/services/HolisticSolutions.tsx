@@ -19,9 +19,9 @@ const HolisticSolutions: React.FC = () => {
           title="Divorce Prevention Solutions"
           description="A comprehensive approach to resolving relationship challenges before they lead to separation, combining therapy and legal mediation."
           features={[
-            "2 Therapy Sessions",
-            "1 Mediation Session",
-            "1 Legal Consultation"
+            "Ideal for couples experiencing serious conflicts",
+            "Perfect for relationships affected by trust issues",
+            "Beneficial for those contemplating separation"
           ]}
           linkPath="/services/holistic/divorce-prevention"
           linkText="Learn More"
@@ -34,8 +34,9 @@ const HolisticSolutions: React.FC = () => {
           title="Pre-Marriage Clarity Solutions"
           description="Start your marriage journey with confidence by addressing both emotional readiness and legal considerations."
           features={[
-            "1 Pre-Marriage Legal Consultation",
-            "2 Mental Health Sessions"
+            "Perfect for engaged couples planning their future",
+            "Helpful for those with complex asset situations",
+            "Beneficial for couples with blended family considerations"
           ]}
           linkPath="/services/holistic/pre-marriage-clarity"
           linkText="Learn More"

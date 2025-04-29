@@ -23,23 +23,23 @@ const ServicesOverview: React.FC = () => {
           <ul className="space-y-2 mb-6">
             <li className="flex items-center gap-2 text-gray-700">
               <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
-              Mental Health Counselling
+              Mental Health Counselling - Support for anxiety, depression, and stress related to relationships.
             </li>
             <li className="flex items-center gap-2 text-gray-700">
               <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
-              Couples Counselling
+              Couples Counselling - Rebuilding communication and trust in your relationship.
             </li>
             <li className="flex items-center gap-2 text-gray-700">
               <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
-              Family Therapy
+              Family Therapy - Strengthening bonds and resolving conflicts among family members.
             </li>
             <li className="flex items-center gap-2 text-gray-700">
               <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
-              Sexual Health Counselling
+              Sexual Health Counselling - Addressing intimacy concerns with professional guidance.
             </li>
             <li className="flex items-center gap-2 text-gray-700">
               <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
-              Premarital Counselling
+              Premarital Counselling - Building a strong foundation before marriage.
             </li>
           </ul>
           <Button asChild variant="link" className="text-vibrantPurple hover:text-vibrantPurple/90 p-0 gap-1 font-medium">
@@ -62,27 +62,27 @@ const ServicesOverview: React.FC = () => {
           <ul className="space-y-2 mb-6">
             <li className="flex items-center gap-2 text-gray-700">
               <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-              Pre-marriage Legal Consultation
+              Pre-marriage Legal Consultation - Understanding rights and agreements before marriage.
             </li>
             <li className="flex items-center gap-2 text-gray-700">
               <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-              Mediation Services
+              Mediation Services - Facilitating agreements without court intervention.
             </li>
             <li className="flex items-center gap-2 text-gray-700">
               <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-              Divorce Consultation
+              Divorce Consultation - Expert guidance through separation and divorce processes.
             </li>
             <li className="flex items-center gap-2 text-gray-700">
               <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-              Child Custody Consultation
+              Child Custody Consultation - Protecting children's interests during family transitions.
             </li>
             <li className="flex items-center gap-2 text-gray-700">
               <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-              Maintenance Consultation
+              Maintenance Consultation - Advice on financial support arrangements.
             </li>
             <li className="flex items-center gap-2 text-gray-700">
               <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-              General Legal Consultation
+              General Legal Consultation - Answers to common family law questions.
             </li>
           </ul>
           <Button asChild variant="link" className="text-peacefulBlue hover:text-peacefulBlue/90 p-0 gap-1 font-medium">
