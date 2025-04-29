@@ -1,7 +1,25 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+
+// Define a type for raw consultation data from Supabase
+interface RawConsultation {
+  id: string;
+  client_name: string | null;
+  client_email: string | null;
+  client_phone: string | null;
+  consultation_type: string;
+  date: string | null;
+  status: string;
+  reference_id: string | null;
+  created_at: string;
+  payment_id?: string | null;
+  payment_status?: string | null;
+  email_sent: boolean | null;
+  service_category?: string | null;
+  timeframe?: string | null;
+  time_slot: string;
+}
 
 export interface Booking {
   id: string;
@@ -44,7 +62,7 @@ export function useBookings() {
       if (data) {
         console.log(`Fetched ${data.length} bookings:`, data);
         // Explicitly cast the data to our Booking type with proper handling of optional fields
-        const typedBookings = data.map(booking => ({
+        const typedBookings = data.map((booking: RawConsultation) => ({
           id: booking.id,
           client_name: booking.client_name || "",
           client_email: booking.client_email || "",
