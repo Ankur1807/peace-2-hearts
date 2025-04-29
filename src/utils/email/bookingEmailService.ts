@@ -164,9 +164,8 @@ export async function fetchBookingDetailsByReference(referenceId: string): Promi
       return null;
     }
     
-    // Determine service category from consultation type if not provided
-    const serviceCategory = data.service_category || 
-      determineServiceCategory(data.consultation_type || '');
+    // Determine service category from consultation type if not available
+    const serviceCategory = determineServiceCategory(data.consultation_type || '');
     
     // Create booking details object
     return {

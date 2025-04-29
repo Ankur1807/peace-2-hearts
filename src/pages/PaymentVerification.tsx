@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
@@ -20,14 +21,19 @@ const PaymentVerification = () => {
     bookingDetails 
   } = location.state || {};
   
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  
   const {
     isVerifying,
     verificationResult
   } = usePaymentVerification({
+    setIsProcessing,
+    setPaymentCompleted,
     paymentId,
-    orderId, 
+    orderId,
     signature,
-    amount: amount || 0,
+    amount,
     referenceId,
     bookingDetails
   });

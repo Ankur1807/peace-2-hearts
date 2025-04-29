@@ -7,13 +7,41 @@ interface UsePaymentVerificationProps {
   handleConfirmBooking?: () => Promise<void>;
   setIsProcessing: (processing: boolean) => void;
   setPaymentCompleted?: (completed: boolean) => void;
+  paymentId?: string;
+  orderId?: string;
+  signature?: string;
+  referenceId?: string;
+  amount?: number;
+  bookingDetails?: BookingDetails;
 }
 
 export const usePaymentVerification = ({
   setIsProcessing,
   setPaymentCompleted,
+  paymentId,
+  orderId,
+  signature,
+  referenceId,
+  amount,
+  bookingDetails
 }: UsePaymentVerificationProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationResult, setVerificationResult] = useState<{ 
+    success: boolean; 
+    verified: boolean;
+    error?: string;
+  } | null>(null);
+
+  // If we have direct payment details, verify automatically
+  useState(() => {
+    if (paymentId && orderId && signature && referenceId && amount && bookingDetails) {
+      verifyPayment({
+        razorpay_payment_id: paymentId,
+        razorpay_order_id: orderId,
+        razorpay_signature: signature
+      }, amount, bookingDetails, referenceId);
+    }
+  }, [paymentId, orderId, signature, referenceId, amount, bookingDetails]);
 
   const verifyPayment = async (response: any, amount: number, bookingDetails: BookingDetails, referenceId: string) => {
     try {
@@ -37,6 +65,7 @@ export const usePaymentVerification = ({
       );
       
       console.log("Payment verification result:", verificationResult);
+      setVerificationResult(verificationResult);
       
       if (verificationResult.success && verificationResult.verified) {
         if (setPaymentCompleted) {
@@ -52,5 +81,5 @@ export const usePaymentVerification = ({
     }
   };
 
-  return { verifyPayment, isVerifying };
+  return { verifyPayment, isVerifying, verificationResult };
 };
