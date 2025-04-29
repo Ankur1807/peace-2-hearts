@@ -7,8 +7,7 @@
 import { 
   sendBookingConfirmationEmail,
   resendBookingConfirmationEmail,
-  fetchBookingDetailsByReference,
-  fetchBookingDetailsByPaymentId
+  fetchBookingDetailsByReference
 } from './bookingEmailService';
 
 import { 
@@ -21,7 +20,6 @@ export {
   sendBookingConfirmationEmail,
   resendBookingConfirmationEmail,
   fetchBookingDetailsByReference,
-  fetchBookingDetailsByPaymentId,
   
   // Contact email functions
   sendContactEmail,

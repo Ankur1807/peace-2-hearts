@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { Resend } from 'npm:resend@1.0.0';
 
@@ -11,21 +10,117 @@ const corsHeaders = {
 const resendApiKey = Deno.env.get('RESEND_API_KEY');
 const resend = new Resend(resendApiKey);
 
-// Define template details type
-interface BookingConfirmationData {
-  to: string;
-  clientName: string;
-  referenceId: string;
-  serviceType: string;
-  date: string;
-  time: string;
-  price: string;
-  isResend?: boolean;
-  highPriority?: boolean;
-}
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: corsHeaders,
+    });
+  }
+
+  try {
+    // Check if Resend API key is available
+    if (!resendApiKey) {
+      throw new Error('RESEND_API_KEY is not configured in environment variables');
+    }
+    
+    // Parse request body
+    const { type, ...data } = await req.json();
+    
+    if (!type) {
+      throw new Error('Missing required parameter: type');
+    }
+    
+    let emailResult;
+    
+    // Handle different email types
+    switch (type) {
+      case 'booking-confirmation':
+        // Validate required fields
+        if (!data.to || !data.clientName || !data.referenceId || !data.serviceType) {
+          throw new Error('Missing required fields for booking confirmation email');
+        }
+        
+        // Generate email content
+        const htmlContent = generateBookingConfirmationHTML(data);
+        const subject = data.isResend 
+          ? `Important: Your Peace2Hearts Consultation Booking #${data.referenceId}`
+          : `Confirmation: Your Peace2Hearts Consultation Booking #${data.referenceId}`;
+        
+        // Send email using Resend
+        emailResult = await resend.emails.send({
+          from: 'Peace2Hearts <booking@peace2hearts.com>',
+          to: data.to,
+          subject: subject,
+          html: htmlContent
+        });
+        break;
+      
+      case 'contact':
+      case 'contact-form':
+        // Validate required fields for contact form
+        if (!data.email || !data.name) {
+          throw new Error('Missing required fields for contact form email');
+        }
+
+        // Send email to the person who submitted the form
+        const userEmailResult = await resend.emails.send({
+          from: 'Peace2Hearts <contact@peace2hearts.com>',
+          to: [data.email],
+          subject: data.isResend ? 'Re: Your Message to Peace2Hearts' : 'Thank you for contacting Peace2Hearts',
+          html: generateContactUserEmail(data)
+        });
+        
+        // Send notification to admin
+        const adminEmailResult = await resend.emails.send({
+          from: 'Peace2Hearts <notifications@peace2hearts.com>',
+          to: ['contact@peace2hearts.com'],
+          subject: `New Contact Form: ${data.subject || 'General Inquiry'}`,
+          html: generateContactAdminEmail(data)
+        });
+        
+        emailResult = {
+          user: userEmailResult,
+          admin: adminEmailResult
+        };
+        break;
+        
+      default:
+        throw new Error(`Unsupported email type: ${type}`);
+    }
+    
+    // Return success response
+    return new Response(
+      JSON.stringify({
+        success: true,
+        result: emailResult
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    );
+    
+  } catch (error) {
+    // Log detailed error
+    console.error('Error in send-email function:', error);
+    
+    // Return error response
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error occurred'
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    );
+  }
+});
 
 // Generate HTML for booking confirmation email
-function generateBookingConfirmationHTML(data: BookingConfirmationData): string {
+function generateBookingConfirmationHTML(data) {
   const { clientName, referenceId, serviceType, date, time, price, isResend } = data;
   
   const subject = isResend 
@@ -152,92 +247,37 @@ function generateBookingConfirmationHTML(data: BookingConfirmationData): string 
   `;
 }
 
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: corsHeaders,
-    });
-  }
+// Generate HTML for contact form user confirmation email
+function generateContactUserEmail(data) {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2 style="color: #3399cc;">Thank You for Contacting Peace2Hearts</h2>
+      <p>Dear ${data.name},</p>
+      <p>We have received your message regarding "${data.subject || 'your inquiry'}" and will get back to you as soon as possible.</p>
+      <p>Here's a copy of your message:</p>
+      <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">
+        <p style="margin: 0;">${data.message}</p>
+      </div>
+      <p>If you have any additional questions or information to share, please don't hesitate to reply to this email.</p>
+      <p>Warm regards,<br>The Peace2Hearts Team</p>
+    </div>
+  `;
+}
 
-  try {
-    // Check if Resend API key is available
-    if (!resendApiKey) {
-      throw new Error('RESEND_API_KEY is not configured in environment variables');
-    }
-    
-    // Parse request body
-    const { type, data } = await req.json();
-    
-    if (!type || !data) {
-      throw new Error('Missing required parameters: type, data');
-    }
-    
-    let emailResult;
-    
-    // Handle different email types
-    switch (type) {
-      case 'booking-confirmation':
-        // Validate required fields
-        if (!data.to || !data.clientName || !data.referenceId || !data.serviceType) {
-          throw new Error('Missing required fields for booking confirmation email');
-        }
-        
-        // Generate email content
-        const htmlContent = generateBookingConfirmationHTML(data);
-        const subject = data.isResend 
-          ? `Important: Your Peace2Hearts Consultation Booking #${data.referenceId}`
-          : `Confirmation: Your Peace2Hearts Consultation Booking #${data.referenceId}`;
-        
-        // Add priority headers if needed
-        const headers = data.highPriority ? {
-          'X-Priority': '1',
-          'X-MSMail-Priority': 'High',
-          'Importance': 'high'
-        } : {};
-        
-        // Send email using Resend
-        emailResult = await resend.emails.send({
-          from: 'Peace2Hearts <booking@peace2hearts.com>',
-          to: data.to,
-          subject: subject,
-          html: htmlContent,
-          headers: headers
-        });
-        break;
-        
-      // Add other email types as needed
-      
-      default:
-        throw new Error(`Unsupported email type: ${type}`);
-    }
-    
-    // Return success response
-    return new Response(
-      JSON.stringify({
-        success: true,
-        result: emailResult
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
-    );
-    
-  } catch (error) {
-    // Log detailed error
-    console.error('Error in send-email function:', error);
-    
-    // Return error response
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message || 'Unknown error occurred'
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      }
-    );
-  }
-});
+// Generate HTML for contact form admin notification
+function generateContactAdminEmail(data) {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2 style="color: #3399cc;">New Contact Form Submission</h2>
+      <p><strong>Name:</strong> ${data.name}</p>
+      <p><strong>Email:</strong> ${data.email}</p>
+      ${data.phone ? `<p><strong>Phone:</strong> ${data.phone}</p>` : ''}
+      <p><strong>Subject:</strong> ${data.subject || 'General Inquiry'}</p>
+      <p><strong>Message:</strong></p>
+      <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">
+        <p style="margin: 0;">${data.message}</p>
+      </div>
+      <p>${data.isResend ? '<strong>Note:</strong> This is a resent notification.' : ''}</p>
+    </div>
+  `;
+}

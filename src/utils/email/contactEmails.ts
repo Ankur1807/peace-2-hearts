@@ -21,6 +21,22 @@ export async function sendContactEmail(formData: ContactFormData): Promise<boole
       subject: formData.subject
     });
     
+    // First store the message in the database
+    const { error: dbError } = await supabase
+      .from('contact_messages')
+      .insert({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        subject: formData.subject,
+        message: formData.message
+      });
+      
+    if (dbError) {
+      console.error("Error storing contact message:", dbError);
+      // Continue with email sending even if DB storage fails
+    }
+    
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
         type: 'contact',
