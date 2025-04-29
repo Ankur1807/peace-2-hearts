@@ -48,8 +48,8 @@ const HolisticPackage: React.FC<HolisticPackageProps> = ({
         </ul>
       </div>
 
-      <div className="mt-auto">
-        <FractalButton asChild fractalType="primary" className="w-full mt-4">
+      <div className="mt-auto pt-4">
+        <FractalButton asChild fractalType="primary" className="w-full">
           <Link to={linkPath}>{linkText}</Link>
         </FractalButton>
       </div>
