@@ -16,6 +16,9 @@ export interface Booking {
   payment_id?: string;
   payment_status?: string;
   email_sent: boolean;
+  service_category?: string; // Added this field to fix the type error
+  timeframe?: string;
+  time_slot?: string;
 }
 
 export function useBookings() {

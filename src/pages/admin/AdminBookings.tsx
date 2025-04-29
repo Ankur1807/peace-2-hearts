@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BookingsTable } from '@/components/admin/BookingsTable';
 import { BookingsFilter } from '@/components/admin/BookingsFilter';
 import { useBookings } from '@/hooks/useBookings';
@@ -36,21 +36,6 @@ const AdminBookings: React.FC = () => {
     fetchBookings();
     toast.success("Bookings refreshed");
   };
-
-  // Check for specific reference ID when component loads
-  useEffect(() => {
-    if (!loading && bookings.length > 0) {
-      const searchRef = "P2H-894747-3561";
-      const foundBooking = bookings.find(b => b.reference_id === searchRef);
-      
-      if (foundBooking) {
-        console.log(`Found booking with reference ${searchRef}:`, foundBooking);
-        setSearchQuery(searchRef);
-      } else {
-        console.log(`No booking found with reference ${searchRef}`);
-      }
-    }
-  }, [bookings, loading]);
 
   return (
     <div className="space-y-6">

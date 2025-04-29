@@ -63,11 +63,12 @@ import MobileBookings from '@/pages/MobileBookings';
 import LogoExport from '@/pages/LogoExport';
 
 function App() {
+  // The issue is likely here with the useEffect hook
   useEffect(() => {
     // Log that the app is ready
     console.log('Peace2Hearts application initialized');
     
-    // Optionally add automated recovery
+    // Fix: Only access window properties if in browser environment
     if (typeof window !== 'undefined' && window.automatedEmailRecovery) {
       const path = window.location.pathname;
       // Only run on important pages to avoid unnecessary processing
