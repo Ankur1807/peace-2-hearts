@@ -22,7 +22,7 @@ export function storePaymentDetailsInSession(
   params: {
     referenceId: string,
     paymentId: string,
-    orderId?: string,
+    orderId?: string | null,
     amount?: number,
     bookingDetails?: BookingDetails
   }
@@ -141,124 +141,88 @@ export const savePaymentRecord = async (params: SavePaymentRecordParams): Promis
       // Find the consultation by reference ID
       let { data: consultationData, error: consultationError } = await supabase
         .from('consultations')
-        .select('id, reference_id, client_name, client_email, date, time_slot, timeframe, consultation_type, message')
+        .select('id, reference_id, client_name, client_email, date, time_slot, timeframe, consultation_type, message, payment_id')
         .eq('reference_id', referenceId)
         .single();
       
       // If consultation not found but we have booking details, create it
-      if (consultationError && bookingDetails) {
+      if ((!consultationData || consultationError) && bookingDetails) {
         console.log("Consultation not found, attempting to create from booking details:", bookingDetails);
         
-        const createdConsultation = await createConsultationFromBookingDetails(bookingDetails);
-        if (createdConsultation) {
-          console.log("Successfully created consultation from booking details");
-          
-          // Retry fetching the newly created consultation
-          const { data: newConsultation, error: newError } = await supabase
-            .from('consultations')
-            .select('id, reference_id, client_name, client_email, date, time_slot, timeframe, consultation_type, message')
-            .eq('reference_id', referenceId)
-            .single();
-            
-          if (!newError && newConsultation) {
-            consultationData = newConsultation;
-            consultationError = null;
-          }
-        }
-      }
-      
-      // If consultation still not found, create a minimal placeholder
-      if (consultationError) {
-        console.log("Creating a minimal placeholder consultation record");
+        const newConsultation = await createConsultationFromBookingDetails(bookingDetails);
         
-        const { data: placeholderData, error: placeholderError } = await supabase
-          .from('consultations')
-          .insert({
-            reference_id: referenceId,
-            payment_id: paymentId,
-            order_id: orderId,
-            amount: amount,
-            payment_status: status,
-            status: 'payment_received_needs_details',
-            consultation_type: 'recovery_needed',
-            client_name: 'Payment Received - Recovery Needed',
-            message: `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`,
-            time_slot: 'to_be_scheduled' // Adding the required time_slot field
-          })
-          .select();
-          
-        if (placeholderError) {
-          console.error(`Attempt ${retryCount + 1}: Error creating placeholder consultation:`, placeholderError);
+        if (newConsultation) {
+          console.log("Successfully created consultation from booking details:", newConsultation);
+          consultationData = newConsultation;
+        } else {
+          console.error("Failed to create consultation from booking details");
           retryCount++;
           if (retryCount < MAX_RETRIES) {
+            console.log(`Will retry in 1 second... (${retryCount}/${MAX_RETRIES})`);
             await new Promise(resolve => setTimeout(resolve, 1000));
             continue;
           }
           return false;
-        } else {
-          consultationData = placeholderData[0];
-          consultationError = null;
         }
+      } else if (!consultationData && !bookingDetails) {
+        console.error("No consultation found and no booking details provided to create one");
+        return false;
       }
-
-      // Update consultation with payment details
-      await updateConsultationStatus(
-        referenceId, 
-        status, 
-        paymentId, 
-        amount, 
-        orderId
-      );
       
-      console.log("Updated consultation with payment information");
-
-      // Send confirmation email if we have either consultation data or booking details
-      if (consultationData || bookingDetails) {
-        // Make sure we have a complete booking details object with serviceCategory
-        let completeBookingDetails: BookingDetails;
+      // Update the consultation with payment information
+      if (consultationData && (!consultationData.payment_id || consultationData.payment_id !== paymentId)) {
+        console.log("Updating consultation with payment information:", {
+          consultationId: consultationData.id,
+          paymentId,
+          orderId,
+          amount
+        });
         
-        if (bookingDetails) {
-          completeBookingDetails = bookingDetails;
-        } else {
-          // Create booking details from consultation data
-          const serviceCategory = consultationData.consultation_type?.toLowerCase().includes('legal') ? 
-            'legal' : consultationData.consultation_type?.toLowerCase().includes('holistic') ? 
-            'holistic' : 'mental-health';
-            
-          completeBookingDetails = {
-            clientName: consultationData.client_name,
-            email: consultationData.client_email,
-            referenceId: consultationData.reference_id,
-            consultationType: consultationData.consultation_type,
-            services: consultationData.consultation_type ? consultationData.consultation_type.split(',') : [],
-            date: consultationData.date ? new Date(consultationData.date) : undefined,
-            timeSlot: consultationData.time_slot,
-            timeframe: consultationData.timeframe,
-            message: consultationData.message,
-            serviceCategory: serviceCategory
-          };
+        const { error: updateError } = await supabase
+          .from('consultations')
+          .update({
+            payment_id: paymentId,
+            order_id: orderId || null,
+            amount: amount,
+            payment_status: status,
+            status: 'confirmed',
+            updated_at: new Date().toISOString()
+          })
+          .eq('reference_id', referenceId);
+        
+        if (updateError) {
+          console.error("Error updating consultation with payment info:", updateError);
+          retryCount++;
+          if (retryCount < MAX_RETRIES) {
+            console.log(`Will retry in 1 second... (${retryCount}/${MAX_RETRIES})`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+          return false;
         }
         
-        const emailResult = await sendEmailForConsultation(completeBookingDetails);
-        console.log("Email sending result:", emailResult);
-        
-        if (emailResult) {
-          // Update the consultation record to mark email as sent
-          await supabase
-            .from('consultations')
-            .update({ email_sent: true })
-            .eq('reference_id', referenceId);
-          
-          console.log("Consultation marked as email_sent");
+        console.log("Successfully updated consultation with payment info");
+      } else {
+        console.log("Payment already recorded for this consultation or no consultation found");
+      }
+      
+      // Send confirmation email if booking details are available
+      if (bookingDetails) {
+        try {
+          console.log("Sending email confirmation for booking");
+          await sendEmailForConsultation(bookingDetails);
+        } catch (emailError) {
+          console.error("Error sending email confirmation:", emailError);
+          // Don't retry just for email failure
         }
       }
       
-      clearPaymentDetailsFromSession(referenceId);
       return true;
-    } catch (err) {
-      console.error(`Attempt ${retryCount + 1}: Exception saving payment record:`, err);
+    } catch (error) {
+      console.error(`Error in savePaymentRecord (attempt ${retryCount + 1}):`, error);
       retryCount++;
       if (retryCount < MAX_RETRIES) {
+        console.log(`Will retry in 1 second... (${retryCount}/${MAX_RETRIES})`);
         await new Promise(resolve => setTimeout(resolve, 1000));
         continue;
       }

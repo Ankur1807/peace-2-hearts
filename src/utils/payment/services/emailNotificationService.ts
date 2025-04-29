@@ -1,257 +1,116 @@
 
-/**
- * Email notification service for payment-related events
- */
-
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
-import { determineServiceCategory } from "./serviceUtils";
+import { sendBookingConfirmationEmail } from "@/utils/email/bookingEmails";
 
 /**
- * Send a payment confirmation email
+ * Sends an email notification for a consultation booking
  */
-export async function sendPaymentConfirmationEmail(
-  bookingDetails: BookingDetails,
-  paymentId: string
-): Promise<boolean> {
+export async function sendEmailForConsultation(bookingDetails: BookingDetails): Promise<boolean> {
   try {
-    console.log(`Sending payment confirmation email for ${bookingDetails.referenceId}`);
+    console.log(`Sending email notification for consultation ${bookingDetails.referenceId}`);
     
-    // Determine service category from consultation type if not provided
-    const serviceCategory = bookingDetails.serviceCategory || 
-      determineServiceCategory(bookingDetails.consultationType);
-    
-    // Send the email using the edge function
-    const { data, error } = await supabase.functions.invoke('send-email', {
-      body: {
-        type: 'payment-confirmation',
-        clientName: bookingDetails.clientName,
-        email: bookingDetails.email,
-        referenceId: bookingDetails.referenceId,
-        consultationType: bookingDetails.consultationType,
-        services: bookingDetails.services,
-        date: bookingDetails.date,
-        timeSlot: bookingDetails.timeSlot,
-        paymentId: paymentId,
-        amount: bookingDetails.amount,
-        serviceCategory: serviceCategory
-      }
-    });
-    
-    if (error) {
-      console.error("Error sending payment confirmation email:", error);
+    // Check for required fields
+    if (!bookingDetails.referenceId || !bookingDetails.email) {
+      console.error("Missing required fields for email notification:", { 
+        hasReferenceId: !!bookingDetails.referenceId,
+        hasEmail: !!bookingDetails.email
+      });
       return false;
     }
+
+    // Send the email using our email service
+    const emailSent = await sendBookingConfirmationEmail(bookingDetails);
     
-    console.log("Payment confirmation email sent:", data);
-    return true;
+    // If email was sent successfully, update the consultation record
+    if (emailSent) {
+      console.log(`Email sent successfully for ${bookingDetails.referenceId}`);
+      
+      try {
+        const { error } = await supabase
+          .from('consultations')
+          .update({ email_sent: true })
+          .eq('reference_id', bookingDetails.referenceId);
+        
+        if (error) {
+          console.error("Error updating consultation email_sent status:", error);
+        }
+      } catch (updateError) {
+        console.error("Exception updating consultation email_sent status:", updateError);
+      }
+      
+      return true;
+    } else {
+      console.error(`Failed to send email for ${bookingDetails.referenceId}`);
+      return false;
+    }
   } catch (error) {
-    console.error("Exception sending payment confirmation email:", error);
+    console.error("Error sending email notification:", error);
     return false;
   }
 }
 
 /**
- * Send confirmation email for a consultation with better error handling and retry mechanism
+ * Resends a consultation confirmation email
  */
-export async function sendEmailForConsultation(
-  bookingDetails: BookingDetails
-): Promise<boolean> {
-  // Import the email sending functionality from the dedicated email module
-  const { sendBookingConfirmationEmail } = await import('@/utils/email/bookingEmails');
-  
+export async function resendConsultationEmail(referenceId: string): Promise<boolean> {
   try {
-    console.log("Sending consultation confirmation email");
+    console.log(`Attempting to resend email for consultation ${referenceId}`);
     
-    // Validate critical fields before sending
-    if (!bookingDetails.email) {
-      console.error("Cannot send email: missing email address");
-      return false;
-    }
-    
-    if (!bookingDetails.referenceId) {
-      console.error("Cannot send email: missing reference ID");
-      return false;
-    }
-    
-    // If we have a reference ID but incomplete booking details, fetch the consultation data
-    if (bookingDetails.referenceId && (!bookingDetails.email || !bookingDetails.clientName)) {
-      const { data } = await supabase
-        .from('consultations')
-        .select('*')
-        .eq('reference_id', bookingDetails.referenceId)
-        .single();
-        
-      if (data) {
-        // Use type assertion to handle the service_category property that TypeScript doesn't recognize
-        const consultationData = data as any;
-        
-        // Determine service category or use the existing one
-        const serviceCategory = consultationData.service_category || determineServiceCategory(data.consultation_type);
-        
-        // Create email data from consultation record
-        bookingDetails = {
-          clientName: data.client_name || bookingDetails.clientName,
-          email: data.client_email || bookingDetails.email,
-          referenceId: data.reference_id,
-          consultationType: data.consultation_type,
-          services: data.consultation_type ? data.consultation_type.split(',') : [],
-          date: data.date ? new Date(data.date) : undefined,
-          timeSlot: data.time_slot,
-          timeframe: data.timeframe,
-          message: data.message,
-          serviceCategory: serviceCategory,
-          highPriority: bookingDetails.highPriority,
-          isResend: bookingDetails.isResend,
-          isRecovery: bookingDetails.isRecovery
-        };
-      }
-    }
-    
-    console.log(`Sending email to ${bookingDetails.email} for reference ${bookingDetails.referenceId}`);
-    
-    // Add high-priority flag for emails
-    const emailResult = await sendBookingConfirmationEmail({
-      ...bookingDetails,
-      highPriority: true
-    });
-    
-    if (emailResult && bookingDetails.referenceId) {
-      // Update the consultation record to mark email as sent
-      await updateEmailSentStatus(bookingDetails.referenceId);
-    }
-    
-    console.log("Email sending result:", emailResult);
-    return !!emailResult;
-  } catch (error) {
-    console.error("Error sending consultation email:", error);
-    
-    // Store the booking details for recovery if needed
-    if (bookingDetails.referenceId) {
-      await markConsultationForRecovery(bookingDetails.referenceId);
-    }
-    
-    return false;
-  }
-}
-
-/**
- * Update the consultation record to mark email as sent
- */
-async function updateEmailSentStatus(referenceId: string): Promise<void> {
-  try {
-    await supabase
-      .from('consultations')
-      .update({ 
-        email_sent: true,
-        status: 'confirmed' 
-      })
-      .eq('reference_id', referenceId);
-      
-    console.log(`Consultation ${referenceId} marked as email_sent=true`);
-  } catch (updateError) {
-    console.error("Error updating email_sent status:", updateError);
-    // Not failing the overall operation if just the status update fails
-  }
-}
-
-/**
- * Mark a consultation for email recovery
- */
-async function markConsultationForRecovery(referenceId: string): Promise<void> {
-  try {
-    await supabase
-      .from('consultations')
-      .update({ 
-        status: 'payment_received_needs_email'
-      })
-      .eq('reference_id', referenceId);
-      
-    console.log(`Consultation ${referenceId} marked for email recovery`);
-  } catch (error) {
-    console.error("Error updating consultation for recovery:", error);
-  }
-}
-
-/**
- * Function to manually trigger resending of confirmation email 
- */
-export async function resendConfirmationEmail(referenceId: string): Promise<boolean> {
-  try {
-    console.log(`Attempting to resend confirmation email for ${referenceId}`);
-    
-    // Fetch the consultation data
-    const { data: consultation } = await supabase
+    // Fetch the consultation details
+    const { data: consultation, error } = await supabase
       .from('consultations')
       .select('*')
       .eq('reference_id', referenceId)
       .single();
     
-    if (!consultation) {
-      console.error("Could not find consultation with reference ID:", referenceId);
+    if (error || !consultation) {
+      console.error("Error fetching consultation for email resend:", error);
       return false;
     }
     
-    // Use type assertion to access service_category
-    const consultationData = consultation as any;
-    
-    // Determine service category from consultation type if not provided
-    const serviceCategory = consultationData.service_category || 
-      determineServiceCategory(consultation.consultation_type || '');
-    
-    // Create booking details for the email
+    // Create booking details from the consultation
     const bookingDetails: BookingDetails = {
+      referenceId: consultation.reference_id,
       clientName: consultation.client_name,
       email: consultation.client_email,
-      referenceId: consultation.reference_id,
       consultationType: consultation.consultation_type,
       services: consultation.consultation_type ? consultation.consultation_type.split(',') : [],
       date: consultation.date ? new Date(consultation.date) : undefined,
       timeSlot: consultation.time_slot,
       timeframe: consultation.timeframe,
       message: consultation.message,
-      serviceCategory: serviceCategory,
-      highPriority: true,
-      isResend: true
+      amount: consultation.amount,
+      isResend: true // Flag to indicate this is a resend
     };
     
     // Send the email
-    return sendEmailForConsultation(bookingDetails);
+    return await sendEmailForConsultation(bookingDetails);
   } catch (error) {
-    console.error("Error resending confirmation email:", error);
+    console.error("Error in resendConsultationEmail:", error);
     return false;
   }
 }
 
 /**
- * Send a general booking notification
+ * Check if an email has been sent for a consultation
  */
-export async function sendBookingNotification(bookingData: any): Promise<boolean> {
+export async function checkEmailSentStatus(referenceId: string): Promise<boolean> {
   try {
-    const { data, error } = await supabase.functions.invoke('send-email', {
-      body: {
-        type: 'admin-notification',
-        bookingData: bookingData,
-        serviceCategory: bookingData.service_category || determineServiceCategory(bookingData.consultation_type || ''),
-        notificationType: 'booking'
-      }
-    });
+    const { data, error } = await supabase
+      .from('consultations')
+      .select('email_sent')
+      .eq('reference_id', referenceId)
+      .single();
     
     if (error) {
-      console.error("Error sending booking notification:", error);
+      console.error("Error checking email sent status:", error);
       return false;
     }
     
-    console.log("Booking notification sent:", data);
-    return true;
+    return data?.email_sent || false;
   } catch (error) {
-    console.error("Exception sending booking notification:", error);
+    console.error("Error in checkEmailSentStatus:", error);
     return false;
   }
-}
-
-// Expose the email resend function globally for debugging and manual recovery
-if (typeof window !== 'undefined') {
-  // @ts-ignore
-  window.resendConfirmationEmail = resendConfirmationEmail;
 }

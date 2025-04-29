@@ -44,8 +44,8 @@ const ServicesOverview: React.FC = () => {
               </li>
             </ul>
           </div>
-          <div className="mt-auto">
-            <FractalButton asChild fractalType="primary" className="mt-4">
+          <div className="mt-auto pt-4">
+            <FractalButton asChild fractalType="primary">
               <Link to="/services/mental-health">
                 Learn More
               </Link>
@@ -91,8 +91,8 @@ const ServicesOverview: React.FC = () => {
               </li>
             </ul>
           </div>
-          <div className="mt-auto">
-            <FractalButton asChild fractalType="secondary" className="mt-4">
+          <div className="mt-auto pt-4">
+            <FractalButton asChild fractalType="secondary">
               <Link to="/services/legal-support">
                 Learn More
               </Link>
