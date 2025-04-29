@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { PaymentMigrationPanel } from '@/components/admin/PaymentMigrationPanel';
+import PaymentMigrationPanel from '@/components/admin/PaymentMigrationPanel';
 
 const AdminPaymentMigration: React.FC = () => {
   return (
