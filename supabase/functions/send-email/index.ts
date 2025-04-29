@@ -1,3 +1,4 @@
+
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { Resend } from 'npm:resend@1.0.0';
 
@@ -37,8 +38,15 @@ serve(async (req) => {
     switch (type) {
       case 'booking-confirmation':
         // Validate required fields
-        if (!data.to || !data.clientName || !data.referenceId || !data.serviceType) {
+        if (!data.to && !data.clientName && !data.referenceId) {
+          console.error('Missing booking confirmation email data:', data);
           throw new Error('Missing required fields for booking confirmation email');
+        }
+        
+        // Get the email recipient from the correct field
+        const recipient = data.to || data.email;
+        if (!recipient) {
+          throw new Error('Missing recipient email address');
         }
         
         // Generate email content
@@ -47,13 +55,21 @@ serve(async (req) => {
           ? `Important: Your Peace2Hearts Consultation Booking #${data.referenceId}`
           : `Confirmation: Your Peace2Hearts Consultation Booking #${data.referenceId}`;
         
+        console.log(`Sending booking confirmation email to ${recipient}`);
+        
         // Send email using Resend
-        emailResult = await resend.emails.send({
-          from: 'Peace2Hearts <booking@peace2hearts.com>',
-          to: data.to,
-          subject: subject,
-          html: htmlContent
-        });
+        try {
+          emailResult = await resend.emails.send({
+            from: 'Peace2Hearts <booking@peace2hearts.com>',
+            to: recipient,
+            subject: subject,
+            html: htmlContent
+          });
+          console.log('Booking email sent successfully:', emailResult);
+        } catch (emailErr) {
+          console.error('Error sending booking confirmation email:', emailErr);
+          throw emailErr;
+        }
         break;
       
       case 'contact':

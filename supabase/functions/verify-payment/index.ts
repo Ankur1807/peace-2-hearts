@@ -34,6 +34,7 @@ interface VerifyPaymentRequest {
     timeframe?: string;
     serviceCategory: string;
     message?: string;
+    amount?: number;
   };
 }
 
@@ -157,6 +158,17 @@ async function createConsultationRecord(
       return { success: true, consultationId: updatedData.id };
     } else {
       // Create new consultation record
+      const effectiveServiceCategory = serviceCategory || determineServiceCategory(services[0] || consultationType);
+      
+      console.log("Creating new consultation with data:", { 
+        clientName, 
+        email, 
+        serviceType: consultationType || services.join(','), 
+        serviceCategory: effectiveServiceCategory,
+        referenceId,
+        amount
+      });
+      
       const { data: newConsultation, error: insertError } = await supabase
         .from('consultations')
         .insert({
@@ -165,7 +177,7 @@ async function createConsultationRecord(
           client_phone: phone,
           reference_id: referenceId,
           consultation_type: consultationType || services.join(','),
-          service_category: serviceCategory || determineServiceCategory(services[0]),
+          service_category: effectiveServiceCategory,
           date: date ? new Date(date).toISOString() : null,
           time_slot: timeSlot || null,
           timeframe: timeframe || null,
@@ -210,15 +222,13 @@ async function sendConfirmationEmail(
       const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-email', {
         body: {
           type: 'booking-confirmation',
+          to: bookingDetails.email,
           clientName: bookingDetails.clientName,
-          email: bookingDetails.email,
           referenceId: bookingDetails.referenceId,
-          consultationType: bookingDetails.consultationType,
-          services: bookingDetails.services,
-          date: bookingDetails.date,
-          timeSlot: bookingDetails.timeSlot,
-          timeframe: bookingDetails.timeframe,
-          serviceCategory: bookingDetails.serviceCategory,
+          serviceType: bookingDetails.consultationType || bookingDetails.services.join(', '),
+          date: bookingDetails.date || 'To be scheduled',
+          time: bookingDetails.timeSlot || bookingDetails.timeframe || '',
+          price: bookingDetails.amount ? `₹${bookingDetails.amount}` : 'To be confirmed',
           highPriority: true
         }
       });

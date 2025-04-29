@@ -30,11 +30,12 @@ export const usePaymentVerification = ({
     success: boolean; 
     verified: boolean;
     error?: string;
+    message?: string;
   } | null>(null);
 
   // If we have direct payment details, verify automatically
   useEffect(() => {
-    if (paymentId && orderId && signature && referenceId && amount && bookingDetails) {
+    if (paymentId && orderId && referenceId && amount && bookingDetails) {
       verifyPayment({
         razorpay_payment_id: paymentId,
         razorpay_order_id: orderId,
@@ -47,10 +48,11 @@ export const usePaymentVerification = ({
     try {
       setIsVerifying(true);
       
-      console.log("Verifying payment with unified verification service");
-      
-      // Convert amount to string for verification if needed
-      const amountString = amount.toString();
+      console.log("Verifying payment with unified verification service", {
+        paymentId: response.razorpay_payment_id,
+        amount,
+        referenceId
+      });
       
       // Use our unified verification service
       const verificationResult = await verifyPaymentAndCreateBooking(
@@ -65,7 +67,21 @@ export const usePaymentVerification = ({
       );
       
       console.log("Payment verification result:", verificationResult);
-      setVerificationResult(verificationResult);
+      
+      // Generate a user-friendly message based on verification results
+      let message = "";
+      if (verificationResult.success && verificationResult.verified) {
+        message = "Your payment has been successfully verified. Thank you for your booking!";
+      } else if (verificationResult.success && !verificationResult.verified) {
+        message = "Your payment was processed, but verification failed. Our team will reach out to you for confirmation.";
+      } else {
+        message = verificationResult.error || "There was an issue with your payment verification. Please contact support.";
+      }
+      
+      setVerificationResult({
+        ...verificationResult,
+        message
+      });
       
       if (verificationResult.success && verificationResult.verified) {
         if (setPaymentCompleted) {
@@ -74,6 +90,17 @@ export const usePaymentVerification = ({
         return { success: true, verified: true };
       }
       
+      // Even if verification failed, we still consider the operation "successful"
+      // for UX purposes, but we'll handle the error on the confirmation page
+      return { success: true, verified: false };
+    } catch (error) {
+      console.error("Error in verifyPayment:", error);
+      setVerificationResult({
+        success: false,
+        verified: false,
+        error: error instanceof Error ? error.message : String(error),
+        message: "An unexpected error occurred during payment verification. Please contact support."
+      });
       return { success: false, verified: false };
     } finally {
       setIsVerifying(false);

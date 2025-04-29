@@ -34,6 +34,10 @@ export const useOpenRazorpayCheckout = ({
     try {
       console.log("Payment successful, processing verification:", response);
       
+      // Calculate the effective price
+      const price = getEffectivePrice();
+      console.log(`Effective price for checkout: ${price}`);
+      
       // Create booking details object
       const bookingDetails = {
         clientName: `${state.personalDetails.firstName || ''} ${state.personalDetails.lastName || ''}`.trim(),
@@ -47,7 +51,7 @@ export const useOpenRazorpayCheckout = ({
         timeframe: state.timeframe,
         message: state.personalDetails.message,
         serviceCategory: state.serviceCategory,
-        amount: getEffectivePrice()
+        amount: price
       };
       
       // Store payment details in session for recovery if needed
@@ -55,7 +59,7 @@ export const useOpenRazorpayCheckout = ({
         referenceId: receiptId,
         paymentId: response.razorpay_payment_id,
         orderId: response.razorpay_order_id,
-        amount: getEffectivePrice(),
+        amount: price,
         bookingDetails
       });
       
@@ -64,12 +68,11 @@ export const useOpenRazorpayCheckout = ({
       }
       
       // Always navigate to verification/confirmation page, even if verification hasn't completed
-      // This ensures users see a confirmation screen regardless of email sending status
       navigateToVerification({
         paymentId: response.razorpay_payment_id,
         orderId: response.razorpay_order_id,
         signature: response.razorpay_signature,
-        amount: getEffectivePrice(),
+        amount: price,
         referenceId: receiptId,
         bookingDetails,
         isVerifying
@@ -78,7 +81,7 @@ export const useOpenRazorpayCheckout = ({
       // Start verification process
       const verificationResult = await verifyPayment(
         response, 
-        getEffectivePrice(), 
+        price, 
         bookingDetails, 
         receiptId
       );
@@ -134,9 +137,15 @@ export const useOpenRazorpayCheckout = ({
         throw new Error('Razorpay not available');
       }
       
+      // Get the effective price, making sure it's positive and non-zero
+      const price = getEffectivePrice();
+      const effectivePrice = Math.max(price, 50); // Ensure minimum price of ₹50
+      
+      console.log(`Opening Razorpay checkout with price: ₹${effectivePrice}`);
+      
       const options = {
         key: razorpayKey,
-        amount: getEffectivePrice() * 100, // Razorpay expects amount in paise
+        amount: effectivePrice * 100, // Razorpay expects amount in paise
         currency: 'INR',
         name: 'Peace2Hearts',
         description: `Consultation Booking: ${receiptId}`,

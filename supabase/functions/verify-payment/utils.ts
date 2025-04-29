@@ -11,10 +11,36 @@ export const corsHeaders = {
 export function determineServiceCategory(serviceId: string): string {
   if (!serviceId) return 'other';
   
-  if (serviceId.includes('legal')) return 'legal';
-  if (serviceId.includes('mental') || serviceId.includes('therapy') || serviceId.includes('counseling')) return 'mental-health';
-  if (serviceId.includes('holistic')) return 'holistic';
-  if (serviceId.includes('test')) return 'test';
+  const serviceIdLower = serviceId.toLowerCase();
+  
+  if (serviceIdLower.includes('legal') || serviceIdLower.includes('lawyer') || serviceIdLower.includes('attorney')) {
+    return 'legal';
+  }
+  
+  if (serviceIdLower.includes('mental') || 
+      serviceIdLower.includes('therapy') || 
+      serviceIdLower.includes('counseling') ||
+      serviceIdLower.includes('counselling') ||
+      serviceIdLower.includes('psycho')) {
+    return 'mental-health';
+  }
+  
+  if (serviceIdLower.includes('holistic') || 
+      serviceIdLower.includes('spiritual') || 
+      serviceIdLower.includes('healing')) {
+    return 'holistic';
+  }
+  
+  if (serviceIdLower.includes('test')) {
+    return 'test';
+  }
   
   return 'other';
+}
+
+/**
+ * Format a price in INR
+ */
+export function formatPrice(price: number): string {
+  return `₹${price}`;
 }
