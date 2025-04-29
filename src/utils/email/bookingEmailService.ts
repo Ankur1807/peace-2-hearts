@@ -190,7 +190,8 @@ export async function fetchBookingDetailsByReference(referenceId: string): Promi
       timeframe: data.timeframe || '',
       message: data.message || '',
       serviceCategory: serviceCategory,
-      amount: data.amount
+      amount: data.amount,
+      phone: data.client_phone || ''
     };
   } catch (error) {
     console.error('Exception fetching booking details:', error);

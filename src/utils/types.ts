@@ -16,6 +16,19 @@ export interface BookingDetails {
   highPriority?: boolean;
   isResend?: boolean;
   isRecovery?: boolean;
+  packageName?: string | null;
+  phone?: string;
+  selectedServices?: string[];
+  personalDetails?: PersonalDetails;
+}
+
+// Add PersonalDetails interface which was missing
+export interface PersonalDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  message?: string;
 }
 
 // Add other interfaces as needed for serialized data
@@ -35,4 +48,14 @@ export interface SerializedBookingDetails {
   highPriority?: boolean;
   isResend?: boolean;
   isRecovery?: boolean;
+  packageName?: string | null;
+}
+
+// Add VerificationResult interface
+export interface VerificationResult {
+  success: boolean;
+  message: string;
+  details?: any;
+  referenceId?: string | null;
+  paymentId?: string | null;
 }

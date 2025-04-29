@@ -1,7 +1,50 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
 import { determineServiceCategory } from "./serviceUtils";
+
+/**
+ * Email notification service for payment-related events
+ */
+
+/**
+ * Send a payment confirmation email
+ */
+export async function sendPaymentConfirmationEmail(
+  bookingDetails: BookingDetails,
+  paymentId: string
+): Promise<boolean> {
+  try {
+    console.log(`Sending payment confirmation email for ${bookingDetails.referenceId}`);
+    
+    // Send the email using the edge function
+    const { data, error } = await supabase.functions.invoke('send-email', {
+      body: {
+        type: 'payment-confirmation',
+        clientName: bookingDetails.clientName,
+        email: bookingDetails.email,
+        referenceId: bookingDetails.referenceId,
+        consultationType: bookingDetails.consultationType,
+        services: bookingDetails.services,
+        date: bookingDetails.date,
+        timeSlot: bookingDetails.timeSlot,
+        paymentId: paymentId,
+        amount: bookingDetails.amount,
+        serviceCategory: bookingDetails.serviceCategory || determineServiceCategory(bookingDetails.consultationType)
+      }
+    });
+    
+    if (error) {
+      console.error("Error sending payment confirmation email:", error);
+      return false;
+    }
+    
+    console.log("Payment confirmation email sent:", data);
+    return true;
+  } catch (error) {
+    console.error("Exception sending payment confirmation email:", error);
+    return false;
+  }
+}
 
 /**
  * Send confirmation email for a consultation with better error handling and retry mechanism
@@ -164,6 +207,33 @@ export async function resendConfirmationEmail(referenceId: string): Promise<bool
     return sendEmailForConsultation(bookingDetails);
   } catch (error) {
     console.error("Error resending confirmation email:", error);
+    return false;
+  }
+}
+
+/**
+ * Send a general booking notification
+ */
+export async function sendBookingNotification(bookingData: any): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.functions.invoke('send-email', {
+      body: {
+        type: 'admin-notification',
+        bookingData: bookingData,
+        serviceCategory: bookingData.service_category || determineServiceCategory(bookingData.consultation_type || ''),
+        notificationType: 'booking'
+      }
+    });
+    
+    if (error) {
+      console.error("Error sending booking notification:", error);
+      return false;
+    }
+    
+    console.log("Booking notification sent:", data);
+    return true;
+  } catch (error) {
+    console.error("Exception sending booking notification:", error);
     return false;
   }
 }

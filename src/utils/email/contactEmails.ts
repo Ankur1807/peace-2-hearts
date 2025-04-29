@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { addToEmailQueue } from './emailQueue';
 
 export interface ContactFormData {
   name: string;
@@ -12,9 +11,9 @@ export interface ContactFormData {
 }
 
 /**
- * Internal function to send contact email
+ * Send contact email
  */
-export async function sendContactEmailInternal(formData: ContactFormData & { type: string }): Promise<boolean> {
+export async function sendContactEmail(formData: ContactFormData): Promise<boolean> {
   try {
     console.log('Sending contact email with data:', {
       name: formData.name, 
@@ -45,24 +44,6 @@ export async function sendContactEmailInternal(formData: ContactFormData & { typ
     console.error('Exception sending contact email:', error);
     return false;
   }
-}
-
-/**
- * Public function to send contact email
- */
-export async function sendContactEmail(formData: ContactFormData): Promise<boolean> {
-  const result = await sendContactEmailInternal({
-    ...formData, 
-    type: 'contact'
-  });
-  
-  if (!result) {
-    // Add to retry queue if failed
-    const emailId = `contact-${formData.email}-${Date.now()}`;
-    addToEmailQueue(emailId, { ...formData, type: 'contact' });
-  }
-  
-  return result;
 }
 
 /**

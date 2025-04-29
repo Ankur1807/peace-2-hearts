@@ -3,10 +3,10 @@
 // It re-exports all the email functionality from the new modular structure
 
 import {
-  sendContactEmail,
-  resendContactEmail,
   sendBookingConfirmationEmail,
-  resendBookingConfirmationEmail
+  resendBookingConfirmationEmail,
+  sendContactEmail,
+  resendContactEmail
 } from './email';
 
 export {

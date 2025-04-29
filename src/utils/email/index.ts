@@ -14,5 +14,8 @@ export {
   retryFailedEmails
 } from './bookingEmailService';
 
-// Export other email types (if needed in the future)
-// export { sendContactEmail, resendContactEmail } from './contactEmailService';
+// Export contact email functions from contactEmails.ts
+export {
+  sendContactEmail,
+  resendContactEmail
+} from './contactEmails';

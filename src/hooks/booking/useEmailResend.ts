@@ -4,7 +4,8 @@
  */
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { sendBookingConfirmationEmail, fetchBookingDetailsByReference } from "@/utils/email/bookingEmailService";
+import { sendBookingConfirmationEmail } from "@/utils/email/bookingEmailService";
+import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
 
 export function useEmailResend() {
   const { toast } = useToast();
@@ -46,7 +47,7 @@ export function useEmailResend() {
         timeSlot: booking.time_slot || '',
         timeframe: booking.timeframe || '',
         message: booking.message || '',
-        serviceCategory: booking.service_category || null,
+        serviceCategory: booking.service_category || determineServiceCategory(booking.consultation_type || ''),
         highPriority: true,
         isResend: true
       };
