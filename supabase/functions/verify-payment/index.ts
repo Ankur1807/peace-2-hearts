@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { corsHeaders, determineServiceCategory, handleFetchResponse } from "./utils.ts";
@@ -97,7 +96,8 @@ async function createConsultationRecord(
   orderId: string,
   amount: number,
   paymentStatus: string,
-  bookingStatus: string
+  bookingStatus: string,
+  source: string = 'edge' // Default source is 'edge' since this is our primary insert point
 ): Promise<{
   success: boolean;
   consultationId?: string;
@@ -167,7 +167,8 @@ async function createConsultationRecord(
         serviceType: consultationType || services.join(','), 
         serviceCategory: effectiveServiceCategory,
         referenceId,
-        amount
+        amount,
+        source // Include source field
       });
       
       // Prepare the consultation data
@@ -186,47 +187,26 @@ async function createConsultationRecord(
         amount: amount,
         payment_status: paymentStatus,
         status: bookingStatus,
-        email_sent: false // Will be updated after email is sent
+        email_sent: false, // Will be updated after email is sent
+        source: source // Add source field
       };
 
-      // Check if we need to add service_category (conditionally)
-      if (effectiveServiceCategory) {
-        try {
-          const { data: insertData, error: insertError } = await supabase
-            .from('consultations')
-            .insert(consultationData)
-            .select('id')
-            .single();
-          
-          if (insertError) {
-            console.error("Error creating consultation record:", insertError);
-            return { success: false, error: insertError.message };
-          }
-          
-          return { success: true, consultationId: insertData.id };
-        } catch (e) {
-          console.error("Exception during insert operation:", e);
-          return { success: false, error: e.message };
+      try {
+        const { data: insertData, error: insertError } = await supabase
+          .from('consultations')
+          .insert(consultationData)
+          .select('id')
+          .single();
+        
+        if (insertError) {
+          console.error("Error creating consultation record:", insertError);
+          return { success: false, error: insertError.message };
         }
-      } else {
-        // Try insert without service_category
-        try {
-          const { data: insertData, error: insertError } = await supabase
-            .from('consultations')
-            .insert(consultationData)
-            .select('id')
-            .single();
-          
-          if (insertError) {
-            console.error("Error creating consultation record:", insertError);
-            return { success: false, error: insertError.message };
-          }
-          
-          return { success: true, consultationId: insertData.id };
-        } catch (e) {
-          console.error("Exception during insert operation:", e);
-          return { success: false, error: e.message };
-        }
+        
+        return { success: true, consultationId: insertData.id };
+      } catch (e) {
+        console.error("Exception during insert operation:", e);
+        return { success: false, error: e.message };
       }
     }
   } catch (error) {
@@ -360,7 +340,8 @@ const handler = async (req: Request): Promise<Response> => {
         orderId,
         paymentVerification.details?.amount || 0,
         'failed',
-        'payment_failed'
+        'payment_failed',
+        'edge' // Add source as edge
       );
       
       return new Response(
@@ -388,7 +369,8 @@ const handler = async (req: Request): Promise<Response> => {
       orderId,
       paymentDetails!.amount / 100, // Convert from paise to rupees
       'completed',
-      'confirmed'
+      'confirmed',
+      'edge' // Add source as edge
     );
     
     if (!consultationResult.success) {

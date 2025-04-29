@@ -1,16 +1,14 @@
 
-interface PaymentDetails {
+/**
+ * Store payment details in session storage
+ */
+export function storePaymentDetailsInSession(details: {
   referenceId: string;
   paymentId: string;
   orderId: string;
   amount: number;
   bookingDetails?: any;
-}
-
-/**
- * Store payment details in session storage
- */
-export function storePaymentDetailsInSession(details: PaymentDetails): void {
+}): void {
   try {
     if (typeof window !== 'undefined' && window.sessionStorage) {
       // Save the main payment reference
@@ -30,37 +28,5 @@ export function storePaymentDetailsInSession(details: PaymentDetails): void {
     }
   } catch (error) {
     console.error('Error storing payment details in session:', error);
-  }
-}
-
-/**
- * Retrieve the last payment reference ID from session
- */
-export function getLastPaymentReferenceId(): string | null {
-  try {
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      return window.sessionStorage.getItem('lastPaymentReferenceId');
-    }
-    return null;
-  } catch (error) {
-    console.error('Error retrieving last payment reference ID:', error);
-    return null;
-  }
-}
-
-/**
- * Get payment details from session
- */
-export function getPaymentDetailsFromSession(referenceId: string): any | null {
-  try {
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      const paymentKey = `payment_${referenceId}`;
-      const data = window.sessionStorage.getItem(paymentKey);
-      return data ? JSON.parse(data) : null;
-    }
-    return null;
-  } catch (error) {
-    console.error(`Error retrieving payment details for ${referenceId}:`, error);
-    return null;
   }
 }

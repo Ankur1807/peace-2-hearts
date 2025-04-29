@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { updateConsultationStatus } from './serviceUtils';
+import { BookingDetails } from '@/utils/types';
 
 interface SavePaymentParams {
   paymentId: string;
@@ -12,13 +13,14 @@ interface SavePaymentParams {
 }
 
 /**
- * Save payment record in database
+ * Store payment information in consultations table 
+ * (without adding a separate payments record)
  */
 export const savePaymentRecord = async (params: SavePaymentParams): Promise<boolean> => {
   try {
     console.log(`Saving payment record for ${params.referenceId}`);
     
-    // First update the consultation record
+    // Update the consultation record instead of creating a separate payment record
     const consultationUpdated = await updateConsultationStatus(
       params.referenceId,
       'paid',
@@ -31,21 +33,8 @@ export const savePaymentRecord = async (params: SavePaymentParams): Promise<bool
       console.error(`Failed to update consultation ${params.referenceId}`);
     }
     
-    // Then create a payment record
-    const { error } = await supabase.from('payments').insert({
-      consultation_id: params.referenceId,
-      payment_status: params.status || 'completed',
-      transaction_id: params.paymentId,
-      amount: params.amount
-    });
-    
-    if (error) {
-      console.error("Error saving payment record:", error);
-      return false;
-    }
-    
     console.log(`Payment record saved successfully for ${params.referenceId}`);
-    return true;
+    return consultationUpdated;
   } catch (error) {
     console.error(`Error in savePaymentRecord for ${params.referenceId}:`, error);
     return false;

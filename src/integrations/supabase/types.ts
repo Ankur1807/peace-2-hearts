@@ -127,6 +127,7 @@ export type Database = {
           payment_id: string | null
           payment_status: string | null
           reference_id: string | null
+          source: string | null
           status: string
           time_slot: string
           timeframe: string | null
@@ -149,6 +150,7 @@ export type Database = {
           payment_id?: string | null
           payment_status?: string | null
           reference_id?: string | null
+          source?: string | null
           status?: string
           time_slot: string
           timeframe?: string | null
@@ -171,6 +173,7 @@ export type Database = {
           payment_id?: string | null
           payment_status?: string | null
           reference_id?: string | null
+          source?: string | null
           status?: string
           time_slot?: string
           timeframe?: string | null

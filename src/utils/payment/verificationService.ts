@@ -135,6 +135,7 @@ export async function verifyPaymentAndCreateBooking(
 
 /**
  * Emergency fallback to store payment details in case verification fails
+ * @deprecated Use edge function createConsultationRecord as the primary insert point
  */
 async function storeEmergencyPaymentRecord(
   paymentId: string,
@@ -155,7 +156,8 @@ async function storeEmergencyPaymentRecord(
       status: "payment_needs_verification",
       consultation_type: bookingDetails.consultationType || "emergency-recovery",
       time_slot: bookingDetails.timeSlot || "to_be_confirmed",
-      message: `Emergency payment record created due to verification failure. Payment ID: ${paymentId}`
+      message: `Emergency payment record created due to verification failure. Payment ID: ${paymentId}`,
+      source: "fallback" // Mark the source as fallback
     });
     
     if (error) {

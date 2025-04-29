@@ -1,3 +1,4 @@
+
 import { generateReferenceId } from "./referenceGenerator";
 import { PersonalDetails } from "./types";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,9 +37,30 @@ export const saveConsultation = async (
       status: 'scheduled', // Initially set to scheduled, will be updated to 'paid' after payment
       message: personalDetails.message,
       reference_id: referenceId,
+      source: 'frontend' // Mark the source as frontend
     };
     
-    console.log("Saving consultation to Supabase with data:", JSON.stringify(consultationData));
+    console.log("Checking for existing consultation with reference ID:", referenceId);
+    
+    // Check if consultation record already exists
+    const { data: existingConsultation, error: checkError } = await supabase
+      .from('consultations')
+      .select('id')
+      .eq('reference_id', referenceId)
+      .maybeSingle();
+    
+    if (checkError) {
+      console.error("Error checking for existing consultation:", checkError);
+      throw checkError;
+    }
+    
+    if (existingConsultation) {
+      console.log("Consultation record already exists for reference ID:", referenceId);
+      // Return the existing record data
+      return { ...existingConsultation, referenceId };
+    }
+    
+    console.log("No existing consultation found, creating new record with source 'frontend'");
     
     // Insert the consultation into Supabase with retry mechanism
     let attempts = 0;

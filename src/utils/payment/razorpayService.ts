@@ -13,7 +13,8 @@ import { createRazorpayOrder } from "./services/paymentOrderService";
 import { verifyRazorpayPayment, verifyAndSyncPayment, verifyAndRecordPayment } from "./services/paymentVerificationService";
 import { updateConsultationStatus } from "./services/serviceUtils";
 import { sendEmailForConsultation } from "./services/emailNotificationService";
-import { storePaymentDetailsInSession, savePaymentRecord } from "./services/paymentRecordService";
+import { storePaymentDetailsInSession } from "./services/paymentStorageService";
+import { savePaymentRecord } from "./services/paymentRecordService";
 
 // Re-export types for compatibility with existing code
 export type { CreateOrderParams, OrderResponse, VerifyPaymentParams } from './razorpayTypes';
