@@ -16,9 +16,9 @@ export interface Booking {
   payment_id?: string;
   payment_status?: string;
   email_sent: boolean;
-  service_category?: string;
-  timeframe?: string;
-  time_slot?: string;
+  service_category: string;  // Added this property
+  timeframe: string;         // Added this property
+  time_slot: string;         // Added this property
 }
 
 export function useBookings() {
