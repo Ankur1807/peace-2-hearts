@@ -73,7 +73,7 @@ export function useConsultationBooking() {
     toast,
     setIsProcessing,
     setShowPaymentStep,
-    handleConfirmBooking,
+    handleConfirmBooking, // This is correctly typed now
     setReferenceId
   };
   

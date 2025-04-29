@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { saveConsultation } from '@/utils/consultationApi';
@@ -25,7 +24,7 @@ interface UseConsultationPaymentParams {
   toast: any;
   setIsProcessing?: (isProcessing: boolean) => void;
   setShowPaymentStep?: (show: boolean) => void;
-  handleConfirmBooking?: () => Promise<void>;
+  handleConfirmBooking?: () => Promise<any>; // Updated to Promise<any>
   setReferenceId?: (id: string) => void;
 }
 
@@ -34,7 +33,7 @@ export function useConsultationPayment({
   toast,
   setIsProcessing = () => {},
   setShowPaymentStep = () => {},
-  handleConfirmBooking = async () => {},
+  handleConfirmBooking = async () => { return {}; }, // Default return object
   setReferenceId = () => {}
 }: UseConsultationPaymentParams) {
   const { processPaymentWithRazorpay } = useProcessPayment();
@@ -199,13 +198,14 @@ export function useConsultationPayment({
           if (verificationResult.success) {
             console.log("Payment verified successfully, calling handleConfirmBooking");
             
-            // Complete the booking process
-            await handleConfirmBooking();
+            // Complete the booking process and get the booking result
+            const bookingResult = await handleConfirmBooking();
+            console.log("Booking confirmed with result:", bookingResult);
           } else {
-            console.error("Payment verification failed:", verificationResult.error);
+            console.error("Payment verification failed:", verificationResult.message);
             toast({
               title: "Payment Verification Failed",
-              description: verificationResult.error || "Please contact support with your reference ID.",
+              description: verificationResult.message || "Please contact support with your reference ID.",
               variant: "destructive"
             });
             
