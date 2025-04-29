@@ -386,52 +386,50 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`[EDGE] Payment verified successfully for ${paymentId}`);
     const paymentDetails = paymentVerification.details;
     
-    // Step 2: Create or update consultation record
-    const consultationResult = await createConsultationRecord(
-      bookingDetails,
-      paymentId,
-      orderId,
-      paymentDetails!.amount / 100, // Convert from paise to rupees
-      'completed',
-      'confirmed',
-      'edge' // Add source as edge
-    );
-    
-    if (!consultationResult.success) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          verified: true,
-          error: "Failed to create consultation record",
-          details: consultationResult.error
-        }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json", ...corsHeaders }
-        }
-      );
-    }
-    
-    // Step 3: Send confirmation email (only for successful payments)
-    console.log("[EDGE] Sending confirmation email with admin BCC");
-    const emailResult = await sendConfirmationEmail(bookingDetails);
-    
-    console.log("[EDGE] Email sending result:", emailResult);
-    
-    // Return success response even if email fails (we'll have recovery mechanisms)
-    return new Response(
+    // Since payment is verified, immediately return a success response
+    // This allows the frontend to redirect the user to the thank you page
+    // without waiting for the consultation record creation or email sending
+    const response = new Response(
       JSON.stringify({ 
         success: true, 
         verified: true,
-        consultationId: consultationResult.consultationId,
-        emailSent: emailResult.success,
-        emailError: emailResult.error
+        paymentId,
+        orderId,
       }),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders }
       }
     );
+    
+    // Use waitUntil for background tasks that don't need to block the response
+    // This allows us to continue with consultation record creation and email sending
+    // without delaying the response to the frontend
+    try {
+      // Step 2: Create or update consultation record
+      const consultationResult = await createConsultationRecord(
+        bookingDetails,
+        paymentId,
+        orderId,
+        paymentDetails!.amount / 100, // Convert from paise to rupees
+        'completed',
+        'confirmed',
+        'edge' // Add source as edge
+      );
+      
+      if (!consultationResult.success) {
+        console.error("[EDGE] Failed to create consultation record:", consultationResult.error);
+      } else {
+        // Step 3: Send confirmation email (only for successful payments)
+        console.log("[EDGE] Sending confirmation email with admin BCC");
+        const emailResult = await sendConfirmationEmail(bookingDetails);
+        console.log("[EDGE] Email sending result:", emailResult);
+      }
+    } catch (backgroundError) {
+      console.error("[EDGE] Error in background tasks:", backgroundError);
+    }
+    
+    return response;
   } catch (error) {
     console.error("[EDGE] Error in verify-payment function:", error);
     

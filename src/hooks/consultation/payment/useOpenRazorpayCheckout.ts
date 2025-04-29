@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { storePaymentDetailsInSession } from '@/utils/payment/services/paymentStorageService';
 import { usePaymentNavigation } from '../payment/usePaymentNavigation';
@@ -31,7 +32,7 @@ export const useOpenRazorpayCheckout = ({
   
   const handleSuccess = async (response: any, receiptId: string) => {
     try {
-      console.log("[PAYMENT FLOW] Payment successful, processing verification:", response);
+      console.log("[PAYMENT FLOW] ✅ Payment successful, processing verification:", response);
       
       // Calculate the effective price
       const price = getEffectivePrice();
@@ -66,6 +67,8 @@ export const useOpenRazorpayCheckout = ({
         setReferenceId(receiptId);
       }
       
+      console.log("[PAYMENT FLOW] 🔄 Calling verifyPayment with payment ID:", response.razorpay_payment_id);
+      
       // Start verification process
       const verificationResult = await verifyPayment(
         response, 
@@ -74,17 +77,16 @@ export const useOpenRazorpayCheckout = ({
         receiptId
       );
       
-      // Enhanced logging for debugging
-      console.log("[PAYMENT FLOW] Verification result:", JSON.stringify(verificationResult));
+      console.log("[PAYMENT FLOW] 📝 Verification result:", JSON.stringify(verificationResult));
       
-      // Navigate based on verification result
+      // Navigate based on verification result - immediately redirect on verification success
       if (verificationResult && verificationResult.success) {
-        console.log("[PAYMENT FLOW] Payment verification successful, navigating to thank-you page");
+        console.log("[PAYMENT FLOW] ✅ Payment verification successful, navigating to thank-you page");
         
-        // Keep isProcessing true until navigation completes
         try {
+          console.log("[PAYMENT FLOW] 🔄 Executing navigation to thank-you page");
+          
           // Navigate with replace to prevent back navigation to payment page
-          console.log("[PAYMENT FLOW] Executing navigation to thank-you page");
           navigate("/thank-you", { 
             state: {
               paymentId: response.razorpay_payment_id,
@@ -96,15 +98,27 @@ export const useOpenRazorpayCheckout = ({
             },
             replace: true 
           });
-          console.log("[PAYMENT FLOW] Navigation command executed");
+          
+          console.log("[PAYMENT FLOW] ✅ Navigation command executed");
         } catch (navError) {
-          console.error("[PAYMENT FLOW] Navigation error:", navError);
-          // If navigation fails, try alternative approach
+          console.error("[PAYMENT FLOW] ❌ Navigation error:", navError);
+          
+          // If navigation fails, try alternative approach with window.location
+          console.log("[PAYMENT FLOW] 🔄 Trying alternate navigation via window.location");
           window.location.href = `/thank-you?ref=${receiptId}&pid=${response.razorpay_payment_id}`;
         }
+        
+        return; // Exit early after navigation
       } else {
-        // If verification failed, navigate to verification page with status
-        console.warn("[PAYMENT FLOW] Verification result was not successful:", verificationResult);
+        // If verification failed, show toast and navigate to verification page
+        console.warn("[PAYMENT FLOW] ❌ Verification result was not successful:", verificationResult);
+        
+        toast({
+          title: "Payment Verification Failed",
+          description: "Your payment was received, but verification failed. Please contact support.",
+          variant: "destructive"
+        });
+        
         navigateToVerification({
           paymentId: response.razorpay_payment_id,
           orderId: response.razorpay_order_id,
@@ -116,44 +130,18 @@ export const useOpenRazorpayCheckout = ({
           verificationFailed: true
         });
         
-        toast({
-          title: "Payment Verification Warning",
-          description: "Your payment was received, but we're having trouble with our system. Please contact support if you don't receive a confirmation email.",
-          variant: "warning"
-        });
         setIsProcessing(false);
       }
     } catch (error) {
-      console.error("[PAYMENT FLOW] Error in payment success handler:", error);
+      console.error("[PAYMENT FLOW] ❌ Error in payment success handler:", error);
       
-      // Even if an error occurs, navigate to verification page with warning state
-      navigateToVerification({
-        paymentId: response.razorpay_payment_id,
-        orderId: response.razorpay_order_id,
-        signature: response.razorpay_signature,
-        amount: getEffectivePrice(),
-        referenceId: receiptId,
-        bookingDetails: {
-          clientName: `${state.personalDetails.firstName || ''} ${state.personalDetails.lastName || ''}`.trim(),
-          email: state.personalDetails.email,
-          referenceId: receiptId,
-          consultationType: state.serviceCategory,
-          services: state.selectedServices || [state.serviceCategory],
-          serviceCategory: state.serviceCategory,
-          date: state.date,
-          timeSlot: state.timeSlot,
-          timeframe: state.timeframe,
-          amount: getEffectivePrice()
-        },
-        isVerifying: false,
-        verificationFailed: true
-      });
-      
+      // Show toast error
       toast({
-        title: "Payment Processing Warning",
-        description: "Your payment was received, but we couldn't complete the booking process. Please contact support.",
-        variant: "warning"
+        title: "Payment Processing Error",
+        description: "There was an error processing your payment. Please contact support.",
+        variant: "destructive"
       });
+      
       setIsProcessing(false);
     }
   };

@@ -1,24 +1,77 @@
 
-import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { CheckCircle2, Calendar, Clock, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { fetchBookingDetailsByReference } from '@/utils/email/bookingEmailService';
+import { BookingDetails } from '@/utils/types';
 
 const ThankYou = () => {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { bookingDetails, referenceId } = location.state || {};
+  const [loading, setLoading] = useState(false);
+  const [bookingDetailsState, setBookingDetailsState] = useState<BookingDetails | null>(null);
 
-  // Redirect to home if no booking data
+  // Get data from either location state or URL parameters
+  const stateRefId = location.state?.referenceId;
+  const urlRefId = searchParams.get('ref');
+  const referenceId = stateRefId || urlRefId;
+
+  const stateData = location.state?.bookingDetails;
+  
   useEffect(() => {
-    if (!referenceId && !location.state) {
+    // Log the entry point to help with debugging
+    console.log("[THANK-YOU] Page loaded with params:", { 
+      fromState: !!location.state, 
+      fromUrl: !!urlRefId, 
+      referenceId 
+    });
+
+    // If we have state data, use it directly
+    if (stateData) {
+      console.log("[THANK-YOU] Using booking details from state");
+      setBookingDetailsState(stateData);
+      return;
+    }
+    
+    // If not, but we have a reference ID, fetch the data
+    if (referenceId && !stateData) {
+      console.log("[THANK-YOU] Fetching booking details for reference ID:", referenceId);
+      setLoading(true);
+      
+      fetchBookingDetailsByReference(referenceId)
+        .then(details => {
+          if (details) {
+            console.log("[THANK-YOU] Successfully fetched booking details");
+            setBookingDetailsState(details);
+          } else {
+            console.warn("[THANK-YOU] No booking details found for reference ID:", referenceId);
+          }
+        })
+        .catch(err => {
+          console.error("[THANK-YOU] Error fetching booking details:", err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [location.state, referenceId, stateData, urlRefId]);
+
+  // Redirect to home if no booking data and no reference ID
+  useEffect(() => {
+    if (!referenceId && !loading) {
+      console.log("[THANK-YOU] No reference ID found, redirecting to home");
       navigate('/', { replace: true });
     }
-  }, [referenceId, location.state, navigate]);
+  }, [referenceId, navigate, loading]);
+
+  // Use either the state data or the fetched data
+  const bookingDetails = stateData || bookingDetailsState;
 
   // Format date nicely if available
   const formattedDate = bookingDetails?.date 
@@ -34,6 +87,21 @@ const ThankYou = () => {
                       (bookingDetails?.services && bookingDetails.services.length > 0 
                         ? bookingDetails.services.join(', ')
                         : 'Consultation');
+
+  if (loading) {
+    return (
+      <>
+        <SEO title="Thank You" description="Your booking has been confirmed" />
+        <Navigation />
+        <main className="py-16 md:py-24">
+          <div className="container mx-auto px-4 flex justify-center items-center">
+            <div className="text-xl">Loading your booking details...</div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
