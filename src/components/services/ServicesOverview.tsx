@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import ServiceCard from './ServiceCard';
-import { Brain, Scale, Heart, UserRound, Users, FileSearch, Gavel, Scale2 } from 'lucide-react';
+import { Brain, Scale, Heart, UserRound, Users, FileSearch, Gavel } from 'lucide-react';
 
 const ServicesOverview: React.FC = () => {
   return (
@@ -103,7 +103,7 @@ const ServicesOverview: React.FC = () => {
         <ServiceCard
           title="General Legal Consultation"
           description="Broad legal guidance for various family and relationship matters."
-          icon={Scale2}
+          icon={Scale}
           options={[
             { title: "Legal Advice", description: "Expert counsel on various legal matters" },
             { title: "Document Review", description: "Professional assessment of legal documents" }

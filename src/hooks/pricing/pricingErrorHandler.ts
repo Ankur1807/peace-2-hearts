@@ -1,10 +1,11 @@
 
-import { useToast } from '@/hooks/use-toast';
-import { toast as toastType } from '@/hooks/use-toast';
+import { Toast } from '@/hooks/use-toast';
 
-export type Toast = typeof toastType;
-
-export const handleOperationError = (error: any, operation: string, toast: ReturnType<typeof useToast>['toast']) => {
+export const handleOperationError = (
+  error: any, 
+  operation: string, 
+  toast: { (props: Toast): void; }
+) => {
   console.error(`Error details for ${operation}:`, error);
   
   if (error.code === 'PGRST116' || error.message?.includes('JWT')) {
@@ -23,9 +24,8 @@ export const handleOperationError = (error: any, operation: string, toast: Retur
   } else {
     toast({
       title: 'Error',
-      description: `Failed to ${operation}: ${error.message}`,
+      description: `Failed to ${operation}: ${error.message || 'Unknown error occurred'}`,
       variant: 'destructive',
     });
   }
-  console.error(`Error: ${operation}:`, error);
 };

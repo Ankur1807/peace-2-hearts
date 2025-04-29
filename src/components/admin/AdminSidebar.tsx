@@ -8,7 +8,8 @@ import {
   DollarSign,
   Calendar,
   Settings,
-  LogOut
+  LogOut,
+  FileEdit
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,11 @@ const AdminSidebar = () => {
       label: "Pricing",
       icon: <DollarSign className="h-5 w-5" />,
       href: "/admin/pricing"
+    },
+    {
+      label: "Services",
+      icon: <FileEdit className="h-5 w-5" />,
+      href: "/admin/services"
     },
     {
       label: "Bookings",

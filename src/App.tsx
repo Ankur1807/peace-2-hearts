@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -62,6 +61,9 @@ import ShippingDelivery from '@/pages/ShippingDelivery';
 import MobileBookings from '@/pages/MobileBookings';
 import LogoExport from '@/pages/LogoExport';
 
+// Import our new AdminServices component
+import AdminServices from './pages/admin/AdminServices';
+
 function App() {
   // The issue is likely here with the useEffect hook
   useEffect(() => {
@@ -85,74 +87,77 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <Toaster position="top-right" />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/services" element={<Services />} />
-        
-        {/* Main service pages */}
-        <Route path="/services/mental-health" element={<MentalHealthService />} />
-        <Route path="/services/legal-support" element={<LegalSupportService />} />
-        <Route path="/services/therapy" element={<TherapyService />} />
-        <Route path="/services/divorce" element={<DivorceService />} />
-        <Route path="/services/custody" element={<CustodyService />} />
-        
-        {/* Mental Health sub-service pages */}
-        <Route path="/services/mental-health/counselling" element={<MentalHealthCounselling />} />
-        <Route path="/services/mental-health/couples-counselling" element={<CouplesCounselling />} />
-        <Route path="/services/mental-health/family-therapy" element={<FamilyTherapy />} />
-        <Route path="/services/mental-health/premarital-counselling" element={<PremaritalCounselling />} />
-        <Route path="/services/mental-health/sexual-health-counselling" element={<SexualHealthCounselling />} />
-        
-        {/* Legal Support sub-service pages */}
-        <Route path="/services/legal-support/mediation" element={<MediationServices />} />
-        <Route path="/services/legal-support/pre-marriage" element={<PreMarriageLegal />} />
-        <Route path="/services/legal-support/divorce" element={<DivorceConsultation />} />
-        <Route path="/services/legal-support/custody" element={<ChildCustodyConsultation />} />
-        <Route path="/services/legal-support/maintenance" element={<MaintenanceConsultation />} />
-        <Route path="/services/legal-support/general" element={<GeneralConsultation />} />
-        
-        {/* Holistic package pages */}
-        <Route path="/services/holistic/pre-marriage-clarity" element={<PreMarriageClarityPackage />} />
-        <Route path="/services/holistic/divorce-prevention" element={<DivorcePreventionPackage />} />
-        
-        <Route path="/book-consultation" element={<BookConsultation />} />
-        <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
-        <Route path="/payment-verification" element={<PaymentVerification />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/refund" element={<Refund />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        
-        {/* Other pages */}
-        <Route path="/news" element={<News />} />
-        <Route path="/consultants" element={<Consultants />} />
-        <Route path="/consultants/:id" element={<ConsultantDetail />} />
-        <Route path="/resources" element={<Resources />} />
-        <Route path="/shipping-delivery" element={<ShippingDelivery />} />
-        <Route path="/mobile-bookings" element={<MobileBookings />} />
-        <Route path="/logo-export" element={<LogoExport />} />
-        
-        {/* Admin routes - Login should stand alone without AdminProvider */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-        
-        {/* Protected admin routes with AdminLayout */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="consultants" element={<AdminConsultants />} />
-          <Route path="pricing" element={<AdminPricing />} />
-          <Route path="bookings" element={<AdminBookings />} />
-          <Route path="settings" element={<AdminSettings />} />
-          <Route path="payment-migration" element={<AdminPaymentMigration />} />
-        </Route>
-        
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Router>
+    <div className="App">
+      <Router>
+        <Toaster position="top-right" />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/services" element={<Services />} />
+          
+          {/* Main service pages */}
+          <Route path="/services/mental-health" element={<MentalHealthService />} />
+          <Route path="/services/legal-support" element={<LegalSupportService />} />
+          <Route path="/services/therapy" element={<TherapyService />} />
+          <Route path="/services/divorce" element={<DivorceService />} />
+          <Route path="/services/custody" element={<CustodyService />} />
+          
+          {/* Mental Health sub-service pages */}
+          <Route path="/services/mental-health/counselling" element={<MentalHealthCounselling />} />
+          <Route path="/services/mental-health/couples-counselling" element={<CouplesCounselling />} />
+          <Route path="/services/mental-health/family-therapy" element={<FamilyTherapy />} />
+          <Route path="/services/mental-health/premarital-counselling" element={<PremaritalCounselling />} />
+          <Route path="/services/mental-health/sexual-health-counselling" element={<SexualHealthCounselling />} />
+          
+          {/* Legal Support sub-service pages */}
+          <Route path="/services/legal-support/mediation" element={<MediationServices />} />
+          <Route path="/services/legal-support/pre-marriage" element={<PreMarriageLegal />} />
+          <Route path="/services/legal-support/divorce" element={<DivorceConsultation />} />
+          <Route path="/services/legal-support/custody" element={<ChildCustodyConsultation />} />
+          <Route path="/services/legal-support/maintenance" element={<MaintenanceConsultation />} />
+          <Route path="/services/legal-support/general" element={<GeneralConsultation />} />
+          
+          {/* Holistic package pages */}
+          <Route path="/services/holistic/pre-marriage-clarity" element={<PreMarriageClarityPackage />} />
+          <Route path="/services/holistic/divorce-prevention" element={<DivorcePreventionPackage />} />
+          
+          <Route path="/book-consultation" element={<BookConsultation />} />
+          <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
+          <Route path="/payment-verification" element={<PaymentVerification />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/refund" element={<Refund />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* Other pages */}
+          <Route path="/news" element={<News />} />
+          <Route path="/consultants" element={<Consultants />} />
+          <Route path="/consultants/:id" element={<ConsultantDetail />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/shipping-delivery" element={<ShippingDelivery />} />
+          <Route path="/mobile-bookings" element={<MobileBookings />} />
+          <Route path="/logo-export" element={<LogoExport />} />
+          
+          {/* Admin routes - Login should stand alone without AdminProvider */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          
+          {/* Protected admin routes with AdminLayout */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="consultants" element={<AdminConsultants />} />
+            <Route path="pricing" element={<AdminPricing />} />
+            <Route path="services" element={<AdminServices />} />
+            <Route path="bookings" element={<AdminBookings />} />
+            <Route path="settings" element={<AdminSettings />} />
+            <Route path="payment-migration" element={<AdminPaymentMigration />} />
+          </Route>
+          
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+    </div>
   );
 }
 
