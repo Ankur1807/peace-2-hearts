@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Brain, Scale, ArrowRight } from 'lucide-react';
+import { Brain, Scale } from 'lucide-react';
 import SiteCard from "@/components/SiteCard";
-import { Button } from '@/components/ui/button';
+import { FractalButton } from '@/components/FractalButton';
 
 const ServicesOverview: React.FC = () => {
   return (
@@ -42,11 +42,11 @@ const ServicesOverview: React.FC = () => {
               Premarital Counselling - Building a strong foundation before marriage.
             </li>
           </ul>
-          <Button asChild variant="link" className="text-vibrantPurple hover:text-vibrantPurple/90 p-0 gap-1 font-medium">
+          <FractalButton asChild fractalType="primary" className="mt-4">
             <Link to="/services/mental-health">
-              Learn More <ArrowRight className="h-4 w-4" />
+              Learn More
             </Link>
-          </Button>
+          </FractalButton>
         </SiteCard>
         
         <SiteCard className="bg-gradient-to-br from-white to-peacefulBlue/10">
@@ -85,11 +85,11 @@ const ServicesOverview: React.FC = () => {
               General Legal Consultation - Answers to common family law questions.
             </li>
           </ul>
-          <Button asChild variant="link" className="text-peacefulBlue hover:text-peacefulBlue/90 p-0 gap-1 font-medium">
+          <FractalButton asChild fractalType="secondary" className="mt-4">
             <Link to="/services/legal-support">
-              Learn More <ArrowRight className="h-4 w-4" />
+              Learn More
             </Link>
-          </Button>
+          </FractalButton>
         </SiteCard>
       </div>
       

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MandalaButton } from '@/components/MandalaButton';
+import { FractalButton } from '@/components/FractalButton';
 import { LucideIcon } from 'lucide-react';
 import SiteCard from "@/components/SiteCard";
 
@@ -49,15 +49,9 @@ const HolisticPackage: React.FC<HolisticPackageProps> = ({
       </div>
 
       <div className="mt-auto flex items-end">
-        <Link to={linkPath} className="block w-full mt-2">
-          <MandalaButton
-            variant="primary"
-            mandalaType="simple"
-            className="w-full py-5 text-xl font-bold"
-          >
-            {linkText}
-          </MandalaButton>
-        </Link>
+        <FractalButton asChild fractalType="primary" className="w-full mt-2">
+          <Link to={linkPath}>{linkText}</Link>
+        </FractalButton>
       </div>
     </SiteCard>
   );
