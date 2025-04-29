@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import ServiceCard from './ServiceCard';
+import { Brain, Scale, Heart, CircleDashed } from 'lucide-react';
 
 const ServicesOverview: React.FC = () => {
   return (
@@ -12,7 +13,13 @@ const ServicesOverview: React.FC = () => {
           <ServiceCard
             title="Mental Health Support"
             description="Professional therapy to help you navigate complex emotions and relationship challenges."
-            icon="mentalHealth"
+            icon={Brain}
+            options={[
+              { title: "Emotional Support", description: "Navigate difficult emotions with professional guidance" },
+              { title: "Therapy Sessions", description: "One-on-one sessions with licensed therapists" }
+            ]}
+            linkPath="/services/mental-health"
+            linkText="Learn More"
           />
         </Link>
         
@@ -20,7 +27,13 @@ const ServicesOverview: React.FC = () => {
           <ServiceCard
             title="Legal Support"
             description="Expert legal guidance for all relationship and family law matters."
-            icon="legalSupport"
+            icon={Scale}
+            options={[
+              { title: "Legal Consultation", description: "Expert advice on family and relationship law" },
+              { title: "Document Preparation", description: "Professional assistance with legal paperwork" }
+            ]}
+            linkPath="/services/legal-support"
+            linkText="Learn More"
           />
         </Link>
         
@@ -28,7 +41,13 @@ const ServicesOverview: React.FC = () => {
           <ServiceCard
             title="Relationship Therapy"
             description="Work through conflicts and build stronger connections with specialized therapy."
-            icon="relationshipTherapy"
+            icon={Heart}
+            options={[
+              { title: "Couples Counseling", description: "Rebuild trust and improve communication" },
+              { title: "Conflict Resolution", description: "Learn effective strategies to handle disagreements" }
+            ]}
+            linkPath="/services/therapy"
+            linkText="Learn More"
           />
         </Link>
         
@@ -36,7 +55,13 @@ const ServicesOverview: React.FC = () => {
           <ServiceCard
             title="Divorce Support"
             description="Comprehensive guidance through the emotional and legal aspects of divorce."
-            icon="divorceSupport"
+            icon={CircleDashed}
+            options={[
+              { title: "Divorce Planning", description: "Navigate the process with professional support" },
+              { title: "Post-Divorce Adjustment", description: "Tools for healing and moving forward" }
+            ]}
+            linkPath="/services/divorce"
+            linkText="Learn More"
           />
         </Link>
       </div>
