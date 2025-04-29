@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { verifyRazorpayPayment, verifyAndSyncPayment } from "@/utils/payment/razorpayService";
+import { verifyAndSyncPayment } from "@/utils/payment/razorpayService";
 import { storePaymentDetailsInSession } from "@/utils/payment/services/paymentStorageService";
 import { updateConsultationStatus } from "@/utils/payment/services/serviceUtils";
 import { sendEmailForConsultation } from "@/utils/payment/services/emailNotificationService";
