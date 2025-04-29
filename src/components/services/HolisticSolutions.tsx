@@ -16,7 +16,7 @@ const HolisticSolutions: React.FC = () => {
       <div className="grid md:grid-cols-2 gap-10">
         <HolisticPackage
           icon={PackageCheck}
-          title="Divorce Prevention Package"
+          title="Divorce Prevention Solutions"
           description="A comprehensive approach to resolving relationship challenges before they lead to separation, combining therapy and legal mediation."
           features={[
             "2 Therapy Sessions",
@@ -31,10 +31,10 @@ const HolisticSolutions: React.FC = () => {
         
         <HolisticPackage
           icon={PackageCheck}
-          title="Pre-Marriage Clarity Package"
+          title="Pre-Marriage Clarity Solutions"
           description="Start your marriage journey with confidence by addressing both emotional readiness and legal considerations."
           features={[
-            "1 Legal Consultation",
+            "1 Pre-Marriage Legal Consultation",
             "2 Mental Health Sessions"
           ]}
           linkPath="/services/holistic/pre-marriage-clarity"
