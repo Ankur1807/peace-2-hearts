@@ -1,17 +1,16 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import ServiceCard from './ServiceCard';
-import { Brain, Scale, Heart, UserRound, Users, FileSearch, Gavel } from 'lucide-react';
+import { Brain, Scale, Heart, UserRound, Users, FileSearch, Gavel, ArrowRight } from 'lucide-react';
 import SiteCard from "@/components/SiteCard";
+import ServiceCard from './ServiceCard';
+import { Button } from '@/components/ui/button';
 
 const ServicesOverview: React.FC = () => {
   return (
     <div className="py-8">
-      <h2 className="section-title text-3xl mb-8 text-center">Our Services</h2>
-      
       {/* Top level service cards - Mental Health and Legal side by side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
         <SiteCard>
           <div className="mb-6 flex items-center">
             <div className="p-4 rounded-full bg-vibrantPurple/15 mr-4 flex items-center justify-center">
@@ -22,9 +21,29 @@ const ServicesOverview: React.FC = () => {
           <p className="text-gray-600 mb-4">
             Our caring therapists help you work through emotional pain, relationship stress, and past trauma—so you can heal and move forward with confidence.
           </p>
-          <Link to="/services/mental-health" className="text-vibrantPurple font-medium hover:underline">
-            Explore Mental Health Services →
-          </Link>
+          <ul className="space-y-2 mb-6">
+            <li className="flex items-center gap-2 text-gray-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
+              Mental Health Counselling
+            </li>
+            <li className="flex items-center gap-2 text-gray-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
+              Couples Counselling
+            </li>
+            <li className="flex items-center gap-2 text-gray-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
+              Family Therapy
+            </li>
+            <li className="flex items-center gap-2 text-gray-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
+              Sexual Health Counselling
+            </li>
+          </ul>
+          <Button asChild variant="link" className="text-vibrantPurple hover:text-vibrantPurple/90 p-0 gap-1 font-medium">
+            <Link to="/services/mental-health">
+              Learn More <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </SiteCard>
         
         <SiteCard className="bg-gradient-to-br from-white to-peacefulBlue/10">
@@ -37,14 +56,37 @@ const ServicesOverview: React.FC = () => {
           <p className="text-gray-600 mb-4">
             Our legal experts guide you through the complexities of family law—whether it's pre-marital agreements, divorce, or custody—always with compassion and clarity.
           </p>
-          <Link to="/services/legal-support" className="text-peacefulBlue font-medium hover:underline">
-            Explore Legal Services →
-          </Link>
+          <ul className="space-y-2 mb-6">
+            <li className="flex items-center gap-2 text-gray-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+              Divorce Consultation
+            </li>
+            <li className="flex items-center gap-2 text-gray-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+              Child Custody Consultation
+            </li>
+            <li className="flex items-center gap-2 text-gray-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+              Maintenance Consultation
+            </li>
+            <li className="flex items-center gap-2 text-gray-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+              General Legal Consultation
+            </li>
+          </ul>
+          <Button asChild variant="link" className="text-peacefulBlue hover:text-peacefulBlue/90 p-0 gap-1 font-medium">
+            <Link to="/services/legal-support">
+              Learn More <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </SiteCard>
       </div>
       
+      {/* Display all services below */}
+      <h2 className="section-title text-3xl mb-8 text-center">Our Individual Services</h2>
+      
       {/* Mental Health Services */}
-      <h3 className="text-2xl mb-6 font-lora text-gray-800 mt-16">Mental Health Services</h3>
+      <h3 className="text-2xl mb-6 font-lora text-gray-800">Mental Health Services</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <ServiceCard
           title="Mental Health Counselling"

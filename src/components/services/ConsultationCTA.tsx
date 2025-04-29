@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { MandalaButton } from '@/components/MandalaButton';
 
 const ConsultationCTA: React.FC = () => {
@@ -12,14 +13,15 @@ const ConsultationCTA: React.FC = () => {
             Take the first step toward finding clarity and support in your relationship journey. Our initial consultation helps us understand your needs and create a personalized support plan.
           </p>
           <div className="w-full sm:w-auto">
-            <MandalaButton
-              variant="primary"
-              mandalaType="simple"
-              href="/book-consultation"
-              className="text-lg bg-white text-peacefulBlue hover:bg-white/90"
-            >
-              Book Your Consultation Today
-            </MandalaButton>
+            <Link to="/book-consultation">
+              <MandalaButton
+                variant="primary"
+                mandalaType="simple"
+                className="text-lg bg-white text-peacefulBlue hover:bg-white/90"
+              >
+                Book Your Consultation Today
+              </MandalaButton>
+            </Link>
           </div>
         </div>
       </div>
