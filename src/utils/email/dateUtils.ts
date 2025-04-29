@@ -1,52 +1,34 @@
 
-import { SerializedBookingDetails } from '@/utils/types';
+import { BookingDetails, SerializedBookingDetails } from '@/utils/types';
 
 /**
- * Processes and formats date from booking details
+ * Process booking date for serialization and email formatting
  */
 export function processBookingDate(bookingDetails: SerializedBookingDetails): SerializedBookingDetails {
-  // Handle date conversion
-  if (bookingDetails.date) {
-    // Properly check for Date object with type guards
-    const dateValue = bookingDetails.date;
+  try {
+    const result = { ...bookingDetails };
     
-    // First check if it's an object
-    if (typeof dateValue === 'object' && dateValue !== null) {
-      // Then check if it has getTime method which is specific to Date objects
-      // Use type assertion to handle the null check that TypeScript doesn't recognize
-      const dateValueNonNull = dateValue as object;
-      if ('getTime' in dateValueNonNull) {
-        // Ensure getTime is a function before attempting to cast
-        const getTimeProperty = (dateValueNonNull as any).getTime;
-        if (typeof getTimeProperty === 'function') {
-          // Now we can safely cast to Date
-          const dateObject = dateValue as unknown as Date;
-          // Check if it's a valid date
-          if (!isNaN(dateObject.getTime())) {
-            // Convert Date to ISO string for API transmission
-            const updatedDetails = {
-              ...bookingDetails,
-              date: dateObject.toISOString()
-            };
-            
-            // Add a formatted date for display
-            const formattedDate = dateObject.toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric'
-            });
-            updatedDetails.formattedDate = formattedDate;
-            
-            return updatedDetails;
-          }
+    // Format the date if it exists
+    if (bookingDetails.date) {
+      try {
+        const dateObj = new Date(bookingDetails.date);
+        
+        if (!isNaN(dateObj.getTime())) {
+          result.formattedDate = dateObj.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
         }
+      } catch (dateError) {
+        console.error('Error formatting date:', dateError, 'Original date:', bookingDetails.date);
       }
-    } else if (typeof dateValue === 'string') {
-      // Keep string as is
-      return bookingDetails;
     }
+    
+    return result;
+  } catch (error) {
+    console.error('Error processing date:', error);
+    return bookingDetails;
   }
-  
-  // Return original if no date processing needed
-  return bookingDetails;
 }

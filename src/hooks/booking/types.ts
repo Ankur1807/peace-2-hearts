@@ -1,6 +1,4 @@
 
-import { BookingDetails } from "@/utils/types";
-
 // Define a type for raw consultation data from Supabase
 export interface RawConsultation {
   id: string;
