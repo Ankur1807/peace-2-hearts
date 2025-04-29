@@ -1,11 +1,11 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { BookingDetails } from "@/utils/types";
-import { determineServiceCategory } from "./serviceUtils";
-
 /**
  * Email notification service for payment-related events
  */
+
+import { supabase } from "@/integrations/supabase/client";
+import { BookingDetails } from "@/utils/types";
+import { determineServiceCategory } from "./serviceUtils";
 
 /**
  * Send a payment confirmation email
@@ -83,8 +83,11 @@ export async function sendEmailForConsultation(
         .single();
         
       if (data) {
+        // Use type assertion to handle the service_category property that TypeScript doesn't recognize
+        const consultationData = data as any;
+        
         // Determine service category or use the existing one
-        const serviceCategory = data.service_category || determineServiceCategory(data.consultation_type);
+        const serviceCategory = consultationData.service_category || determineServiceCategory(data.consultation_type);
         
         // Create email data from consultation record
         bookingDetails = {
