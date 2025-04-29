@@ -40,7 +40,7 @@ export function useBookingFetch() {
           payment_id: booking.payment_id,
           payment_status: booking.payment_status,
           email_sent: booking.email_sent || false,
-          service_category: booking.service_category, // Properly include service_category
+          service_category: booking.service_category,
           timeframe: booking.timeframe,
           time_slot: booking.time_slot || ""
         })) as Booking[];
