@@ -21,7 +21,7 @@ export const useConsultationActions = ({
   setIsProcessing,
   toast
 }: UseConsultationActionsParams) => {
-  const handleConfirmBooking = async (): Promise<any> => {  // Changed return type from void to any
+  const handleConfirmBooking = async (): Promise<any> {
     setIsProcessing(true);
     setBookingError(null);
     
@@ -62,9 +62,9 @@ export const useConsultationActions = ({
       console.log("Consultation saved successfully:", result);
       
       // Set the reference ID for later use
-      if (result && result.reference_id) {
-        setReferenceId(result.reference_id);
-        console.log("Reference ID set to:", result.reference_id);
+      if (result && result.referenceId) {
+        setReferenceId(result.referenceId);
+        console.log("Reference ID set to:", result.referenceId);
       } else {
         throw new Error("No reference ID returned from saveConsultation");
       }
@@ -74,7 +74,7 @@ export const useConsultationActions = ({
         setSubmitted(true);
       }
       
-      return result;  // This is now correctly typed as 'any'
+      return result;
     } catch (error) {
       console.error("Error in handleConfirmBooking:", error);
       

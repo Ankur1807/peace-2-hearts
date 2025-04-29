@@ -26,7 +26,7 @@ export const savePaymentRecord = async (params: SavePaymentParams): Promise<bool
       'paid',
       params.paymentId,
       params.amount,
-      params.orderId
+      params.orderId || undefined
     );
     
     if (!consultationUpdated) {
@@ -41,28 +41,5 @@ export const savePaymentRecord = async (params: SavePaymentParams): Promise<bool
   }
 };
 
-/**
- * Store payment details in session storage
- */
-export function storePaymentDetailsInSession(details: SavePaymentParams): void {
-  try {
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      // Save the main payment reference
-      window.sessionStorage.setItem('lastPaymentReferenceId', details.referenceId);
-      
-      // Save full payment details
-      const paymentKey = `payment_${details.referenceId}`;
-      window.sessionStorage.setItem(paymentKey, JSON.stringify({
-        referenceId: details.referenceId,
-        paymentId: details.paymentId,
-        orderId: details.orderId,
-        amount: details.amount,
-        timestamp: new Date().toISOString()
-      }));
-      
-      console.log(`Payment details stored in session for ${details.referenceId}`);
-    }
-  } catch (error) {
-    console.error('Error storing payment details in session:', error);
-  }
-}
+// storePaymentDetailsInSession is now imported from paymentStorageService.ts
+// This function has been removed to avoid duplication

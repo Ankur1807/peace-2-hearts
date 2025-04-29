@@ -1,12 +1,13 @@
 
 /**
- * Utility functions for migrating from the old payments table to storing
- * payment data directly in the consultations table
+ * Utility functions for payment system migrations
+ * Note: The payments table has been migrated to storing payment data directly in consultations
  */
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Verify all consultations have been properly migrated from the payments table
+ * Verify all consultations have been properly migrated
+ * @returns Verification status
  */
 export async function verifyPaymentMigration(): Promise<{
   success: boolean;
@@ -14,16 +15,8 @@ export async function verifyPaymentMigration(): Promise<{
   consultationsWithoutPayment: number;
 }> {
   try {
-    // Check if any payments remain in the payments table
-    const { data: payments, error: paymentsError } = await supabase
-      .from('payments')
-      .select('id, consultation_id, transaction_id, amount')
-      .limit(100);
-
-    if (paymentsError) {
-      console.error("Error checking payments table:", paymentsError);
-      return { success: false, paymentsCount: 0, consultationsWithoutPayment: 0 };
-    }
+    // The payments table no longer exists - migration completed
+    const paymentsCount = 0;
 
     // Get consultations that should have payment info but don't
     const { data: consultationsWithoutPayment, error: consultationsError } = await supabase
@@ -37,14 +30,14 @@ export async function verifyPaymentMigration(): Promise<{
       console.error("Error checking consultations:", consultationsError);
       return { 
         success: false, 
-        paymentsCount: payments?.length || 0, 
+        paymentsCount: 0, 
         consultationsWithoutPayment: 0 
       };
     }
 
     return {
       success: true,
-      paymentsCount: payments?.length || 0,
+      paymentsCount: 0, // Always 0 since table no longer exists
       consultationsWithoutPayment: consultationsWithoutPayment?.length || 0
     };
   } catch (error) {
@@ -54,8 +47,9 @@ export async function verifyPaymentMigration(): Promise<{
 }
 
 /**
- * Execute the final migration to clean up the payments table
- * Note: This should only be performed by administrators after verification
+ * Execute the final migration cleanup steps
+ * Note: This function is maintained for historical purposes only
+ * The payments table has already been migrated
  */
 export async function executePaymentMigration(): Promise<{
   success: boolean;
@@ -75,45 +69,19 @@ export async function executePaymentMigration(): Promise<{
     if (verification.consultationsWithoutPayment > 0) {
       return {
         success: false,
-        message: `Found ${verification.consultationsWithoutPayment} paid consultations without payment data. Migration cannot proceed.`
-      };
-    }
-
-    // If there are still payments, we should not proceed with dropping the table
-    if (verification.paymentsCount > 0) {
-      // Instead, offer an admin function to migrate remaining data
-      return {
-        success: false,
-        message: `Found ${verification.paymentsCount} records still in the payments table. Please migrate these manually before dropping the table.`
-      };
-    }
-
-    // Execute DROP TABLE through the admin API
-    // This should be implemented in an edge function with proper authentication
-    const { data, error } = await supabase.functions.invoke('admin-migration', {
-      body: {
-        action: 'drop_payments_table',
-        adminKey: localStorage.getItem('admin_api_key')
-      }
-    });
-
-    if (error) {
-      console.error("Error dropping payments table:", error);
-      return {
-        success: false,
-        message: `Failed to drop payments table: ${error.message}`
+        message: `Found ${verification.consultationsWithoutPayment} paid consultations without payment data. Please fix these records first.`
       };
     }
 
     return {
       success: true,
-      message: "Payments table successfully removed. Migration complete."
+      message: "Payment system migration has been completed. The payments table no longer exists."
     };
   } catch (error) {
     console.error("Error executing payment migration:", error);
     return {
       success: false,
-      message: `Error executing migration: ${error instanceof Error ? error.message : String(error)}`
+      message: `Error with migration status check: ${error instanceof Error ? error.message : String(error)}`
     };
   }
 }

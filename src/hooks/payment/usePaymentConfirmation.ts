@@ -120,7 +120,8 @@ export const usePaymentConfirmation = ({
                       consultation_type: 'recovery_needed',
                       client_name: 'Payment Received - Recovery Needed',
                       message: `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`,
-                      time_slot: 'to_be_scheduled' // Adding the required time_slot field
+                      time_slot: 'to_be_scheduled',
+                      source: 'recovery' // Add source for tracking
                     })
                     .select();
                     
