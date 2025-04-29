@@ -1,10 +1,11 @@
 
-import { Toast } from '@/hooks/use-toast';
+import { toast } from "@/hooks/use-toast";
+import { ToastProps } from "@/components/ui/toast";
 
 export const handleOperationError = (
   error: any, 
   operation: string, 
-  toast: { (props: Toast): void; }
+  toast: { (props: ToastProps): void; }
 ) => {
   console.error(`Error details for ${operation}:`, error);
   
