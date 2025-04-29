@@ -43,7 +43,26 @@ export function useBookings() {
 
       if (data) {
         console.log(`Fetched ${data.length} bookings:`, data);
-        setBookings(data as Booking[]);
+        // Explicitly cast the data to our Booking type
+        const typedBookings = data.map(booking => ({
+          id: booking.id,
+          client_name: booking.client_name || "",
+          client_email: booking.client_email || "",
+          client_phone: booking.client_phone || "",
+          consultation_type: booking.consultation_type,
+          date: booking.date || "",
+          status: booking.status,
+          reference_id: booking.reference_id || "",
+          created_at: booking.created_at,
+          payment_id: booking.payment_id,
+          payment_status: booking.payment_status,
+          email_sent: booking.email_sent || false,
+          service_category: booking.service_category,
+          timeframe: booking.timeframe,
+          time_slot: booking.time_slot
+        })) as Booking[];
+        
+        setBookings(typedBookings);
       }
     } catch (error) {
       console.error("Error fetching bookings:", error);
