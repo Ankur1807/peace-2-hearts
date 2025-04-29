@@ -130,6 +130,14 @@ export function useBookings() {
       
       console.log("Booking details for email resend:", booking);
       
+      // Ensure type safety for all properties we're accessing
+      const bookingWithSafeProps = {
+        ...booking,
+        service_category: booking.service_category || 'general',
+        time_slot: booking.time_slot || '',
+        timeframe: booking.timeframe || ''
+      };
+      
       // Call the send-email edge function
       const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-email', {
         body: {
@@ -140,9 +148,9 @@ export function useBookings() {
           consultationType: booking.consultation_type,
           services: [booking.consultation_type],
           date: booking.date,
-          timeSlot: booking.time_slot,
-          timeframe: booking.timeframe,
-          serviceCategory: booking.service_category || 'general',
+          timeSlot: bookingWithSafeProps.time_slot,
+          timeframe: bookingWithSafeProps.timeframe,
+          serviceCategory: bookingWithSafeProps.service_category,
           highPriority: true,
           isResend: true
         }
