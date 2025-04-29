@@ -50,7 +50,7 @@ export function processEmailQueue() {
       });
     } else if (item.payload.type === 'contact') {
       import('./contactEmails').then(contactModule => {
-        contactModule.sendContactEmailInternal(item.payload)
+        contactModule.sendContactEmail(item.payload)
           .then(success => {
             if (success) {
               emailQueue.delete(id);

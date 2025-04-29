@@ -1,4 +1,3 @@
-
 /**
  * Email Service for Booking and Payments
  * 
@@ -174,9 +173,9 @@ export async function fetchBookingDetailsByReference(referenceId: string): Promi
       return null;
     }
     
-    // Determine service category
+    // Determine service category from consultation type if not provided
     const serviceCategory = data.service_category || 
-      determineServiceCategory(data.consultation_type);
+      determineServiceCategory(data.consultation_type || '');
     
     // Create booking details object
     return {
@@ -222,6 +221,10 @@ export async function retryFailedEmails(): Promise<number> {
     
     // Process each consultation
     for (const consultation of data) {
+      // Determine service category from consultation type if not provided
+      const serviceCategory = consultation.service_category || 
+        determineServiceCategory(consultation.consultation_type || '');
+      
       const bookingDetails: BookingDetails = {
         clientName: consultation.client_name || '',
         email: consultation.client_email || '',
@@ -232,8 +235,7 @@ export async function retryFailedEmails(): Promise<number> {
         timeSlot: consultation.time_slot || '',
         timeframe: consultation.timeframe || '',
         message: consultation.message || '',
-        serviceCategory: consultation.service_category || 
-          determineServiceCategory(consultation.consultation_type),
+        serviceCategory: serviceCategory,
         amount: consultation.amount,
         highPriority: true,
         isRecovery: true

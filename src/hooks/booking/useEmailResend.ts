@@ -4,7 +4,7 @@
  */
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { sendBookingConfirmationEmail } from "@/utils/email/bookingEmailService";
+import { sendBookingConfirmationEmail } from "@/utils/email";
 import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
 
 export function useEmailResend() {
@@ -36,6 +36,10 @@ export function useEmailResend() {
         throw new Error("Booking has no reference ID");
       }
       
+      // Determine service category from consultation type if not provided
+      const serviceCategory = booking.service_category || 
+                             determineServiceCategory(booking.consultation_type || '');
+      
       // Get complete booking details
       const bookingDetails = {
         clientName: booking.client_name || '',
@@ -47,7 +51,7 @@ export function useEmailResend() {
         timeSlot: booking.time_slot || '',
         timeframe: booking.timeframe || '',
         message: booking.message || '',
-        serviceCategory: booking.service_category || determineServiceCategory(booking.consultation_type || ''),
+        serviceCategory: serviceCategory,
         highPriority: true,
         isResend: true
       };

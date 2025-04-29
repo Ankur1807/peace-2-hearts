@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
 import { determineServiceCategory } from "./serviceUtils";
@@ -16,6 +17,10 @@ export async function sendPaymentConfirmationEmail(
   try {
     console.log(`Sending payment confirmation email for ${bookingDetails.referenceId}`);
     
+    // Determine service category from consultation type if not provided
+    const serviceCategory = bookingDetails.serviceCategory || 
+      determineServiceCategory(bookingDetails.consultationType);
+    
     // Send the email using the edge function
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
@@ -29,7 +34,7 @@ export async function sendPaymentConfirmationEmail(
         timeSlot: bookingDetails.timeSlot,
         paymentId: paymentId,
         amount: bookingDetails.amount,
-        serviceCategory: bookingDetails.serviceCategory || determineServiceCategory(bookingDetails.consultationType)
+        serviceCategory: serviceCategory
       }
     });
     
@@ -184,8 +189,9 @@ export async function resendConfirmationEmail(referenceId: string): Promise<bool
       return false;
     }
     
-    // Determine service category or use the existing one
-    const serviceCategory = consultation.service_category || determineServiceCategory(consultation.consultation_type);
+    // Determine service category from consultation type if not provided
+    const serviceCategory = consultation.service_category || 
+      determineServiceCategory(consultation.consultation_type || '');
     
     // Create booking details for the email
     const bookingDetails: BookingDetails = {
