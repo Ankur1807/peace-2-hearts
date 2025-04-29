@@ -27,7 +27,7 @@ export function useBookingFetch() {
       if (data) {
         console.log(`Fetched ${data.length} bookings:`, data);
         // Explicitly cast the data to our Booking type with proper handling of optional fields
-        const typedBookings = data.map((booking: RawConsultation) => ({
+        const typedBookings = data.map((booking: any) => ({
           id: booking.id,
           client_name: booking.client_name || "",
           client_email: booking.client_email || "",

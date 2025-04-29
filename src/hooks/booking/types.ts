@@ -13,7 +13,7 @@ export interface RawConsultation {
   payment_id?: string | null;
   payment_status?: string | null;
   email_sent: boolean | null;
-  service_category: string | null;
+  service_category?: string | null;
   timeframe?: string | null;
   time_slot: string;
 }
@@ -31,7 +31,7 @@ export interface Booking {
   payment_id?: string;
   payment_status?: string;
   email_sent: boolean;
-  service_category: string | null;
+  service_category?: string | null;
   timeframe?: string;
   time_slot: string;
 }
