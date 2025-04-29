@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { sendBookingConfirmationEmail } from "@/utils/email/bookingEmails";
 import { BookingDetails } from "@/utils/types";
 import { determineServiceCategory } from "./serviceUtils";
 
@@ -10,111 +9,114 @@ import { determineServiceCategory } from "./serviceUtils";
 export async function sendEmailForConsultation(
   bookingDetails: BookingDetails
 ): Promise<boolean> {
-  const MAX_EMAIL_RETRIES = 3;
-  let emailRetryCount = 0;
+  // Import the email sending functionality from the dedicated email module
+  const { sendBookingConfirmationEmail } = await import('@/utils/email/bookingEmails');
   
-  while (emailRetryCount < MAX_EMAIL_RETRIES) {
-    try {
-      console.log("Attempting to send confirmation email (attempt " + (emailRetryCount + 1) + ")");
-      
-      // If we have a reference ID but incomplete booking details, fetch the consultation data
-      if (bookingDetails.referenceId && (!bookingDetails.email || !bookingDetails.clientName)) {
-        const { data } = await supabase
-          .from('consultations')
-          .select('*')
-          .eq('reference_id', bookingDetails.referenceId)
-          .single();
-          
-        if (data) {
-          // Create email data from consultation record
-          bookingDetails = {
-            clientName: data.client_name || bookingDetails.clientName,
-            email: data.client_email || bookingDetails.email,
-            referenceId: data.reference_id,
-            consultationType: data.consultation_type,
-            services: data.consultation_type ? data.consultation_type.split(',') : [],
-            date: data.date ? new Date(data.date) : undefined,
-            timeSlot: data.time_slot,
-            timeframe: data.timeframe,
-            message: data.message,
-            serviceCategory: determineServiceCategory(data.consultation_type),
-            highPriority: bookingDetails.highPriority,
-            isResend: bookingDetails.isResend,
-            isRecovery: bookingDetails.isRecovery
-          };
-        }
-      }
-      
-      // Validate critical fields before sending
-      if (!bookingDetails.email) {
-        console.error("Cannot send email: missing email address");
-        return false;
-      }
-      
-      if (!bookingDetails.referenceId) {
-        console.error("Cannot send email: missing reference ID");
-        return false;
-      }
-      
-      console.log(`Sending email to ${bookingDetails.email} for reference ${bookingDetails.referenceId}`);
-      
-      // Add high-priority flag for emails
-      const emailResult = await sendBookingConfirmationEmail({
-        ...bookingDetails,
-        highPriority: true
-      });
-      
-      if (emailResult && bookingDetails.referenceId) {
-        // Update the consultation record to mark email as sent
-        try {
-          await supabase
-            .from('consultations')
-            .update({ 
-              email_sent: true,
-              status: 'confirmed' 
-            })
-            .eq('reference_id', bookingDetails.referenceId);
-            
-          console.log(`Consultation ${bookingDetails.referenceId} marked as email_sent=true`);
-        } catch (updateError) {
-          console.error("Error updating email_sent status:", updateError);
-          // Not failing the overall operation if just the status update fails
-        }
-      }
-      
-      console.log("Email sending result:", emailResult);
-      return !!emailResult;
-    } catch (error) {
-      console.error(`Email sending attempt ${emailRetryCount + 1} failed:`, error);
-      emailRetryCount++;
-      
-      if (emailRetryCount < MAX_EMAIL_RETRIES) {
-        const backoffDelay = emailRetryCount * 2000; // Exponential backoff
-        console.log(`Retrying email in ${backoffDelay/1000} seconds...`);
-        await new Promise(resolve => setTimeout(resolve, backoffDelay));
-      } else {
-        console.error("All email sending attempts failed, adding to recovery queue");
+  try {
+    console.log("Sending consultation confirmation email");
+    
+    // Validate critical fields before sending
+    if (!bookingDetails.email) {
+      console.error("Cannot send email: missing email address");
+      return false;
+    }
+    
+    if (!bookingDetails.referenceId) {
+      console.error("Cannot send email: missing reference ID");
+      return false;
+    }
+    
+    // If we have a reference ID but incomplete booking details, fetch the consultation data
+    if (bookingDetails.referenceId && (!bookingDetails.email || !bookingDetails.clientName)) {
+      const { data } = await supabase
+        .from('consultations')
+        .select('*')
+        .eq('reference_id', bookingDetails.referenceId)
+        .single();
         
-        // Store the booking details for recovery
-        try {
-          if (bookingDetails.referenceId) {
-            await supabase
-              .from('consultations')
-              .update({ 
-                status: 'payment_received_needs_email'
-              })
-              .eq('reference_id', bookingDetails.referenceId);
-          }
-        } catch (e) {
-          console.error("Error updating consultation for recovery:", e);
-        }
-        
-        return false;
+      if (data) {
+        // Create email data from consultation record
+        bookingDetails = {
+          clientName: data.client_name || bookingDetails.clientName,
+          email: data.client_email || bookingDetails.email,
+          referenceId: data.reference_id,
+          consultationType: data.consultation_type,
+          services: data.consultation_type ? data.consultation_type.split(',') : [],
+          date: data.date ? new Date(data.date) : undefined,
+          timeSlot: data.time_slot,
+          timeframe: data.timeframe,
+          message: data.message,
+          serviceCategory: determineServiceCategory(data.consultation_type),
+          highPriority: bookingDetails.highPriority,
+          isResend: bookingDetails.isResend,
+          isRecovery: bookingDetails.isRecovery
+        };
       }
     }
+    
+    console.log(`Sending email to ${bookingDetails.email} for reference ${bookingDetails.referenceId}`);
+    
+    // Add high-priority flag for emails
+    const emailResult = await sendBookingConfirmationEmail({
+      ...bookingDetails,
+      highPriority: true
+    });
+    
+    if (emailResult && bookingDetails.referenceId) {
+      // Update the consultation record to mark email as sent
+      await updateEmailSentStatus(bookingDetails.referenceId);
+    }
+    
+    console.log("Email sending result:", emailResult);
+    return !!emailResult;
+  } catch (error) {
+    console.error("Error sending consultation email:", error);
+    
+    // Store the booking details for recovery if needed
+    if (bookingDetails.referenceId) {
+      await markConsultationForRecovery(bookingDetails.referenceId);
+    }
+    
+    return false;
   }
-  
-  return false;
+}
+
+/**
+ * Update the consultation record to mark email as sent
+ */
+async function updateEmailSentStatus(referenceId: string): Promise<void> {
+  try {
+    await supabase
+      .from('consultations')
+      .update({ 
+        email_sent: true,
+        status: 'confirmed' 
+      })
+      .eq('reference_id', referenceId);
+      
+    console.log(`Consultation ${referenceId} marked as email_sent=true`);
+  } catch (updateError) {
+    console.error("Error updating email_sent status:", updateError);
+    // Not failing the overall operation if just the status update fails
+  }
+}
+
+/**
+ * Mark a consultation for email recovery
+ */
+async function markConsultationForRecovery(referenceId: string): Promise<void> {
+  try {
+    await supabase
+      .from('consultations')
+      .update({ 
+        status: 'payment_received_needs_email'
+      })
+      .eq('reference_id', referenceId);
+      
+    console.log(`Consultation ${referenceId} marked for email recovery`);
+  } catch (error) {
+    console.error("Error updating consultation for recovery:", error);
+  }
 }
 
 /**
@@ -147,7 +149,7 @@ export async function resendConfirmationEmail(referenceId: string): Promise<bool
       timeSlot: consultation.time_slot,
       timeframe: consultation.timeframe,
       message: consultation.message,
-      serviceCategory: determineServiceCategory(consultation.consultation_type),
+      serviceCategory: consultation.service_category || determineServiceCategory(consultation.consultation_type),
       highPriority: true,
       isResend: true
     };
