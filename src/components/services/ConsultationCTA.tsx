@@ -4,7 +4,7 @@ import { MandalaButton } from '@/components/MandalaButton';
 
 const ConsultationCTA: React.FC = () => {
   return (
-    <section className="py-16 bg-peacefulBlue text-white">
+    <section className="py-16 bg-gradient-to-br from-peacefulBlue to-peacefulBlue/90 text-white">
       <div className="container mx-auto px-4 flex justify-center">
         <div className="max-w-3xl text-center flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-lora font-semibold mb-4">Schedule a Consultation</h2>
@@ -16,7 +16,7 @@ const ConsultationCTA: React.FC = () => {
               variant="primary"
               mandalaType="simple"
               href="/book-consultation"
-              className="text-lg"
+              className="text-lg bg-white text-peacefulBlue hover:bg-white/90"
             >
               Book Your Consultation Today
             </MandalaButton>
@@ -28,4 +28,3 @@ const ConsultationCTA: React.FC = () => {
 };
 
 export default ConsultationCTA;
-
