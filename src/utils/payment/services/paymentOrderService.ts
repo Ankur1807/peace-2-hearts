@@ -16,7 +16,7 @@ export async function createRazorpayOrder(
     // Call the edge function to create an order
     const { data, error } = await supabase.functions.invoke('razorpay', {
       body: {
-        action: 'create-order',
+        action: 'create_order', // Consistent action naming
         amount,
         receipt: receiptId,
         notes: {

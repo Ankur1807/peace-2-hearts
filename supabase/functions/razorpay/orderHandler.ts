@@ -99,15 +99,28 @@ export async function handleCreateOrder(
       });
     }
     
-    // Build success response
+    // Build success response with required fields for frontend compatibility
     const orderResponse = {
+      id: data.id,
       success: true,
       order_id: data.id,
+      entity: data.entity,
+      amount: data.amount / 100, // Convert back from paise to main currency unit
+      amount_paid: data.amount_paid / 100,
+      amount_due: data.amount_due / 100,
+      currency: data.currency,
+      receipt: data.receipt,
+      status: data.status,
+      attempts: data.attempts,
+      razorpayKey: key_id, // Include the key_id for frontend to use
       details: {
         id: data.id,
-        amount: data.amount / 100, // Convert back from paise to main currency unit
-        currency: data.currency,
-        key_id // Include the key_id for frontend to use
+        key_id,
+        amount: data.amount / 100,
+        currency: data.currency
+      },
+      order: {
+        id: data.id
       }
     };
     
