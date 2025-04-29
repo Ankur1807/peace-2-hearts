@@ -155,7 +155,7 @@ export async function recoverEmailByReferenceId(referenceId: string): Promise<bo
     console.log(`Found consultation, sending recovery email for: ${referenceId}`);
     const emailSent = await sendEmailForConsultation({
       ...bookingDetails,
-      isRecovery: true,
+      isRecovery: true, // Now the type supports this field
       highPriority: true
     });
     

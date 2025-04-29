@@ -1,3 +1,4 @@
+
 export interface PersonalDetails {
   firstName: string;
   lastName: string;
@@ -12,7 +13,7 @@ export interface BookingDetails {
   referenceId: string;
   consultationType?: string;
   services?: string[];
-  date?: Date;
+  date?: Date | string;
   timeSlot?: string;
   timeframe?: string;
   message?: string;
@@ -22,7 +23,11 @@ export interface BookingDetails {
   serviceCategory?: string;
   packageName?: string;
   highPriority?: boolean;
-  bcc?: string; // Added field for BCC recipient
+  bcc?: string;
+  // New fields to match actual usage
+  selectedServices?: string[];
+  personalDetails?: PersonalDetails;
+  isRecovery?: boolean;
 }
 
 export interface Consultant {
@@ -54,3 +59,17 @@ export interface Service {
   featured: boolean;
   popular: boolean;
 }
+
+// Add missing types
+export interface VerificationResult {
+  success: boolean;
+  verified: boolean;
+  error?: string;
+  message?: string;
+  details?: any;
+}
+
+export interface SerializedBookingDetails extends BookingDetails {
+  formattedDate?: string;
+}
+

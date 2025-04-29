@@ -1,6 +1,7 @@
 
 import { getBookingDetailsFromLocalStorage, clearBookingDetailsFromLocalStorage } from '@/utils/bookingStorage';
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
+import { BookingDetails } from '@/utils/types';
 
 export function initializeBookingFromStorage(bookingState: ConsultationBookingHook): void {
   const {
@@ -12,7 +13,11 @@ export function initializeBookingFromStorage(bookingState: ConsultationBookingHo
   } = bookingState;
 
   // Check if there are stored booking details
-  const storedDetails = getBookingDetailsFromLocalStorage();
+  const storedDetails = getBookingDetailsFromLocalStorage() as BookingDetails & {
+    selectedServices?: string[];
+    personalDetails?: any;
+  };
+  
   if (storedDetails) {
     setServiceCategory(storedDetails.serviceCategory || 'mental-health');
     

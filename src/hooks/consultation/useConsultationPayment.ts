@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { saveConsultation } from '@/utils/consultationApi';
 import { createRazorpayOrder } from '@/utils/payment/services/paymentOrderService';
@@ -178,7 +177,7 @@ export function useConsultationPayment({
             response.razorpay_signature,
             receiptId,
             {
-              date: date instanceof Date ? date.toISOString() : (date || ''),
+              date: date instanceof Date ? date.toISOString() : (date || ''), // Fix: Convert Date to string
               timeSlot: timeSlot || '',
               timeframe: timeframe || '',
               consultationType: consultationType,
