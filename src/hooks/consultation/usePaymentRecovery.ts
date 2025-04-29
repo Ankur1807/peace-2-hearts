@@ -12,6 +12,7 @@ import { createBookingDetailsFromConsultation } from '@/utils/consultation/consu
  */
 export function usePaymentRecovery() {
   const [isRecovering, setIsRecovering] = useState(false);
+  const [recoveryResult, setRecoveryResult] = useState<{success: boolean; message: string} | null>(null);
   const { toast } = useToast();
 
   /**
@@ -20,6 +21,7 @@ export function usePaymentRecovery() {
   const recoverPaymentAndSendEmail = useCallback(
     async (referenceId: string, paymentId: string, amount: number, orderId: string = '') => {
       setIsRecovering(true);
+      setRecoveryResult(null);
 
       try {
         toast({
@@ -45,6 +47,10 @@ export function usePaymentRecovery() {
             title: "Payment Not Verified",
             description: "Could not verify payment with Razorpay.",
             variant: "destructive",
+          });
+          setRecoveryResult({
+            success: false,
+            message: "Could not verify payment with Razorpay. Please contact support."
           });
           return false;
         }
@@ -80,6 +86,10 @@ export function usePaymentRecovery() {
               description: "Could not create consultation record.",
               variant: "destructive",
             });
+            setRecoveryResult({
+              success: false,
+              message: "Could not create consultation record. Please contact support."
+            });
             return false;
           }
           
@@ -91,6 +101,10 @@ export function usePaymentRecovery() {
             title: "Recovery Failed",
             description: "Could not fetch consultation details.",
             variant: "destructive",
+          });
+          setRecoveryResult({
+            success: false,
+            message: "Could not fetch consultation details. Please contact support."
           });
           return false;
         }
@@ -139,6 +153,11 @@ export function usePaymentRecovery() {
                 description: "Payment verified and confirmation email sent.",
               });
               
+              setRecoveryResult({
+                success: true,
+                message: "Payment verified and confirmation email sent successfully."
+              });
+              
               return true;
             } else {
               console.error("Failed to send recovery email");
@@ -147,6 +166,11 @@ export function usePaymentRecovery() {
                 description: "Payment verified but couldn't send confirmation email.",
                 variant: "destructive",
               });
+              
+              setRecoveryResult({
+                success: false,
+                message: "Payment verified but couldn't send confirmation email. Please try again later."
+              });
             }
           } else {
             console.error("Could not create booking details from consultation");
@@ -154,6 +178,11 @@ export function usePaymentRecovery() {
               title: "Recovery Partially Completed",
               description: "Payment verified but couldn't create email details.",
               variant: "destructive",
+            });
+            
+            setRecoveryResult({
+              success: false,
+              message: "Payment verified but couldn't create email details. Please contact support."
             });
           }
         }
@@ -166,6 +195,12 @@ export function usePaymentRecovery() {
           description: "An unexpected error occurred during recovery.",
           variant: "destructive",
         });
+        
+        setRecoveryResult({
+          success: false,
+          message: "An unexpected error occurred during recovery. Please contact support."
+        });
+        
         return false;
       } finally {
         setIsRecovering(false);
@@ -174,5 +209,5 @@ export function usePaymentRecovery() {
     [toast]
   );
 
-  return { recoverPaymentAndSendEmail, isRecovering };
+  return { recoverPaymentAndSendEmail, isRecovering, recoveryResult };
 }
