@@ -44,13 +44,14 @@ import DivorcePreventionPackage from '@/pages/services/holistic/DivorcePreventio
 
 // Admin pages
 import AdminLogin from '@/pages/admin/AdminLogin';
-import AdminLayout from '@/components/admin/AdminLayout';
+import AdminLayout from '@/components/layouts/AdminLayout';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminConsultants from '@/pages/admin/AdminConsultants';
 import AdminPricing from '@/pages/admin/AdminPricing';
 import AdminBookings from '@/pages/admin/AdminBookings';
 import AdminSettings from '@/pages/admin/AdminSettings';
 import AdminPaymentMigration from '@/pages/admin/AdminPaymentMigration';
+import AdminServices from '@/pages/admin/AdminServices';
 
 // Other pages
 import News from '@/pages/News';
@@ -60,9 +61,6 @@ import Resources from '@/pages/Resources';
 import ShippingDelivery from '@/pages/ShippingDelivery';
 import MobileBookings from '@/pages/MobileBookings';
 import LogoExport from '@/pages/LogoExport';
-
-// Import our new AdminServices component
-import AdminServices from './pages/admin/AdminServices';
 
 function App() {
   // The issue is likely here with the useEffect hook
@@ -141,11 +139,11 @@ function App() {
           
           {/* Admin routes - Login should stand alone without AdminProvider */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           
-          {/* Protected admin routes with AdminLayout */}
+          {/* Fixed: Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="consultants" element={<AdminConsultants />} />
             <Route path="pricing" element={<AdminPricing />} />
             <Route path="services" element={<AdminServices />} />

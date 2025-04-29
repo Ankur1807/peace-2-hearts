@@ -26,7 +26,7 @@ const AdminSidebar = () => {
     {
       label: "Dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
-      href: "/admin"
+      href: "/admin/dashboard"
     },
     {
       label: "Consultants",
