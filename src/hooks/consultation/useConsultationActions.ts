@@ -21,7 +21,7 @@ export const useConsultationActions = ({
   setIsProcessing,
   toast
 }: UseConsultationActionsParams) => {
-  const handleConfirmBooking = async (): Promise<any> {
+  const handleConfirmBooking = async () => {
     setIsProcessing(true);
     setBookingError(null);
     
