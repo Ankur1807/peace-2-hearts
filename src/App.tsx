@@ -24,6 +24,21 @@ import TherapyService from '@/pages/services/TherapyService';
 import DivorceService from '@/pages/services/DivorceService';
 import CustodyService from '@/pages/services/CustodyService';
 
+// Mental Health sub-service pages
+import MentalHealthCounselling from '@/pages/services/mentalhealth/MentalHealthCounselling';
+import CouplesCounselling from '@/pages/services/mentalhealth/CouplesCounselling';
+import FamilyTherapy from '@/pages/services/mentalhealth/FamilyTherapy';
+import PremaritalCounselling from '@/pages/services/mentalhealth/PremaritalCounselling';
+import SexualHealthCounselling from '@/pages/services/mentalhealth/SexualHealthCounselling';
+
+// Legal Support sub-service pages
+import MediationServices from '@/pages/services/legal/MediationServices';
+import PreMarriageLegal from '@/pages/services/legal/PreMarriageLegal';
+import DivorceConsultation from '@/pages/services/legal/DivorceConsultation';
+import ChildCustodyConsultation from '@/pages/services/legal/ChildCustodyConsultation';
+import MaintenanceConsultation from '@/pages/services/legal/MaintenanceConsultation';
+import GeneralConsultation from '@/pages/services/legal/GeneralConsultation';
+
 // Admin pages
 import AdminLogin from '@/pages/admin/AdminLogin';
 
@@ -41,12 +56,27 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
         
-        {/* Inner service pages */}
+        {/* Main service pages */}
         <Route path="/services/mental-health" element={<MentalHealthService />} />
         <Route path="/services/legal-support" element={<LegalSupportService />} />
         <Route path="/services/therapy" element={<TherapyService />} />
         <Route path="/services/divorce" element={<DivorceService />} />
         <Route path="/services/custody" element={<CustodyService />} />
+        
+        {/* Mental Health sub-service pages */}
+        <Route path="/services/mental-health/counselling" element={<MentalHealthCounselling />} />
+        <Route path="/services/mental-health/couples-counselling" element={<CouplesCounselling />} />
+        <Route path="/services/mental-health/family-therapy" element={<FamilyTherapy />} />
+        <Route path="/services/mental-health/premarital-counselling" element={<PremaritalCounselling />} />
+        <Route path="/services/mental-health/sexual-health-counselling" element={<SexualHealthCounselling />} />
+        
+        {/* Legal Support sub-service pages */}
+        <Route path="/services/legal-support/mediation" element={<MediationServices />} />
+        <Route path="/services/legal-support/pre-marriage" element={<PreMarriageLegal />} />
+        <Route path="/services/legal-support/divorce" element={<DivorceConsultation />} />
+        <Route path="/services/legal-support/custody" element={<ChildCustodyConsultation />} />
+        <Route path="/services/legal-support/maintenance" element={<MaintenanceConsultation />} />
+        <Route path="/services/legal-support/general" element={<GeneralConsultation />} />
         
         <Route path="/book-consultation" element={<BookConsultation />} />
         <Route path="/payment-confirmation" element={<PaymentConfirmation />} />

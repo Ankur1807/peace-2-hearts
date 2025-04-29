@@ -1,8 +1,8 @@
-
+import React from 'react';
 import ServiceLayout from "@/components/ServiceLayout";
 import SubServicesList from "@/components/SubServicesList";
 
-const LegalSupportService = () => {
+const LegalSupportService: React.FC = () => {
   const legalSubServices = [
     {
       id: "pre-marriage-legal",
@@ -42,25 +42,30 @@ const LegalSupportService = () => {
     }
   ];
 
+  const forWhom = [
+    "Couples considering divorce and needing legal guidance",
+    "Parents navigating child custody and support arrangements",
+    "Individuals seeking pre-nuptial or post-nuptial agreements",
+    "People needing protection from domestic abuse through legal means",
+    "Those with questions about relationship property division",
+    "Anyone needing legal documentation related to relationship changes"
+  ];
+
+  const howItWorks = [
+    "Schedule an initial legal consultation to discuss your situation",
+    "Meet with an experienced attorney specializing in relationship law",
+    "Receive clear explanations of your legal options and rights",
+    "Develop a strategic plan for your specific legal needs"
+  ];
+
   return (
     <ServiceLayout
       title="Legal Support & Consultation"
       description="Our experienced legal team provides compassionate guidance on all aspects of relationship law, including divorce proceedings, custody arrangements, and pre-marital legal counseling."
       image="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-      forWhom={[
-        "Couples considering divorce and needing legal guidance",
-        "Parents navigating child custody and support arrangements",
-        "Individuals seeking pre-nuptial or post-nuptial agreements",
-        "People needing protection from domestic abuse through legal means",
-        "Those with questions about relationship property division",
-        "Anyone needing legal documentation related to relationship changes"
-      ]}
-      howItWorks={[
-        "Schedule an initial legal consultation to discuss your situation",
-        "Meet with an experienced attorney specializing in relationship law",
-        "Receive clear explanations of your legal options and rights",
-        "Develop a strategic plan for your specific legal needs"
-      ]}
+      forWhom={forWhom}
+      howItWorks={howItWorks}
+      serviceType="legal-support"
     >
       <section className="py-16">
         <div className="container mx-auto px-4">
