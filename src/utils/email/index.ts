@@ -10,10 +10,17 @@ import {
   retryFailedEmails
 } from './bookingEmailService';
 
-// Re-export email services
+import {
+  sendContactEmail,
+  resendContactEmail
+} from './contactEmails';
+
+// Re-export all email services
 export {
   sendBookingConfirmationEmail,
   resendBookingConfirmationEmail,
   fetchBookingDetailsByReference,
-  retryFailedEmails
+  retryFailedEmails,
+  sendContactEmail,
+  resendContactEmail
 };

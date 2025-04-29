@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { verifyPaymentAndCreateBooking } from '@/utils/payment/verificationService';
 import { BookingDetails } from '@/utils/types';
 
@@ -33,7 +33,7 @@ export const usePaymentVerification = ({
   } | null>(null);
 
   // If we have direct payment details, verify automatically
-  useState(() => {
+  useEffect(() => {
     if (paymentId && orderId && signature && referenceId && amount && bookingDetails) {
       verifyPayment({
         razorpay_payment_id: paymentId,
