@@ -1,6 +1,7 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
 
 export function useEmailResend() {
   const { toast } = useToast();
@@ -27,13 +28,8 @@ export function useEmailResend() {
       
       console.log("Booking details for email resend:", booking);
       
-      // Handle optional fields safely
-      const bookingWithSafeProps = {
-        ...booking,
-        service_category: booking.service_category || 'general',
-        time_slot: booking.time_slot || '',
-        timeframe: booking.timeframe || ''
-      };
+      // Determine service category if it doesn't exist
+      const serviceCategory = booking.service_category || determineServiceCategory(booking.consultation_type);
       
       // Call the send-email edge function
       const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-email', {
@@ -45,9 +41,9 @@ export function useEmailResend() {
           consultationType: booking.consultation_type,
           services: [booking.consultation_type],
           date: booking.date,
-          timeSlot: bookingWithSafeProps.time_slot,
-          timeframe: bookingWithSafeProps.timeframe,
-          serviceCategory: bookingWithSafeProps.service_category,
+          timeSlot: booking.time_slot || '',
+          timeframe: booking.timeframe || '',
+          serviceCategory: serviceCategory,
           highPriority: true,
           isResend: true
         }

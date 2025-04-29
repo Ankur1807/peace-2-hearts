@@ -35,6 +35,9 @@ export async function sendEmailForConsultation(
         .single();
         
       if (data) {
+        // Determine service category or use the existing one
+        const serviceCategory = data.service_category || determineServiceCategory(data.consultation_type);
+        
         // Create email data from consultation record
         bookingDetails = {
           clientName: data.client_name || bookingDetails.clientName,
@@ -46,7 +49,7 @@ export async function sendEmailForConsultation(
           timeSlot: data.time_slot,
           timeframe: data.timeframe,
           message: data.message,
-          serviceCategory: determineServiceCategory(data.consultation_type),
+          serviceCategory: serviceCategory,
           highPriority: bookingDetails.highPriority,
           isResend: bookingDetails.isResend,
           isRecovery: bookingDetails.isRecovery
@@ -138,6 +141,9 @@ export async function resendConfirmationEmail(referenceId: string): Promise<bool
       return false;
     }
     
+    // Determine service category or use the existing one
+    const serviceCategory = consultation.service_category || determineServiceCategory(consultation.consultation_type);
+    
     // Create booking details for the email
     const bookingDetails: BookingDetails = {
       clientName: consultation.client_name,
@@ -149,7 +155,7 @@ export async function resendConfirmationEmail(referenceId: string): Promise<bool
       timeSlot: consultation.time_slot,
       timeframe: consultation.timeframe,
       message: consultation.message,
-      serviceCategory: consultation.service_category || determineServiceCategory(consultation.consultation_type),
+      serviceCategory: serviceCategory,
       highPriority: true,
       isResend: true
     };
