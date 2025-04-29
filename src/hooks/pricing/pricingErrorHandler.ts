@@ -1,6 +1,13 @@
 
-import { toast } from "@/hooks/use-toast";
-import { ToastProps } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
+import { ToastActionElement } from "@/components/ui/toast";
+
+type ToastProps = {
+  title?: string;
+  description?: string;
+  variant?: "default" | "destructive";
+  action?: ToastActionElement;
+};
 
 export const handleOperationError = (
   error: any, 
