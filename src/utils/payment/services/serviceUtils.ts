@@ -5,27 +5,29 @@ import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
 
 /**
- * Determine the service category based on the consultation type
+ * Service category utilities
+ */
+
+/**
+ * Determine service category from consultation type
  */
 export function determineServiceCategory(consultationType: string): string {
-  if (!consultationType) return 'mental-health';
+  if (!consultationType) return 'mental-health'; // Default category
   
-  const lowerConsultation = consultationType.toLowerCase();
+  const lowerType = consultationType.toLowerCase();
   
-  if (lowerConsultation.includes('legal') || 
-      lowerConsultation.includes('divorce') || 
-      lowerConsultation.includes('custody')) {
+  if (lowerType.includes('legal') || lowerType.includes('divorce') || lowerType.includes('lawyer')) {
     return 'legal';
-  }
-  
-  if (lowerConsultation.includes('holistic') || 
-      lowerConsultation.includes('package') ||
-      lowerConsultation.includes('prevention')) {
+  } else if (lowerType.includes('holistic') || lowerType.includes('comprehensive')) {
     return 'holistic';
+  } else {
+    return 'mental-health';
   }
-  
-  return 'mental-health';
 }
+
+/**
+ * Other service utilities can be added here if needed
+ */
 
 /**
  * Update the consultation status in the database

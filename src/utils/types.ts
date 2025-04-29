@@ -1,63 +1,38 @@
 
-export interface VerificationResult {
-  success: boolean;
-  message: string;
-}
-
-export interface PersonalDetails {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  message: string;
-}
+// If this file doesn't exist yet, create it with the BookingDetails interface
 
 export interface BookingDetails {
-  clientName?: string;
-  email?: string;
-  phone?: string;
-  referenceId?: string;
-  consultationType?: string;
+  clientName: string;
+  email: string;
+  referenceId: string;
+  consultationType: string;
   services?: string[];
   date?: Date | string;
   timeSlot?: string;
   timeframe?: string;
-  serviceCategory?: string;
   message?: string;
+  serviceCategory?: string | null;
   amount?: number;
   highPriority?: boolean;
   isResend?: boolean;
   isRecovery?: boolean;
-  [key: string]: any;
 }
 
-export interface SerializedBookingDetails extends Omit<BookingDetails, 'date'> {
-  date?: string;
-  type?: string;
-  failedAt?: string;
-  formattedDate?: string;
-}
-
-export interface PaymentRecord {
-  id: string;
-  consultation_id: string;
-  amount: number;
-  transaction_id?: string;
-  payment_status: string;
-  payment_method?: string;
-  email_sent?: boolean;
-  recovery_timestamp?: string;
-  created_at?: string;
-  updated_at?: string;
-  currency?: string;
-}
-
-export interface SavePaymentRecordParams {
-  paymentId: string;
-  orderId: string;
-  amount: number;
+// Add other interfaces as needed for serialized data
+export interface SerializedBookingDetails {
+  clientName: string;
+  email: string;
   referenceId: string;
-  status?: string;
-  bookingDetails?: BookingDetails;
+  consultationType: string;
+  services?: string[];
+  date?: string;
+  formattedDate?: string;
+  timeSlot?: string;
+  timeframe?: string;
+  message?: string;
+  serviceCategory?: string | null;
+  amount?: number;
   highPriority?: boolean;
+  isResend?: boolean;
+  isRecovery?: boolean;
 }

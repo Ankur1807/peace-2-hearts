@@ -1,12 +1,11 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CalendarPlus, FilePlus, Download, Send, RefreshCw } from 'lucide-react';
+import { CalendarPlus, Send, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BookingDetails } from '@/utils/types';
 import { useToast } from '@/hooks/use-toast';
-import { sendBookingConfirmationEmail } from '@/utils/email/bookingEmails';
-import { usePaymentRecovery } from '@/hooks/consultation/usePaymentRecovery';
+import { sendBookingConfirmationEmail } from '@/utils/email/bookingEmailService';
 
 interface ActionButtonsProps {
   bookingDetails?: BookingDetails;
@@ -18,7 +17,6 @@ const ActionButtons = ({ bookingDetails, referenceId }: ActionButtonsProps) => {
   const { toast } = useToast();
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const { recoverPaymentAndSendEmail, isRecovering } = usePaymentRecovery();
 
   const handleResendEmail = async () => {
     if (!bookingDetails) {
@@ -33,44 +31,19 @@ const ActionButtons = ({ bookingDetails, referenceId }: ActionButtonsProps) => {
     setIsSendingEmail(true);
     
     try {
-      // First, try using the recovery mechanism if we have payment details
-      if (bookingDetails.amount && bookingDetails.amount > 0 && referenceId) {
-        const paymentId = sessionStorage.getItem(`payment_id_${referenceId}`) || '';
-        const orderId = sessionStorage.getItem(`order_id_${referenceId}`) || '';
-        
-        if (paymentId) {
-          const result = await recoverPaymentAndSendEmail(
-            referenceId,
-            paymentId,
-            bookingDetails.amount,
-            orderId
-          );
-          
-          if (result) {
-            setEmailSent(true);
-            toast({
-              title: "Email Sent",
-              description: "Confirmation email has been resent successfully",
-            });
-            setIsSendingEmail(false);
-            return;
-          }
-        }
-      }
-      
-      // Fall back to just sending the email
+      // Send confirmation email with high priority and resend flag
       const result = await sendBookingConfirmationEmail({
         ...bookingDetails,
         referenceId: referenceId,
-        isResend: true,
-        highPriority: true // Mark as high priority
+        highPriority: true,
+        isResend: true
       });
       
       if (result) {
         setEmailSent(true);
         toast({
           title: "Email Sent",
-          description: "Confirmation email has been resent successfully",
+          description: "Confirmation email has been sent successfully",
         });
       } else {
         toast({
@@ -80,10 +53,10 @@ const ActionButtons = ({ bookingDetails, referenceId }: ActionButtonsProps) => {
         });
       }
     } catch (error) {
-      console.error("Error resending email:", error);
+      console.error("Error sending email:", error);
       toast({
         title: "Error",
-        description: "Failed to resend confirmation email",
+        description: "Failed to send confirmation email",
         variant: "destructive"
       });
     } finally {
@@ -93,7 +66,7 @@ const ActionButtons = ({ bookingDetails, referenceId }: ActionButtonsProps) => {
 
   return (
     <div className="flex flex-col space-y-3 sm:space-y-4">
-      {!emailSent && !isSendingEmail && !isRecovering && (
+      {!emailSent && !isSendingEmail && (
         <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-800 text-sm">
           <p className="font-medium">If you haven't received your booking confirmation email:</p>
           <p className="mt-1">Please check your spam folder or click "Send Confirmation Email" below.</p>
@@ -122,9 +95,9 @@ const ActionButtons = ({ bookingDetails, referenceId }: ActionButtonsProps) => {
             variant="outline"
             className="flex items-center"
             onClick={handleResendEmail}
-            disabled={isSendingEmail || isRecovering || !bookingDetails?.email}
+            disabled={isSendingEmail || !bookingDetails?.email}
           >
-            {isSendingEmail || isRecovering ? (
+            {isSendingEmail ? (
               <>
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                 Sending...

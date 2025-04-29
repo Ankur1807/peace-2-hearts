@@ -1,7 +1,10 @@
 
+/**
+ * Hook for resending confirmation emails for bookings
+ */
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
+import { sendBookingConfirmationEmail, fetchBookingDetailsByReference } from "@/utils/email/bookingEmailService";
 
 export function useEmailResend() {
   const { toast } = useToast();
@@ -28,51 +31,38 @@ export function useEmailResend() {
       
       console.log("Booking details for email resend:", booking);
       
-      // Determine service category if it doesn't exist
-      const serviceCategory = booking.service_category || determineServiceCategory(booking.consultation_type);
-      
-      // Call the send-email edge function
-      const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-email', {
-        body: {
-          type: 'booking-confirmation',
-          clientName: booking.client_name,
-          email: booking.client_email,
-          referenceId: booking.reference_id,
-          consultationType: booking.consultation_type,
-          services: [booking.consultation_type],
-          date: booking.date,
-          timeSlot: booking.time_slot || '',
-          timeframe: booking.timeframe || '',
-          serviceCategory: serviceCategory,
-          highPriority: true,
-          isResend: true
-        }
-      });
-      
-      if (emailError) {
-        console.error("Error from send-email function:", emailError);
-        throw emailError;
+      if (!booking.reference_id) {
+        throw new Error("Booking has no reference ID");
       }
       
-      console.log("Email resend response:", emailResponse);
+      // Get complete booking details
+      const bookingDetails = {
+        clientName: booking.client_name || '',
+        email: booking.client_email || '',
+        referenceId: booking.reference_id || '',
+        consultationType: booking.consultation_type || '',
+        services: booking.consultation_type ? [booking.consultation_type] : [],
+        date: booking.date ? new Date(booking.date) : undefined,
+        timeSlot: booking.time_slot || '',
+        timeframe: booking.timeframe || '',
+        message: booking.message || '',
+        serviceCategory: booking.service_category || null,
+        highPriority: true,
+        isResend: true
+      };
       
-      // Update the email_sent status
-      const { error: updateError } = await supabase
-        .from('consultations')
-        .update({ email_sent: true })
-        .eq('id', bookingId);
-        
-      if (updateError) {
-        console.error("Error updating email_sent status:", updateError);
-        throw updateError;
+      // Try sending the email
+      const emailResult = await sendBookingConfirmationEmail(bookingDetails);
+      
+      if (emailResult) {
+        toast({
+          title: "Email Sent",
+          description: "Confirmation email has been resent successfully",
+        });
+        return true;
+      } else {
+        throw new Error("Failed to send email");
       }
-      
-      toast({
-        title: "Email Sent",
-        description: "Confirmation email has been resent successfully",
-      });
-      
-      return true;
     } catch (error) {
       console.error("Error resending confirmation email:", error);
       toast({
