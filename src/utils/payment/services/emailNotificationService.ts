@@ -189,8 +189,11 @@ export async function resendConfirmationEmail(referenceId: string): Promise<bool
       return false;
     }
     
+    // Use type assertion to access service_category
+    const consultationData = consultation as any;
+    
     // Determine service category from consultation type if not provided
-    const serviceCategory = consultation.service_category || 
+    const serviceCategory = consultationData.service_category || 
       determineServiceCategory(consultation.consultation_type || '');
     
     // Create booking details for the email

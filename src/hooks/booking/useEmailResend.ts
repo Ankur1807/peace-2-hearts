@@ -36,8 +36,11 @@ export function useEmailResend() {
         throw new Error("Booking has no reference ID");
       }
       
+      // Use type assertion to handle the service_category property that TypeScript doesn't recognize
+      const bookingWithServiceCategory = booking as any;
+      
       // Determine service category from consultation type if not provided
-      const serviceCategory = booking.service_category || 
+      const serviceCategory = bookingWithServiceCategory.service_category || 
                              determineServiceCategory(booking.consultation_type || '');
       
       // Get complete booking details

@@ -16,6 +16,7 @@ export interface RawConsultation {
   service_category?: string | null;
   timeframe?: string | null;
   time_slot: string;
+  message?: string | null;
 }
 
 export interface Booking {
@@ -34,6 +35,7 @@ export interface Booking {
   service_category?: string | null;
   timeframe?: string;
   time_slot: string;
+  message?: string;
 }
 
 export interface UseBookingsReturn {

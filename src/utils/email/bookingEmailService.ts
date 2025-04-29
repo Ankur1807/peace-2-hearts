@@ -173,8 +173,11 @@ export async function fetchBookingDetailsByReference(referenceId: string): Promi
       return null;
     }
     
+    // Use type assertion to access service_category
+    const consultationData = data as any;
+    
     // Determine service category from consultation type if not provided
-    const serviceCategory = data.service_category || 
+    const serviceCategory = consultationData.service_category || 
       determineServiceCategory(data.consultation_type || '');
     
     // Create booking details object
@@ -221,8 +224,11 @@ export async function retryFailedEmails(): Promise<number> {
     
     // Process each consultation
     for (const consultation of data) {
+      // Use type assertion to access service_category
+      const consultationData = consultation as any;
+      
       // Determine service category from consultation type if not provided
-      const serviceCategory = consultation.service_category || 
+      const serviceCategory = consultationData.service_category || 
         determineServiceCategory(consultation.consultation_type || '');
       
       const bookingDetails: BookingDetails = {
