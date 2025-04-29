@@ -1,6 +1,6 @@
 
 import { recoverEmailByReferenceId } from './payment/services/paymentVerificationService';
-import { resendConfirmationEmail } from './payment/services/emailNotificationService';
+import { resendConsultationEmail } from './payment/services/emailNotificationService';
 
 // Expose recovery functions globally 
 if (typeof window !== 'undefined') {
@@ -10,7 +10,7 @@ if (typeof window !== 'undefined') {
   
   // For resending confirmation emails
   // @ts-ignore
-  window.resendConfirmationEmail = resendConfirmationEmail;
+  window.resendConsultationEmail = resendConsultationEmail;
   
   // Helper function to recover email for the latest payment
   // @ts-ignore
@@ -30,7 +30,7 @@ if (typeof window !== 'undefined') {
   
   console.log('Email recovery functions available in console:');
   console.log('- recoverEmailByReferenceId("YOUR_REFERENCE_ID")');
-  console.log('- resendConfirmationEmail("YOUR_REFERENCE_ID")');
+  console.log('- resendConsultationEmail("YOUR_REFERENCE_ID")');
   console.log('- recoverLatestEmail() - tries to recover using the reference ID from the URL');
 }
 

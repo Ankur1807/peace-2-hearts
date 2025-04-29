@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
-import { sendBookingConfirmationEmail } from "@/utils/email/bookingEmails";
+import { sendBookingConfirmationEmail } from "@/utils/email/bookingEmailService";
 
 /**
  * Sends an email notification for a consultation booking

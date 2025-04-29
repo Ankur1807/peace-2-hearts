@@ -1,31 +1,32 @@
 
-/**
- * Type definitions for Razorpay integration
- */
-
+// Order creation parameters
 export interface CreateOrderParams {
   amount: number;
-  currency?: string;
   receipt: string;
   notes?: Record<string, string>;
 }
 
+// Order response from API
 export interface OrderResponse {
-  success: boolean;
-  error?: string;
-  order_id?: string;
-  details?: {
+  id: string;
+  entity: string;
+  amount: number;
+  amount_paid: number;
+  amount_due: number;
+  currency: string;
+  receipt: string;
+  status: string;
+  attempts: number;
+  razorpayKey: string; // Added to match our implementation
+  order: {
     id: string;
-    amount: number;
-    currency: string;
-    key_id?: string;
-    message?: string;
-  };
+  }; // Added to match our implementation
 }
 
+// Payment verification parameters
 export interface VerifyPaymentParams {
   paymentId: string;
   orderId: string;
   signature: string;
+  referenceId: string;
 }
-

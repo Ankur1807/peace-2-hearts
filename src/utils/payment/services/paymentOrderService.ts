@@ -1,79 +1,51 @@
 
-/**
- * Service for handling Razorpay order creation
- */
-import { supabase } from "@/integrations/supabase/client";
-import { CreateOrderParams, OrderResponse } from "../razorpayTypes";
+import { supabase } from '@/integrations/supabase/client';
+import { CreateOrderParams, OrderResponse } from '../razorpayTypes';
 
 /**
  * Create a new Razorpay order
  */
-export const createRazorpayOrder = async (params: CreateOrderParams): Promise<OrderResponse> => {
+export async function createRazorpayOrder(
+  receiptId: string,
+  amount: number,
+  consultationType: string
+): Promise<OrderResponse> {
   try {
-    const { amount, currency = 'INR', receipt, notes } = params;
+    console.log(`Creating Razorpay order for ${receiptId} with amount ${amount}`);
     
-    if (!amount || amount <= 0) {
-      console.error('Invalid amount for order creation:', amount);
-      return { 
-        success: false, 
-        error: 'Invalid amount. Must be greater than zero.' 
-      };
-    }
-    
-    console.log("Creating Razorpay order with params:", { 
-      amount, 
-      currency, 
-      receipt, 
-      notes
-    });
-    
-    // Send a numeric amount to the edge function
-    // The edge function will handle conversion to paise
+    // Call the edge function to create an order
     const { data, error } = await supabase.functions.invoke('razorpay', {
       body: {
-        action: 'create_order',
-        amount: Number(amount),
-        currency,
-        receipt,
-        orderData: { notes }
+        action: 'create-order',
+        amount,
+        receipt: receiptId,
+        notes: {
+          'consultationType': consultationType
+        }
       }
     });
     
     if (error) {
-      console.error('Error invoking Razorpay edge function:', error);
-      return { 
-        success: false, 
-        error: `Edge function error: ${error.message || 'Unknown error'}` 
-      };
+      console.error("Error creating Razorpay order:", error);
+      throw new Error(`Failed to create payment order: ${error.message}`);
     }
     
-    console.log("Razorpay order response:", data);
-    
-    if (!data?.success) {
-      console.error('Razorpay order creation failed:', data?.error || 'Unknown error');
-      return { 
-        success: false, 
-        error: data?.error || 'Failed to create payment order'
-      };
+    if (!data || !data.id) {
+      throw new Error("Invalid response from order creation");
     }
     
-    return data as OrderResponse;
-  } catch (err) {
-    console.error('Exception creating order:', err);
-    return { 
-      success: false, 
-      error: 'Failed to create order',
-      details: err instanceof Error ? { 
-        id: 'error', 
-        amount: 0, 
-        currency: 'INR', 
-        message: err.message 
-      } : { 
-        id: 'error', 
-        amount: 0, 
-        currency: 'INR', 
-        message: String(err) 
+    console.log("Order created successfully:", data);
+    
+    // Match our expected return type 
+    return {
+      ...data,
+      razorpayKey: data.razorpayKey || '',
+      order: {
+        id: data.id
       }
     };
+  } catch (error) {
+    console.error("Error in createRazorpayOrder:", error);
+    throw error;
   }
-};
+}

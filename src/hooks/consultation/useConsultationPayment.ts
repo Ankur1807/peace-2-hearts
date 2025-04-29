@@ -2,7 +2,8 @@
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { saveConsultation } from '@/utils/consultationApi';
-import { createRazorpayOrder, verifyRazorpayPayment } from '@/utils/payment/razorpayService';
+import { createRazorpayOrder } from '@/utils/payment/services/paymentOrderService';
+import { verifyRazorpayPayment } from '@/utils/payment/services/paymentVerificationService';
 import { generateReferenceId } from '@/utils/referenceGenerator';
 import { PersonalDetails } from '@/utils/types';
 import { useProcessPayment } from './payment/useProcessPayment';
@@ -148,22 +149,22 @@ export function useConsultationPayment({
       }
 
       // Create the Razorpay order
-      const { order, razorpayKey } = await createRazorpayOrder(
+      const orderResponse = await createRazorpayOrder(
         receiptId,
         totalPrice,
         consultationType
       );
 
-      if (!order || !order.id) {
+      if (!orderResponse || !orderResponse.order || !orderResponse.order.id) {
         throw new Error("Failed to create payment order");
       }
       
-      console.log("Created Razorpay order successfully:", order);
+      console.log("Created Razorpay order successfully:", orderResponse);
       
       // Process the payment with Razorpay
-      await processPaymentWithRazorpay({
-        razorpayKey,
-        orderId: order.id,
+      processPaymentWithRazorpay({
+        razorpayKey: orderResponse.razorpayKey,
+        orderId: orderResponse.order.id,
         amount: totalPrice,
         receipt: receiptId,
         name: `${personalDetails.firstName} ${personalDetails.lastName}`,
