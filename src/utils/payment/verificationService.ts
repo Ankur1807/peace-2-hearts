@@ -19,16 +19,16 @@ export async function verifyPaymentAndCreateBooking(
   bookingDetails: BookingDetails
 ): Promise<VerificationResult> {
   try {
-    console.log(`Verifying payment and creating booking for ${paymentId}`);
+    console.log(`[VERIFICATION] Verifying payment and creating booking for ${paymentId}, reference: ${bookingDetails.referenceId}`);
     
     // Safety check for missing data - still try to proceed
     if (!signature) {
-      console.warn("Missing signature in verification call, attempting to proceed anyway");
+      console.warn("[VERIFICATION] Missing signature in verification call, attempting to proceed anyway");
     }
     
     // Add specific validation for critical fields
     if (!paymentId) {
-      console.error("Payment ID is missing");
+      console.error("[VERIFICATION] Payment ID is missing");
       return { 
         success: false, 
         verified: false, 
@@ -37,7 +37,7 @@ export async function verifyPaymentAndCreateBooking(
     }
     
     if (!bookingDetails.referenceId) {
-      console.error("Reference ID is missing");
+      console.error("[VERIFICATION] Reference ID is missing");
       return { 
         success: false, 
         verified: false, 
@@ -47,6 +47,13 @@ export async function verifyPaymentAndCreateBooking(
     
     // Call our verify-payment edge function
     try {
+      console.log(`[VERIFICATION] Calling edge function with data:`, {
+        paymentId,
+        orderId,
+        referenceId: bookingDetails.referenceId,
+        email: bookingDetails.email
+      });
+      
       const { data, error } = await supabase.functions.invoke('verify-payment', {
         body: {
           paymentId,
@@ -70,14 +77,14 @@ export async function verifyPaymentAndCreateBooking(
       });
       
       if (error) {
-        console.error("Error verifying payment with edge function:", error);
+        console.error("[VERIFICATION] Error verifying payment with edge function:", error);
         
         // Store payment details in database even if verification fails
         // This ensures we don't lose payment information
         try {
           await storeEmergencyPaymentRecord(paymentId, orderId, bookingDetails);
         } catch (emergencyError) {
-          console.error("Failed to store emergency payment record:", emergencyError);
+          console.error("[VERIFICATION] Failed to store emergency payment record:", emergencyError);
         }
         
         return { 
@@ -87,11 +94,11 @@ export async function verifyPaymentAndCreateBooking(
         };
       }
       
-      console.log("Verification result:", data);
+      console.log("[VERIFICATION] Edge function response:", data);
       
       // If email failed but payment verified, still return success
       if (data.verified && !data.emailSent) {
-        console.warn("Payment verified but email sending failed");
+        console.warn("[VERIFICATION] Payment verified but email sending failed");
         return {
           success: true,
           verified: true,
@@ -103,18 +110,18 @@ export async function verifyPaymentAndCreateBooking(
       }
       
       return {
-        success: true,
+        success: data.verified || false,
         verified: data.verified || false,
         details: data
       };
     } catch (invokeError: any) {
-      console.error("Error invoking verify-payment function:", invokeError);
+      console.error("[VERIFICATION] Error invoking verify-payment function:", invokeError);
       
       // Store payment details in database even if verification fails
       try {
         await storeEmergencyPaymentRecord(paymentId, orderId, bookingDetails);
       } catch (emergencyError) {
-        console.error("Failed to store emergency payment record:", emergencyError);
+        console.error("[VERIFICATION] Failed to store emergency payment record:", emergencyError);
       }
       
       return { 
@@ -124,7 +131,7 @@ export async function verifyPaymentAndCreateBooking(
       };
     }
   } catch (err: any) {
-    console.error("Error in verifyPaymentAndCreateBooking:", err);
+    console.error("[VERIFICATION] Error in verifyPaymentAndCreateBooking:", err);
     return {
       success: false,
       verified: false,

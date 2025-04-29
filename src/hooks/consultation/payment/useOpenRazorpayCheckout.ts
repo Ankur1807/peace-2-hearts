@@ -74,23 +74,37 @@ export const useOpenRazorpayCheckout = ({
         receiptId
       );
       
+      // Enhanced logging for debugging
+      console.log("[PAYMENT FLOW] Verification result:", JSON.stringify(verificationResult));
+      
       // Navigate based on verification result
-      if (verificationResult.success) {
+      if (verificationResult && verificationResult.success) {
         console.log("[PAYMENT FLOW] Payment verification successful, navigating to thank-you page");
+        
         // Keep isProcessing true until navigation completes
-        navigate("/thank-you", { 
-          state: {
-            paymentId: response.razorpay_payment_id,
-            orderId: response.razorpay_order_id,
-            signature: response.razorpay_signature,
-            amount: price,
-            referenceId: receiptId,
-            bookingDetails
-          },
-          replace: true 
-        });
+        try {
+          // Navigate with replace to prevent back navigation to payment page
+          console.log("[PAYMENT FLOW] Executing navigation to thank-you page");
+          navigate("/thank-you", { 
+            state: {
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature,
+              amount: price,
+              referenceId: receiptId,
+              bookingDetails
+            },
+            replace: true 
+          });
+          console.log("[PAYMENT FLOW] Navigation command executed");
+        } catch (navError) {
+          console.error("[PAYMENT FLOW] Navigation error:", navError);
+          // If navigation fails, try alternative approach
+          window.location.href = `/thank-you?ref=${receiptId}&pid=${response.razorpay_payment_id}`;
+        }
       } else {
         // If verification failed, navigate to verification page with status
+        console.warn("[PAYMENT FLOW] Verification result was not successful:", verificationResult);
         navigateToVerification({
           paymentId: response.razorpay_payment_id,
           orderId: response.razorpay_order_id,

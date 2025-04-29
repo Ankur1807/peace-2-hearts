@@ -236,15 +236,26 @@ async function sendConfirmationEmail(
   error?: string;
 }> {
   try {
-    console.log(`Sending confirmation email for booking ${bookingDetails.referenceId}`);
+    console.log(`[EDGE] Sending confirmation email for booking ${bookingDetails.referenceId}`);
     
     // Add additional error handling for email sending
     try {
+      // Make sure we always include admin as BCC
+      const adminEmail = "admin@peace2hearts.com";
+      
+      console.log(`[EDGE] Calling send-email function with data:`, {
+        referenceId: bookingDetails.referenceId,
+        email: bookingDetails.email,
+        clientName: bookingDetails.clientName,
+        withBcc: true,
+        bcc: adminEmail
+      });
+      
       const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-email', {
         body: {
           type: 'booking-confirmation',
           to: bookingDetails.email,
-          bcc: "admin@peace2hearts.com", // Add admin email as BCC
+          bcc: adminEmail, // Add admin email as BCC
           clientName: bookingDetails.clientName,
           referenceId: bookingDetails.referenceId,
           serviceType: bookingDetails.consultationType || bookingDetails.services.join(', '),
@@ -256,42 +267,43 @@ async function sendConfirmationEmail(
       });
       
       if (emailError) {
-        console.error("Error sending confirmation email:", emailError);
+        console.error("[EDGE] Error sending confirmation email:", emailError);
         return { success: false, error: emailError.message };
       }
       
-      console.log("Email sent successfully:", emailResponse);
+      console.log("[EDGE] Email sent successfully:", emailResponse);
+      
+      // Update the consultation record to mark email as sent ONLY if email was actually sent
+      try {
+        const { error: updateError } = await supabase
+          .from('consultations')
+          .update({ email_sent: true })
+          .eq('reference_id', bookingDetails.referenceId);
+        
+        if (updateError) {
+          console.error("[EDGE] Error updating email_sent status:", updateError);
+        } else {
+          console.log("[EDGE] Updated email_sent status to true");
+        }
+      } catch (updateErr) {
+        console.error("[EDGE] Exception updating email_sent status:", updateErr);
+      }
+      
+      return { success: true };
     } catch (emailErr) {
       // Don't fail the entire process if email sending fails
-      console.error("Exception in email sending:", emailErr);
+      console.error("[EDGE] Exception in email sending:", emailErr);
       return { success: false, error: emailErr.message };
     }
-    
-    // Update the consultation record to mark email as sent - don't fail if this doesn't work
-    try {
-      const { error: updateError } = await supabase
-        .from('consultations')
-        .update({ email_sent: true })
-        .eq('reference_id', bookingDetails.referenceId);
-      
-      if (updateError) {
-        console.error("Error updating email_sent status:", updateError);
-      }
-    } catch (updateErr) {
-      console.error("Exception updating email_sent status:", updateErr);
-    }
-    
-    // Return success even if there were errors updating the database
-    return { success: true };
   } catch (error) {
-    console.error("Exception in sendConfirmationEmail:", error);
+    console.error("[EDGE] Exception in sendConfirmationEmail:", error);
     return { success: false, error: error.message };
   }
 }
 
 // Main handler function
 const handler = async (req: Request): Promise<Response> => {
-  console.log("Verify payment function called");
+  console.log("[EDGE] Verify payment function called");
   
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -304,7 +316,7 @@ const handler = async (req: Request): Promise<Response> => {
     try {
       requestData = await req.json() as VerifyPaymentRequest;
     } catch (parseError) {
-      console.error("Error parsing request body:", parseError);
+      console.error("[EDGE] Error parsing request body:", parseError);
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -320,7 +332,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { paymentId, orderId, signature, bookingDetails } = requestData;
     
     if (!paymentId || !bookingDetails || !bookingDetails.referenceId) {
-      console.error("Missing required parameters:", { 
+      console.error("[EDGE] Missing required parameters:", { 
         paymentId: !!paymentId,
         bookingDetails: !!bookingDetails,
         referenceId: bookingDetails?.referenceId 
@@ -337,13 +349,13 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
     
-    console.log(`Processing payment verification for: ${paymentId}, reference: ${bookingDetails.referenceId}`);
+    console.log(`[EDGE] Processing payment verification for: ${paymentId}, reference: ${bookingDetails.referenceId}`);
     
     // Step 1: Verify payment with Razorpay
     const paymentVerification = await verifyPaymentWithRazorpay(paymentId);
     
     if (!paymentVerification.verified) {
-      console.log(`Payment verification failed for ${paymentId}`);
+      console.log(`[EDGE] Payment verification failed for ${paymentId}`);
       
       // Create consultation record with failed status
       await createConsultationRecord(
@@ -371,7 +383,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
     
     // Payment successfully verified
-    console.log(`Payment verified successfully for ${paymentId}`);
+    console.log(`[EDGE] Payment verified successfully for ${paymentId}`);
     const paymentDetails = paymentVerification.details;
     
     // Step 2: Create or update consultation record
@@ -401,7 +413,10 @@ const handler = async (req: Request): Promise<Response> => {
     }
     
     // Step 3: Send confirmation email (only for successful payments)
+    console.log("[EDGE] Sending confirmation email with admin BCC");
     const emailResult = await sendConfirmationEmail(bookingDetails);
+    
+    console.log("[EDGE] Email sending result:", emailResult);
     
     // Return success response even if email fails (we'll have recovery mechanisms)
     return new Response(
@@ -418,7 +433,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error) {
-    console.error("Error in verify-payment function:", error);
+    console.error("[EDGE] Error in verify-payment function:", error);
     
     return new Response(
       JSON.stringify({ 
@@ -433,5 +448,5 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-console.log("Verify payment handler initialized");
+console.log("[EDGE] Verify payment handler initialized");
 serve(handler);

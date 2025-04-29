@@ -19,7 +19,10 @@ export const usePaymentVerification = ({
     try {
       setIsVerifying(true);
       
-      console.log("Verifying payment with unified verification service");
+      console.log("[VERIFY] Starting payment verification process", { 
+        paymentId: response.razorpay_payment_id,
+        referenceId: referenceId,
+      });
       
       // Use our unified verification service
       const verificationResult = await verifyPaymentAndCreateBooking(
@@ -33,16 +36,21 @@ export const usePaymentVerification = ({
         }
       );
       
-      console.log("Payment verification result:", verificationResult);
+      console.log("[VERIFY] Payment verification completed with result:", verificationResult);
       
       if (verificationResult.success && verificationResult.verified) {
+        console.log("[VERIFY] Payment verified successfully, marking as completed");
         if (setPaymentCompleted) {
           setPaymentCompleted(true);
         }
         return { success: true, verified: true };
       }
       
+      console.warn("[VERIFY] Payment verification failed:", verificationResult);
       return { success: false, verified: false };
+    } catch (error) {
+      console.error("[VERIFY] Error in verifyPayment:", error);
+      return { success: false, verified: false, error };
     } finally {
       setIsVerifying(false);
       setIsProcessing(false);
