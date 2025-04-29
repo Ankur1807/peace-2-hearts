@@ -16,7 +16,7 @@ export async function verifyRazorpayPayment(
   bookingDetails?: BookingDetails
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log(`Verifying payment: ${paymentId} for reference: ${referenceId}`);
+    console.log(`[PAYMENT VERIFICATION] Verifying payment: ${paymentId} for reference: ${referenceId}`);
     
     // Call the verify-payment edge function
     const { data, error } = await supabase.functions.invoke('verify-payment', {
@@ -44,16 +44,16 @@ export async function verifyRazorpayPayment(
     });
     
     if (error) {
-      console.error("Error verifying payment with edge function:", error);
+      console.error("[PAYMENT VERIFICATION] Error verifying payment with edge function:", error);
       return { success: false, error: error.message };
     }
     
     if (!data.success || !data.verified) {
-      console.error("Payment verification failed:", data);
+      console.error("[PAYMENT VERIFICATION] Payment verification failed:", data);
       return { success: false, error: data.error || "Payment verification failed" };
     }
     
-    console.log("Payment verified successfully:", data);
+    console.log("[PAYMENT VERIFICATION] Payment verified successfully:", data);
     
     // Save payment record locally
     if (bookingDetails) {
@@ -68,7 +68,7 @@ export async function verifyRazorpayPayment(
     
     return { success: true };
   } catch (error: any) {
-    console.error("Error in verifyRazorpayPayment:", error);
+    console.error("[PAYMENT VERIFICATION] Error in verifyRazorpayPayment:", error);
     return { success: false, error: error.message };
   }
 }

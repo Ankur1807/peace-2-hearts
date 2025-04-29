@@ -31,11 +31,11 @@ export const useOpenRazorpayCheckout = ({
   
   const handleSuccess = async (response: any, receiptId: string) => {
     try {
-      console.log("Payment successful, processing verification:", response);
+      console.log("[PAYMENT FLOW] Payment successful, processing verification:", response);
       
       // Calculate the effective price
       const price = getEffectivePrice();
-      console.log(`Effective price for checkout: ${price}`);
+      console.log(`[PAYMENT FLOW] Effective price for checkout: ${price}`);
       
       // Create booking details object
       const bookingDetails = {
@@ -74,10 +74,10 @@ export const useOpenRazorpayCheckout = ({
         receiptId
       );
       
-      // Navigate based on verification result - FIX 1: Navigate to thank-you page
+      // Navigate based on verification result
       if (verificationResult.success) {
-        console.log("Payment verification successful, navigating to thank-you page");
-        // FIX 2: Keep isProcessing true until navigation completes
+        console.log("[PAYMENT FLOW] Payment verification successful, navigating to thank-you page");
+        // Keep isProcessing true until navigation completes
         navigate("/thank-you", { 
           state: {
             paymentId: response.razorpay_payment_id,
@@ -110,7 +110,7 @@ export const useOpenRazorpayCheckout = ({
         setIsProcessing(false);
       }
     } catch (error) {
-      console.error("Error in payment success handler:", error);
+      console.error("[PAYMENT FLOW] Error in payment success handler:", error);
       
       // Even if an error occurs, navigate to verification page with warning state
       navigateToVerification({
@@ -154,7 +154,7 @@ export const useOpenRazorpayCheckout = ({
       const price = getEffectivePrice();
       const effectivePrice = Math.max(price, 50); // Ensure minimum price of ₹50
       
-      console.log(`Opening Razorpay checkout with price: ₹${effectivePrice}`);
+      console.log(`[PAYMENT FLOW] Opening Razorpay checkout with price: ₹${effectivePrice}`);
       
       const options = {
         key: razorpayKey,
@@ -180,7 +180,7 @@ export const useOpenRazorpayCheckout = ({
         },
         modal: {
           ondismiss: () => {
-            console.log("Payment dismissed");
+            console.log("[PAYMENT FLOW] Payment dismissed");
             setIsProcessing(false);
             toast({
               title: "Payment Cancelled",
@@ -194,10 +194,10 @@ export const useOpenRazorpayCheckout = ({
       const razorpayInstance = new window.Razorpay(options);
       razorpayInstance.open();
       
-      console.log("Razorpay checkout opened");
+      console.log("[PAYMENT FLOW] Razorpay checkout opened");
       
     } catch (error) {
-      console.error("Error opening Razorpay checkout:", error);
+      console.error("[PAYMENT FLOW] Error opening Razorpay checkout:", error);
       setIsProcessing(false);
       toast({
         title: "Payment Gateway Error",

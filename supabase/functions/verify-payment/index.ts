@@ -119,49 +119,59 @@ async function createConsultationRecord(
       message
     } = bookingDetails;
     
-    console.log(`Creating consultation record with reference ID: ${referenceId}`);
+    console.log(`[EDGE FUNCTION] Creating consultation record with reference ID: ${referenceId}`);
     
     // Check if a record already exists with this reference ID
     const { data: existingConsultation, error: checkError } = await supabase
       .from('consultations')
-      .select('id')
+      .select('id, payment_id')
       .eq('reference_id', referenceId)
       .maybeSingle();
     
     if (checkError) {
-      console.error("Error checking for existing consultation:", checkError);
+      console.error("[EDGE FUNCTION] Error checking for existing consultation:", checkError);
       return { success: false, error: checkError.message };
     }
     
     if (existingConsultation) {
-      console.log(`Consultation with reference ID ${referenceId} already exists, updating status`);
+      console.log(`[EDGE FUNCTION] Consultation with reference ID ${referenceId} already exists, checking if it needs updating`);
       
-      // Update existing record
-      const { data: updatedData, error: updateError } = await supabase
-        .from('consultations')
-        .update({
-          payment_id: paymentId,
-          order_id: orderId,
-          amount: amount,
-          payment_status: paymentStatus,
-          status: bookingStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('reference_id', referenceId)
-        .select('id')
-        .single();
-      
-      if (updateError) {
-        console.error("Error updating consultation:", updateError);
-        return { success: false, error: updateError.message };
+      // Only update if payment_id is missing or different
+      if (!existingConsultation.payment_id || existingConsultation.payment_id !== paymentId) {
+        console.log(`[EDGE FUNCTION] Updating existing consultation record with payment info: ${paymentId}`);
+        
+        // Update existing record
+        const { data: updatedData, error: updateError } = await supabase
+          .from('consultations')
+          .update({
+            payment_id: paymentId,
+            order_id: orderId,
+            amount: amount,
+            payment_status: paymentStatus,
+            status: bookingStatus,
+            source: 'edge', // Ensure source is set to 'edge'
+            updated_at: new Date().toISOString()
+          })
+          .eq('reference_id', referenceId)
+          .select('id')
+          .single();
+        
+        if (updateError) {
+          console.error("[EDGE FUNCTION] Error updating consultation:", updateError);
+          return { success: false, error: updateError.message };
+        }
+        
+        console.log(`[EDGE FUNCTION] Successfully updated consultation record: ${updatedData?.id}`);
+        return { success: true, consultationId: updatedData.id };
+      } else {
+        console.log(`[EDGE FUNCTION] Consultation already has payment info, skipping update: ${existingConsultation.id}`);
+        return { success: true, consultationId: existingConsultation.id };
       }
-      
-      return { success: true, consultationId: updatedData.id };
     } else {
-      // Create new consultation record
+      // Create new consultation record - this should be the primary path now
       const effectiveServiceCategory = serviceCategory || determineServiceCategory(services[0] || consultationType);
       
-      console.log("Creating new consultation with data:", { 
+      console.log("[EDGE FUNCTION] Creating new consultation with data:", { 
         clientName, 
         email, 
         serviceType: consultationType || services.join(','), 
@@ -199,18 +209,19 @@ async function createConsultationRecord(
           .single();
         
         if (insertError) {
-          console.error("Error creating consultation record:", insertError);
+          console.error("[EDGE FUNCTION] Error creating consultation record:", insertError);
           return { success: false, error: insertError.message };
         }
         
+        console.log(`[EDGE FUNCTION] Successfully created new consultation record: ${insertData?.id}`);
         return { success: true, consultationId: insertData.id };
       } catch (e) {
-        console.error("Exception during insert operation:", e);
+        console.error("[EDGE FUNCTION] Exception during insert operation:", e);
         return { success: false, error: e.message };
       }
     }
   } catch (error) {
-    console.error("Error in createConsultationRecord:", error);
+    console.error("[EDGE FUNCTION] Error in createConsultationRecord:", error);
     return { success: false, error: error.message };
   }
 }
