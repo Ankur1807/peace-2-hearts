@@ -171,7 +171,8 @@ export async function createRecoveryConsultation(
         client_name: clientName,
         message: message,
         payment_id: paymentId,
-        amount: amount
+        amount: amount,
+        order_id: orderId || null
       })
       .select();
       
@@ -180,14 +181,10 @@ export async function createRecoveryConsultation(
       return false;
     }
     
-    if (recoveryData) {
-      console.log("Created recovery consultation:", recoveryData);
-      return true;
-    }
-    
-    return false;
-  } catch (recoveryException) {
-    console.error("Exception in recovery process:", recoveryException);
+    console.log("Created recovery consultation record:", recoveryData);
+    return true;
+  } catch (error) {
+    console.error("Exception in createRecoveryConsultation:", error);
     return false;
   }
 }

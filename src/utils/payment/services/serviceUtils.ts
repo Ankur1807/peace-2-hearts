@@ -1,130 +1,89 @@
-
 /**
- * Utility functions for payment service
+ * Utility functions for payment services
  */
 import { supabase } from "@/integrations/supabase/client";
+import { BookingDetails } from "@/utils/types";
 
 /**
- * Determine service category from consultation type
+ * Determine the service category based on the consultation type
  */
 export function determineServiceCategory(consultationType: string): string {
   if (!consultationType) return 'mental-health';
   
-  const lowerCaseType = consultationType.toLowerCase();
+  const lowerConsultation = consultationType.toLowerCase();
   
-  if (lowerCaseType.includes('legal') || lowerCaseType.includes('divorce')) {
+  if (lowerConsultation.includes('legal') || 
+      lowerConsultation.includes('divorce') || 
+      lowerConsultation.includes('custody')) {
     return 'legal';
-  } else if (lowerCaseType.includes('holistic')) {
-    return 'holistic';
-  } else {
-    return 'mental-health';
   }
+  
+  if (lowerConsultation.includes('holistic') || 
+      lowerConsultation.includes('package') ||
+      lowerConsultation.includes('prevention')) {
+    return 'holistic';
+  }
+  
+  return 'mental-health';
 }
 
 /**
- * Update the status and payment information of a consultation
+ * Update the consultation status in the database
  */
 export async function updateConsultationStatus(
-  consultationId: string, 
-  status: string,
+  referenceId: string, 
+  status: string, 
   paymentId?: string,
   amount?: number,
   orderId?: string
 ): Promise<boolean> {
   try {
-    // First check if consultationId is a UUID or a reference_id
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(consultationId);
+    console.log(`Updating consultation status for ${referenceId} to ${status}`);
     
-    // Prepare update data
-    const updateData: any = { 
-      status: status === 'completed' ? 'paid' : status 
+    let updateData: any = { 
+      payment_status: status,
+      updated_at: new Date().toISOString()
     };
     
-    // Add payment information if provided
-    if (paymentId) {
-      updateData.payment_id = paymentId;
+    // Only update these fields if they're provided
+    if (paymentId) updateData.payment_id = paymentId;
+    if (amount !== undefined) updateData.amount = amount;
+    if (orderId) updateData.order_id = orderId;
+    
+    // For completed payments, update status to confirmed
+    if (status === 'completed' || status === 'paid') {
+      updateData.status = 'confirmed';
     }
     
-    if (amount) {
-      updateData.amount = amount;
-    }
-    
-    if (orderId) {
-      updateData.order_id = orderId;
-    }
-    
-    if (status === 'paid' || status === 'completed') {
-      updateData.payment_status = 'completed';
-    }
-    
-    // Proceed with the update
+    // Update the consultation record
     const { error } = await supabase
       .from('consultations')
       .update(updateData)
-      .eq(isUuid ? 'id' : 'reference_id', consultationId);
+      .eq('reference_id', referenceId);
     
     if (error) {
-      console.error("Error updating consultation status:", error);
+      console.error(`Error updating consultation status: ${error.message}`);
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error("Exception updating consultation status:", error);
+    console.error(`Exception updating consultation status: ${error}`);
     return false;
   }
 }
 
 /**
- * Get consultation data by reference ID
+ * Create a booking email for payment verification
  */
-export async function getConsultationByReferenceId(referenceId: string): Promise<any> {
-  try {
-    const { data, error } = await supabase
-      .from('consultations')
-      .select('*')
-      .eq('reference_id', referenceId)
-      .single();
-    
-    if (error) {
-      console.error("Error fetching consultation:", error);
-      return null;
-    }
-    
-    return data;
-  } catch (error) {
-    console.error("Exception fetching consultation:", error);
-    return null;
-  }
-}
-
-/**
- * Check if consultation has payment information
- */
-export async function hasPaymentInformation(consultationId: string): Promise<boolean> {
-  try {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(consultationId);
-    
-    const { data, error } = await supabase
-      .from('consultations')
-      .select('payment_id, payment_status')
-      .eq(isUuid ? 'id' : 'reference_id', consultationId)
-      .single();
-    
-    if (error) {
-      console.log("Error checking payment information:", error.message);
-      return false;
-    }
-    
-    if (!data) {
-      return false;
-    }
-    
-    // Access the properties directly without type checking
-    // This will work now that we've added these fields to the database
-    return !!(data.payment_id || (data.payment_status === 'completed'));
-  } catch (error) {
-    console.error("Exception checking payment information:", error);
-    return false;
-  }
+export function createEmailForPayment(
+  bookingDetails: BookingDetails, 
+  paymentId: string, 
+  amount: number
+): {
+  success: boolean;
+  emailRecord?: any;
+} {
+  // Implementation would be here
+  return { success: false };
 }

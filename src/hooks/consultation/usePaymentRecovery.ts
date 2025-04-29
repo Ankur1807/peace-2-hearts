@@ -1,153 +1,178 @@
 
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { verifyAndRecordPayment } from "@/utils/payment/services/paymentVerificationService";
-import { fetchConsultationData, createBookingDetailsFromConsultation } from "@/utils/consultation/consultationRecovery";
+import { useState, useCallback } from 'react';
+import { verifyAndSyncPayment } from '@/utils/payment/services/paymentVerificationService';
+import { savePaymentRecord } from '@/utils/payment/services/paymentRecordService';
+import { sendBookingConfirmationEmail } from '@/utils/email/bookingEmails';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { createBookingDetailsFromConsultation } from '@/utils/consultation/consultationRecovery';
 
+/**
+ * Hook for payment recovery operations
+ */
 export function usePaymentRecovery() {
   const [isRecovering, setIsRecovering] = useState(false);
-  const [recoveryResult, setRecoveryResult] = useState<{success: boolean, message: string} | null>(null);
   const { toast } = useToast();
 
   /**
-   * Recover payment details and send email
+   * Recovers a payment and sends the confirmation email again
    */
-  const recoverPaymentAndSendEmail = async (
-    referenceId: string, 
-    paymentId: string, 
-    amount: number, 
-    orderId?: string | null
-  ) => {
-    if (!referenceId || !paymentId) {
-      toast({
-        title: "Recovery Failed",
-        description: "Missing required information for recovery",
-        variant: "destructive"
-      });
-      return false;
-    }
-    
-    setIsRecovering(true);
-    setRecoveryResult(null);
-    
-    try {
-      console.log(`Starting payment recovery for ${referenceId} with payment ${paymentId}`);
-      
-      // Step 1: Check the current status in the database
-      const consultation = await fetchConsultationData(referenceId);
-      
-      if (!consultation) {
-        console.error("No consultation found with reference ID:", referenceId);
-        
-        setRecoveryResult({
-          success: false,
-          message: "Could not find booking details for the provided reference ID"
-        });
-        
-        toast({
-          title: "Recovery Failed", 
-          description: "Could not find booking details", 
-          variant: "destructive"
-        });
-        
-        return false;
-      }
-      
-      // Check if payment is already marked as completed
-      if (consultation.payment_status === 'completed' && consultation.payment_id === paymentId) {
-        console.log("Payment already marked as completed");
-        
-        // If email wasn't sent, we'll still try to send it
-        if (!consultation.email_sent) {
-          console.log("Email not sent yet, will attempt to send");
-        } else {
-          console.log("Email already sent");
-          
-          setRecoveryResult({
-            success: true,
-            message: "Payment was already processed and email sent"
-          });
-          
-          toast({ 
-            title: "Already Processed", 
-            description: "This payment was already processed successfully" 
-          });
-          
-          return true;
-        }
-      }
-      
-      // Convert date from string if exists
-      let bookingDetails = null;
-      if (consultation) {
-        // Create booking details from consultation
-        bookingDetails = createBookingDetailsFromConsultation(consultation);
-        
-        // Add additional recovery flags
-        if (bookingDetails) {
-          bookingDetails.highPriority = true;
-          bookingDetails.isRecovery = true;
-        }
-      }
-      
-      // Step 2: Verify and record the payment again to ensure payment details are saved
-      const result = await verifyAndRecordPayment(
-        paymentId,
-        orderId || null,
-        amount,
-        referenceId,
-        bookingDetails
-      );
-      
-      if (result) {
-        setRecoveryResult({
-          success: true,
-          message: "Payment details recovered successfully"
-        });
-        
-        toast({ 
-          title: "Recovery Successful", 
-          description: "Payment details were recovered successfully" 
-        });
-        
-        return true;
-      } else {
-        setRecoveryResult({
-          success: false,
-          message: "Could not verify payment with Razorpay"
-        });
-        
-        toast({ 
-          title: "Recovery Failed", 
-          description: "Payment verification failed with Razorpay", 
-          variant: "destructive" 
-        });
-        
-        return false;
-      }
-    } catch (error) {
-      console.error("Error in payment recovery:", error);
-      
-      setRecoveryResult({
-        success: false,
-        message: error instanceof Error ? error.message : "Unknown error during recovery"
-      });
-      
-      toast({ 
-        title: "Recovery Failed", 
-        description: "An unexpected error occurred during recovery", 
-        variant: "destructive" 
-      });
-      
-      return false;
-    } finally {
-      setIsRecovering(false);
-    }
-  };
+  const recoverPaymentAndSendEmail = useCallback(
+    async (referenceId: string, paymentId: string, amount: number, orderId: string = '') => {
+      setIsRecovering(true);
 
-  return {
-    isRecovering,
-    recoveryResult,
-    recoverPaymentAndSendEmail
-  };
+      try {
+        toast({
+          title: "Recovery in progress",
+          description: "Attempting to recover payment details...",
+        });
+
+        console.log(`Starting payment recovery for ${referenceId} with payment ${paymentId}`);
+
+        // Step 1: Check if consultation record exists
+        const { data: consultationData, error: consultationError } = await supabase
+          .from('consultations')
+          .select('*')
+          .eq('reference_id', referenceId)
+          .maybeSingle();
+
+        // Step 2: Verify payment with Razorpay
+        const paymentVerified = await verifyAndSyncPayment(paymentId);
+        console.log(`Payment verification result: ${paymentVerified}`);
+
+        if (!paymentVerified) {
+          toast({
+            title: "Payment Not Verified",
+            description: "Could not verify payment with Razorpay.",
+            variant: "destructive",
+          });
+          return false;
+        }
+
+        // Step 3: If consultation doesn't exist, create a placeholder record
+        let finalConsultationData = consultationData;
+        
+        if (!consultationData && !consultationError) {
+          console.log("No consultation record found, creating placeholder");
+          
+          // Create a minimal placeholder record
+          const { data: placeholderData, error: placeholderError } = await supabase
+            .from('consultations')
+            .insert({
+              reference_id: referenceId,
+              payment_id: paymentId,
+              order_id: orderId,
+              amount: amount,
+              payment_status: 'completed',
+              status: 'payment_received_needs_details',
+              consultation_type: 'recovery_needed',
+              client_name: 'Payment Received - Recovery Needed',
+              message: `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`,
+              time_slot: 'to_be_scheduled' // Required field
+            })
+            .select()
+            .single();
+            
+          if (placeholderError) {
+            console.error("Error creating placeholder:", placeholderError);
+            toast({
+              title: "Recovery Failed",
+              description: "Could not create consultation record.",
+              variant: "destructive",
+            });
+            return false;
+          }
+          
+          finalConsultationData = placeholderData;
+          
+        } else if (consultationError) {
+          console.error("Error fetching consultation:", consultationError);
+          toast({
+            title: "Recovery Failed",
+            description: "Could not fetch consultation details.",
+            variant: "destructive",
+          });
+          return false;
+        }
+
+        // Step 4: If payment record doesn't exist, create it
+        if (finalConsultationData && !finalConsultationData.payment_id) {
+          console.log("Updating consultation with payment information");
+          
+          // Update the consultation with payment information
+          await supabase
+            .from('consultations')
+            .update({
+              payment_id: paymentId,
+              order_id: orderId,
+              amount: amount,
+              payment_status: 'completed',
+              status: finalConsultationData.status === 'payment_received_needs_details' 
+                ? finalConsultationData.status 
+                : 'confirmed'
+            })
+            .eq('reference_id', referenceId);
+        }
+
+        // Step 5: Send confirmation email with consultation details
+        if (finalConsultationData) {
+          const bookingDetails = createBookingDetailsFromConsultation(finalConsultationData);
+          
+          if (bookingDetails) {
+            bookingDetails.highPriority = true;
+            bookingDetails.isRecovery = true;
+            
+            console.log("Sending recovery email with booking details:", bookingDetails);
+            const emailResult = await sendBookingConfirmationEmail(bookingDetails);
+            
+            if (emailResult) {
+              console.log("Recovery email sent successfully");
+              
+              // Update the consultation record to mark email as sent
+              await supabase
+                .from('consultations')
+                .update({ email_sent: true })
+                .eq('reference_id', referenceId);
+              
+              toast({
+                title: "Recovery Completed",
+                description: "Payment verified and confirmation email sent.",
+              });
+              
+              return true;
+            } else {
+              console.error("Failed to send recovery email");
+              toast({
+                title: "Email Sending Failed",
+                description: "Payment verified but couldn't send confirmation email.",
+                variant: "destructive",
+              });
+            }
+          } else {
+            console.error("Could not create booking details from consultation");
+            toast({
+              title: "Recovery Partially Completed",
+              description: "Payment verified but couldn't create email details.",
+              variant: "destructive",
+            });
+          }
+        }
+
+        return false;
+      } catch (error) {
+        console.error("Payment recovery error:", error);
+        toast({
+          title: "Recovery Failed",
+          description: "An unexpected error occurred during recovery.",
+          variant: "destructive",
+        });
+        return false;
+      } finally {
+        setIsRecovering(false);
+      }
+    },
+    [toast]
+  );
+
+  return { recoverPaymentAndSendEmail, isRecovering };
 }

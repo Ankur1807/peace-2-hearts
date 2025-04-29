@@ -1,179 +1,220 @@
 
-import { Resend } from "npm:resend@2.0.0";
-import { 
-  ContactEmailRequest, 
-  BookingEmailRequest, 
-  getContactUserEmailTemplate,
-  getContactAdminEmailTemplate,
-  getBookingUserEmailTemplate,
-  getBookingAdminEmailTemplate
-} from "./templates.ts";
+import { Resend } from "https://esm.sh/resend@1.0.0";
 
-// Initialize Resend with the API key
-const resendApiKey = Deno.env.get("RESEND_API_KEY");
-if (!resendApiKey) {
-  console.error("CRITICAL: RESEND_API_KEY environment variable is not set!");
+// Define interfaces for email data
+interface ContactEmailData {
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
 }
 
-const resend = new Resend(resendApiKey);
+interface BookingEmailData {
+  clientName: string;
+  email: string;
+  referenceId: string;
+  consultationType: string;
+  services?: string[];
+  date?: string;
+  timeSlot?: string;
+  timeframe?: string;
+  serviceCategory?: string;
+  highPriority?: boolean;
+  isResend?: boolean;
+  isRecovery?: boolean;
+}
 
-// Format date function (client-side can be different from Deno formatting)
-function formatDate(dateStr?: string) {
-  if (!dateStr) return null;
+// Set up Resend client
+const getResendClient = () => {
+  const apiKey = Deno.env.get("RESEND_API_KEY");
+  if (!apiKey) {
+    throw new Error("Missing RESEND_API_KEY environment variable");
+  }
   
-  console.log(`Formatting date: ${dateStr}`);
-  
+  return new Resend(apiKey);
+};
+
+// Handle contact form email
+export async function handleContactEmail(data: ContactEmailData) {
   try {
-    // Parse the ISO date string
-    const date = new Date(dateStr);
+    console.log("Processing contact email for:", data.email);
+    const resend = getResendClient();
     
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      console.warn(`Invalid date received: ${dateStr}`);
-      return dateStr;
+    // Send the email
+    const { data: emailData, error } = await resend.emails.send({
+      from: "Peace2Hearts <hello@peace2hearts.com>",
+      to: [data.email],
+      subject: data.subject || "Thank you for contacting Peace2Hearts",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+          <h2>Thank You for Reaching Out, ${data.name}!</h2>
+          <p>We've received your message and will get back to you shortly.</p>
+          <hr style="border: none; border-top: 1px solid #eaeaea; margin: 20px 0;">
+          <p>Best regards,<br>The Peace2Hearts Team</p>
+        </div>
+      `
+    });
+    
+    if (error) {
+      throw new Error(`Failed to send contact email: ${error.message}`);
     }
     
-    // Format the date as DD/MM/YYYY
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  } catch (error) {
-    console.error(`Error formatting date: ${error}`);
-    return dateStr; // Return original string if parsing fails
+    return { success: true, id: emailData.id };
+  } catch (err) {
+    console.error("Error in handleContactEmail:", err);
+    throw err;
   }
 }
 
-// Handle contact form emails
-export async function handleContactEmail(data: ContactEmailRequest) {
-  const { email, subject, isResend } = data;
+// Generate booking confirmation email
+function generateBookingEmail(data: BookingEmailData): string {
+  const { clientName, referenceId, consultationType, services = [], date, timeSlot, timeframe, serviceCategory } = data;
   
-  console.log(`Handling contact email request for: ${email}`);
+  // Service category helps determine what info to show
+  const isHolistic = serviceCategory?.toLowerCase() === 'holistic';
+  const isLegal = serviceCategory?.toLowerCase() === 'legal';
+  const isMentalHealth = serviceCategory?.toLowerCase() === 'mental-health' || !serviceCategory;
   
-  if (!email) {
-    throw new Error("Email address is required");
-  }
+  // Format date if available
+  const formattedDate = date ? new Date(date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) : '';
   
-  try {
-    // Send email to the user (confirmation)
-    const userEmailResponse = await resend.emails.send({
-      from: "Peace2Hearts <contact@peace2hearts.com>",
-      to: [email],
-      subject: isResend ? "Re: We've received your message - Peace2Hearts" : "We've received your message - Peace2Hearts",
-      html: getContactUserEmailTemplate(data),
-    });
-    
-    console.log(`User contact email sent to ${email}: ${JSON.stringify(userEmailResponse)}`);
-    
-    // Send notification to admin
-    const adminEmailResponse = await resend.emails.send({
-      from: "Peace2Hearts Website <contact@peace2hearts.com>",
-      to: ["contact@peace2hearts.com"],
-      subject: `${isResend ? "[RESEND] " : ""}New Contact Form Submission: ${subject}`,
-      html: getContactAdminEmailTemplate(data),
-    });
-    
-    console.log(`Admin contact email sent: ${JSON.stringify(adminEmailResponse)}`);
+  // Format service names for display
+  const formattedServices = services.map(service => 
+    service.split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  ).join(', ');
+  
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <img src="https://mcbdxszoozmlelejvizn.supabase.co/storage/v1/object/public/peace2hearts/logo-dark.png" alt="Peace2Hearts Logo" style="max-width: 200px; height: auto;">
+      </div>
+      
+      <div style="background-color: #f9f9f9; border-radius: 8px; padding: 25px; margin-bottom: 20px;">
+        <h2 style="color: #2c5282; margin-top: 0;">Booking Confirmation</h2>
+        <p>Dear ${clientName},</p>
+        <p>Thank you for booking a consultation with Peace2Hearts. Your booking has been confirmed with the following details:</p>
+        
+        <div style="background-color: white; border-left: 4px solid #2c5282; padding: 15px; margin: 20px 0;">
+          <p style="margin: 5px 0;"><strong>Reference ID:</strong> ${referenceId}</p>
+          <p style="margin: 5px 0;"><strong>Service Type:</strong> ${formattedServices || consultationType}</p>
+          
+          ${isHolistic ? `
+            <p style="margin: 5px 0;"><strong>Timeframe:</strong> ${timeframe || "To be scheduled"}</p>
+          ` : ''}
+          
+          ${!isHolistic ? `
+            <p style="margin: 5px 0;"><strong>Date:</strong> ${formattedDate || "To be scheduled"}</p>
+            <p style="margin: 5px 0;"><strong>Time:</strong> ${timeSlot || "To be scheduled"}</p>
+          ` : ''}
+        </div>
+        
+        <p>Our team will reach out to you shortly to confirm the details and provide next steps.</p>
+      </div>
+      
+      <div style="margin-top: 30px; border-top: 1px solid #eaeaea; padding-top: 20px;">
+        <p><strong>What to Expect Next:</strong></p>
+        <ul style="padding-left: 20px;">
+          <li>You'll receive a call or email from our team within 24 hours to confirm your booking.</li>
+          <li>Please keep your reference ID handy for all future communications.</li>
+          ${isMentalHealth ? `<li>Please prepare any relevant information about your situation that might help our mental health professional assist you better.</li>` : ''}
+          ${isLegal ? `<li>Consider gathering any legal documents related to your case for discussion during the consultation.</li>` : ''}
+          ${isHolistic ? `<li>Our holistic consultation team will create a personalized plan based on your timeframe and needs.</li>` : ''}
+        </ul>
+      </div>
+      
+      <div style="margin-top: 30px; font-size: 14px; color: #666; text-align: center;">
+        <p>If you have any questions, please contact us at <a href="mailto:contact@peace2hearts.com" style="color: #2c5282;">contact@peace2hearts.com</a></p>
+        <p>Peace2Hearts - Helping you find peace, with or without love.</p>
+        <p><a href="https://peace2hearts.com" style="color: #2c5282;">www.peace2hearts.com</a></p>
+      </div>
+    </div>
+  `;
+}
 
-    return { 
-      userEmail: userEmailResponse, 
-      adminEmail: adminEmailResponse,
-      timestamp: new Date().toISOString()
+// Handle booking confirmation email
+export async function handleBookingEmail(data: BookingEmailData) {
+  try {
+    console.log(`Processing booking confirmation email for ${data.email} (Reference: ${data.referenceId})`);
+    console.log(`Email flags: highPriority=${data.highPriority}, isResend=${data.isResend}, isRecovery=${data.isRecovery}`);
+    
+    const resend = getResendClient();
+    
+    // Set email subject based on flags
+    let subject = "Your Booking Confirmation - Peace2Hearts";
+    if (data.isResend) {
+      subject = "Booking Confirmation (Resent) - Peace2Hearts";
+    } else if (data.isRecovery) {
+      subject = "Booking Confirmation (Recovery) - Peace2Hearts";
+    }
+    
+    // Set email options
+    const emailOptions: any = {
+      from: "Peace2Hearts <bookings@peace2hearts.com>",
+      to: [data.email],
+      subject: subject,
+      html: generateBookingEmail(data),
+      tags: [
+        {
+          name: "category",
+          value: "booking_confirmation"
+        },
+        {
+          name: "reference_id",
+          value: data.referenceId
+        }
+      ]
     };
-  } catch (error) {
-    console.error(`Error sending contact email: ${error}`);
-    throw error;
-  }
-}
-
-// Handle booking confirmation emails
-export async function handleBookingEmail(data: BookingEmailRequest) {
-  const { email, consultationType, isResend, referenceId } = data;
-  
-  console.log(`Handling booking email request for reference ID: ${referenceId}`);
-  console.log(`Email recipient: ${email}`);
-  
-  if (!email) {
-    throw new Error("Email address is required for booking confirmation");
-  }
-  
-  if (!referenceId) {
-    throw new Error("Reference ID is required for booking confirmation");
-  }
-  
-  // Use provided formatted date or format the date if exists
-  if (data.date && !data.formattedDate) {
-    const formattedDate = formatDate(data.date);
-    console.log(`Formatting date from ${data.date} to ${formattedDate}`);
-    data.formattedDate = formattedDate;
-  }
-  
-  // Implement exponential backoff for retries
-  let attempt = 1;
-  const MAX_RETRIES = 3;
-  const INITIAL_DELAY = 500; // 500ms
-  
-  while (attempt <= MAX_RETRIES) {
-    try {
-      // Send confirmation email to client
-      console.log(`Attempt ${attempt}: Sending confirmation email to client: ${email}`);
-      
-      // Add explicit email headers for important emails
-      const emailOptions = {
-        from: "Peace2Hearts <contact@peace2hearts.com>",
-        to: [email],
-        subject: isResend ? "Re: Your Consultation Booking Confirmation - Peace2Hearts" : "Your Consultation Booking Confirmation - Peace2Hearts",
-        html: getBookingUserEmailTemplate(data),
-        headers: {}
-      };
-      
-      // Mark important emails with high priority
-      if (isResend || data.isRecovery) {
-        // @ts-ignore - Headers type is not properly defined
-        emailOptions.headers = {
-          "X-Priority": "1",
-          "X-MSMail-Priority": "High",
-          "Importance": "high"
-        };
-      }
-      
-      const userEmailResponse = await resend.emails.send(emailOptions);
-      
-      console.log(`User booking email sent successfully to ${email}: ${JSON.stringify(userEmailResponse)}`);
-      
-      // Send notification to admin
-      console.log("Sending notification email to admin");
-      const adminEmailResponse = await resend.emails.send({
-        from: "Peace2Hearts Booking System <contact@peace2hearts.com>",
-        to: ["contact@peace2hearts.com"],
-        subject: `${isResend ? "[RESEND] " : ""}New Consultation Booking: ${consultationType} (Ref: ${referenceId})`,
-        html: getBookingAdminEmailTemplate(data),
+    
+    // Add BCC for high priority emails
+    if (data.highPriority) {
+      emailOptions.bcc = ["support@peace2hearts.com"];
+      emailOptions.tags.push({
+        name: "priority",
+        value: "high"
       });
-      
-      console.log(`Admin booking email sent successfully: ${JSON.stringify(adminEmailResponse)}`);
-
-      return { 
-        userEmail: userEmailResponse, 
-        adminEmail: adminEmailResponse,
-        success: true,
-        timestamp: new Date().toISOString()
-      };
-    } catch (error) {
-      console.error(`Attempt ${attempt}: Error sending booking email: ${error.message}`);
-      
-      if (attempt < MAX_RETRIES) {
-        // Exponential backoff
-        const delay = INITIAL_DELAY * Math.pow(2, attempt - 1);
-        console.log(`Retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    
+    // Send the email with retries if needed
+    let attempt = 0;
+    const maxAttempts = 3;
+    let lastError = null;
+    
+    while (attempt < maxAttempts) {
+      try {
+        console.log(`Sending email attempt ${attempt + 1}/${maxAttempts}`);
+        const { data: emailData, error } = await resend.emails.send(emailOptions);
+        
+        if (error) {
+          throw error;
+        }
+        
+        console.log(`Email sent successfully on attempt ${attempt + 1}, ID: ${emailData.id}`);
+        return { success: true, id: emailData.id };
+      } catch (err) {
+        lastError = err;
+        console.error(`Email send attempt ${attempt + 1} failed:`, err);
         attempt++;
-      } else {
-        console.error(`Failed to send email after ${MAX_RETRIES} attempts`);
-        throw error;
+        
+        // Wait before retry
+        if (attempt < maxAttempts) {
+          const waitMs = attempt * 1000; // Increase wait time with each retry
+          console.log(`Waiting ${waitMs}ms before retry`);
+          await new Promise(resolve => setTimeout(resolve, waitMs));
+        }
       }
     }
+    
+    // If we get here, all attempts failed
+    throw new Error(`Failed to send email after ${maxAttempts} attempts: ${lastError?.message || "Unknown error"}`);
+  } catch (err) {
+    console.error("Error in handleBookingEmail:", err);
+    throw err;
   }
-  
-  throw new Error(`Failed to send email after ${MAX_RETRIES} attempts`);
 }
