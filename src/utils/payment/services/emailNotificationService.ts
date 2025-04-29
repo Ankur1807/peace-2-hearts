@@ -5,13 +5,21 @@ import { sendBookingConfirmationEmail } from '@/utils/email';
 
 /**
  * Send email for a consultation booking
+ * Now includes admin@peace2hearts.com as BCC recipient
  */
 export async function sendEmailForConsultation(bookingDetails: BookingDetails): Promise<boolean> {
   try {
     console.log(`Sending email for booking ${bookingDetails.referenceId}`);
     
-    // Call the booking confirmation email function
-    const emailSent = await sendBookingConfirmationEmail(bookingDetails);
+    // Add admin email as a BCC recipient
+    const adminEmail = "admin@peace2hearts.com";
+    const bookingDetailsWithAdmin = {
+      ...bookingDetails,
+      bcc: adminEmail // Add BCC field for admin notification
+    };
+    
+    // Call the booking confirmation email function with admin BCC
+    const emailSent = await sendBookingConfirmationEmail(bookingDetailsWithAdmin);
     
     if (emailSent) {
       // Update the consultation record to mark email as sent
@@ -37,6 +45,7 @@ export async function sendEmailForConsultation(bookingDetails: BookingDetails): 
 
 /**
  * Resend confirmation email for a consultation
+ * Now includes admin@peace2hearts.com as BCC recipient
  */
 export async function resendConsultationEmail(referenceId: string): Promise<boolean> {
   try {
@@ -68,7 +77,8 @@ export async function resendConsultationEmail(referenceId: string): Promise<bool
       services: consultation.consultation_type ? [consultation.consultation_type] : [],
       isResend: true,
       phone: consultation.client_phone || '',
-      highPriority: true
+      highPriority: true,
+      bcc: "admin@peace2hearts.com" // Add admin email as BCC
     };
     
     // Send the email

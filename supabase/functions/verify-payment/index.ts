@@ -233,6 +233,7 @@ async function sendConfirmationEmail(
         body: {
           type: 'booking-confirmation',
           to: bookingDetails.email,
+          bcc: "admin@peace2hearts.com", // Add admin email as BCC
           clientName: bookingDetails.clientName,
           referenceId: bookingDetails.referenceId,
           serviceType: bookingDetails.consultationType || bookingDetails.services.join(', '),

@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { storePaymentDetailsInSession } from '@/utils/payment/services/paymentStorageService';
 import { usePaymentNavigation } from '../payment/usePaymentNavigation';
@@ -67,17 +66,6 @@ export const useOpenRazorpayCheckout = ({
         setReferenceId(receiptId);
       }
       
-      // Always navigate to verification/confirmation page, even if verification hasn't completed
-      navigateToVerification({
-        paymentId: response.razorpay_payment_id,
-        orderId: response.razorpay_order_id,
-        signature: response.razorpay_signature,
-        amount: price,
-        referenceId: receiptId,
-        bookingDetails,
-        isVerifying
-      });
-      
       // Start verification process
       const verificationResult = await verifyPayment(
         response, 
@@ -86,19 +74,45 @@ export const useOpenRazorpayCheckout = ({
         receiptId
       );
       
-      // If verification failed but we've already navigated, we need to update the state
-      if (!verificationResult.success) {
+      // Navigate based on verification result - FIX 1: Navigate to thank-you page
+      if (verificationResult.success) {
+        console.log("Payment verification successful, navigating to thank-you page");
+        // FIX 2: Keep isProcessing true until navigation completes
+        navigate("/thank-you", { 
+          state: {
+            paymentId: response.razorpay_payment_id,
+            orderId: response.razorpay_order_id,
+            signature: response.razorpay_signature,
+            amount: price,
+            referenceId: receiptId,
+            bookingDetails
+          },
+          replace: true 
+        });
+      } else {
+        // If verification failed, navigate to verification page with status
+        navigateToVerification({
+          paymentId: response.razorpay_payment_id,
+          orderId: response.razorpay_order_id,
+          signature: response.razorpay_signature,
+          amount: price,
+          referenceId: receiptId,
+          bookingDetails,
+          isVerifying: false,
+          verificationFailed: true
+        });
+        
         toast({
           title: "Payment Verification Warning",
           description: "Your payment was received, but we're having trouble with our system. Please contact support if you don't receive a confirmation email.",
           variant: "warning"
         });
+        setIsProcessing(false);
       }
-      
     } catch (error) {
       console.error("Error in payment success handler:", error);
       
-      // Even if an error occurs, navigate to confirmation with warning state
+      // Even if an error occurs, navigate to verification page with warning state
       navigateToVerification({
         paymentId: response.razorpay_payment_id,
         orderId: response.razorpay_order_id,
@@ -126,7 +140,6 @@ export const useOpenRazorpayCheckout = ({
         description: "Your payment was received, but we couldn't complete the booking process. Please contact support.",
         variant: "warning"
       });
-    } finally {
       setIsProcessing(false);
     }
   };
