@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { saveConsultation } from '@/utils/consultationApi';
@@ -202,10 +203,10 @@ export function useConsultationPayment({
             const bookingResult = await handleConfirmBooking();
             console.log("Booking confirmed with result:", bookingResult);
           } else {
-            console.error("Payment verification failed:", verificationResult.message);
+            console.error("Payment verification failed:", verificationResult.error);
             toast({
               title: "Payment Verification Failed",
-              description: verificationResult.message || "Please contact support with your reference ID.",
+              description: verificationResult.error || "Please contact support with your reference ID.",
               variant: "destructive"
             });
             
