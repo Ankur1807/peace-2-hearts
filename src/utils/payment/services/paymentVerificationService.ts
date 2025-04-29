@@ -67,7 +67,7 @@ export async function verifyRazorpayPayment(
     }
     
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in verifyRazorpayPayment:", error);
     return { success: false, error: error.message };
   }

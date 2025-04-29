@@ -1,8 +1,6 @@
 
 import { useCallback } from 'react';
 import { saveConsultation } from '@/utils/consultationApi';
-import { sendBookingConfirmationEmail } from '@/utils/emailService';
-import { getPackageName } from './consultationHelpers';
 
 interface UseConsultationActionsParams {
   state: any;

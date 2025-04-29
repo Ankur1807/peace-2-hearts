@@ -1,7 +1,5 @@
-
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { PersonalDetails } from '@/utils/types';
 import { useConsultationState } from './consultation/useConsultationState';
 import { useConsultationActions } from './consultation/useConsultationActions';
 import { useConsultationPricing } from './consultation/useConsultationPricing';
@@ -73,7 +71,7 @@ export function useConsultationBooking() {
     toast,
     setIsProcessing,
     setShowPaymentStep,
-    handleConfirmBooking, // This is correctly typed now
+    handleConfirmBooking,
     setReferenceId
   };
   
@@ -108,7 +106,7 @@ export function useConsultationBooking() {
     setTimeSlot,
     setTimeframe,
     setTotalPrice,
-    setIsProcessing, // Explicitly export this function
+    setIsProcessing,
     
     // Actions
     handlePersonalDetailsChange,

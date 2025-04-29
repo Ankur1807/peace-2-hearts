@@ -1,7 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { updateConsultationStatus } from './serviceUtils';
-import { BookingDetails } from '@/utils/types';
 
 interface SavePaymentParams {
   paymentId: string;
@@ -40,6 +39,3 @@ export const savePaymentRecord = async (params: SavePaymentParams): Promise<bool
     return false;
   }
 };
-
-// storePaymentDetailsInSession is now imported from paymentStorageService.ts
-// This function has been removed to avoid duplication

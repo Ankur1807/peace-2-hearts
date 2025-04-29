@@ -30,7 +30,6 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
     personalDetails,
     handlePersonalDetailsChange,
     isProcessing,
-    setIsProcessing,
     pricing,
     totalPrice,
     proceedToPayment,

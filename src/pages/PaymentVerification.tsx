@@ -5,7 +5,7 @@ import { SEO } from '@/components/SEO';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { usePaymentVerification } from '@/hooks/payment/usePaymentVerification';
 import { BookingDetails } from '@/utils/types';
 import PaymentVerificationLoader from '@/components/consultation/payment/PaymentVerificationLoader';

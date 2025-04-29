@@ -16,7 +16,7 @@ import { sendEmailForConsultation } from "./services/emailNotificationService";
 import { storePaymentDetailsInSession } from "./services/paymentStorageService";
 import { savePaymentRecord } from "./services/paymentRecordService";
 
-// Re-export types for compatibility with existing code
+// Export types for compatibility with existing code
 export type { CreateOrderParams, OrderResponse, VerifyPaymentParams } from './razorpayTypes';
 
 // Export all payment-related functions

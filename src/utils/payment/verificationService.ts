@@ -107,7 +107,7 @@ export async function verifyPaymentAndCreateBooking(
         verified: data.verified || false,
         details: data
       };
-    } catch (invokeError) {
+    } catch (invokeError: any) {
       console.error("Error invoking verify-payment function:", invokeError);
       
       // Store payment details in database even if verification fails
@@ -123,7 +123,7 @@ export async function verifyPaymentAndCreateBooking(
         error: invokeError instanceof Error ? invokeError.message : String(invokeError) 
       };
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error in verifyPaymentAndCreateBooking:", err);
     return {
       success: false,

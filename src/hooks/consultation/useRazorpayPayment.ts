@@ -2,7 +2,6 @@
 import { useEffectivePrice } from './payment/useEffectivePrice';
 import { useInitializeRazorpayPayment } from './payment/useInitializeRazorpayPayment';
 import { useOpenRazorpayCheckout } from './payment/useOpenRazorpayCheckout';
-import { verifyPaymentAndCreateBooking } from '@/utils/payment/verificationService';
 
 interface RazorpayPaymentProps {
   state: any;
@@ -11,7 +10,7 @@ interface RazorpayPaymentProps {
   setOrderId?: (id: string | null) => void;
   setPaymentCompleted?: (completed: boolean) => void;
   setReferenceId?: (id: string) => void;
-  handleConfirmBooking?: () => Promise<void>;
+  handleConfirmBooking?: () => Promise<any>;
 }
 
 export function useRazorpayPayment({

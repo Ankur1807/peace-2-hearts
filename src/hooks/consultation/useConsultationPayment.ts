@@ -1,6 +1,5 @@
 
 import { useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { saveConsultation } from '@/utils/consultationApi';
 import { createRazorpayOrder } from '@/utils/payment/services/paymentOrderService';
 import { verifyRazorpayPayment } from '@/utils/payment/services/paymentVerificationService';
@@ -25,7 +24,7 @@ interface UseConsultationPaymentParams {
   toast: any;
   setIsProcessing?: (isProcessing: boolean) => void;
   setShowPaymentStep?: (show: boolean) => void;
-  handleConfirmBooking?: () => Promise<any>; // Updated to Promise<any>
+  handleConfirmBooking?: () => Promise<any>; // Correct return type
   setReferenceId?: (id: string) => void;
 }
 
