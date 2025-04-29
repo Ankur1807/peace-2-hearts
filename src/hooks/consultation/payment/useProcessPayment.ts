@@ -1,7 +1,24 @@
 
-import { useCallback } from 'react';
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description?: string;
+  order_id: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  notes?: Record<string, string>;
+  theme?: {
+    color?: string;
+  };
+  handler?: (response: any) => void;
+}
 
-type RazorpayParams = {
+interface ProcessPaymentProps {
   razorpayKey: string;
   orderId: string;
   amount: number;
@@ -11,78 +28,90 @@ type RazorpayParams = {
   phone?: string;
   successCallback: (response: any) => void;
   errorCallback: (error: any) => void;
-};
+}
 
-export function useProcessPayment() {
-  const processPaymentWithRazorpay = useCallback((params: RazorpayParams) => {
-    const {
-      razorpayKey,
-      orderId,
-      amount,
-      receipt,
-      name,
-      email,
-      phone,
-      successCallback,
-      errorCallback
-    } = params;
-
-    console.log("Setting up Razorpay payment with:", { orderId, amount, receipt });
-    
-    // Razorpay should be loaded by now via the script
-    if (typeof window.Razorpay === 'undefined') {
-      console.error("Razorpay is not loaded");
-      errorCallback({ description: "Payment gateway is not available. Please refresh the page and try again." });
-      return;
-    }
-
+export const useProcessPayment = () => {
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (typeof window === 'undefined') {
+        resolve(false);
+        return;
+      }
+      
+      // Check if Razorpay is already loaded
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      
+      // Load the script
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      
+      document.body.appendChild(script);
+    });
+  };
+  
+  const processPaymentWithRazorpay = async (props: ProcessPaymentProps) => {
     try {
-      // Initialize Razorpay options
-      const options = {
+      // Ensure Razorpay script is loaded
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        throw new Error('Failed to load Razorpay checkout script');
+      }
+      
+      const { 
+        razorpayKey,
+        orderId,
+        amount,
+        receipt,
+        name,
+        email,
+        phone,
+        successCallback,
+        errorCallback
+      } = props;
+      
+      // Prepare Razorpay options
+      const options: RazorpayOptions = {
         key: razorpayKey,
         amount: amount * 100, // Razorpay expects amount in paise
-        currency: "INR",
-        name: "Peace2Hearts",
-        description: "Consultation Booking",
+        currency: 'INR',
+        name: 'Peace2Hearts',
+        description: `Consultation Booking: ${receipt}`,
         order_id: orderId,
-        handler: function (response: any) {
-          console.log("Razorpay payment successful:", response);
-          successCallback(response);
-        },
         prefill: {
           name: name,
           email: email,
-          contact: phone || ""
+          contact: phone
         },
         notes: {
-          receipt_id: receipt
+          reference_id: receipt
         },
         theme: {
-          color: "#4F6CF7"
+          color: '#4f6cf7'
         },
-        modal: {
-          ondismiss: function() {
-            console.log("Payment modal dismissed");
-            errorCallback({ description: "Payment cancelled" });
-          }
-        }
+        handler: successCallback
       };
-
-      console.log("Creating Razorpay instance with options:", options);
-      const razorpay = new window.Razorpay(options);
+      
+      // Create and open Razorpay checkout
+      const razorpay = new (window as any).Razorpay(options);
+      
+      // Set up error handler
+      razorpay.on('payment.failed', errorCallback);
+      
+      // Open the checkout
       razorpay.open();
     } catch (error) {
-      console.error("Error opening Razorpay:", error);
-      errorCallback({ description: "Failed to open payment gateway" });
+      console.error('Error processing payment:', error);
+      props.errorCallback({
+        description: error instanceof Error ? error.message : 'Failed to process payment'
+      });
     }
-  }, []);
-
+  };
+  
   return { processPaymentWithRazorpay };
-}
-
-// Add Razorpay to window type
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
+};

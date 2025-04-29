@@ -1,5 +1,5 @@
 
-import { createRazorpayOrder } from '@/utils/payment/razorpayService';
+import { createRazorpayOrder } from '@/utils/payment/services/paymentOrderService';
 import { useToast } from '@/hooks/use-toast';
 
 interface InitializeRazorpayArgs {
@@ -26,19 +26,16 @@ export const useInitializeRazorpayPayment = ({
     console.log("Using payment amount:", validAmount);
     
     try {
-      // Create order with validated price and improved error handling
-      const orderResponse = await createRazorpayOrder({
-        amount: validAmount,
-        receipt: receiptId,
-        notes: {
-          services: state.selectedServices.join(','),
-          client: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
-        },
-      });
+      // Create order with validated price
+      const orderResponse = await createRazorpayOrder(
+        receiptId,
+        validAmount,
+        state.selectedServices?.join(',') || 'consultation'
+      );
       
-      if (!orderResponse.success || !orderResponse.order_id) {
+      if (!orderResponse || !orderResponse.id) {
         console.error("Order creation failed:", orderResponse);
-        const errorMessage = orderResponse.error || "Failed to create order";
+        const errorMessage = "Failed to create order";
         
         if (toast) {
           toast({
@@ -58,12 +55,17 @@ export const useInitializeRazorpayPayment = ({
       }
       
       // Use the order_id from the response
-      const orderId = orderResponse.order_id;
+      const orderId = orderResponse.id;
       if (setOrderId) setOrderId(orderId);
       
       // Extract order details and key_id
-      const order = orderResponse.details || { id: orderId, amount: validAmount, currency: 'INR' };
-      const razorpayKey = orderResponse.details?.key_id;
+      const order = { 
+        id: orderId, 
+        amount: validAmount, 
+        currency: 'INR' 
+      };
+      
+      const razorpayKey = orderResponse.razorpayKey;
       
       if (!razorpayKey) {
         const errorMessage = "Razorpay key not configured. Please contact support.";

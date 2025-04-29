@@ -1,68 +1,74 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
+
+/**
+ * Determine the service category based on consultation type
+ */
+export function determineServiceCategory(consultationType: string): string {
+  if (!consultationType) return 'unknown';
+  
+  if (consultationType.includes('divorce-prevention') || 
+      consultationType.includes('pre-marriage-clarity') ||
+      consultationType.includes('holistic')) {
+    return 'holistic';
+  }
+  
+  if (consultationType.includes('legal') || 
+      consultationType.includes('divorce') || 
+      consultationType.includes('marriage-law')) {
+    return 'legal';
+  }
+  
+  if (consultationType.includes('therapy') || 
+      consultationType.includes('counseling') || 
+      consultationType.includes('mental-health')) {
+    return 'mental-health';
+  }
+  
+  return 'general';
+}
 
 /**
  * Update consultation status in the database
  */
 export async function updateConsultationStatus(
-  referenceId: string, 
+  referenceId: string,
   status: string,
-  additionalData: Record<string, any> = {}
+  paymentId?: string,
+  amount?: number,
+  orderId?: string
 ): Promise<boolean> {
   try {
-    console.log(`Updating consultation status for ${referenceId} to ${status}`);
+    console.log(`Updating consultation status: ${referenceId} -> ${status}`);
     
-    const { data, error } = await supabase
+    const updateData: Record<string, any> = { status };
+    
+    if (paymentId) {
+      updateData.payment_id = paymentId;
+    }
+    
+    if (amount !== undefined) {
+      updateData.amount = amount;
+    }
+    
+    if (orderId) {
+      updateData.order_id = orderId;
+    }
+    
+    const { error } = await supabase
       .from('consultations')
-      .update({
-        status,
-        updated_at: new Date().toISOString(),
-        ...additionalData
-      })
+      .update(updateData)
       .eq('reference_id', referenceId);
-      
+    
     if (error) {
       console.error("Error updating consultation status:", error);
       return false;
     }
     
+    console.log(`Successfully updated consultation ${referenceId} status to ${status}`);
     return true;
   } catch (error) {
     console.error("Exception updating consultation status:", error);
     return false;
   }
-}
-
-/**
- * Determine service category from consultation type
- */
-export function determineServiceCategory(consultationType: string): string {
-  consultationType = consultationType.toLowerCase();
-  
-  // Legal services
-  if (consultationType.includes('legal') || 
-      consultationType.includes('lawyer') || 
-      consultationType.includes('divorce') || 
-      consultationType.includes('custody')) {
-    return 'legal';
-  }
-  
-  // Mental health services
-  if (consultationType.includes('therapy') || 
-      consultationType.includes('counseling') || 
-      consultationType.includes('mental') || 
-      consultationType.includes('psychological')) {
-    return 'mental-health';
-  }
-  
-  // Holistic packages
-  if (consultationType.includes('package') || 
-      consultationType.includes('holistic') || 
-      consultationType.includes('prevention') || 
-      consultationType.includes('clarity')) {
-    return 'holistic';
-  }
-  
-  // Default
-  return 'service';
 }

@@ -8,7 +8,6 @@ import { verifyAndSyncPayment } from "./paymentVerificationService";
 
 /**
  * Attempt to recover payment records for consultations that have no payment record
- * This can be called after payment to ensure we don't miss any confirmation emails
  */
 export const recoverPaymentRecord = async (referenceId: string, paymentId: string, amount: number, orderId?: string): Promise<boolean> => {
   try {

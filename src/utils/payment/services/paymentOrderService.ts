@@ -36,9 +36,11 @@ export async function createRazorpayOrder(
     
     console.log("Order created successfully:", data);
     
-    // Match our expected return type 
+    // Return the data with success flag
     return {
       ...data,
+      success: true,
+      order_id: data.id,
       razorpayKey: data.razorpayKey || '',
       order: {
         id: data.id

@@ -1,6 +1,6 @@
 
 import { recoverEmailByReferenceId } from './payment/services/paymentVerificationService';
-import { resendConsultationEmail } from './payment/services/emailNotificationService';
+import { resendBookingConfirmationEmail } from './email/bookingEmailService';
 
 // Expose recovery functions globally 
 if (typeof window !== 'undefined') {
@@ -10,7 +10,7 @@ if (typeof window !== 'undefined') {
   
   // For resending confirmation emails
   // @ts-ignore
-  window.resendConsultationEmail = resendConsultationEmail;
+  window.resendConsultationEmail = resendBookingConfirmationEmail;
   
   // Helper function to recover email for the latest payment
   // @ts-ignore

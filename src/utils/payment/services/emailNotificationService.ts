@@ -1,42 +1,27 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { BookingDetails } from "@/utils/types";
-import { sendBookingConfirmationEmail } from "@/utils/email/bookingEmailService";
+import { supabase } from '@/integrations/supabase/client';
+import { BookingDetails } from '@/utils/types';
+import { sendBookingConfirmationEmail } from '@/utils/email';
 
 /**
- * Sends an email notification for a consultation booking
+ * Send email for a consultation booking
  */
 export async function sendEmailForConsultation(bookingDetails: BookingDetails): Promise<boolean> {
   try {
-    console.log(`Sending email notification for consultation ${bookingDetails.referenceId}`);
+    console.log(`Sending email for booking ${bookingDetails.referenceId}`);
     
-    // Check for required fields
-    if (!bookingDetails.referenceId || !bookingDetails.email) {
-      console.error("Missing required fields for email notification:", { 
-        hasReferenceId: !!bookingDetails.referenceId,
-        hasEmail: !!bookingDetails.email
-      });
-      return false;
-    }
-
-    // Send the email using our email service
+    // Call the booking confirmation email function
     const emailSent = await sendBookingConfirmationEmail(bookingDetails);
     
-    // If email was sent successfully, update the consultation record
     if (emailSent) {
-      console.log(`Email sent successfully for ${bookingDetails.referenceId}`);
+      // Update the consultation record to mark email as sent
+      const { error } = await supabase
+        .from('consultations')
+        .update({ email_sent: true })
+        .eq('reference_id', bookingDetails.referenceId);
       
-      try {
-        const { error } = await supabase
-          .from('consultations')
-          .update({ email_sent: true })
-          .eq('reference_id', bookingDetails.referenceId);
-        
-        if (error) {
-          console.error("Error updating consultation email_sent status:", error);
-        }
-      } catch (updateError) {
-        console.error("Exception updating consultation email_sent status:", updateError);
+      if (error) {
+        console.error(`Error updating email_sent status for ${bookingDetails.referenceId}:`, error);
       }
       
       return true;
@@ -45,19 +30,19 @@ export async function sendEmailForConsultation(bookingDetails: BookingDetails): 
       return false;
     }
   } catch (error) {
-    console.error("Error sending email notification:", error);
+    console.error(`Exception sending email for ${bookingDetails.referenceId}:`, error);
     return false;
   }
 }
 
 /**
- * Resends a consultation confirmation email
+ * Resend confirmation email for a consultation
  */
 export async function resendConsultationEmail(referenceId: string): Promise<boolean> {
   try {
-    console.log(`Attempting to resend email for consultation ${referenceId}`);
+    console.log(`Resending email for booking ${referenceId}`);
     
-    // Fetch the consultation details
+    // Fetch the consultation record
     const { data: consultation, error } = await supabase
       .from('consultations')
       .select('*')
@@ -65,52 +50,31 @@ export async function resendConsultationEmail(referenceId: string): Promise<bool
       .single();
     
     if (error || !consultation) {
-      console.error("Error fetching consultation for email resend:", error);
+      console.error(`Error fetching consultation for ${referenceId}:`, error);
       return false;
     }
     
-    // Create booking details from the consultation
+    // Convert to booking details
     const bookingDetails: BookingDetails = {
-      referenceId: consultation.reference_id,
-      clientName: consultation.client_name,
-      email: consultation.client_email,
-      consultationType: consultation.consultation_type,
-      services: consultation.consultation_type ? consultation.consultation_type.split(',') : [],
+      clientName: consultation.client_name || '',
+      email: consultation.client_email || '',
+      referenceId: consultation.reference_id || '',
+      consultationType: consultation.consultation_type || '',
       date: consultation.date ? new Date(consultation.date) : undefined,
-      timeSlot: consultation.time_slot,
-      timeframe: consultation.timeframe,
-      message: consultation.message,
-      amount: consultation.amount,
-      isResend: true // Flag to indicate this is a resend
+      timeSlot: consultation.time_slot || '',
+      timeframe: consultation.timeframe || '',
+      message: consultation.message || '',
+      amount: consultation.amount || 0,
+      services: consultation.consultation_type ? [consultation.consultation_type] : [],
+      isResend: true,
+      phone: consultation.client_phone || '',
+      highPriority: true
     };
     
     // Send the email
     return await sendEmailForConsultation(bookingDetails);
   } catch (error) {
-    console.error("Error in resendConsultationEmail:", error);
-    return false;
-  }
-}
-
-/**
- * Check if an email has been sent for a consultation
- */
-export async function checkEmailSentStatus(referenceId: string): Promise<boolean> {
-  try {
-    const { data, error } = await supabase
-      .from('consultations')
-      .select('email_sent')
-      .eq('reference_id', referenceId)
-      .single();
-    
-    if (error) {
-      console.error("Error checking email sent status:", error);
-      return false;
-    }
-    
-    return data?.email_sent || false;
-  } catch (error) {
-    console.error("Error in checkEmailSentStatus:", error);
+    console.error(`Exception resending email for ${referenceId}:`, error);
     return false;
   }
 }

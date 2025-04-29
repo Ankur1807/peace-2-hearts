@@ -77,16 +77,32 @@ export async function verifyRazorpayPayment(
  * Verify and sync a payment with the server
  */
 export async function verifyAndSyncPayment(
-  paymentId: string,
-  orderId: string,
-  signature: string,
-  referenceId: string
-): Promise<{ success: boolean; error?: string }> {
+  paymentId: string
+): Promise<boolean> {
   try {
-    return await verifyRazorpayPayment(paymentId, orderId, signature, referenceId);
+    // Call the Razorpay API via our edge function
+    const { data, error } = await supabase.functions.invoke('razorpay', {
+      body: {
+        action: 'verify_payment',
+        paymentId,
+        checkOnly: true
+      }
+    });
+    
+    if (error) {
+      console.error("Error verifying payment:", error);
+      return false;
+    }
+    
+    if (!data.verified) {
+      console.error("Payment verification failed:", data);
+      return false;
+    }
+    
+    return true;
   } catch (error) {
     console.error("Error in verifyAndSyncPayment:", error);
-    return { success: false, error: error.message };
+    return false;
   }
 }
 
@@ -94,17 +110,29 @@ export async function verifyAndSyncPayment(
  * Verify payment and record in database
  */
 export async function verifyAndRecordPayment(
-  paymentId: string,
-  orderId: string,
-  signature: string,
   referenceId: string,
-  bookingDetails: BookingDetails
-): Promise<{ success: boolean; error?: string }> {
+  paymentId: string,
+  amount: number
+): Promise<boolean> {
   try {
-    return await verifyRazorpayPayment(paymentId, orderId, signature, referenceId, bookingDetails);
+    // First verify the payment is valid
+    const isValid = await verifyAndSyncPayment(paymentId);
+    
+    if (!isValid) {
+      console.error(`Payment ${paymentId} is not valid`);
+      return false;
+    }
+    
+    // Record the payment in the database
+    return await savePaymentRecord({
+      paymentId,
+      orderId: '',
+      amount,
+      referenceId
+    });
   } catch (error) {
     console.error("Error in verifyAndRecordPayment:", error);
-    return { success: false, error: error.message };
+    return false;
   }
 }
 

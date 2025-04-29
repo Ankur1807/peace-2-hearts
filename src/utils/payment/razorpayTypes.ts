@@ -17,10 +17,19 @@ export interface OrderResponse {
   receipt: string;
   status: string;
   attempts: number;
-  razorpayKey: string; // Added to match our implementation
-  order: {
+  success?: boolean;
+  error?: string;
+  order_id?: string;
+  details?: {
     id: string;
-  }; // Added to match our implementation
+    key_id?: string;
+    amount: number;
+    currency: string;
+  };
+  razorpayKey?: string;
+  order?: {
+    id: string;
+  };
 }
 
 // Payment verification parameters
