@@ -28,7 +28,7 @@ const HolisticPackage: React.FC<HolisticPackageProps> = ({
 }) => {
   return (
     <SiteCard className="flex flex-col h-full">
-      <div>
+      <div className="flex-grow">
         <div className="mb-6 flex items-center">
           <div className={`p-3 rounded-full ${iconColor} mr-4 flex items-center justify-center`}>
             <Icon className={`h-7 w-7 ${dotColor}`} />
@@ -48,8 +48,8 @@ const HolisticPackage: React.FC<HolisticPackageProps> = ({
         </ul>
       </div>
 
-      <div className="mt-auto flex items-end">
-        <FractalButton asChild fractalType="primary" className="w-full mt-2">
+      <div className="mt-auto">
+        <FractalButton asChild fractalType="primary" className="w-full mt-4">
           <Link to={linkPath}>{linkText}</Link>
         </FractalButton>
       </div>
