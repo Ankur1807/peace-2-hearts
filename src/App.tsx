@@ -135,7 +135,7 @@ function App() {
         <Route path="/mobile-bookings" element={<MobileBookings />} />
         <Route path="/logo-export" element={<LogoExport />} />
         
-        {/* Admin routes */}
+        {/* Admin routes - Login should stand alone without AdminProvider */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
         
