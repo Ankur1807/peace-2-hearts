@@ -1,11 +1,11 @@
 
 export interface PersonalDetails {
-  name?: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
   message: string;
-  firstName: string;
-  lastName: string;
+  name?: string; // Legacy field, kept for backward compatibility
 }
 
 export interface BookingDetails {
@@ -55,4 +55,12 @@ export interface SerializedBookingDetails {
   highPriority?: boolean;
   isResend?: boolean;
   packageName?: string;
+  personalDetails?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    message: string;
+  };
+  isRecovery?: boolean;
 }

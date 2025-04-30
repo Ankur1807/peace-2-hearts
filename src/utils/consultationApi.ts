@@ -1,161 +1,39 @@
+
 import { generateReferenceId } from "./referenceGenerator";
 import { PersonalDetails } from "./types";
 import { supabase } from "@/integrations/supabase/client";
 
+// This function is kept for reference but should not be used anymore.
+// All database operations should happen via the verify-payment edge function.
+// Note: This function is now marked as deprecated
+/**
+ * @deprecated This function should no longer be used. All database operations are now handled by edge functions.
+ */
 export const saveConsultation = async (
   consultationType: string,
   date: Date | undefined,
   timeSlotOrTimeframe: string,
   personalDetails: PersonalDetails
 ) => {
-  // For holistic packages, we use timeframe instead of specific date
-  const isTimeframe = ['1-2-weeks', '2-4-weeks', '4-weeks-plus'].includes(timeSlotOrTimeframe);
-  
-  console.log("saveConsultation called with:", { 
-    consultationType, 
-    date: date?.toISOString() || 'Using timeframe instead', 
-    timeSlotOrTimeframe, 
-    isTimeframe,
-    personalDetails 
-  });
-
-  try {
-    // Create a reference ID for the consultation
-    const referenceId = generateReferenceId();
-    console.log("Generated reference ID:", referenceId);
-
-    // Prepare the consultation data
-    const consultationData = {
-      consultation_type: consultationType,
-      date: date ? date.toISOString() : null,
-      time_slot: isTimeframe ? null : timeSlotOrTimeframe,
-      timeframe: isTimeframe ? timeSlotOrTimeframe : null,
-      client_name: `${personalDetails.firstName} ${personalDetails.lastName}`,
-      client_email: personalDetails.email,
-      client_phone: personalDetails.phone,
-      status: 'scheduled', // Initially set to scheduled, will be updated to 'paid' after payment
-      message: personalDetails.message,
-      reference_id: referenceId,
-    };
-    
-    console.log("Saving consultation to Supabase with data:", JSON.stringify(consultationData));
-    
-    // Insert the consultation into Supabase with retry mechanism
-    let attempts = 0;
-    const maxAttempts = 3;
-    
-    while (attempts < maxAttempts) {
-      try {
-        const { data, error } = await supabase
-          .from('consultations')
-          .insert(consultationData)
-          .select();
-        
-        if (error) {
-          console.error(`Attempt ${attempts + 1}: Error inserting consultation:`, error);
-          attempts++;
-          if (attempts < maxAttempts) {
-            console.log(`Retrying in 1 second... (${attempts}/${maxAttempts})`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            continue;
-          }
-          throw error;
-        }
-        
-        if (!data || data.length === 0) {
-          console.error(`Attempt ${attempts + 1}: No data returned after inserting consultation`);
-          attempts++;
-          if (attempts < maxAttempts) {
-            console.log(`Retrying in 1 second... (${attempts}/${maxAttempts})`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            continue;
-          }
-          throw new Error("Failed to save consultation: No data returned");
-        }
-        
-        console.log("Consultation saved successfully to Supabase:", data);
-        
-        // Verify the consultation was actually saved by querying it back
-        const { data: verificationData, error: verificationError } = await supabase
-          .from('consultations')
-          .select('*')
-          .eq('reference_id', referenceId)
-          .single();
-          
-        if (verificationError || !verificationData) {
-          console.error("Verification failed - consultation may not have been saved:", verificationError);
-          attempts++;
-          if (attempts < maxAttempts) {
-            console.log(`Retrying in 1 second... (${attempts}/${maxAttempts})`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            continue;
-          }
-          throw new Error("Failed to verify consultation was saved");
-        }
-        
-        console.log("Consultation verified in database:", verificationData);
-        return { ...data[0], referenceId };
-      } catch (retryError) {
-        console.error(`Attempt ${attempts + 1}: Error in retry loop:`, retryError);
-        attempts++;
-        if (attempts >= maxAttempts) {
-          throw retryError;
-        }
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
-    
-    throw new Error("Failed to save consultation after multiple attempts");
-  } catch (error) {
-    console.error("Error in saveConsultation:", error);
-    // Log additional information about the connection
-    try {
-      const { data: connectionTest, error: connectionError } = await supabase
-        .from('consultations')
-        .select('count(*)')
-        .limit(1);
-        
-      if (connectionError) {
-        console.error("Database connection test failed:", connectionError);
-      } else {
-        console.log("Database connection test succeeded:", connectionTest);
-      }
-    } catch (testError) {
-      console.error("Error testing database connection:", testError);
-    }
-    
-    throw error;
-  }
+  console.warn("saveConsultation is deprecated and should not be called directly - use edge functions instead");
+  // This function is kept for backward compatibility but should not be used anymore
+  throw new Error("Direct database operations from frontend are no longer supported. Use edge functions instead.");
 };
 
-// Update a consultation record (e.g., after payment)
+// Update a consultation record - now should only be done via edge functions
+/**
+ * @deprecated This function should no longer be used. All database operations are now handled by edge functions.
+ */
 export const updateConsultationStatus = async (
   referenceId: string,
   newStatus: string
 ) => {
-  try {
-    console.log(`Updating consultation ${referenceId} to status ${newStatus}`);
-    
-    const { data, error } = await supabase
-      .from('consultations')
-      .update({ status: newStatus })
-      .eq('reference_id', referenceId)
-      .select();
-    
-    if (error) {
-      console.error("Error updating consultation status:", error);
-      return false;
-    }
-    
-    console.log("Consultation status updated successfully:", data);
-    return true;
-  } catch (error) {
-    console.error("Error in updateConsultationStatus:", error);
-    return false;
-  }
+  console.warn("updateConsultationStatus is deprecated and should not be called directly - use edge functions instead");
+  // This function is kept for backward compatibility but should not be used anymore
+  throw new Error("Direct database operations from frontend are no longer supported. Use edge functions instead.");
 };
 
-// Get consultation details by reference ID
+// Get consultation details by reference ID - read operation is still allowed
 export const getConsultationByReferenceId = async (referenceId: string) => {
   try {
     console.log("Fetching consultation with reference ID:", referenceId);

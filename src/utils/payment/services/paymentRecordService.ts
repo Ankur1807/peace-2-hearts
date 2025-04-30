@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { updateConsultationStatus } from './serviceUtils';
 
 interface SavePaymentParams {
   paymentId: string;
@@ -10,35 +9,6 @@ interface SavePaymentParams {
   bookingDetails?: any;
   status?: string;
 }
-
-/**
- * Save payment record directly in the consultations table
- */
-export const savePaymentRecord = async (params: SavePaymentParams): Promise<boolean> => {
-  try {
-    console.log(`Saving payment record for ${params.referenceId}`);
-    
-    // Update the consultation record with payment information
-    const consultationUpdated = await updateConsultationStatus(
-      params.referenceId,
-      'paid',
-      params.paymentId,
-      params.amount,
-      params.orderId
-    );
-    
-    if (!consultationUpdated) {
-      console.error(`Failed to update consultation ${params.referenceId}`);
-      return false;
-    }
-    
-    console.log(`Payment record saved successfully for ${params.referenceId}`);
-    return true;
-  } catch (error) {
-    console.error(`Error in savePaymentRecord for ${params.referenceId}:`, error);
-    return false;
-  }
-};
 
 /**
  * Store payment details in session storage
@@ -65,3 +35,17 @@ export function storePaymentDetailsInSession(details: SavePaymentParams): void {
     console.error('Error storing payment details in session:', error);
   }
 }
+
+/**
+ * Save payment record via edge function only
+ * @deprecated Direct database writes are not allowed anymore, use edge functions instead
+ */
+export const savePaymentRecord = async (params: SavePaymentParams): Promise<boolean> => {
+  console.warn("savePaymentRecord is deprecated - payments should only be processed by edge functions");
+  
+  // Store payment details in session for recovery purposes
+  storePaymentDetailsInSession(params);
+  
+  // The verify-payment edge function should handle the database operations
+  return true;
+};

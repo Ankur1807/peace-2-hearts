@@ -1,7 +1,6 @@
 
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { saveConsultation } from '@/utils/consultationApi';
 import { createRazorpayOrder } from '@/utils/payment/services/paymentOrderService';
 import { verifyRazorpayPayment } from '@/utils/payment/services/paymentVerificationService';
 import { generateReferenceId } from '@/utils/referenceGenerator';
@@ -123,29 +122,8 @@ export function useConsultationPayment({
       
       const timeSlotOrTimeframe = isHolisticPackage ? timeframe || 'Not specified' : timeSlot || 'Not specified';
       
-      // Only save new consultation if it doesn't already exist
-      try {
-        if (!state.referenceId) {
-          console.log("Saving consultation before payment processing");
-          await saveConsultation(
-            consultationType,
-            isHolisticPackage ? undefined : date,
-            timeSlotOrTimeframe,
-            personalDetails
-          );
-        } else {
-          console.log("Consultation already exists with reference ID:", state.referenceId);
-        }
-      } catch (error) {
-        console.error("Error saving consultation:", error);
-        toast({
-          title: "Error Saving Booking",
-          description: "There was an error saving your booking information. Please try again.",
-          variant: "destructive"
-        });
-        setIsProcessing(false);
-        return;
-      }
+      // REMOVED: Direct saveConsultation call - database operations now handled exclusively by edge function
+      // The edge function verify-payment will handle the database operations when payment verification happens
 
       // Create the Razorpay order
       const orderResponse = await createRazorpayOrder(
@@ -179,7 +157,7 @@ export function useConsultationPayment({
             receiptId,
             {
               // Convert string date to Date object if present, otherwise pass undefined
-              date: date ? date : undefined,
+              date: date,
               timeSlot: timeSlot || '',
               timeframe: timeframe || '',
               consultationType: consultationType,
