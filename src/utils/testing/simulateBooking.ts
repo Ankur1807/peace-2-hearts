@@ -37,11 +37,12 @@ export const convertISTTimeSlotToUTCString = (dateString: string, timeSlot: stri
   // Create date object in IST
   const istDate = new Date(year, month - 1, day, hours, minutes);
   
-  // Convert to UTC (IST is UTC+5:30)
-  const utcDate = new Date(istDate.getTime() - (5.5 * 60 * 60 * 1000));
+  // Fix for timezone issues - set to noon to prevent date shifting
+  const adjustedDate = new Date(year, month - 1, day);
+  adjustedDate.setHours(12, 0, 0, 0);
   
   // Format as ISO string
-  const utcString = utcDate.toISOString();
+  const utcString = adjustedDate.toISOString();
   
   console.log(`   Output: ${utcString}`);
   return utcString;
@@ -73,7 +74,9 @@ export const constructSupabasePayload = (
     payment_status: 'completed',
     payment_id: 'test_payment_id',
     order_id: 'test_order_id',
-    amount: 11 // Amount for test service
+    amount: 11, // Amount for test service
+    source: 'edge', // Mark source as edge function
+    email_sent: true // Mark email as sent
   };
   
   console.log(JSON.stringify(payload, null, 2));
@@ -91,7 +94,8 @@ export const simulateEmailPayload = (
   let formattedTime = '';
   
   if (bookingDetails.date) {
-    const istDate = new Date(bookingDetails.date.getTime() + (5.5 * 60 * 60 * 1000));
+    // Since we're using noon time UTC (should be same day in IST)
+    const istDate = new Date(bookingDetails.date);
     formattedDate = formatDate(istDate);
     formattedTime = bookingDetails.timeSlot;
   } else if (bookingDetails.timeframe) {

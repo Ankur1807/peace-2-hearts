@@ -143,6 +143,7 @@ async function createConsultationRecord(
           amount: amount,
           payment_status: paymentStatus,
           status: bookingStatus,
+          source: "edge", // Mark source as edge
           updated_at: new Date().toISOString()
         })
         .eq('reference_id', referenceId)
@@ -175,6 +176,7 @@ async function createConsultationRecord(
           amount: amount,
           payment_status: paymentStatus,
           status: bookingStatus,
+          source: "edge", // Mark source as edge
           email_sent: false // Will be updated after email is sent
         })
         .select('id')
@@ -197,13 +199,14 @@ async function createConsultationRecord(
  * Send confirmation email
  */
 async function sendConfirmationEmail(
-  bookingDetails: VerifyPaymentRequest['bookingDetails']
+  bookingDetails: VerifyPaymentRequest['bookingDetails'],
+  referenceId: string
 ): Promise<{
   success: boolean;
   error?: string;
 }> {
   try {
-    console.log(`Sending confirmation email for booking ${bookingDetails.referenceId}`);
+    console.log(`Sending confirmation email for booking ${referenceId}`);
     
     // Add additional error handling for email sending
     try {
@@ -229,31 +232,71 @@ async function sendConfirmationEmail(
       }
       
       console.log("Email sent successfully:", emailResponse);
+      
+      // Update the consultation record to mark email as sent
+      try {
+        const { error: updateError } = await supabase
+          .from('consultations')
+          .update({ email_sent: true })
+          .eq('reference_id', referenceId);
+        
+        if (updateError) {
+          console.error("Error updating email_sent status:", updateError);
+        } else {
+          console.log(`Marked email as sent for consultation ${referenceId}`);
+        }
+      } catch (updateErr) {
+        console.error("Exception updating email_sent status:", updateErr);
+      }
     } catch (emailErr) {
       // Don't fail the entire process if email sending fails
       console.error("Exception in email sending:", emailErr);
       return { success: false, error: emailErr.message };
     }
     
-    // Update the consultation record to mark email as sent - don't fail if this doesn't work
-    try {
-      const { error: updateError } = await supabase
-        .from('consultations')
-        .update({ email_sent: true })
-        .eq('reference_id', bookingDetails.referenceId);
-      
-      if (updateError) {
-        console.error("Error updating email_sent status:", updateError);
-      }
-    } catch (updateErr) {
-      console.error("Exception updating email_sent status:", updateErr);
-    }
-    
-    // Return success even if there were errors updating the database
+    // Return success since we've tried to send the email
     return { success: true };
   } catch (error) {
     console.error("Exception in sendConfirmationEmail:", error);
     return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Process background tasks for payment verification
+ */
+async function processBackgroundTasks(
+  bookingDetails: VerifyPaymentRequest['bookingDetails'],
+  paymentId: string,
+  orderId: string,
+  paymentDetails: RazorpayPaymentDetail
+) {
+  try {
+    // Step 1: Create or update consultation record
+    const consultationResult = await createConsultationRecord(
+      bookingDetails,
+      paymentId,
+      orderId,
+      paymentDetails.amount / 100, // Convert from paise to rupees
+      'completed',
+      'confirmed'
+    );
+    
+    if (!consultationResult.success) {
+      console.error("Failed to create consultation record:", consultationResult.error);
+      return;
+    }
+    
+    console.log("Consultation record created successfully");
+    
+    // Step 2: Send confirmation email
+    const emailResult = await sendConfirmationEmail(bookingDetails, bookingDetails.referenceId);
+    
+    if (!emailResult.success) {
+      console.error("Failed to send confirmation email:", emailResult.error);
+    }
+  } catch (error) {
+    console.error("Error in background tasks:", error);
   }
 }
 
@@ -289,16 +332,6 @@ const handler = async (req: Request): Promise<Response> => {
     if (!paymentVerification.verified) {
       console.log(`Payment verification failed for ${paymentId}`);
       
-      // Create consultation record with failed status
-      await createConsultationRecord(
-        bookingDetails,
-        paymentId,
-        orderId,
-        paymentVerification.details?.amount || 0,
-        'failed',
-        'payment_failed'
-      );
-      
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -317,48 +350,37 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Payment verified successfully for ${paymentId}`);
     const paymentDetails = paymentVerification.details;
     
-    // Step 2: Create or update consultation record
-    const consultationResult = await createConsultationRecord(
-      bookingDetails,
+    // Return success response immediately before starting background tasks
+    const responseData = { 
+      success: true, 
+      verified: true,
+      consultationId: "pending", // Will be created in background
+      redirectUrl: "/thank-you",
       paymentId,
-      orderId,
-      paymentDetails!.amount / 100, // Convert from paise to rupees
-      'completed',
-      'confirmed'
-    );
+      orderId
+    };
     
-    if (!consultationResult.success) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          verified: true,
-          error: "Failed to create consultation record",
-          details: consultationResult.error
-        }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json", ...corsHeaders }
-        }
+    // Start background tasks without awaiting
+    if (EdgeRuntime && typeof EdgeRuntime.waitUntil === 'function') {
+      EdgeRuntime.waitUntil(
+        processBackgroundTasks(bookingDetails, paymentId, orderId, paymentDetails!)
       );
+    } else {
+      // Fallback for environments that don't support waitUntil
+      setTimeout(() => {
+        processBackgroundTasks(bookingDetails, paymentId, orderId, paymentDetails!);
+      }, 0);
     }
     
-    // Step 3: Send confirmation email (only for successful payments)
-    const emailResult = await sendConfirmationEmail(bookingDetails);
-    
-    // Return success response even if email fails (we'll have recovery mechanisms)
+    // Return success response immediately
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        verified: true,
-        consultationId: consultationResult.consultationId,
-        emailSent: emailResult.success,
-        emailError: emailResult.error
-      }),
+      JSON.stringify(responseData),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders }
       }
     );
+    
   } catch (error) {
     console.error("Error in verify-payment function:", error);
     

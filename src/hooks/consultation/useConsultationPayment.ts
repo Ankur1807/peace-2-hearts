@@ -6,6 +6,7 @@ import { verifyRazorpayPayment } from '@/utils/payment/services/paymentVerificat
 import { generateReferenceId } from '@/utils/referenceGenerator';
 import { PersonalDetails } from '@/utils/types';
 import { useProcessPayment } from './payment/useProcessPayment';
+import { useNavigate } from 'react-router-dom';
 
 interface UseConsultationPaymentParams {
   state: {
@@ -37,6 +38,7 @@ export function useConsultationPayment({
   setReferenceId = () => {}
 }: UseConsultationPaymentParams) {
   const { processPaymentWithRazorpay } = useProcessPayment();
+  const navigate = useNavigate();
   
   // Function to proceed to payment step
   const proceedToPayment = useCallback(() => {
@@ -122,8 +124,13 @@ export function useConsultationPayment({
       
       const timeSlotOrTimeframe = isHolisticPackage ? timeframe || 'Not specified' : timeSlot || 'Not specified';
       
-      // REMOVED: Direct saveConsultation call - database operations now handled exclusively by edge function
-      // The edge function verify-payment will handle the database operations when payment verification happens
+      // Fix for date timezone issues - set time to noon to prevent date shifting
+      let adjustedDate: Date | undefined;
+      if (date) {
+        adjustedDate = new Date(date);
+        adjustedDate.setHours(12, 0, 0, 0);
+        console.log("Original date:", date.toISOString(), "Adjusted date:", adjustedDate.toISOString());
+      }
 
       // Create the Razorpay order
       const orderResponse = await createRazorpayOrder(
@@ -156,8 +163,8 @@ export function useConsultationPayment({
             response.razorpay_signature,
             receiptId,
             {
-              // Convert string date to Date object if present, otherwise pass undefined
-              date: date,
+              // Use the adjusted date with noon time
+              date: adjustedDate,
               timeSlot: timeSlot || '',
               timeframe: timeframe || '',
               consultationType: consultationType,
@@ -179,6 +186,9 @@ export function useConsultationPayment({
             
             // Complete the booking process
             await handleConfirmBooking();
+            
+            // Redirect to thank you page
+            navigate("/thank-you");
           } else {
             console.error("Payment verification failed:", verificationResult.error);
             toast({
@@ -210,7 +220,7 @@ export function useConsultationPayment({
       });
       setIsProcessing(false);
     }
-  }, [state, toast, setIsProcessing, handleConfirmBooking, processPaymentWithRazorpay, setReferenceId]);
+  }, [state, toast, setIsProcessing, handleConfirmBooking, processPaymentWithRazorpay, setReferenceId, navigate]);
 
   return {
     proceedToPayment,
