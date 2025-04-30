@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { verifyPaymentAndCreateBooking } from '@/utils/payment/verificationService';
-import { BookingDetails } from '@/utils/types';
+import { BookingDetails, VerificationResult } from '@/utils/types';
 
 interface UsePaymentVerificationProps {
   handleConfirmBooking?: () => Promise<void>;

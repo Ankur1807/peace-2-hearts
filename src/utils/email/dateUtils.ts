@@ -41,8 +41,8 @@ export function processBookingDate(bookingDetails: SerializedBookingDetails): Se
           
           // Format time separately if available
           if (bookingDetails.timeSlot) {
-            const formattedTime = bookingDetails.timeSlot.replace('-', ':').toUpperCase();
-            result.formattedTime = formattedTime;
+            result.formattedTime = bookingDetails.timeSlot.replace('-', ':').toUpperCase();
+            console.log("[processBookingDate] Formatted time:", result.formattedTime);
           }
           
           console.log("[processBookingDate] Formatted date:", result.formattedDate);

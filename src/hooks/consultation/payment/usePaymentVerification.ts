@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { verifyPaymentAndCreateBooking } from '@/utils/payment/verificationService';
-import { BookingDetails } from '@/utils/types';
+import { BookingDetails, VerificationResult } from '@/utils/types';
 
 interface UsePaymentVerificationProps {
   handleConfirmBooking?: () => Promise<void>;
@@ -43,7 +43,7 @@ export const usePaymentVerification = ({
         if (setPaymentCompleted) {
           setPaymentCompleted(true);
         }
-        return { success: true, verified: true };
+        return { success: true, verified: true, redirectUrl: verificationResult.redirectUrl || '/thank-you' };
       }
       
       console.warn("[VERIFY] Payment verification failed:", verificationResult);

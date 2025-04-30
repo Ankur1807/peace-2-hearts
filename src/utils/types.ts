@@ -67,9 +67,10 @@ export interface VerificationResult {
   error?: string;
   message?: string;
   details?: any;
+  redirectUrl?: string; // Add the redirectUrl field that was missing
 }
 
 export interface SerializedBookingDetails extends BookingDetails {
   formattedDate?: string;
+  formattedTime?: string; // Add the formattedTime field that was missing
 }
-
