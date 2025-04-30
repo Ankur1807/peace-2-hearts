@@ -7,6 +7,7 @@ import Services from '@/pages/Services';
 import BookConsultation from '@/pages/BookConsultation';
 import PaymentConfirmation from '@/pages/PaymentConfirmation';
 import PaymentVerification from '@/pages/PaymentVerification';
+import ThankYou from '@/pages/ThankYou';
 import Contact from '@/pages/Contact';
 import Terms from '@/pages/Terms';
 import Privacy from '@/pages/PrivacyPolicy';
@@ -133,6 +134,7 @@ function App() {
           <Route path="/book-consultation" element={<BookConsultation />} />
           <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
           <Route path="/payment-verification" element={<PaymentVerification />} />
+          <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />

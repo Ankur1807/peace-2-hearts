@@ -51,11 +51,11 @@ const PaymentVerification = () => {
     }
   }, [paymentId, location.state, navigate]);
 
-  // Automatically redirect to the confirmation page after short timeout
+  // Automatically redirect to the thank-you page after successful verification
   useEffect(() => {
-    if (paymentId && !isVerifying && !initiallyVerifying) {
+    if (paymentId && !isVerifying && !initiallyVerifying && verificationResult?.success) {
       const timer = setTimeout(() => {
-        navigate('/payment-confirmation', {
+        navigate('/thank-you', {
           state: {
             paymentId,
             orderId,
@@ -67,7 +67,7 @@ const PaymentVerification = () => {
           },
           replace: true
         });
-      }, 3000);
+      }, 2000); // Short delay before redirecting
       
       return () => clearTimeout(timer);
     }
@@ -117,7 +117,7 @@ const PaymentVerification = () => {
           <h1 className="text-2xl font-semibold mb-4">Payment Processed!</h1>
           <p className="text-gray-600 mb-6">
             Your payment has been received and your booking information is being saved.
-            You'll be redirected to the confirmation page in a moment.
+            You'll be redirected to the thank you page in a moment.
           </p>
           <div className="bg-gray-50 p-4 rounded-lg mb-6 text-left">
             <p className="text-sm">
@@ -128,7 +128,7 @@ const PaymentVerification = () => {
           </div>
           <div className="space-y-3">
             <Button 
-              onClick={() => navigate('/payment-confirmation', { 
+              onClick={() => navigate('/thank-you', { 
                 state: {
                   paymentId,
                   orderId,
@@ -137,11 +137,12 @@ const PaymentVerification = () => {
                   amount,
                   bookingDetails,
                   verificationResult
-                }
+                },
+                replace: true
               })}
               className="w-full bg-peacefulBlue hover:bg-peacefulBlue/80"
             >
-              View Confirmation
+              Proceed to Thank You
             </Button>
             
             {!manualVerification && (
