@@ -180,7 +180,8 @@ export async function fetchBookingDetailsByReference(referenceId: string): Promi
       message: data.message || '',
       serviceCategory: serviceCategory,
       amount: data.amount,
-      phone: data.client_phone || ''
+      phone: data.client_phone || '',
+      paymentId: data.payment_id || undefined
     };
   } catch (error) {
     console.error('Exception fetching booking details:', error);
@@ -221,7 +222,7 @@ export async function fetchBookingDetailsByPaymentId(paymentId: string): Promise
       serviceCategory: serviceCategory,
       amount: data.amount,
       phone: data.client_phone || '',
-      paymentId: data.payment_id || undefined
+      paymentId: data.payment_id
     };
   } catch (error) {
     console.error('Exception fetching booking details by payment ID:', error);
