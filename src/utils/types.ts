@@ -60,17 +60,17 @@ export interface Service {
   popular: boolean;
 }
 
-// Add missing types
+// Updated interface with redirectUrl field
 export interface VerificationResult {
   success: boolean;
   verified: boolean;
   error?: string;
   message?: string;
   details?: any;
-  redirectUrl?: string; // Added the redirectUrl field
+  redirectUrl?: string;
 }
 
 export interface SerializedBookingDetails extends BookingDetails {
   formattedDate?: string;
-  formattedTime?: string; // Ensuring formattedTime is defined here
+  formattedTime?: string;
 }

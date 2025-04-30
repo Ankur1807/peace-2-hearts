@@ -1,13 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { BookingDetails } from '@/utils/types';
-
-interface VerificationResult {
-  success: boolean;
-  verified: boolean;
-  error?: string;
-  details?: any;
-}
+import { BookingDetails, VerificationResult } from '@/utils/types';
 
 /**
  * Verify payment and create booking in one call
@@ -102,6 +95,7 @@ export async function verifyPaymentAndCreateBooking(
         return {
           success: true,
           verified: true,
+          redirectUrl: data.redirectUrl || '/thank-you',
           details: {
             ...data,
             emailWarning: true
@@ -112,6 +106,7 @@ export async function verifyPaymentAndCreateBooking(
       return {
         success: data.verified || false,
         verified: data.verified || false,
+        redirectUrl: data.redirectUrl || '/thank-you',
         details: data
       };
     } catch (invokeError: any) {

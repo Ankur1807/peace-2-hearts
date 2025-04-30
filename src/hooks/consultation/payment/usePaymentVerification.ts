@@ -47,14 +47,14 @@ export const usePaymentVerification = ({
           success: true, 
           verified: true, 
           redirectUrl: verificationResult.redirectUrl || '/thank-you'
-        };
+        } as VerificationResult;
       }
       
       console.warn("[VERIFY] Payment verification failed:", verificationResult);
-      return { success: false, verified: false };
+      return { success: false, verified: false } as VerificationResult;
     } catch (error) {
       console.error("[VERIFY] Error in verifyPayment:", error);
-      return { success: false, verified: false, error };
+      return { success: false, verified: false, error } as VerificationResult;
     } finally {
       setIsVerifying(false);
       setIsProcessing(false);

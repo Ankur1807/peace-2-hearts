@@ -107,12 +107,12 @@ export const usePaymentVerification = ({
           success: true, 
           verified: true, 
           redirectUrl: verificationResult.redirectUrl || '/thank-you'
-        };
+        } as VerificationResult;
       }
       
       // Even if verification failed, we still consider the operation "successful"
       // for UX purposes, but we'll handle the error on the confirmation page
-      return { success: true, verified: false };
+      return { success: true, verified: false } as VerificationResult;
     } catch (error) {
       console.error("Error in verifyPayment:", error);
       setVerificationResult({
@@ -121,7 +121,7 @@ export const usePaymentVerification = ({
         error: error instanceof Error ? error.message : String(error),
         message: "An unexpected error occurred during payment verification. Please contact support."
       });
-      return { success: false, verified: false };
+      return { success: false, verified: false } as VerificationResult;
     } finally {
       setIsVerifying(false);
       setIsProcessing(false);
