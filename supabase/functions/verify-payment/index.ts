@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { corsHeaders, determineServiceCategory, handleFetchResponse } from "./utils.ts";
@@ -480,6 +479,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("[EDGE] Error in background tasks:", backgroundError);
     }
     
+    // Return immediately so the frontend redirects
     return response;
   } catch (error) {
     console.error("[EDGE] Error in verify-payment function:", error);
