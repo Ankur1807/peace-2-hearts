@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -8,7 +7,6 @@ import Services from '@/pages/Services';
 import BookConsultation from '@/pages/BookConsultation';
 import PaymentConfirmation from '@/pages/PaymentConfirmation';
 import PaymentVerification from '@/pages/PaymentVerification';
-import ThankYou from '@/pages/ThankYou'; // Add import for new ThankYou page
 import Contact from '@/pages/Contact';
 import Terms from '@/pages/Terms';
 import Privacy from '@/pages/PrivacyPolicy';
@@ -46,14 +44,13 @@ import DivorcePreventionPackage from '@/pages/services/holistic/DivorcePreventio
 
 // Admin pages
 import AdminLogin from '@/pages/admin/AdminLogin';
-import AdminLayout from '@/components/layouts/AdminLayout';
+import AdminLayout from '@/components/admin/AdminLayout';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminConsultants from '@/pages/admin/AdminConsultants';
 import AdminPricing from '@/pages/admin/AdminPricing';
 import AdminBookings from '@/pages/admin/AdminBookings';
 import AdminSettings from '@/pages/admin/AdminSettings';
 import AdminPaymentMigration from '@/pages/admin/AdminPaymentMigration';
-import AdminServices from '@/pages/admin/AdminServices';
 
 // Other pages
 import News from '@/pages/News';
@@ -63,6 +60,9 @@ import Resources from '@/pages/Resources';
 import ShippingDelivery from '@/pages/ShippingDelivery';
 import MobileBookings from '@/pages/MobileBookings';
 import LogoExport from '@/pages/LogoExport';
+
+// Import our new AdminServices component
+import AdminServices from './pages/admin/AdminServices';
 
 function App() {
   // The issue is likely here with the useEffect hook
@@ -124,7 +124,6 @@ function App() {
           <Route path="/book-consultation" element={<BookConsultation />} />
           <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
           <Route path="/payment-verification" element={<PaymentVerification />} />
-          <Route path="/thank-you" element={<ThankYou />} /> {/* Add new ThankYou route */}
           <Route path="/contact" element={<Contact />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
@@ -142,11 +141,11 @@ function App() {
           
           {/* Admin routes - Login should stand alone without AdminProvider */}
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           
-          {/* Fixed: Admin Routes */}
+          {/* Protected admin routes with AdminLayout */}
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route index element={<AdminDashboard />} />
             <Route path="consultants" element={<AdminConsultants />} />
             <Route path="pricing" element={<AdminPricing />} />
             <Route path="services" element={<AdminServices />} />

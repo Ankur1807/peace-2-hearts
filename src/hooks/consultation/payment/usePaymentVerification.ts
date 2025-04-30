@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { verifyPaymentAndCreateBooking } from '@/utils/payment/verificationService';
-import { BookingDetails, VerificationResult } from '@/utils/types';
+import { BookingDetails } from '@/utils/types';
 
 interface UsePaymentVerificationProps {
   handleConfirmBooking?: () => Promise<void>;
@@ -19,10 +19,7 @@ export const usePaymentVerification = ({
     try {
       setIsVerifying(true);
       
-      console.log("[VERIFY] Starting payment verification process", { 
-        paymentId: response.razorpay_payment_id,
-        referenceId: referenceId,
-      });
+      console.log("Verifying payment with unified verification service");
       
       // Use our unified verification service
       const verificationResult = await verifyPaymentAndCreateBooking(
@@ -36,35 +33,16 @@ export const usePaymentVerification = ({
         }
       );
       
-      console.log("[VERIFY] Payment verification completed with result:", verificationResult);
+      console.log("Payment verification result:", verificationResult);
       
       if (verificationResult.success && verificationResult.verified) {
-        console.log("[VERIFY] Payment verified successfully, marking as completed");
         if (setPaymentCompleted) {
           setPaymentCompleted(true);
         }
-        return { 
-          success: true, 
-          verified: true, 
-          redirectUrl: verificationResult.redirectUrl || '/thank-you'
-        } as VerificationResult;
+        return { success: true, verified: true };
       }
       
-      console.warn("[VERIFY] Payment verification failed:", verificationResult);
-      return { 
-        success: false, 
-        verified: false,
-        error: verificationResult.error,
-        redirectUrl: verificationResult.redirectUrl || '/payment-error'
-      } as VerificationResult;
-    } catch (error: any) {
-      console.error("[VERIFY] Error in verifyPayment:", error);
-      return { 
-        success: false, 
-        verified: false, 
-        error, 
-        redirectUrl: '/payment-error'
-      } as VerificationResult;
+      return { success: false, verified: false };
     } finally {
       setIsVerifying(false);
       setIsProcessing(false);

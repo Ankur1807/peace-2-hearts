@@ -13,7 +13,6 @@ import ConsultationInitializer from '@/components/consultation/ConsultationIniti
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { convertISTTimeSlotToUTCString } from '@/utils/dateUtils';
 
 const BookConsultation = () => {
   const [searchParams] = useSearchParams();
@@ -53,49 +52,20 @@ const BookConsultation = () => {
     }
   }, [showPaymentStep, debugState.showingPaymentStep]);
 
-  const createBookingDetails = (): BookingDetails => {
-    // Debug log the state values
-    console.log('[BookConsultation] Creating booking details with date:', date);
-    
-    // Create the basic booking details
-    const bookingDetails: BookingDetails = {
-      clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
-      email: personalDetails.email,
-      referenceId: referenceId || '',
-      consultationType: selectedServices.length > 1 ? 'multiple' : selectedServices[0] || serviceCategory,
-      services: selectedServices || [], 
-      timeSlot: timeSlot,
-      timeframe: timeframe,
-      serviceCategory: serviceCategory,
-      packageName: getPackageName(selectedServices),
-      amount: totalPrice,
-      message: personalDetails.message
-    };
-    
-    // If we have both date and timeSlot, convert to UTC for storage
-    if (date && timeSlot) {
-      console.log('[BookConsultation] Original date before conversion:', date);
-      
-      // Format the date string (YYYY-MM-DD) from the Date object
-      // This is critical - ensure we get the correct date in local timezone 
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const dateStr = `${year}-${month}-${day}`;
-      
-      console.log('[BookConsultation] Formatted date string for conversion:', dateStr);
-        
-      // Convert to UTC using our hardcoded function
-      const utcDateString = convertISTTimeSlotToUTCString(dateStr, timeSlot);
-      console.log('[BookConsultation] Converted UTC string for storage:', utcDateString);
-      
-      bookingDetails.date = utcDateString;
-    } else {
-      bookingDetails.date = date; // Keep original format if missing timeSlot
-    }
-    
-    return bookingDetails;
-  };
+  const createBookingDetails = (): BookingDetails => ({
+    clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
+    email: personalDetails.email,
+    referenceId: referenceId || '',
+    consultationType: selectedServices.length > 1 ? 'multiple' : selectedServices[0] || serviceCategory, // Add consultationType
+    services: selectedServices || [], 
+    date: date, 
+    timeSlot: timeSlot,
+    timeframe: timeframe,
+    serviceCategory: serviceCategory,
+    packageName: getPackageName(selectedServices),
+    amount: totalPrice,
+    message: personalDetails.message
+  });
 
   React.useEffect(() => {
     if (submitted && referenceId) {
@@ -174,4 +144,3 @@ const BookConsultation = () => {
 };
 
 export default BookConsultation;
-

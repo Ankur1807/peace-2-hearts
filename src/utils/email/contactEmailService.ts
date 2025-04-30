@@ -8,29 +8,11 @@ export async function sendContactEmail(
   name: string,
   email: string,
   subject: string,
-  message: string,
-  phone?: string
+  message: string
 ): Promise<boolean> {
   try {
     console.log(`Sending contact form email from ${name} <${email}>`);
     
-    // First store the message in the database
-    const { error: dbError } = await supabase
-      .from('contact_messages')
-      .insert({
-        name,
-        email,
-        phone: phone || null,
-        subject,
-        message
-      });
-      
-    if (dbError) {
-      console.error("Error storing contact message:", dbError);
-      // Continue with email sending even if DB storage fails
-    }
-    
-    // Then send the email via edge function
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
         type: 'contact-form',
@@ -38,7 +20,6 @@ export async function sendContactEmail(
         email,
         subject,
         message,
-        phone: phone || null,
         highPriority: false
       }
     });
@@ -82,8 +63,7 @@ export async function resendContactEmail(
       contactData.name,
       contactData.email,
       contactData.subject,
-      contactData.message,
-      contactData.phone
+      contactData.message
     );
   } catch (error) {
     console.error("Error in resendContactEmail:", error);

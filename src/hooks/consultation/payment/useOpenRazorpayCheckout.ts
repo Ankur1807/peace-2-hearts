@@ -32,11 +32,7 @@ export const useOpenRazorpayCheckout = ({
   
   const handleSuccess = async (response: any, receiptId: string) => {
     try {
-      console.log("[PAYMENT FLOW] ✅ Payment successful, processing verification:", response);
-      
-      // Calculate the effective price
-      const price = getEffectivePrice();
-      console.log(`[PAYMENT FLOW] Effective price for checkout: ${price}`);
+      console.log("Payment successful, processing verification:", response);
       
       // Create booking details object
       const bookingDetails = {
@@ -51,22 +47,15 @@ export const useOpenRazorpayCheckout = ({
         timeframe: state.timeframe,
         message: state.personalDetails.message,
         serviceCategory: state.serviceCategory,
-        amount: price
+        amount: getEffectivePrice()
       };
-      
-      // Debug logs
-      console.log("[PAYMENT FLOW] Booking date:", state.date);
-      if (state.date instanceof Date) {
-        console.log("[PAYMENT FLOW] Date ISO string:", state.date.toISOString());
-      }
-      console.log("[PAYMENT FLOW] Timeslot:", state.timeSlot);
       
       // Store payment details in session for recovery if needed
       storePaymentDetailsInSession({
         referenceId: receiptId,
         paymentId: response.razorpay_payment_id,
         orderId: response.razorpay_order_id,
-        amount: price,
+        amount: getEffectivePrice(),
         bookingDetails
       });
       
@@ -74,98 +63,68 @@ export const useOpenRazorpayCheckout = ({
         setReferenceId(receiptId);
       }
       
-      console.log("[PAYMENT FLOW] 🔄 Calling verifyPayment with payment ID:", response.razorpay_payment_id);
+      // Always navigate to verification/confirmation page, even if verification hasn't completed
+      // This ensures users see a confirmation screen regardless of email sending status
+      navigateToVerification({
+        paymentId: response.razorpay_payment_id,
+        orderId: response.razorpay_order_id,
+        signature: response.razorpay_signature,
+        amount: getEffectivePrice(),
+        referenceId: receiptId,
+        bookingDetails,
+        isVerifying
+      });
       
       // Start verification process
       const verificationResult = await verifyPayment(
         response, 
-        price, 
+        getEffectivePrice(), 
         bookingDetails, 
         receiptId
       );
       
-      console.log("[PAYMENT FLOW] 📝 Verification result:", JSON.stringify(verificationResult));
-      
-      // Navigate based on verification result - immediately redirect on verification success
-      if (verificationResult && verificationResult.success) {
-        console.log("[PAYMENT FLOW] ✅ Payment verification successful, navigating to thank-you page");
-        
-        try {
-          console.log("[PAYMENT FLOW] 🔄 Executing navigation to thank-you page");
-          
-          // Navigate to the thank you page with all necessary data
-          navigate("/thank-you", { 
-            state: {
-              paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id,
-              signature: response.razorpay_signature,
-              amount: price,
-              referenceId: receiptId,
-              bookingDetails
-            },
-            replace: true 
-          });
-          
-          console.log("[PAYMENT FLOW] ✅ Navigation command executed");
-          
-          // Fallback in case navigate fails silently
-          setTimeout(() => {
-            if (window.location.pathname.indexOf('/thank-you') === -1) {
-              console.log("[PAYMENT FLOW] ⚠️ Navigate may have failed, using fallback URL redirection");
-              window.location.href = `/thank-you?ref=${receiptId}&pid=${response.razorpay_payment_id}`;
-            }
-          }, 300);
-          
-          return;
-        } catch (navError) {
-          console.error("[PAYMENT FLOW] ❌ Navigation error:", navError);
-          
-          // Use window.location as fallback
-          console.log("[PAYMENT FLOW] 🔄 Using fallback navigation via window.location");
-          window.location.href = `/thank-you?ref=${receiptId}&pid=${response.razorpay_payment_id}`;
-          
-          return;
-        }
-      } else {
-        // Show error toast and navigate to verification page if verification failed
-        console.warn("[PAYMENT FLOW] ❌ Verification result was not successful:", verificationResult);
-        
+      // If verification failed but we've already navigated, we need to update the state
+      if (!verificationResult.success) {
         toast({
-          title: "Payment Received",
-          description: "Your payment was received but verification is pending. We will process your booking soon.",
-          variant: "default"
+          title: "Payment Verification Warning",
+          description: "Your payment was received, but we're having trouble with our system. Please contact support if you don't receive a confirmation email.",
+          variant: "warning"
         });
-        
-        // Navigate to verification page to allow manual verification
-        navigateToVerification({
-          paymentId: response.razorpay_payment_id,
-          orderId: response.razorpay_order_id,
-          signature: response.razorpay_signature,
-          amount: price,
-          referenceId: receiptId,
-          bookingDetails,
-          isVerifying: false,
-          verificationFailed: false
-        });
-        
-        setIsProcessing(false);
       }
-    } catch (error) {
-      console.error("[PAYMENT FLOW] ❌ Error in payment success handler:", error);
       
-      // Show toast error
-      toast({
-        title: "Payment Processing",
-        description: "Your payment is being processed. If you don't receive a confirmation, please contact support.",
-        variant: "default"
+    } catch (error) {
+      console.error("Error in payment success handler:", error);
+      
+      // Even if an error occurs, navigate to confirmation with warning state
+      navigateToVerification({
+        paymentId: response.razorpay_payment_id,
+        orderId: response.razorpay_order_id,
+        signature: response.razorpay_signature,
+        amount: getEffectivePrice(),
+        referenceId: receiptId,
+        bookingDetails: {
+          clientName: `${state.personalDetails.firstName || ''} ${state.personalDetails.lastName || ''}`.trim(),
+          email: state.personalDetails.email,
+          referenceId: receiptId,
+          consultationType: state.serviceCategory,
+          services: state.selectedServices || [state.serviceCategory],
+          serviceCategory: state.serviceCategory,
+          date: state.date,
+          timeSlot: state.timeSlot,
+          timeframe: state.timeframe,
+          amount: getEffectivePrice()
+        },
+        isVerifying: false,
+        verificationFailed: true
       });
       
+      toast({
+        title: "Payment Processing Warning",
+        description: "Your payment was received, but we couldn't complete the booking process. Please contact support.",
+        variant: "warning"
+      });
+    } finally {
       setIsProcessing(false);
-      
-      // Navigate to thank you page as fallback
-      setTimeout(() => {
-        navigate("/thank-you", { replace: true });
-      }, 3000);
     }
   };
   
@@ -175,15 +134,9 @@ export const useOpenRazorpayCheckout = ({
         throw new Error('Razorpay not available');
       }
       
-      // Get the effective price, making sure it's positive and non-zero
-      const price = getEffectivePrice();
-      const effectivePrice = Math.max(price, 50); // Ensure minimum price of ₹50
-      
-      console.log(`[PAYMENT FLOW] Opening Razorpay checkout with price: ₹${effectivePrice}`);
-      
       const options = {
         key: razorpayKey,
-        amount: effectivePrice * 100, // Razorpay expects amount in paise
+        amount: getEffectivePrice() * 100, // Razorpay expects amount in paise
         currency: 'INR',
         name: 'Peace2Hearts',
         description: `Consultation Booking: ${receiptId}`,
@@ -205,7 +158,7 @@ export const useOpenRazorpayCheckout = ({
         },
         modal: {
           ondismiss: () => {
-            console.log("[PAYMENT FLOW] Payment dismissed");
+            console.log("Payment dismissed");
             setIsProcessing(false);
             toast({
               title: "Payment Cancelled",
@@ -219,10 +172,10 @@ export const useOpenRazorpayCheckout = ({
       const razorpayInstance = new window.Razorpay(options);
       razorpayInstance.open();
       
-      console.log("[PAYMENT FLOW] Razorpay checkout opened");
+      console.log("Razorpay checkout opened");
       
     } catch (error) {
-      console.error("[PAYMENT FLOW] Error opening Razorpay checkout:", error);
+      console.error("Error opening Razorpay checkout:", error);
       setIsProcessing(false);
       toast({
         title: "Payment Gateway Error",

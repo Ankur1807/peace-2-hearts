@@ -1,67 +1,47 @@
 
-import { useEffect, useState } from 'react';
+import { useCallback } from 'react';
 
-interface UseEffectivePriceProps {
-  selectedServices: string[];
+interface UseEffectivePriceParams {
+  selectedServices?: string[];
   pricing?: Map<string, number>;
   totalPrice?: number;
 }
 
-export const useEffectivePrice = ({
-  selectedServices,
+export function useEffectivePrice({
+  selectedServices = [],
   pricing,
-  totalPrice
-}: UseEffectivePriceProps) => {
-  const [effectivePrice, setEffectivePrice] = useState<number>(0);
+  totalPrice = 0
+}: UseEffectivePriceParams) {
 
-  useEffect(() => {
-    const calculateEffectivePrice = () => {
-      // If total price is directly provided, use it
-      if (totalPrice !== undefined && totalPrice > 0) {
-        console.log(`Using provided total price: ${totalPrice}`);
-        setEffectivePrice(totalPrice);
-        return;
-      }
+  const getEffectivePrice = useCallback(() => {
+    if (!pricing || pricing.size === 0) {
+      return totalPrice;
+    }
 
-      // Check if we have test service
-      const hasTestService = selectedServices.includes('test-service');
-      if (hasTestService) {
-        console.log('Test service detected, setting fixed price');
-        setEffectivePrice(50); // Fixed price for test service
-        return;
+    if (selectedServices.length === 0) {
+      return 0;
+    }
+
+    // Handle test service for development - FIXED: preserve the actual price (11)
+    if (selectedServices.includes('test-service')) {
+      const testServicePrice = pricing.get('test-service');
+      if (testServicePrice !== undefined && testServicePrice > 0) {
+        return testServicePrice; // Return the actual price from pricing map
       }
-      
-      // Calculate based on selected services and pricing map
-      if (selectedServices.length > 0 && pricing && pricing.size > 0) {
-        let total = 0;
-        let calculatedPrice = false;
-        
-        // Try to get price for each selected service
-        for (const service of selectedServices) {
-          const price = pricing.get(service);
-          if (price) {
-            total += price;
-            calculatedPrice = true;
-            console.log(`Adding price for ${service}: ${price}`);
-          } else {
-            console.log(`No price found for service: ${service}`);
-          }
-        }
-        
-        if (calculatedPrice) {
-          console.log(`Calculated total price from pricing map: ${total}`);
-          setEffectivePrice(total);
-          return;
-        }
+      return 11; // Default fallback price for test service
+    }
+
+    // Try to find the price from the pricing map
+    for (const serviceId of selectedServices) {
+      const price = pricing.get(serviceId);
+      if (price !== undefined && price > 0) {
+        return price;
       }
-      
-      // If we reach here, no valid price was found
-      console.log('Could not determine price. Setting to 0.');
-      setEffectivePrice(0);
-    };
-    
-    calculateEffectivePrice();
+    }
+
+    // Fall back to total price if available
+    return totalPrice;
   }, [selectedServices, pricing, totalPrice]);
 
-  return () => effectivePrice;
-};
+  return getEffectivePrice;
+}

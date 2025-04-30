@@ -134,7 +134,7 @@ export function usePaymentRecovery() {
           
           if (bookingDetails) {
             bookingDetails.highPriority = true;
-            bookingDetails.isRecovery = true; // Now this property is defined in the type
+            bookingDetails.isRecovery = true;
             
             console.log("Sending recovery email with booking details:", bookingDetails);
             const emailResult = await sendBookingConfirmationEmail(bookingDetails);

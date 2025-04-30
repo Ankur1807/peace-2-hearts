@@ -6,7 +6,8 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
-import { sendContactEmail } from '@/utils/email';
+import { sendContactEmail } from '@/utils/emailService';
+// Removed GoogleAnalytics import as it's now in App.tsx
 
 const Contact = () => {
   const { toast } = useToast();
@@ -34,14 +35,8 @@ const Contact = () => {
     try {
       console.log('Form data submitted:', formData);
       
-      // Send email using our email service with individual parameters
-      const emailSent = await sendContactEmail(
-        formData.name,
-        formData.email,
-        formData.subject,
-        formData.message,
-        formData.phone
-      );
+      // Send email using our email service
+      const emailSent = await sendContactEmail(formData);
       
       if (emailSent) {
         toast({

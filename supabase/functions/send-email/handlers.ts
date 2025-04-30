@@ -22,7 +22,6 @@ interface BookingEmailData {
   highPriority?: boolean;
   isResend?: boolean;
   isRecovery?: boolean;
-  bcc?: string; // Added this field to explicitly define bcc
 }
 
 // Set up Resend client
@@ -76,9 +75,13 @@ function generateBookingEmail(data: BookingEmailData): string {
   const isLegal = serviceCategory?.toLowerCase() === 'legal';
   const isMentalHealth = serviceCategory?.toLowerCase() === 'mental-health' || !serviceCategory;
   
-  // Log for debugging timezone issues
-  console.log(`[generateBookingEmail] Date received: ${date}`);
-  console.log(`[generateBookingEmail] Time received: ${timeSlot || timeframe}`);
+  // Format date if available
+  const formattedDate = date ? new Date(date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) : '';
   
   // Format service names for display
   const formattedServices = services.map(service => 
@@ -107,7 +110,7 @@ function generateBookingEmail(data: BookingEmailData): string {
           ` : ''}
           
           ${!isHolistic ? `
-            <p style="margin: 5px 0;"><strong>Date:</strong> ${date || "To be scheduled"}</p>
+            <p style="margin: 5px 0;"><strong>Date:</strong> ${formattedDate || "To be scheduled"}</p>
             <p style="margin: 5px 0;"><strong>Time:</strong> ${timeSlot || "To be scheduled"}</p>
           ` : ''}
         </div>
@@ -169,12 +172,9 @@ export async function handleBookingEmail(data: BookingEmailData) {
       ]
     };
     
-    // Add BCC for high priority emails or if explicitly specified
-    if (data.highPriority || data.bcc) {
-      // Use explicit BCC if provided, otherwise use support email
-      const bccEmail = data.bcc || "support@peace2hearts.com";
-      console.log(`Adding BCC to booking email: ${bccEmail}`);
-      emailOptions.bcc = [bccEmail];
+    // Add BCC for high priority emails
+    if (data.highPriority) {
+      emailOptions.bcc = ["support@peace2hearts.com"];
       emailOptions.tags.push({
         name: "priority",
         value: "high"

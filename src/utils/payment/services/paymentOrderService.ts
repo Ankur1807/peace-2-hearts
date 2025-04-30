@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { OrderResponse } from '../razorpayTypes';
+import { CreateOrderParams, OrderResponse } from '../razorpayTypes';
 
 /**
  * Create a new Razorpay order

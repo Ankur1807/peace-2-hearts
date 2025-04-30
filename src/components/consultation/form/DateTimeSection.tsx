@@ -54,43 +54,6 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     return date < getMinDate();
   };
 
-  // Create a wrapped setDate function to add additional logging
-  const handleDateChange = (newDate: Date | undefined) => {
-    console.log('[DateTimeSection] Setting new date:', newDate);
-    if (newDate) {
-      console.log('[DateTimeSection] New date ISO string:', newDate.toISOString());
-      console.log('[DateTimeSection] New date formatted:', newDate.toLocaleDateString());
-      console.log('[DateTimeSection] Year:', newDate.getFullYear());
-      console.log('[DateTimeSection] Month:', newDate.getMonth() + 1);
-      console.log('[DateTimeSection] Day:', newDate.getDate());
-      
-      // Set the date directly without further manipulation
-      // The DateTimePicker has already adjusted the time to noon to prevent timezone issues
-      setDate(newDate);
-    } else {
-      setDate(newDate);
-    }
-  };
-
-  // Log for debugging timezone issues
-  React.useEffect(() => {
-    if (date) {
-      console.log("[DateTimeSection] Selected date object:", date);
-      console.log("[DateTimeSection] Date in ISO:", date.toISOString());
-      console.log("[DateTimeSection] Local date string:", date.toString());
-      console.log("[DateTimeSection] Full year:", date.getFullYear());
-      console.log("[DateTimeSection] Month:", date.getMonth() + 1);
-      console.log("[DateTimeSection] Date:", date.getDate());
-      console.log("[DateTimeSection] Local time:", date.toLocaleTimeString());
-      console.log("[DateTimeSection] Selected time slot:", timeSlot);
-      
-      // Calculate the UTC offset
-      const offset = date.getTimezoneOffset();
-      console.log("[DateTimeSection] Timezone offset (minutes):", offset);
-      console.log("[DateTimeSection] Timezone offset (hours):", offset / 60);
-    }
-  }, [date, timeSlot]);
-
   return (
     <div className="p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">
       <h3 className="text-xl font-semibold mb-4 text-gray-800">Schedule Your Session</h3>
@@ -103,7 +66,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       ) : (
         <DateTimePicker 
           date={date}
-          setDate={handleDateChange}
+          setDate={setDate}
           timeSlot={timeSlot}
           setTimeSlot={setTimeSlot}
           serviceCategory={serviceCategory}

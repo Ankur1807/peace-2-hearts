@@ -38,31 +38,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   };
   
   const handleDateSelect = (selectedDate: Date | undefined) => {
-    // Add detailed logging to track the selected date
-    console.log('📅 User clicked date (raw):', selectedDate);
-    if (selectedDate) {
-      // Format date manually to ensure it matches what the user selected in the UI
-      const year = selectedDate.getFullYear();
-      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-      const day = String(selectedDate.getDate()).padStart(2, '0');
-      const dateString = `${year}-${month}-${day}`;
-      
-      console.log('📅 User clicked date (manually formatted):', dateString);
-      console.log('📅 User clicked date (ISO):', selectedDate.toISOString());
-      console.log('📅 User clicked date (local):', selectedDate.toLocaleDateString());
-      
-      // Create a new date object to avoid timezone issues by setting to noon local time
-      const correctedDate = new Date(selectedDate);
-      correctedDate.setHours(12, 0, 0, 0); // Set to noon to avoid any date shifting due to timezone
-      console.log('📅 Corrected date with noon time:', correctedDate);
-      console.log('📅 Corrected date ISO:', correctedDate.toISOString());
-      console.log('📅 Final date string that will be used:', `${correctedDate.getFullYear()}-${String(correctedDate.getMonth() + 1).padStart(2, '0')}-${String(correctedDate.getDate()).padStart(2, '0')}`);
-      
-      setDate(correctedDate);
-    } else {
-      setDate(undefined);
-    }
-    
+    setDate(selectedDate);
     setCalendarOpen(false);
   };
   

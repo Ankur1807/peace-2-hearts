@@ -9,15 +9,6 @@ interface ServiceDetailsProps {
 }
 
 const ServiceDetails = ({ services, date, timeSlot }: ServiceDetailsProps) => {
-  // Log for debugging timezone issues
-  if (date) {
-    console.log("[ServiceDetails] Raw date value:", date);
-    console.log("[ServiceDetails] Date type:", typeof date);
-    if (date instanceof Date) {
-      console.log("[ServiceDetails] Date ISO string:", date.toISOString());
-    }
-  }
-
   return (
     <>
       <p className="font-medium mb-2">Services Selected:</p>

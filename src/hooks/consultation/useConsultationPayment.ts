@@ -1,5 +1,6 @@
 
 import { useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { saveConsultation } from '@/utils/consultationApi';
 import { createRazorpayOrder } from '@/utils/payment/services/paymentOrderService';
 import { verifyRazorpayPayment } from '@/utils/payment/services/paymentVerificationService';
@@ -24,7 +25,7 @@ interface UseConsultationPaymentParams {
   toast: any;
   setIsProcessing?: (isProcessing: boolean) => void;
   setShowPaymentStep?: (show: boolean) => void;
-  handleConfirmBooking?: () => Promise<any>; // Correct return type
+  handleConfirmBooking?: () => Promise<void>;
   setReferenceId?: (id: string) => void;
 }
 
@@ -33,7 +34,7 @@ export function useConsultationPayment({
   toast,
   setIsProcessing = () => {},
   setShowPaymentStep = () => {},
-  handleConfirmBooking = async () => { return {}; }, // Default return object
+  handleConfirmBooking = async () => {},
   setReferenceId = () => {}
 }: UseConsultationPaymentParams) {
   const { processPaymentWithRazorpay } = useProcessPayment();
@@ -45,7 +46,7 @@ export function useConsultationPayment({
       selectedServices
     } = state;
     
-    console.log("[BOOKING FLOW] Proceeding to payment step with:", {
+    console.log("Proceeding to payment step with:", {
       personalDetails: personalDetails ? `${personalDetails.firstName} ${personalDetails.lastName}` : 'None',
       selectedServices: selectedServices ? selectedServices.join(', ') : 'None'
     });
@@ -55,7 +56,7 @@ export function useConsultationPayment({
     
     // For debugging, verify state updates
     setTimeout(() => {
-      console.log("[BOOKING FLOW] Verified showPaymentStep state change:", state.showPaymentStep);
+      console.log("Verified showPaymentStep state change:", state.showPaymentStep);
     }, 100);
   }, [state, setShowPaymentStep]);
 
@@ -93,10 +94,10 @@ export function useConsultationPayment({
     
     // Preserve the reference ID for later use
     if (!state.referenceId) {
-      console.log("[BOOKING FLOW] Generated new reference ID:", receiptId);
+      console.log("Generated new reference ID:", receiptId);
       setReferenceId(receiptId);
     } else {
-      console.log("[BOOKING FLOW] Using existing reference ID:", receiptId);
+      console.log("Using existing reference ID:", receiptId);
     }
 
     const consultationType = selectedServices.join(',');
@@ -105,12 +106,12 @@ export function useConsultationPayment({
     setIsProcessing(true);
     
     try {
-      console.log("[BOOKING FLOW] Processing payment with the following data:", {
+      console.log("Processing payment with the following data:", {
         serviceType: consultationType,
         clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
         referenceId: receiptId,
         amount: totalPrice,
-        date: date ? (date instanceof Date ? date.toISOString() : date) : undefined,
+        date: date?.toISOString(),
         timeSlot,
         timeframe
       });
@@ -122,34 +123,25 @@ export function useConsultationPayment({
       
       const timeSlotOrTimeframe = isHolisticPackage ? timeframe || 'Not specified' : timeSlot || 'Not specified';
       
-      // Only generate reference ID without actually inserting into database
+      // First save the consultation information
       try {
-        // Check if a consultation with this reference ID already exists, but don't create one
-        console.log("[BOOKING FLOW] Validating reference ID before payment:", receiptId);
-        const result = await saveConsultation(
-          consultationType,
-          isHolisticPackage ? undefined : date,
-          timeSlotOrTimeframe,
-          personalDetails
-        );
-        
-        if (!result || !result.referenceId) {
-          console.error("[BOOKING FLOW] Failed to validate reference ID");
-          toast({
-            title: "Error Preparing Booking",
-            description: "There was an error preparing your booking information. Please try again.",
-            variant: "destructive"
-          });
-          setIsProcessing(false);
-          return;
+        // Only save new consultation if it doesn't already exist
+        if (!state.referenceId) {
+          console.log("Saving consultation before payment processing");
+          await saveConsultation(
+            consultationType,
+            isHolisticPackage ? undefined : date,
+            timeSlotOrTimeframe,
+            personalDetails
+          );
+        } else {
+          console.log("Consultation already exists with reference ID:", state.referenceId);
         }
-        
-        console.log("[BOOKING FLOW] Reference ID validated successfully:", result.referenceId);
       } catch (error) {
-        console.error("[BOOKING FLOW] Error validating reference ID:", error);
+        console.error("Error saving consultation:", error);
         toast({
-          title: "Error Preparing Booking",
-          description: "There was an error preparing your booking information. Please try again.",
+          title: "Error Saving Booking",
+          description: "There was an error saving your booking information. Please try again.",
           variant: "destructive"
         });
         setIsProcessing(false);
@@ -167,7 +159,7 @@ export function useConsultationPayment({
         throw new Error("Failed to create payment order");
       }
       
-      console.log("[BOOKING FLOW] Created Razorpay order successfully:", orderResponse);
+      console.log("Created Razorpay order successfully:", orderResponse);
       
       // Process the payment with Razorpay
       processPaymentWithRazorpay({
@@ -179,15 +171,7 @@ export function useConsultationPayment({
         email: personalDetails.email,
         phone: personalDetails.phone,
         successCallback: async (response: any) => {
-          console.log("[BOOKING FLOW] Payment successful, starting verification", response);
-          
-          // Format the date as a string for consistent handling
-          let dateString = '';
-          if (date) {
-            dateString = date instanceof Date 
-              ? date.toISOString().split('T')[0] // Extract YYYY-MM-DD
-              : date;
-          }
+          console.log("Payment successful, starting verification", response);
           
           const verificationResult = await verifyRazorpayPayment(
             response.razorpay_payment_id,
@@ -195,7 +179,7 @@ export function useConsultationPayment({
             response.razorpay_signature,
             receiptId,
             {
-              date: dateString, // Always pass a string
+              date: date instanceof Date ? date.toISOString() : (date || ''),
               timeSlot: timeSlot || '',
               timeframe: timeframe || '',
               consultationType: consultationType,
@@ -210,32 +194,15 @@ export function useConsultationPayment({
             }
           );
 
-          console.log("[BOOKING FLOW] Payment verification result:", verificationResult);
+          console.log("Payment verification result:", verificationResult);
           
           if (verificationResult.success) {
-            console.log("[BOOKING FLOW] Payment verified successfully, calling handleConfirmBooking");
+            console.log("Payment verified successfully, calling handleConfirmBooking");
             
-            try {
-              // Complete the booking process and get the booking result
-              const bookingResult = await handleConfirmBooking();
-              console.log("[BOOKING FLOW] Booking confirmed with result:", bookingResult);
-              
-              // Navigate to thank-you page after successful booking
-              console.log("[BOOKING FLOW] Navigating to thank-you page");
-              
-              // Note: Navigation is now handled in the verification component for consistency
-            } catch (bookingError) {
-              console.error("[BOOKING FLOW] Error in handleConfirmBooking:", bookingError);
-              toast({
-                title: "Booking Confirmation Error",
-                description: "Your payment was successful, but there was an error confirming your booking. Our team will contact you.",
-                variant: "destructive"
-              });
-              
-              setIsProcessing(false);
-            }
+            // Complete the booking process
+            await handleConfirmBooking();
           } else {
-            console.error("[BOOKING FLOW] Payment verification failed:", verificationResult.error);
+            console.error("Payment verification failed:", verificationResult.error);
             toast({
               title: "Payment Verification Failed",
               description: verificationResult.error || "Please contact support with your reference ID.",
@@ -246,7 +213,7 @@ export function useConsultationPayment({
           }
         },
         errorCallback: (error: any) => {
-          console.error("[BOOKING FLOW] Payment error:", error);
+          console.error("Payment error:", error);
           toast({
             title: "Payment Error",
             description: error.description || "There was an error processing your payment. Please try again.",
@@ -257,7 +224,7 @@ export function useConsultationPayment({
       });
       
     } catch (error: any) {
-      console.error("[BOOKING FLOW] Error in processPayment:", error);
+      console.error("Error in processPayment:", error);
       toast({
         title: "Payment Processing Error",
         description: error.message || "There was an error processing your payment. Please try again.",

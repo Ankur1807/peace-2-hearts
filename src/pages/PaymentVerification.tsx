@@ -5,7 +5,7 @@ import { SEO } from '@/components/SEO';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { usePaymentVerification } from '@/hooks/payment/usePaymentVerification';
 import { BookingDetails } from '@/utils/types';
 import PaymentVerificationLoader from '@/components/consultation/payment/PaymentVerificationLoader';
@@ -23,14 +23,12 @@ const PaymentVerification = () => {
     amount, 
     referenceId,
     bookingDetails,
-    isVerifying: initiallyVerifying = false,
-    verificationFailed = false
+    isVerifying: initiallyVerifying = false
   } = location.state || {};
   
   const [isProcessing, setIsProcessing] = useState(true);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [manualVerification, setManualVerification] = useState(false);
-  const [redirectTime, setRedirectTime] = useState(3); // seconds to redirect
   
   const {
     isVerifying,
@@ -55,39 +53,25 @@ const PaymentVerification = () => {
 
   // Automatically redirect to the confirmation page after short timeout
   useEffect(() => {
-    // Only start the countdown when verification is complete
-    if (!isVerifying && !initiallyVerifying) {
-      const timer = setInterval(() => {
-        setRedirectTime((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            navigateToConfirmation();
-            return 0;
-          }
-          return prev - 1;
+    if (paymentId && !isVerifying && !initiallyVerifying) {
+      const timer = setTimeout(() => {
+        navigate('/payment-confirmation', {
+          state: {
+            paymentId,
+            orderId,
+            signature,
+            referenceId,
+            amount,
+            bookingDetails,
+            verificationResult
+          },
+          replace: true
         });
-      }, 1000);
+      }, 3000);
       
-      return () => clearInterval(timer);
+      return () => clearTimeout(timer);
     }
-  }, [isVerifying, initiallyVerifying]);
-
-  // Function to navigate to confirmation page
-  const navigateToConfirmation = () => {
-    navigate('/payment-confirmation', {
-      state: {
-        paymentId,
-        orderId,
-        signature,
-        referenceId,
-        amount,
-        bookingDetails,
-        verificationResult,
-        verificationFailed
-      },
-      replace: true
-    });
-  };
+  }, [isVerifying, initiallyVerifying, paymentId, navigate, orderId, signature, referenceId, amount, bookingDetails, verificationResult]);
 
   // Try manual verification if needed
   const handleManualVerification = () => {
@@ -133,7 +117,7 @@ const PaymentVerification = () => {
           <h1 className="text-2xl font-semibold mb-4">Payment Processed!</h1>
           <p className="text-gray-600 mb-6">
             Your payment has been received and your booking information is being saved.
-            You'll be redirected to the confirmation page in {redirectTime} {redirectTime === 1 ? 'second' : 'seconds'}.
+            You'll be redirected to the confirmation page in a moment.
           </p>
           <div className="bg-gray-50 p-4 rounded-lg mb-6 text-left">
             <p className="text-sm">
@@ -144,10 +128,20 @@ const PaymentVerification = () => {
           </div>
           <div className="space-y-3">
             <Button 
-              onClick={navigateToConfirmation}
+              onClick={() => navigate('/payment-confirmation', { 
+                state: {
+                  paymentId,
+                  orderId,
+                  signature,
+                  referenceId,
+                  amount,
+                  bookingDetails,
+                  verificationResult
+                }
+              })}
               className="w-full bg-peacefulBlue hover:bg-peacefulBlue/80"
             >
-              View Confirmation Now
+              View Confirmation
             </Button>
             
             {!manualVerification && (

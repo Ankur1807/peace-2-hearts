@@ -4,7 +4,6 @@ import { BookingDetails } from "@/utils/types";
 import { savePaymentRecord } from "./paymentRecordService";
 import { fetchBookingDetailsByReference } from "@/utils/email/bookingEmailService";
 import { sendEmailForConsultation } from "./emailNotificationService";
-import { convertISTTimeSlotToUTCString } from "@/utils/dateUtils";
 
 /**
  * Verify a Razorpay payment with the server
@@ -17,28 +16,7 @@ export async function verifyRazorpayPayment(
   bookingDetails?: BookingDetails
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log(`[PAYMENT VERIFICATION] Verifying payment: ${paymentId} for reference: ${referenceId}`);
-    
-    // Ensure date is properly formatted as UTC ISO string if we have both date and timeSlot
-    if (bookingDetails?.date && bookingDetails?.timeSlot) {
-      console.log('[PAYMENT VERIFICATION] Original date and timeSlot:', { 
-        date: bookingDetails.date,
-        timeSlot: bookingDetails.timeSlot 
-      });
-      
-      // This should already be a string from previous formatting, but just in case:
-      const dateStr = typeof bookingDetails.date === 'string' 
-        ? bookingDetails.date 
-        : bookingDetails.date instanceof Date 
-          ? bookingDetails.date.toISOString().split('T')[0]
-          : '';
-          
-      if (dateStr && bookingDetails.timeSlot) {
-        // Convert to UTC using our hardcoded function
-        bookingDetails.date = convertISTTimeSlotToUTCString(dateStr, bookingDetails.timeSlot);
-        console.log('[PAYMENT VERIFICATION] Converted date to UTC ISO string:', bookingDetails.date);
-      }
-    }
+    console.log(`Verifying payment: ${paymentId} for reference: ${referenceId}`);
     
     // Call the verify-payment edge function
     const { data, error } = await supabase.functions.invoke('verify-payment', {
@@ -53,7 +31,9 @@ export async function verifyRazorpayPayment(
           referenceId: bookingDetails.referenceId,
           consultationType: bookingDetails.consultationType,
           services: bookingDetails.services || [bookingDetails.consultationType],
-          date: bookingDetails.date, // Now consistently a string
+          date: bookingDetails.date ? 
+            (bookingDetails.date instanceof Date ? 
+              bookingDetails.date.toISOString() : bookingDetails.date) : undefined,
           timeSlot: bookingDetails.timeSlot,
           timeframe: bookingDetails.timeframe,
           message: bookingDetails.message,
@@ -64,16 +44,16 @@ export async function verifyRazorpayPayment(
     });
     
     if (error) {
-      console.error("[PAYMENT VERIFICATION] Error verifying payment with edge function:", error);
+      console.error("Error verifying payment with edge function:", error);
       return { success: false, error: error.message };
     }
     
     if (!data.success || !data.verified) {
-      console.error("[PAYMENT VERIFICATION] Payment verification failed:", data);
+      console.error("Payment verification failed:", data);
       return { success: false, error: data.error || "Payment verification failed" };
     }
     
-    console.log("[PAYMENT VERIFICATION] Payment verified successfully:", data);
+    console.log("Payment verified successfully:", data);
     
     // Save payment record locally
     if (bookingDetails) {
@@ -87,8 +67,8 @@ export async function verifyRazorpayPayment(
     }
     
     return { success: true };
-  } catch (error: any) {
-    console.error("[PAYMENT VERIFICATION] Error in verifyRazorpayPayment:", error);
+  } catch (error) {
+    console.error("Error in verifyRazorpayPayment:", error);
     return { success: false, error: error.message };
   }
 }
@@ -175,7 +155,7 @@ export async function recoverEmailByReferenceId(referenceId: string): Promise<bo
     console.log(`Found consultation, sending recovery email for: ${referenceId}`);
     const emailSent = await sendEmailForConsultation({
       ...bookingDetails,
-      isRecovery: true, // Now the type supports this field
+      isRecovery: true,
       highPriority: true
     });
     

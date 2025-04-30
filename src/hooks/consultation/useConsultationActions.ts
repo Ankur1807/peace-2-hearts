@@ -1,6 +1,8 @@
 
 import { useCallback } from 'react';
 import { saveConsultation } from '@/utils/consultationApi';
+import { sendBookingConfirmationEmail } from '@/utils/emailService';
+import { getPackageName } from './consultationHelpers';
 
 interface UseConsultationActionsParams {
   state: any;
@@ -19,12 +21,12 @@ export const useConsultationActions = ({
   setIsProcessing,
   toast
 }: UseConsultationActionsParams) => {
-  const handleConfirmBooking = async () => {
+  const handleConfirmBooking = async (): Promise<any> => {  // Changed return type from void to any
     setIsProcessing(true);
     setBookingError(null);
     
     try {
-      console.log("[BOOKING FLOW] handleConfirmBooking started with state:", {
+      console.log("handleConfirmBooking started with state:", {
         selectedServices: state.selectedServices,
         serviceCategory: state.serviceCategory,
         date: state.date,
@@ -42,40 +44,27 @@ export const useConsultationActions = ({
         ? state.timeframe 
         : state.timeSlot;
       
-      console.log("[BOOKING FLOW] Validating reference ID in handleConfirmBooking:", {
+      console.log("Saving consultation with:", {
         consultationType,
         timeSlotOrTimeframe,
         isHolistic: state.serviceCategory === 'holistic',
         personalDetails: state.personalDetails
       });
       
-      // Only check if reference ID is valid, don't save new consultation
-      let result;
-      if (state.referenceId) {
-        // If we already have a referenceId, just return it
-        console.log("[BOOKING FLOW] Using existing reference ID:", state.referenceId);
-        result = { referenceId: state.referenceId };
-      } else {
-        // Generate a new reference ID
-        try {
-          result = await saveConsultation(
-            consultationType,
-            state.date,
-            timeSlotOrTimeframe,
-            state.personalDetails
-          );
-        } catch (error) {
-          console.error("[BOOKING FLOW] Error validating reference ID:", error);
-          throw new Error("Could not validate reference ID");
-        }
-      }
+      // Save the consultation
+      const result = await saveConsultation(
+        consultationType,
+        state.date,
+        timeSlotOrTimeframe,
+        state.personalDetails
+      );
       
-      console.log("[BOOKING FLOW] Reference ID validated:", result);
+      console.log("Consultation saved successfully:", result);
       
       // Set the reference ID for later use
-      if (result && result.referenceId) {
-        setReferenceId(result.referenceId);
-        console.log("[BOOKING FLOW] Reference ID set to:", result.referenceId);
+      if (result && result.reference_id) {
+        setReferenceId(result.reference_id);
+        console.log("Reference ID set to:", result.reference_id);
       } else {
         throw new Error("No reference ID returned from saveConsultation");
       }
@@ -85,9 +74,9 @@ export const useConsultationActions = ({
         setSubmitted(true);
       }
       
-      return result;
+      return result;  // This is now correctly typed as 'any'
     } catch (error) {
-      console.error("[BOOKING FLOW] Error in handleConfirmBooking:", error);
+      console.error("Error in handleConfirmBooking:", error);
       
       const errorMessage = error instanceof Error ? error.message : "Failed to book consultation";
       setBookingError(errorMessage);
@@ -108,7 +97,7 @@ export const useConsultationActions = ({
     const { selectedServices, serviceCategory, date, timeSlot, timeframe, personalDetails } = state;
     let lastResult;
     
-    console.log("[BOOKING FLOW] processServiceBookings - Starting bookings process with state:", {
+    console.log("processServiceBookings - Starting bookings process with state:", {
       selectedServices, 
       serviceCategory, 
       date: date ? date.toString() : undefined, 
@@ -121,29 +110,30 @@ export const useConsultationActions = ({
       throw new Error("No services selected");
     }
 
-    // Just validate referenceId for first service and use it for all others
-    console.log(`[BOOKING FLOW] Validating reference ID for service: ${selectedServices[0]}`);
-    try {
-      const result = await saveConsultation(
-        selectedServices[0],
-        serviceCategory === 'holistic' ? undefined : date,
-        serviceCategory === 'holistic' ? timeframe : timeSlot,
-        personalDetails
-      );
-      
-      if (result) {
-        console.log(`[BOOKING FLOW] Reference ID validated for ${selectedServices[0]}:`, result);
-        lastResult = result;
-      } else {
-        console.error(`[BOOKING FLOW] Failed to validate reference ID for ${selectedServices[0]}: No result returned`);
+    for (const service of selectedServices) {
+      console.log(`Creating consultation for service: ${service}`);
+      try {
+        const result = await saveConsultation(
+          service,
+          serviceCategory === 'holistic' ? undefined : date,
+          serviceCategory === 'holistic' ? timeframe : timeSlot,
+          personalDetails
+        );
+        
+        if (result) {
+          console.log(`Consultation created for ${service}:`, result);
+          lastResult = result;
+        } else {
+          console.error(`Failed to create consultation for ${service}: No result returned`);
+        }
+      } catch (error) {
+        console.error(`Error creating consultation for ${service}:`, error);
+        throw error;
       }
-    } catch (error) {
-      console.error(`[BOOKING FLOW] Error validating reference ID for ${selectedServices[0]}:`, error);
-      throw error;
     }
     
     if (!lastResult) {
-      throw new Error("Failed to validate reference ID");
+      throw new Error("Failed to create any consultations");
     }
     
     return lastResult;

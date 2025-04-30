@@ -1,7 +1,7 @@
 
-import React from 'react';
-import { CheckCircle, XCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface PaymentStatusMessageProps {
   success: boolean;
@@ -10,28 +10,34 @@ interface PaymentStatusMessageProps {
   orderId?: string | null;
 }
 
-const PaymentStatusMessage = ({ 
-  success, 
-  message, 
-  paymentId, 
-  orderId 
-}: PaymentStatusMessageProps) => {
+const PaymentStatusMessage = ({ success, message, paymentId, orderId }: PaymentStatusMessageProps) => {
+  const navigate = useNavigate();
+
+  if (success) {
+    return (
+      <Alert variant="default" className="mb-6">
+        <AlertTitle className="text-xl font-lora">Payment Verified</AlertTitle>
+        <AlertDescription className="text-lg">{message}</AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
-    <Alert className={`mb-6 ${success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-      <div className="flex items-center gap-3">
-        {success ? (
-          <CheckCircle className="h-5 w-5 text-green-600" />
-        ) : (
-          <XCircle className="h-5 w-5 text-red-600" />
-        )}
-        <AlertTitle className={`${success ? 'text-green-800' : 'text-red-800'}`}>
-          {success ? 'Payment Successful' : 'Payment Issue Detected'}
-        </AlertTitle>
+    <div className="text-center">
+      {paymentId && <p className="mb-4">Payment ID: <strong>{paymentId}</strong></p>}
+      {orderId && <p className="mb-4">Order ID: <strong>{orderId}</strong></p>}
+      <p className="mb-6">Please save these details for your reference when contacting support.</p>
+      <div className="space-y-3">
+        <Button onClick={() => navigate('/book-consultation')} className="w-full sm:w-auto">
+          Try Booking Again
+        </Button>
+        <div className="pt-2">
+          <Button onClick={() => navigate('/')} variant="outline" className="w-full sm:w-auto">
+            Return to Home
+          </Button>
+        </div>
       </div>
-      <AlertDescription className="mt-2 text-gray-700">
-        {message}
-      </AlertDescription>
-    </Alert>
+    </div>
   );
 };
 
