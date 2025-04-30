@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { saveConsultation } from '@/utils/consultationApi';
@@ -122,9 +123,8 @@ export function useConsultationPayment({
       
       const timeSlotOrTimeframe = isHolisticPackage ? timeframe || 'Not specified' : timeSlot || 'Not specified';
       
-      // First save the consultation information
+      // Only save new consultation if it doesn't already exist
       try {
-        // Only save new consultation if it doesn't already exist
         if (!state.referenceId) {
           console.log("Saving consultation before payment processing");
           await saveConsultation(
@@ -178,7 +178,8 @@ export function useConsultationPayment({
             response.razorpay_signature,
             receiptId,
             {
-              date: date instanceof Date ? date.toISOString() : (date || ''),
+              // Convert string date to Date object if present, otherwise pass undefined
+              date: date ? date : undefined,
               timeSlot: timeSlot || '',
               timeframe: timeframe || '',
               consultationType: consultationType,
