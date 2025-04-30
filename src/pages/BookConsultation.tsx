@@ -13,6 +13,7 @@ import ConsultationInitializer from '@/components/consultation/ConsultationIniti
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { convertISTDateTimeToUTC } from '@/utils/dateUtils';
 
 const BookConsultation = () => {
   const [searchParams] = useSearchParams();
@@ -52,20 +53,37 @@ const BookConsultation = () => {
     }
   }, [showPaymentStep, debugState.showingPaymentStep]);
 
-  const createBookingDetails = (): BookingDetails => ({
-    clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
-    email: personalDetails.email,
-    referenceId: referenceId || '',
-    consultationType: selectedServices.length > 1 ? 'multiple' : selectedServices[0] || serviceCategory, // Add consultationType
-    services: selectedServices || [], 
-    date: date, 
-    timeSlot: timeSlot,
-    timeframe: timeframe,
-    serviceCategory: serviceCategory,
-    packageName: getPackageName(selectedServices),
-    amount: totalPrice,
-    message: personalDetails.message
-  });
+  const createBookingDetails = (): BookingDetails => {
+    // Create the basic booking details
+    const bookingDetails: BookingDetails = {
+      clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
+      email: personalDetails.email,
+      referenceId: referenceId || '',
+      consultationType: selectedServices.length > 1 ? 'multiple' : selectedServices[0] || serviceCategory,
+      services: selectedServices || [], 
+      timeSlot: timeSlot,
+      timeframe: timeframe,
+      serviceCategory: serviceCategory,
+      packageName: getPackageName(selectedServices),
+      amount: totalPrice,
+      message: personalDetails.message
+    };
+    
+    // If we have both date and timeSlot, convert to UTC for storage
+    if (date && timeSlot) {
+      console.log('Original date before conversion:', date);
+      // Convert date to ISO string first if it's a Date object
+      const dateIsoStr = date instanceof Date ? date.toISOString() : date;
+      // Use the new conversion function
+      const utcDate = convertISTDateTimeToUTC(dateIsoStr, timeSlot);
+      console.log('Converted UTC date for Supabase storage:', utcDate);
+      bookingDetails.date = utcDate;
+    } else {
+      bookingDetails.date = date; // Keep original format if missing timeSlot
+    }
+    
+    return bookingDetails;
+  };
 
   React.useEffect(() => {
     if (submitted && referenceId) {

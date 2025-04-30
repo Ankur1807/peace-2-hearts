@@ -58,6 +58,45 @@ export function addDays(date: Date, days: number): Date {
 }
 
 /**
+ * Convert IST date and time to UTC for database storage
+ * Properly handles the IST (+5:30) to UTC conversion
+ */
+export function convertISTDateTimeToUTC(dateString: string | Date, timeSlot: string): string {
+  // Handle Date object conversion
+  const dateStr = dateString instanceof Date ? 
+    dateString.toISOString().split('T')[0] : 
+    typeof dateString === 'string' ? dateString : '';
+    
+  // Parse time from the timeSlot format (e.g., "11-am", "2-pm")
+  const [hourStr, meridian] = timeSlot.split('-');
+  let hour = parseInt(hourStr, 10);
+  
+  // Convert to 24-hour format
+  if (meridian.toLowerCase() === 'pm' && hour < 12) {
+    hour += 12;
+  } else if (meridian.toLowerCase() === 'am' && hour === 12) {
+    hour = 0;
+  }
+  
+  // Create date with explicit IST timezone offset
+  const istDate = new Date(`${dateStr}T${hour.toString().padStart(2, '0')}:00:00+05:30`);
+  
+  console.log('[convertISTDateTimeToUTC] Input:', {
+    dateString,
+    timeSlot,
+    parsedHour: hour,
+    istDateObj: istDate,
+    istDateStr: istDate.toString()
+  });
+  
+  // Convert to UTC ISO string
+  const utcString = istDate.toISOString();
+  console.log('[convertISTDateTimeToUTC] Output UTC:', utcString);
+  
+  return utcString;
+}
+
+/**
  * Convert local date and time to UTC for storage
  * Properly handles IST (+5:30) to UTC conversion
  */

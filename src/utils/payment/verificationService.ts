@@ -44,7 +44,8 @@ export async function verifyPaymentAndCreateBooking(
         paymentId,
         orderId,
         referenceId: bookingDetails.referenceId,
-        email: bookingDetails.email
+        email: bookingDetails.email,
+        date: bookingDetails.date
       });
       
       const { data, error } = await supabase.functions.invoke('verify-payment', {
@@ -59,7 +60,7 @@ export async function verifyPaymentAndCreateBooking(
             referenceId: bookingDetails.referenceId,
             consultationType: bookingDetails.consultationType,
             services: bookingDetails.services || [bookingDetails.consultationType],
-            date: bookingDetails.date instanceof Date ? bookingDetails.date.toISOString() : bookingDetails.date,
+            date: bookingDetails.date, // This is now in proper UTC format
             timeSlot: bookingDetails.timeSlot,
             timeframe: bookingDetails.timeframe,
             serviceCategory: bookingDetails.serviceCategory,
@@ -159,7 +160,9 @@ async function storeEmergencyPaymentRecord(
       consultation_type: bookingDetails.consultationType || "emergency-recovery",
       time_slot: bookingDetails.timeSlot || "to_be_confirmed",
       message: `Emergency payment record created due to verification failure. Payment ID: ${paymentId}`,
-      source: "fallback" // Mark the source as fallback
+      source: "fallback", // Mark the source as fallback
+      // Include the date which is now properly formatted in UTC
+      date: bookingDetails.date
     });
     
     if (error) {

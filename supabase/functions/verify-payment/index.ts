@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { corsHeaders, determineServiceCategory, handleFetchResponse } from "./utils.ts";
@@ -120,6 +121,7 @@ async function createConsultationRecord(
     } = bookingDetails;
     
     console.log(`[EDGE FUNCTION] Creating consultation record with reference ID: ${referenceId}`);
+    console.log(`[EDGE FUNCTION] Date received (should now be UTC):`, date);
     
     // Check if a record already exists with this reference ID
     const { data: existingConsultation, error: checkError } = await supabase
@@ -178,6 +180,7 @@ async function createConsultationRecord(
         serviceCategory: effectiveServiceCategory,
         referenceId,
         amount,
+        date, // This should now be a proper UTC date string from the frontend
         source // Include source field
       });
       
@@ -188,7 +191,7 @@ async function createConsultationRecord(
         client_phone: phone,
         reference_id: referenceId,
         consultation_type: consultationType || services.join(','),
-        date: date ? new Date(date).toISOString() : null,
+        date: date || null, // The date is already in UTC format from the frontend
         time_slot: timeSlot || null,
         timeframe: timeframe || null,
         message: message || null,
@@ -387,7 +390,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Log date information for debugging
     if (bookingDetails.date) {
-      console.log(`[EDGE] Received booking date: ${bookingDetails.date}`);
+      console.log(`[EDGE] Received booking date (should be in UTC): ${bookingDetails.date}`);
       if (typeof bookingDetails.date === 'string') {
         try {
           const dateObj = new Date(bookingDetails.date);
