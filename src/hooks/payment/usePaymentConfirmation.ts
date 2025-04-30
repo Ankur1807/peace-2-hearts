@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { verifyRazorpayPayment, verifyAndSyncPayment } from "@/utils/payment/razorpayService";
@@ -90,6 +89,7 @@ export const usePaymentConfirmation = ({
                       email: consultation.client_email,
                       consultationType: consultation.consultation_type,
                       services: consultation.consultation_type ? consultation.consultation_type.split(',') : [],
+                      timeSlot: consultation.time_slot || 'to_be_scheduled', // Adding required timeSlot
                       serviceCategory: consultation.consultation_type?.toLowerCase().includes('legal') ? 
                         'legal' : consultation.consultation_type?.toLowerCase().includes('holistic') ? 
                         'holistic' : 'mental-health',

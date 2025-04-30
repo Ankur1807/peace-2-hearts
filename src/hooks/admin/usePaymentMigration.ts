@@ -1,116 +1,80 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { verifyPaymentMigration, executePaymentMigration } from '@/utils/payment/services/paymentMigration';
 import { useToast } from '@/hooks/use-toast';
 
 export function usePaymentMigration() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
-  const [verificationResult, setVerificationResult] = useState<any>(null);
-  const [migrationResult, setMigrationResult] = useState<{
+  const [migrationStats, setMigrationStats] = useState<{
     success: boolean;
-    message: string;
+    migratedConsultations: number;
+    consultationsWithoutPayment: number;
   } | null>(null);
   const { toast } = useToast();
-
-  const verifyMigration = async () => {
+  
+  const verifyMigration = useCallback(async () => {
     setIsVerifying(true);
     try {
-      const result = await verifyPaymentMigration();
-      setVerificationResult(result);
-      
-      if (result.success) {
-        toast({
-          title: "Verification Complete",
-          description: `Found ${result.paymentsCount} payment records and ${result.consultationsWithoutPayment} consultations needing payment data.`
-        });
-      } else {
-        toast({
-          title: "Verification Failed",
-          description: "Could not verify migration status. See console for details.",
-          variant: "destructive"
-        });
-      }
-      
-      return result;
-    } catch (error) {
-      console.error("Error verifying migration:", error);
-      setVerificationResult({
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error occurred"
-      });
+      const results = await verifyPaymentMigration();
+      setMigrationStats(results);
       
       toast({
-        title: "Verification Error",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
+        title: results.success ? "Migration Status Verified" : "Migration Check Failed",
+        description: `Found ${results.migratedConsultations} migrated consultations and ${results.consultationsWithoutPayment} consultations without payments.`
       });
       
-      return {
-        success: false,
-        paymentsCount: 0,
-        consultationsWithoutPayment: 0
-      };
+      return results;
+    } catch (error) {
+      console.error("Error verifying payment migration:", error);
+      toast({
+        title: "Migration Check Failed",
+        description: "Could not verify payment migration status",
+        variant: "destructive"
+      });
+      return null;
     } finally {
       setIsVerifying(false);
     }
-  };
-
-  const executeMigration = async () => {
+  }, [toast]);
+  
+  const runMigration = useCallback(async () => {
     setIsMigrating(true);
     try {
       const result = await executePaymentMigration();
-      setMigrationResult(result);
       
+      toast({
+        title: result.success ? "Migration Completed" : "Migration Failed",
+        description: result.message
+      });
+      
+      // Verify the migration after running it
       if (result.success) {
-        toast({
-          title: "Migration Successful",
-          description: result.message
-        });
-      } else {
-        toast({
-          title: "Migration Failed",
-          description: result.message,
-          variant: "destructive"
-        });
+        await verifyMigration();
       }
       
       return result;
     } catch (error) {
-      console.error("Error executing migration:", error);
-      
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      setMigrationResult({
-        success: false,
-        message: errorMessage
-      });
-      
+      console.error("Error running payment migration:", error);
       toast({
-        title: "Migration Error",
-        description: errorMessage,
+        title: "Migration Failed",
+        description: "An error occurred during the payment migration",
         variant: "destructive"
       });
-      
       return {
         success: false,
-        message: errorMessage
+        message: "An error occurred during the payment migration"
       };
     } finally {
       setIsMigrating(false);
     }
-  };
-
-  const canExecuteMigration = verificationResult?.success &&
-    verificationResult?.paymentsCount === 0 && 
-    verificationResult?.consultationsWithoutPayment === 0;
-
+  }, [toast, verifyMigration]);
+  
   return {
     isVerifying,
     isMigrating,
-    verificationResult,
-    migrationResult,
+    migrationStats,
     verifyMigration,
-    executeMigration,
-    canExecuteMigration
+    runMigration
   };
 }

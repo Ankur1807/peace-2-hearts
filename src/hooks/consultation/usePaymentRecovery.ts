@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { verifyAndSyncPayment } from '@/utils/payment/services/paymentVerificationService';
 import { savePaymentRecord } from '@/utils/payment/services/paymentRecordService';
@@ -134,7 +133,7 @@ export function usePaymentRecovery() {
           
           if (bookingDetails) {
             bookingDetails.highPriority = true;
-            bookingDetails.isRecovery = true;
+            bookingDetails.isRecovery = true; // This property is now properly defined in the type
             
             console.log("Sending recovery email with booking details:", bookingDetails);
             const emailResult = await sendBookingConfirmationEmail(bookingDetails);
