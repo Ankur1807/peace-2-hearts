@@ -58,6 +58,13 @@ serve(async (req) => {
           ? `Important: Your Peace2Hearts Consultation Booking #${data.referenceId}`
           : `Confirmation: Your Peace2Hearts Consultation Booking #${data.referenceId}`;
         
+        // Log the BCC address if provided
+        if (data.bcc) {
+          console.log("[SEND-EMAIL] Admin BCC included:", data.bcc);
+        } else {
+          console.warn("[SEND-EMAIL] No BCC email address provided");
+        }
+        
         console.log(`[SEND-EMAIL] Sending booking confirmation email to ${recipient}, BCC: ${data.bcc || 'none'}`);
         
         // Send email using Resend with BCC support

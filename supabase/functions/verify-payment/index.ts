@@ -199,7 +199,8 @@ async function createConsultationRecord(
         payment_status: paymentStatus,
         status: bookingStatus,
         email_sent: false, // Will be updated after email is sent
-        source: source // Add source field
+        source: source, // Add source field
+        service_category: effectiveServiceCategory // Make sure service_category is included
       };
 
       try {

@@ -86,25 +86,45 @@ export const useOpenRazorpayCheckout = ({
         try {
           console.log("[PAYMENT FLOW] 🔄 Executing navigation to thank-you page");
           
-          // Navigate with replace to prevent back navigation to payment page
+          // Navigation parameters for both primary and fallback navigation
+          const navigationParams = {
+            paymentId: response.razorpay_payment_id,
+            orderId: response.razorpay_order_id,
+            signature: response.razorpay_signature,
+            amount: price,
+            referenceId: receiptId
+          };
+          
+          // Primary navigation method using React Router
           navigate("/thank-you", { 
             state: {
-              paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id,
-              signature: response.razorpay_signature,
-              amount: price,
-              referenceId: receiptId,
+              ...navigationParams,
               bookingDetails
             },
             replace: true 
           });
           
           console.log("[PAYMENT FLOW] ✅ Navigation command executed");
+          
+          // Set a fallback in case navigate fails silently (happens in some scenarios)
+          setTimeout(() => {
+            // Check if we're still on the same page after navigation attempt
+            if (window.location.pathname.indexOf('/thank-you') === -1) {
+              console.log("[PAYMENT FLOW] ⚠️ Navigate may have failed, using fallback URL redirection");
+              // Construct URL parameters for fallback
+              const params = new URLSearchParams({
+                ref: receiptId,
+                pid: response.razorpay_payment_id,
+                oid: response.razorpay_order_id
+              });
+              window.location.href = `/thank-you?${params.toString()}`;
+            }
+          }, 500);
         } catch (navError) {
           console.error("[PAYMENT FLOW] ❌ Navigation error:", navError);
           
-          // If navigation fails, try alternative approach with window.location
-          console.log("[PAYMENT FLOW] 🔄 Trying alternate navigation via window.location");
+          // If navigation fails, use window.location as fallback
+          console.log("[PAYMENT FLOW] 🔄 Using fallback navigation via window.location");
           window.location.href = `/thank-you?ref=${receiptId}&pid=${response.razorpay_payment_id}`;
         }
         
