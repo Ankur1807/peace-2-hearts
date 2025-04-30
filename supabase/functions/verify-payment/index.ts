@@ -244,6 +244,33 @@ async function sendConfirmationEmail(
       // Make sure we always include admin as BCC - Fixed admin email address
       const adminEmail = "admin@peace2hearts.com";
       
+      // Process date for email - log the raw and formatted values for debugging
+      const rawDate = bookingDetails.date;
+      let formattedDate = bookingDetails.date || 'To be scheduled';
+      
+      if (rawDate) {
+        try {
+          // Parse the date without any timezone assumptions
+          const dateObj = new Date(rawDate);
+          
+          if (!isNaN(dateObj.getTime())) {
+            // Format the date in a human-readable format (in user's local timezone)
+            formattedDate = dateObj.toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            });
+            
+            // Log for debugging
+            console.log("[EDGE] Raw date:", rawDate);
+            console.log("[EDGE] Formatted date for email:", formattedDate);
+          }
+        } catch (dateError) {
+          console.error("[EDGE] Error formatting date:", dateError, "Original date:", rawDate);
+        }
+      }
+      
       // Log payload to help with debugging
       const emailPayload = {
         type: 'booking-confirmation',
@@ -252,7 +279,7 @@ async function sendConfirmationEmail(
         clientName: bookingDetails.clientName,
         referenceId: bookingDetails.referenceId,
         serviceType: bookingDetails.consultationType || bookingDetails.services.join(', '),
-        date: bookingDetails.date || 'To be scheduled',
+        date: formattedDate,
         time: bookingDetails.timeSlot || bookingDetails.timeframe || '',
         price: bookingDetails.amount ? `₹${bookingDetails.amount}` : 'To be confirmed',
         highPriority: true

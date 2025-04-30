@@ -24,6 +24,12 @@ const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({
 }) => {
   const formattedDate = date ? formatDate(date) : undefined;
 
+  // Log for debugging timezone issues
+  if (date) {
+    console.log("[BookingDetailsCard] Raw date value:", date);
+    console.log("[BookingDetailsCard] Formatted date:", formattedDate);
+  }
+
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-6">
       <h3 className="text-xl font-semibold mb-4">Booking Details</h3>

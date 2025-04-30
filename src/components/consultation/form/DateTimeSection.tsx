@@ -54,6 +54,19 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     return date < getMinDate();
   };
 
+  // Log for debugging timezone issues
+  React.useEffect(() => {
+    if (date) {
+      console.log("[DateTimeSection] Selected date:", date);
+      console.log("[DateTimeSection] Date in ISO:", date.toISOString());
+      console.log("[DateTimeSection] Local date string:", date.toString());
+      
+      // Calculate the UTC offset
+      const offset = date.getTimezoneOffset();
+      console.log("[DateTimeSection] Timezone offset (minutes):", offset);
+    }
+  }, [date]);
+
   return (
     <div className="p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">
       <h3 className="text-xl font-semibold mb-4 text-gray-800">Schedule Your Session</h3>

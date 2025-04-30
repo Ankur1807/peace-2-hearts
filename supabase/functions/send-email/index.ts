@@ -189,6 +189,10 @@ function generateBookingConfirmationHTML(data) {
     ? `Important: Your Peace2Hearts Consultation Booking #${referenceId}`
     : `Confirmation: Your Peace2Hearts Consultation Booking #${referenceId}`;
   
+  // Log date and time for debugging timezone issues
+  console.log(`[SEND-EMAIL] Date value received: ${date}`);
+  console.log(`[SEND-EMAIL] Time value received: ${time}`);
+  
   return `
 <!DOCTYPE html>
 <html>

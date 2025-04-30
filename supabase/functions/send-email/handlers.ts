@@ -76,13 +76,9 @@ function generateBookingEmail(data: BookingEmailData): string {
   const isLegal = serviceCategory?.toLowerCase() === 'legal';
   const isMentalHealth = serviceCategory?.toLowerCase() === 'mental-health' || !serviceCategory;
   
-  // Format date if available
-  const formattedDate = date ? new Date(date).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }) : '';
+  // Log for debugging timezone issues
+  console.log(`[generateBookingEmail] Date received: ${date}`);
+  console.log(`[generateBookingEmail] Time received: ${timeSlot || timeframe}`);
   
   // Format service names for display
   const formattedServices = services.map(service => 
@@ -111,7 +107,7 @@ function generateBookingEmail(data: BookingEmailData): string {
           ` : ''}
           
           ${!isHolistic ? `
-            <p style="margin: 5px 0;"><strong>Date:</strong> ${formattedDate || "To be scheduled"}</p>
+            <p style="margin: 5px 0;"><strong>Date:</strong> ${date || "To be scheduled"}</p>
             <p style="margin: 5px 0;"><strong>Time:</strong> ${timeSlot || "To be scheduled"}</p>
           ` : ''}
         </div>
