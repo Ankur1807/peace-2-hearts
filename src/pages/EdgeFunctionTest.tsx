@@ -5,13 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Toaster } from '@/components/ui/toaster';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 const EdgeFunctionTest = () => {
   const [logs, setLogs] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const runTest = async () => {
     setLogs([]);
+    setError(null);
     setIsRunning(true);
     
     // Capture console.log output
@@ -26,7 +30,13 @@ const EdgeFunctionTest = () => {
     
     console.error = (...args) => {
       originalError(...args);
-      setLogs(prev => [...prev, `ERROR: ${args.join(' ')}`]);
+      const errorMessage = args.join(' ');
+      setLogs(prev => [...prev, `ERROR: ${errorMessage}`]);
+      
+      // Capture the error message for display
+      if (errorMessage.includes('Edge function error')) {
+        setError(errorMessage);
+      }
     };
     
     console.warn = (...args) => {
@@ -39,6 +49,7 @@ const EdgeFunctionTest = () => {
       await testVerifyPaymentEdgeFunction();
     } catch (error) {
       console.error('Unhandled test error:', error);
+      setError(error instanceof Error ? error.message : String(error));
     }
     
     // Restore original console functions
@@ -76,6 +87,16 @@ const EdgeFunctionTest = () => {
           {isRunning ? "Running Test..." : "Run Edge Function Test"}
         </Button>
       </Card>
+      
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Test Failed</AlertTitle>
+          <AlertDescription className="font-mono text-xs">
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
       
       {logs.length > 0 && (
         <Card className="p-6">

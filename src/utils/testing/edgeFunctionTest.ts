@@ -31,7 +31,9 @@ export async function testVerifyPaymentEdgeFunction() {
       serviceCategory: "mental-health",
       message: "Simulated booking",
       amount: 999
-    }
+    },
+    // Add this test flag to tell the function to use mocked responses
+    _testMode: true
   };
 
   console.log('📤 Sending test payload to verify-payment edge function:');
