@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { corsHeaders, determineServiceCategory, handleFetchResponse } from "./utils.ts";
@@ -240,7 +241,7 @@ async function sendConfirmationEmail(
     
     // Add additional error handling for email sending
     try {
-      // Make sure we always include admin as BCC
+      // Make sure we always include admin as BCC - Fixed admin email address
       const adminEmail = "admin@peace2hearts.com";
       
       console.log(`[EDGE] Calling send-email function with data:`, {
@@ -255,7 +256,7 @@ async function sendConfirmationEmail(
         body: {
           type: 'booking-confirmation',
           to: bookingDetails.email,
-          bcc: adminEmail, // Add admin email as BCC
+          bcc: adminEmail, // Ensure admin email is included as BCC
           clientName: bookingDetails.clientName,
           referenceId: bookingDetails.referenceId,
           serviceType: bookingDetails.consultationType || bookingDetails.services.join(', '),

@@ -127,6 +127,7 @@ export type Database = {
           payment_id: string | null
           payment_status: string | null
           reference_id: string | null
+          service_category: string | null
           source: string | null
           status: string
           time_slot: string
@@ -150,6 +151,7 @@ export type Database = {
           payment_id?: string | null
           payment_status?: string | null
           reference_id?: string | null
+          service_category?: string | null
           source?: string | null
           status?: string
           time_slot: string
@@ -173,6 +175,7 @@ export type Database = {
           payment_id?: string | null
           payment_status?: string | null
           reference_id?: string | null
+          service_category?: string | null
           source?: string | null
           status?: string
           time_slot?: string

@@ -26,7 +26,10 @@ serve(async (req) => {
     }
     
     // Parse request body
-    const { type, ...data } = await req.json();
+    const body = await req.json();
+    const { type, ...data } = body;
+    
+    console.log("[SEND-EMAIL] Function called with type:", type, "and data:", JSON.stringify(data));
     
     if (!type) {
       throw new Error('Missing required parameter: type');
@@ -38,8 +41,8 @@ serve(async (req) => {
     switch (type) {
       case 'booking-confirmation':
         // Validate required fields
-        if (!data.to && !data.clientName && !data.referenceId) {
-          console.error('Missing booking confirmation email data:', data);
+        if (!data.to || !data.clientName || !data.referenceId) {
+          console.error('Missing required fields for booking confirmation email:', data);
           throw new Error('Missing required fields for booking confirmation email');
         }
         
@@ -55,19 +58,27 @@ serve(async (req) => {
           ? `Important: Your Peace2Hearts Consultation Booking #${data.referenceId}`
           : `Confirmation: Your Peace2Hearts Consultation Booking #${data.referenceId}`;
         
-        console.log(`Sending booking confirmation email to ${recipient}`);
+        console.log(`[SEND-EMAIL] Sending booking confirmation email to ${recipient}, BCC: ${data.bcc || 'none'}`);
         
-        // Send email using Resend
+        // Send email using Resend with BCC support
         try {
-          emailResult = await resend.emails.send({
+          const emailOptions = {
             from: 'Peace2Hearts <booking@peace2hearts.com>',
-            to: recipient,
+            to: [recipient],
             subject: subject,
             html: htmlContent
-          });
-          console.log('Booking email sent successfully:', emailResult);
+          };
+          
+          // Add BCC if provided
+          if (data.bcc) {
+            console.log(`[SEND-EMAIL] Adding BCC: ${data.bcc}`);
+            emailOptions.bcc = [data.bcc];
+          }
+          
+          emailResult = await resend.emails.send(emailOptions);
+          console.log('[SEND-EMAIL] Booking email sent successfully:', emailResult);
         } catch (emailErr) {
-          console.error('Error sending booking confirmation email:', emailErr);
+          console.error('[SEND-EMAIL] Error sending booking confirmation email:', emailErr);
           throw emailErr;
         }
         break;
