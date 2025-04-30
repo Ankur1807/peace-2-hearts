@@ -51,10 +51,20 @@ export const usePaymentVerification = ({
       }
       
       console.warn("[VERIFY] Payment verification failed:", verificationResult);
-      return { success: false, verified: false } as VerificationResult;
-    } catch (error) {
+      return { 
+        success: false, 
+        verified: false,
+        error: verificationResult.error,
+        redirectUrl: verificationResult.redirectUrl || '/payment-error'
+      } as VerificationResult;
+    } catch (error: any) {
       console.error("[VERIFY] Error in verifyPayment:", error);
-      return { success: false, verified: false, error } as VerificationResult;
+      return { 
+        success: false, 
+        verified: false, 
+        error, 
+        redirectUrl: '/payment-error'
+      } as VerificationResult;
     } finally {
       setIsVerifying(false);
       setIsProcessing(false);

@@ -4,7 +4,7 @@ import { useRazorpayPayment } from './useRazorpayPayment';
 import { usePaymentFlow } from './usePaymentFlow';
 import { BookingDetails } from '@/utils/types';
 import { getPackageName } from '@/utils/consultation/packageUtils';
-import { convertISTDateTimeToUTC } from '@/utils/dateUtils';
+import { convertISTTimeSlotToUTCString } from '@/utils/dateUtils';
 
 interface UseConsultationPaymentProps {
   state: any;
@@ -60,12 +60,17 @@ export function useConsultationPayment({
     // If we have both date and timeSlot, convert to UTC for storage
     if (state.date && state.timeSlot) {
       console.log('[useConsultationPayment] Original date before conversion:', state.date);
-      // Convert date to ISO string first if it's a Date object
-      const dateIsoStr = state.date instanceof Date ? state.date.toISOString() : state.date;
-      // Use the new conversion function
-      const utcDate = convertISTDateTimeToUTC(dateIsoStr, state.timeSlot);
-      console.log('[useConsultationPayment] Converted UTC date for Supabase storage:', utcDate);
-      bookingDetails.date = utcDate;
+      
+      // Format the date string (YYYY-MM-DD) from the Date object
+      const dateStr = state.date instanceof Date 
+        ? state.date.toISOString().split('T')[0] 
+        : state.date;
+        
+      // Convert to UTC using our hardcoded function
+      const utcDateString = convertISTTimeSlotToUTCString(dateStr, state.timeSlot);
+      console.log('[useConsultationPayment] Converted UTC string for storage:', utcDateString);
+      
+      bookingDetails.date = utcDateString;
     } else {
       bookingDetails.date = state.date; // Keep original format if missing timeSlot
     }

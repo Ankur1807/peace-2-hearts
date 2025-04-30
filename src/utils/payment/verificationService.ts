@@ -60,7 +60,7 @@ export async function verifyPaymentAndCreateBooking(
             referenceId: bookingDetails.referenceId,
             consultationType: bookingDetails.consultationType,
             services: bookingDetails.services || [bookingDetails.consultationType],
-            date: bookingDetails.date, // This is now in proper UTC format
+            date: bookingDetails.date, // This is now a UTC ISO string
             timeSlot: bookingDetails.timeSlot,
             timeframe: bookingDetails.timeframe,
             serviceCategory: bookingDetails.serviceCategory,
@@ -84,7 +84,8 @@ export async function verifyPaymentAndCreateBooking(
         return { 
           success: false, 
           verified: false, 
-          error: error.message || "Payment verification failed" 
+          error: error.message || "Payment verification failed",
+          redirectUrl: '/payment-error'
         };
       }
       
@@ -123,7 +124,8 @@ export async function verifyPaymentAndCreateBooking(
       return { 
         success: false, 
         verified: false, 
-        error: invokeError instanceof Error ? invokeError.message : String(invokeError) 
+        error: invokeError instanceof Error ? invokeError.message : String(invokeError),
+        redirectUrl: '/payment-error'
       };
     }
   } catch (err: any) {
@@ -131,7 +133,8 @@ export async function verifyPaymentAndCreateBooking(
     return {
       success: false,
       verified: false,
-      error: err instanceof Error ? err.message : String(err)
+      error: err instanceof Error ? err.message : String(err),
+      redirectUrl: '/payment-error'
     };
   }
 }
@@ -148,6 +151,11 @@ async function storeEmergencyPaymentRecord(
   try {
     console.log("Storing emergency payment record for", paymentId);
     
+    // Ensure date is a string for database storage
+    const dateString = typeof bookingDetails.date === 'string' 
+      ? bookingDetails.date 
+      : undefined;
+    
     const { error } = await supabase.from('consultations').insert({
       client_name: bookingDetails.clientName || "Emergency Recovery",
       client_email: bookingDetails.email || "recovery-needed@payment.error",
@@ -161,8 +169,7 @@ async function storeEmergencyPaymentRecord(
       time_slot: bookingDetails.timeSlot || "to_be_confirmed",
       message: `Emergency payment record created due to verification failure. Payment ID: ${paymentId}`,
       source: "fallback", // Mark the source as fallback
-      // Include the date which is now properly formatted in UTC
-      date: bookingDetails.date
+      date: dateString // This is now consistently a string
     });
     
     if (error) {

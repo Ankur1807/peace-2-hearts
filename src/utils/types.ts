@@ -1,4 +1,3 @@
-
 export interface PersonalDetails {
   firstName: string;
   lastName: string;
@@ -65,9 +64,8 @@ export interface VerificationResult {
   success: boolean;
   verified: boolean;
   error?: string;
-  message?: string;
-  details?: any;
   redirectUrl?: string;
+  details?: any;
 }
 
 export interface SerializedBookingDetails extends BookingDetails {

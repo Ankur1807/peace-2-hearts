@@ -13,7 +13,7 @@ import ConsultationInitializer from '@/components/consultation/ConsultationIniti
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { convertISTDateTimeToUTC } from '@/utils/dateUtils';
+import { convertISTTimeSlotToUTCString } from '@/utils/dateUtils';
 
 const BookConsultation = () => {
   const [searchParams] = useSearchParams();
@@ -72,12 +72,17 @@ const BookConsultation = () => {
     // If we have both date and timeSlot, convert to UTC for storage
     if (date && timeSlot) {
       console.log('Original date before conversion:', date);
-      // Convert date to ISO string first if it's a Date object
-      const dateIsoStr = date instanceof Date ? date.toISOString() : date;
-      // Use the new conversion function
-      const utcDate = convertISTDateTimeToUTC(dateIsoStr, timeSlot);
-      console.log('Converted UTC date for Supabase storage:', utcDate);
-      bookingDetails.date = utcDate;
+      
+      // Format the date string (YYYY-MM-DD) from the Date object
+      const dateStr = date instanceof Date 
+        ? date.toISOString().split('T')[0] 
+        : date;
+        
+      // Convert to UTC using our hardcoded function
+      const utcDateString = convertISTTimeSlotToUTCString(dateStr, timeSlot);
+      console.log('Converted UTC string for storage:', utcDateString);
+      
+      bookingDetails.date = utcDateString;
     } else {
       bookingDetails.date = date; // Keep original format if missing timeSlot
     }

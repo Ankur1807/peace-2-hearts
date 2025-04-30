@@ -110,7 +110,7 @@ export function useConsultationPayment({
         clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
         referenceId: receiptId,
         amount: totalPrice,
-        date: date?.toISOString(),
+        date: date ? (date instanceof Date ? date.toISOString() : date) : undefined,
         timeSlot,
         timeframe
       });
@@ -181,13 +181,21 @@ export function useConsultationPayment({
         successCallback: async (response: any) => {
           console.log("[BOOKING FLOW] Payment successful, starting verification", response);
           
+          // Format the date as a string for consistent handling
+          let dateString = '';
+          if (date) {
+            dateString = date instanceof Date 
+              ? date.toISOString().split('T')[0] // Extract YYYY-MM-DD
+              : date;
+          }
+          
           const verificationResult = await verifyRazorpayPayment(
             response.razorpay_payment_id,
             response.razorpay_order_id,
             response.razorpay_signature,
             receiptId,
             {
-              date: date instanceof Date ? date.toISOString() : (date || ''), // Fix: Convert Date to string
+              date: dateString, // Always pass a string
               timeSlot: timeSlot || '',
               timeframe: timeframe || '',
               consultationType: consultationType,

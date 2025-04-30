@@ -4,6 +4,7 @@ import { BookingDetails } from "@/utils/types";
 import { savePaymentRecord } from "./paymentRecordService";
 import { fetchBookingDetailsByReference } from "@/utils/email/bookingEmailService";
 import { sendEmailForConsultation } from "./emailNotificationService";
+import { convertISTTimeSlotToUTCString } from "@/utils/dateUtils";
 
 /**
  * Verify a Razorpay payment with the server
@@ -18,6 +19,27 @@ export async function verifyRazorpayPayment(
   try {
     console.log(`[PAYMENT VERIFICATION] Verifying payment: ${paymentId} for reference: ${referenceId}`);
     
+    // Ensure date is properly formatted as UTC ISO string if we have both date and timeSlot
+    if (bookingDetails?.date && bookingDetails?.timeSlot) {
+      console.log('[PAYMENT VERIFICATION] Original date and timeSlot:', { 
+        date: bookingDetails.date,
+        timeSlot: bookingDetails.timeSlot 
+      });
+      
+      // This should already be a string from previous formatting, but just in case:
+      const dateStr = typeof bookingDetails.date === 'string' 
+        ? bookingDetails.date 
+        : bookingDetails.date instanceof Date 
+          ? bookingDetails.date.toISOString().split('T')[0]
+          : '';
+          
+      if (dateStr && bookingDetails.timeSlot) {
+        // Convert to UTC using our hardcoded function
+        bookingDetails.date = convertISTTimeSlotToUTCString(dateStr, bookingDetails.timeSlot);
+        console.log('[PAYMENT VERIFICATION] Converted date to UTC ISO string:', bookingDetails.date);
+      }
+    }
+    
     // Call the verify-payment edge function
     const { data, error } = await supabase.functions.invoke('verify-payment', {
       body: {
@@ -31,9 +53,7 @@ export async function verifyRazorpayPayment(
           referenceId: bookingDetails.referenceId,
           consultationType: bookingDetails.consultationType,
           services: bookingDetails.services || [bookingDetails.consultationType],
-          date: bookingDetails.date ? 
-            (bookingDetails.date instanceof Date ? 
-              bookingDetails.date.toISOString() : bookingDetails.date) : undefined,
+          date: bookingDetails.date, // Now consistently a string
           timeSlot: bookingDetails.timeSlot,
           timeframe: bookingDetails.timeframe,
           message: bookingDetails.message,
