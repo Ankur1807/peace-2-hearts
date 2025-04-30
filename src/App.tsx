@@ -67,6 +67,9 @@ import AdminServices from './pages/admin/AdminServices';
 // Add import for the TestSimulation page
 import TestSimulation from './pages/TestSimulation';
 
+// Add import for the manual payment test page
+import ManualPaymentTest from './pages/ManualPaymentTest';
+
 function App() {
   // The issue is likely here with the useEffect hook
   useEffect(() => {
@@ -159,6 +162,9 @@ function App() {
           
           {/* Add the TestSimulation route to your router configuration */}
           <Route path="/test-simulation" element={<TestSimulation />} />
+          
+          {/* Add the manual payment test route */}
+          <Route path="/manual-payment-test" element={<ManualPaymentTest />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
