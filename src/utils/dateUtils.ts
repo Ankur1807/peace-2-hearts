@@ -99,3 +99,66 @@ export function formatLocalDateTime(date: Date | string | undefined, timeSlot: s
     return 'Invalid date/time';
   }
 }
+
+// Simple test function for the booking simulation
+export function simulateBookingFlow() {
+  const testDate = "2025-05-02";
+  const testTimeSlot = "11-am";
+  
+  // Step 1: Convert IST to UTC
+  const utcDateString = convertISTTimeSlotToUTCString(testDate, testTimeSlot);
+  console.log("SIMULATION - UTC date string:", utcDateString);
+  console.assert(utcDateString === "2025-05-02T05:30:00.000Z", "UTC conversion incorrect");
+  
+  // Step 2: Build mock Supabase payload
+  const mockSupabasePayload = {
+    client_name: "Ankur Bhardwaj",
+    client_email: "bhardwajankur6@gmail.com",
+    client_phone: "7428564364",
+    reference_id: "P2H-670165-0071",
+    consultation_type: "Test Service",
+    date: utcDateString,  // UTC ISO string for database storage
+    time_slot: "11-am",
+    service_category: "mental_health",
+    message: null,
+    payment_id: "pay_sim12345",
+    order_id: "order_sim12345",
+    amount: 1500,
+    payment_status: "completed",
+    status: "confirmed",
+    email_sent: false,
+    source: "edge"
+  };
+  console.log("SIMULATION - Supabase payload:", JSON.stringify(mockSupabasePayload, null, 2));
+  
+  // Step 3: Generate mock email content
+  const mockEmailContent = {
+    to: "bhardwajankur6@gmail.com",
+    bcc: "admin@peace2hearts.com",
+    subject: "Booking Confirmation - Peace2Hearts",
+    clientName: "Ankur Bhardwaj",
+    referenceId: "P2H-670165-0071",
+    serviceType: "Test Service",
+    date: "Friday, May 2, 2025",  // Back to IST for user display
+    time: "11:00 AM",
+    price: "₹1,500",
+    highPriority: true
+  };
+  console.log("SIMULATION - Email preview:", JSON.stringify(mockEmailContent, null, 2));
+  
+  // Step 4: Simulate verify-payment response
+  const verificationResponse = {
+    success: true,
+    verified: true,
+    redirectUrl: '/thank-you'
+  };
+  console.log("SIMULATION - Payment verification response:", JSON.stringify(verificationResponse, null, 2));
+  console.log("SIMULATION - Triggering redirect to:", verificationResponse.redirectUrl);
+  
+  return {
+    utcDateString,
+    supabasePayload: mockSupabasePayload,
+    emailContent: mockEmailContent,
+    verificationResponse
+  };
+}
