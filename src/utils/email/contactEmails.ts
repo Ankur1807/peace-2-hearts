@@ -23,13 +23,16 @@ export async function sendContactEmail(formData: ContactFormData): Promise<boole
     
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
-        type: 'contact',
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        subject: formData.subject,
-        message: formData.message,
-        isResend: formData.isResend || false
+        type: 'contact-form',
+        data: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          subject: formData.subject,
+          message: formData.message,
+          isResend: formData.isResend || false,
+          highPriority: false
+        }
       }
     });
     

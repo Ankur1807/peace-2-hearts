@@ -208,21 +208,27 @@ async function sendConfirmationEmail(
   try {
     console.log(`Sending confirmation email for booking ${referenceId}`);
     
+    // Format date and time for the email if available
+    let serviceType = bookingDetails.consultationType || "";
+    if (Array.isArray(bookingDetails.services) && bookingDetails.services.length > 0) {
+      serviceType = bookingDetails.services.join(", ");
+    }
+    
     // Add additional error handling for email sending
     try {
       const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-email', {
         body: {
           type: 'booking-confirmation',
-          clientName: bookingDetails.clientName,
-          email: bookingDetails.email,
-          referenceId: bookingDetails.referenceId,
-          consultationType: bookingDetails.consultationType,
-          services: bookingDetails.services,
-          date: bookingDetails.date,
-          timeSlot: bookingDetails.timeSlot,
-          timeframe: bookingDetails.timeframe,
-          serviceCategory: bookingDetails.serviceCategory,
-          highPriority: true
+          data: {
+            to: bookingDetails.email,
+            clientName: bookingDetails.clientName,
+            referenceId: bookingDetails.referenceId,
+            serviceType: serviceType,
+            date: bookingDetails.date ? new Date(bookingDetails.date).toLocaleDateString() : 'To be scheduled',
+            time: bookingDetails.timeSlot || bookingDetails.timeframe || '',
+            price: 'Payment completed',
+            highPriority: true
+          }
         }
       });
       

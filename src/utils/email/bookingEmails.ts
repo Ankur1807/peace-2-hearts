@@ -34,37 +34,6 @@ export async function sendBookingConfirmationEmail(bookingDetails: BookingDetail
       date: bookingDetails.date ? new Date(bookingDetails.date).toISOString() : undefined
     });
     
-    let response = await sendBookingConfirmationEmailInternal(bookingDetails);
-    
-    if (!response.success) {
-      // Schedule retry
-      console.info(`Email sending failed, scheduling retry in ${RETRY_DELAY/1000} seconds. Attempt: ${attemptCount + 1}`);
-      setTimeout(() => {
-        console.info(`Retrying email ${emailId}, attempt ${attemptCount + 2}`);
-        sendBookingConfirmationEmail(bookingDetails);
-      }, RETRY_DELAY);
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error(`Error sending booking confirmation email:`, error);
-    
-    // Schedule retry
-    setTimeout(() => {
-      console.info(`Retrying email ${emailId}, attempt ${attemptCount + 2}`);
-      sendBookingConfirmationEmail(bookingDetails);
-    }, RETRY_DELAY);
-    
-    return false;
-  }
-}
-
-/**
- * Internal function to send booking confirmation email through the edge function
- */
-async function sendBookingConfirmationEmailInternal(bookingDetails: BookingDetails): Promise<{success: boolean}> {
-  try {
     // Format date and time for the email
     let dateDisplay = "To be scheduled";
     let timeDisplay = "";
@@ -94,43 +63,48 @@ async function sendBookingConfirmationEmailInternal(bookingDetails: BookingDetai
     // Get price if available
     const priceDisplay = bookingDetails.amount ? formatPrice(bookingDetails.amount) : "Price will be confirmed";
     
-    const emailData = {
-      to: bookingDetails.email,
-      clientName: bookingDetails.clientName,
-      referenceId: bookingDetails.referenceId,
-      serviceType: serviceType,
-      date: dateDisplay,
-      time: timeDisplay,
-      price: priceDisplay,
-      isResend: bookingDetails.isResend || false,
-      highPriority: bookingDetails.highPriority || false
-    };
-    
-    console.log(`Sending booking confirmation email via edge function with data:`, emailData);
-    
     // Call the edge function to send the email
-    try {
-      const { data, error } = await supabase.functions.invoke('send-email', {
-        body: {
-          type: 'booking-confirmation',
-          data: emailData
+    const { data, error } = await supabase.functions.invoke('send-email', {
+      body: {
+        type: 'booking-confirmation',
+        data: {
+          to: bookingDetails.email,
+          clientName: bookingDetails.clientName,
+          referenceId: bookingDetails.referenceId,
+          serviceType: serviceType,
+          date: dateDisplay,
+          time: timeDisplay,
+          price: priceDisplay,
+          isResend: bookingDetails.isResend || false,
+          highPriority: bookingDetails.highPriority || false
         }
-      });
-      
-      if (error) {
-        console.error(`Error calling send-email function:`, error);
-        return { success: false };
       }
+    });
+    
+    if (error) {
+      console.error(`Error calling send-email function:`, error);
       
-      console.log(`Email function response:`, data);
-      return { success: true };
-    } catch (functionError) {
-      console.error(`Exception calling send-email function:`, functionError);
-      return { success: false };
+      // Schedule retry
+      setTimeout(() => {
+        console.info(`Retrying email ${emailId}, attempt ${attemptCount + 2}`);
+        sendBookingConfirmationEmail(bookingDetails);
+      }, RETRY_DELAY);
+      
+      return false;
     }
+    
+    console.log(`Email function response:`, data);
+    return true;
   } catch (error) {
     console.error(`Error sending booking confirmation email:`, error);
-    return { success: false };
+    
+    // Schedule retry
+    setTimeout(() => {
+      console.info(`Retrying email ${emailId}, attempt ${attemptCount + 2}`);
+      sendBookingConfirmationEmail(bookingDetails);
+    }, RETRY_DELAY);
+    
+    return false;
   }
 }
 

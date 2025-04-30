@@ -16,11 +16,13 @@ export async function sendContactEmail(
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: {
         type: 'contact-form',
-        name,
-        email,
-        subject,
-        message,
-        highPriority: false
+        data: {
+          name,
+          email,
+          subject,
+          message,
+          highPriority: false
+        }
       }
     });
     
@@ -58,7 +60,7 @@ export async function resendContactEmail(
       return false;
     }
     
-    // Resend email
+    // Resend email with high priority
     return await sendContactEmail(
       contactData.name,
       contactData.email,
