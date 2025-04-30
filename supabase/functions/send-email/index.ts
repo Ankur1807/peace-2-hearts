@@ -59,18 +59,18 @@ serve(async (req) => {
     switch (type) {
       case 'booking-confirmation':
         // Validate required fields with more robust error handling
-        if (!data.to && !data.email) {
-          console.error('Missing recipient email address:', data);
+        if (!data.email && !data.to) {
+          console.error('[SEND-EMAIL] Missing recipient email address:', data);
           throw new Error('Missing recipient email address');
         }
         
         if (!data.clientName) {
-          console.error('Missing client name for booking confirmation:', data);
+          console.error('[SEND-EMAIL] Missing client name for booking confirmation:', data);
           throw new Error('Missing client name for booking confirmation');
         }
         
         if (!data.referenceId) {
-          console.error('Missing reference ID for booking confirmation:', data);
+          console.error('[SEND-EMAIL] Missing reference ID for booking confirmation:', data);
           throw new Error('Missing reference ID for booking confirmation');
         }
         
@@ -90,14 +90,15 @@ serve(async (req) => {
         if (data.bcc) {
           console.log("[SEND-EMAIL] Admin BCC included:", data.bcc);
         } else {
-          console.warn("[SEND-EMAIL] No BCC email address provided");
+          console.log("[SEND-EMAIL] Adding default admin BCC: admin@peace2hearts.com");
+          data.bcc = "admin@peace2hearts.com"; // Always ensure admin BCC is set
         }
         
         console.log(`[SEND-EMAIL] Sending booking confirmation email to ${recipient}, BCC: ${data.bcc || 'none'}`);
         
         // Send email using Resend with BCC support
         try {
-          const emailOptions = {
+          const emailOptions: any = {
             from: 'Peace2Hearts <booking@peace2hearts.com>',
             to: [recipient],
             subject: subject,

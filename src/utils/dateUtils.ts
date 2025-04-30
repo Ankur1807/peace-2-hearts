@@ -59,7 +59,7 @@ export function addDays(date: Date, days: number): Date {
 
 /**
  * Convert local date and time to UTC for storage
- * This ensures date/time selected in IST is properly converted to UTC
+ * Properly handles IST (+5:30) to UTC conversion
  */
 export function convertLocalDateTimeToUTC(date: Date | undefined, timeSlot: string): string | undefined {
   if (!date) return undefined;
@@ -82,12 +82,20 @@ export function convertLocalDateTimeToUTC(date: Date | undefined, timeSlot: stri
       }
     }
     
-    // Set the time components
+    // Set the time components on the local date
     localDate.setHours(hours, 0, 0, 0);
     
+    // Convert to proper UTC value - NO OFFSET CORRECTION NEEDED
+    // JavaScript Date's toISOString() already handles the timezone conversion correctly
+    // as long as the Date object itself has the correct local time
+    
     // Log for debugging
-    console.log(`[convertLocalDateTimeToUTC] Local date/time: ${localDate.toString()}`);
-    console.log(`[convertLocalDateTimeToUTC] UTC ISO string: ${localDate.toISOString()}`);
+    console.log(`[convertLocalDateTimeToUTC] Original date input:`, date);
+    console.log(`[convertLocalDateTimeToUTC] Time slot:`, timeSlot);
+    console.log(`[convertLocalDateTimeToUTC] Parsed hours:`, hours);
+    console.log(`[convertLocalDateTimeToUTC] Local date with time:`, localDate.toString());
+    console.log(`[convertLocalDateTimeToUTC] UTC ISO string:`, localDate.toISOString());
+    console.log(`[convertLocalDateTimeToUTC] UTC timestamp:`, localDate.getTime());
     
     // Return the ISO string (which is in UTC)
     return localDate.toISOString();

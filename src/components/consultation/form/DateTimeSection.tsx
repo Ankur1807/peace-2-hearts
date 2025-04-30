@@ -60,12 +60,15 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       console.log("[DateTimeSection] Selected date:", date);
       console.log("[DateTimeSection] Date in ISO:", date.toISOString());
       console.log("[DateTimeSection] Local date string:", date.toString());
+      console.log("[DateTimeSection] Local time:", date.toLocaleTimeString());
+      console.log("[DateTimeSection] Selected time slot:", timeSlot);
       
       // Calculate the UTC offset
       const offset = date.getTimezoneOffset();
       console.log("[DateTimeSection] Timezone offset (minutes):", offset);
+      console.log("[DateTimeSection] Timezone offset (hours):", offset / 60);
     }
-  }, [date]);
+  }, [date, timeSlot]);
 
   return (
     <div className="p-6 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 shadow-sm">

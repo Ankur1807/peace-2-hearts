@@ -29,6 +29,7 @@ export const usePaymentVerification = ({
   const [verificationResult, setVerificationResult] = useState<{ 
     success: boolean; 
     verified: boolean;
+    redirectUrl?: string;
     error?: string;
     message?: string;
   } | null>(null);
@@ -36,6 +37,7 @@ export const usePaymentVerification = ({
   // If we have direct payment details, verify automatically
   useEffect(() => {
     if (paymentId && orderId && referenceId && amount && bookingDetails) {
+      console.log("Auto-verifying payment with direct details:", { paymentId, referenceId });
       verifyPayment({
         razorpay_payment_id: paymentId,
         razorpay_order_id: orderId,
@@ -54,16 +56,30 @@ export const usePaymentVerification = ({
         referenceId
       });
       
+      // Log the date before sending to verification service
+      if (bookingDetails.date) {
+        console.log("Booking date before verification:", bookingDetails.date);
+        if (bookingDetails.date instanceof Date) {
+          console.log("Date ISO string:", bookingDetails.date.toISOString());
+        }
+      }
+      
+      // Convert date to ISO string if it's a Date object
+      const processedBookingDetails = {
+        ...bookingDetails,
+        date: bookingDetails.date instanceof Date 
+          ? bookingDetails.date.toISOString() 
+          : bookingDetails.date,
+        referenceId,
+        amount
+      };
+      
       // Use our unified verification service
       const verificationResult = await verifyPaymentAndCreateBooking(
         response.razorpay_payment_id,
         response.razorpay_order_id,
         response.razorpay_signature,
-        {
-          ...bookingDetails,
-          referenceId,
-          amount
-        }
+        processedBookingDetails
       );
       
       console.log("Payment verification result:", verificationResult);
@@ -87,7 +103,11 @@ export const usePaymentVerification = ({
         if (setPaymentCompleted) {
           setPaymentCompleted(true);
         }
-        return { success: true, verified: true };
+        return { 
+          success: true, 
+          verified: true, 
+          redirectUrl: verificationResult.redirectUrl || '/thank-you'
+        };
       }
       
       // Even if verification failed, we still consider the operation "successful"

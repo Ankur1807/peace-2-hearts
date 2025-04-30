@@ -231,7 +231,7 @@ async function createConsultationRecord(
  * Send confirmation email
  */
 async function sendConfirmationEmail(
-  bookingDetails: VerifyPaymentRequest['bookingDetails']
+  bookingDetails
 ): Promise<{
   success: boolean;
   error?: string;
@@ -241,7 +241,7 @@ async function sendConfirmationEmail(
     
     // Add additional error handling for email sending
     try {
-      // Make sure we always include admin as BCC - Fixed admin email address
+      // Always include admin as BCC
       const adminEmail = "admin@peace2hearts.com";
       
       // Process date for email - log the raw and formatted values for debugging
@@ -264,6 +264,7 @@ async function sendConfirmationEmail(
             
             // Log for debugging
             console.log("[EDGE] Raw date:", rawDate);
+            console.log("[EDGE] Parsed date object:", dateObj.toString());
             console.log("[EDGE] Formatted date for email:", formattedDate);
           }
         } catch (dateError) {
@@ -271,24 +272,32 @@ async function sendConfirmationEmail(
         }
       }
       
+      // Format time slot if available
+      let formattedTime = '';
+      if (bookingDetails.timeSlot) {
+        formattedTime = bookingDetails.timeSlot.replace('-', ':').toUpperCase();
+        console.log("[EDGE] Formatted time for email:", formattedTime);
+      }
+      
       // Log payload to help with debugging
       const emailPayload = {
         type: 'booking-confirmation',
         to: bookingDetails.email,
-        bcc: adminEmail, // Ensure admin email is included as BCC
+        bcc: adminEmail, // Always include admin email as BCC
         clientName: bookingDetails.clientName,
         referenceId: bookingDetails.referenceId,
-        serviceType: bookingDetails.consultationType || bookingDetails.services.join(', '),
+        serviceType: bookingDetails.consultationType || bookingDetails.services?.join(', ') || 'Consultation',
         date: formattedDate,
-        time: bookingDetails.timeSlot || bookingDetails.timeframe || '',
+        time: formattedTime || bookingDetails.timeframe || '',
         price: bookingDetails.amount ? `₹${bookingDetails.amount}` : 'To be confirmed',
         highPriority: true
       };
       
       console.log(`[EDGE] Calling send-email function with payload:`, JSON.stringify(emailPayload));
       
+      // Send email using Resend with BCC support
       const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-email', {
-        body: emailPayload // IMPORTANT: Direct payload, not nested under 'data'
+        body: emailPayload // Direct payload structure
       });
       
       if (emailError) {
@@ -298,7 +307,7 @@ async function sendConfirmationEmail(
       
       console.log("[EDGE] Email sent successfully:", emailResponse);
       
-      // Update the consultation record to mark email as sent ONLY if email was actually sent
+      // Update the consultation record to mark email as sent
       try {
         const { error: updateError } = await supabase
           .from('consultations')
@@ -337,9 +346,9 @@ const handler = async (req: Request): Promise<Response> => {
   
   try {
     // Parse request body
-    let requestData: VerifyPaymentRequest;
+    let requestData;
     try {
-      requestData = await req.json() as VerifyPaymentRequest;
+      requestData = await req.json();
     } catch (parseError) {
       console.error("[EDGE] Error parsing request body:", parseError);
       return new Response(
@@ -375,6 +384,21 @@ const handler = async (req: Request): Promise<Response> => {
     }
     
     console.log(`[EDGE] Processing payment verification for: ${paymentId}, reference: ${bookingDetails.referenceId}`);
+    
+    // Log date information for debugging
+    if (bookingDetails.date) {
+      console.log(`[EDGE] Received booking date: ${bookingDetails.date}`);
+      if (typeof bookingDetails.date === 'string') {
+        try {
+          const dateObj = new Date(bookingDetails.date);
+          console.log(`[EDGE] Parsed date object: ${dateObj.toString()}`);
+          console.log(`[EDGE] Parsed date ISO: ${dateObj.toISOString()}`);
+          console.log(`[EDGE] Local date string: ${dateObj.toLocaleString()}`);
+        } catch (err) {
+          console.error(`[EDGE] Error parsing date: ${err}`);
+        }
+      }
+    }
     
     // Step 1: Verify payment with Razorpay
     const paymentVerification = await verifyPaymentWithRazorpay(paymentId);
@@ -420,6 +444,7 @@ const handler = async (req: Request): Promise<Response> => {
         verified: true,
         paymentId,
         orderId,
+        redirectUrl: "/thank-you" // Add a redirect URL to help frontend navigation
       }),
       {
         status: 200,
@@ -427,9 +452,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
     
-    // Use waitUntil for background tasks that don't need to block the response
-    // This allows us to continue with consultation record creation and email sending
-    // without delaying the response to the frontend
+    // Continue processing in background
     try {
       // Step 2: Create or update consultation record
       const consultationResult = await createConsultationRecord(

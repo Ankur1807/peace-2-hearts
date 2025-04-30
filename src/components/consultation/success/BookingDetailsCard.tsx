@@ -1,5 +1,6 @@
 
-import { formatDate } from '@/utils/dateFormatters';
+import React from 'react';
+import { formatDate } from '@/utils/dateUtils';
 
 interface BookingDetailsCardProps {
   services: string[];
@@ -22,13 +23,26 @@ const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({
   amount,
   referenceId
 }) => {
+  // Format the date for display
   const formattedDate = date ? formatDate(date) : undefined;
 
   // Log for debugging timezone issues
-  if (date) {
-    console.log("[BookingDetailsCard] Raw date value:", date);
-    console.log("[BookingDetailsCard] Formatted date:", formattedDate);
-  }
+  React.useEffect(() => {
+    if (date) {
+      console.log("[BookingDetailsCard] Raw date value:", date);
+      console.log("[BookingDetailsCard] Date type:", typeof date);
+      if (date instanceof Date) {
+        console.log("[BookingDetailsCard] Date ISO string:", date.toISOString());
+      } else if (typeof date === 'string') {
+        console.log("[BookingDetailsCard] String date parsing:", new Date(date).toISOString());
+      }
+      console.log("[BookingDetailsCard] Formatted date:", formattedDate);
+    }
+  }, [date, formattedDate]);
+
+  // Format the time slot for display
+  const formattedTimeSlot = timeSlot ? 
+    timeSlot.replace('-', ':').toUpperCase() : undefined;
 
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-6">
@@ -46,14 +60,14 @@ const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({
           </div>
         )}
 
-        {(formattedDate || timeSlot || timeframe) && (
+        {(formattedDate || formattedTimeSlot || timeframe) && (
           <div>
             <h4 className="font-medium text-gray-700">Scheduling</h4>
             {formattedDate && (
               <p className="text-gray-600">Date: {formattedDate}</p>
             )}
-            {timeSlot && (
-              <p className="text-gray-600">Time: {timeSlot}</p>
+            {formattedTimeSlot && (
+              <p className="text-gray-600">Time: {formattedTimeSlot}</p>
             )}
             {timeframe && (
               <p className="text-gray-600">Timeframe: {timeframe}</p>
