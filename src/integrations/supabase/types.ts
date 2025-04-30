@@ -127,6 +127,8 @@ export type Database = {
           payment_id: string | null
           payment_status: string | null
           reference_id: string | null
+          service_category: string | null
+          source: string | null
           status: string
           time_slot: string
           timeframe: string | null
@@ -149,6 +151,8 @@ export type Database = {
           payment_id?: string | null
           payment_status?: string | null
           reference_id?: string | null
+          service_category?: string | null
+          source?: string | null
           status?: string
           time_slot: string
           timeframe?: string | null
@@ -171,6 +175,8 @@ export type Database = {
           payment_id?: string | null
           payment_status?: string | null
           reference_id?: string | null
+          service_category?: string | null
+          source?: string | null
           status?: string
           time_slot?: string
           timeframe?: string | null
@@ -186,6 +192,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string | null
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       discount_codes: {
         Row: {
@@ -240,56 +279,6 @@ export type Database = {
           usage_limit?: number | null
         }
         Relationships: []
-      }
-      payments: {
-        Row: {
-          amount: number
-          consultation_id: string
-          created_at: string
-          currency: string
-          email_sent: boolean | null
-          id: string
-          payment_method: string | null
-          payment_status: string
-          recovery_timestamp: string | null
-          transaction_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          amount: number
-          consultation_id: string
-          created_at?: string
-          currency?: string
-          email_sent?: boolean | null
-          id?: string
-          payment_method?: string | null
-          payment_status?: string
-          recovery_timestamp?: string | null
-          transaction_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          amount?: number
-          consultation_id?: string
-          created_at?: string
-          currency?: string
-          email_sent?: boolean | null
-          id?: string
-          payment_method?: string | null
-          payment_status?: string
-          recovery_timestamp?: string | null
-          transaction_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payments_consultation_id_fkey"
-            columns: ["consultation_id"]
-            isOneToOne: false
-            referencedRelation: "consultations"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       pricing_history: {
         Row: {

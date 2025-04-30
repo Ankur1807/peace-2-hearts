@@ -189,6 +189,47 @@ export async function fetchBookingDetailsByReference(referenceId: string): Promi
 }
 
 /**
+ * Fetch booking details using payment ID
+ */
+export async function fetchBookingDetailsByPaymentId(paymentId: string): Promise<BookingDetails | null> {
+  try {
+    const { data, error } = await supabase
+      .from('consultations')
+      .select('*')
+      .eq('payment_id', paymentId)
+      .single();
+    
+    if (error || !data) {
+      console.error('Error fetching consultation by payment ID:', error);
+      return null;
+    }
+    
+    // Determine service category from consultation type
+    const serviceCategory = determineServiceCategory(data.consultation_type || '');
+    
+    // Create booking details object
+    return {
+      clientName: data.client_name || '',
+      email: data.client_email || '',
+      referenceId: data.reference_id || '',
+      consultationType: data.consultation_type || '',
+      services: data.consultation_type ? [data.consultation_type] : [],
+      date: data.date ? new Date(data.date) : undefined,
+      timeSlot: data.time_slot || '',
+      timeframe: data.timeframe || '',
+      message: data.message || '',
+      serviceCategory: serviceCategory,
+      amount: data.amount,
+      phone: data.client_phone || '',
+      paymentId: data.payment_id || undefined
+    };
+  } catch (error) {
+    console.error('Exception fetching booking details by payment ID:', error);
+    return null;
+  }
+}
+
+/**
  * Retry sending failed emails
  */
 export async function retryFailedEmails(): Promise<{success: number, failed: number}> {

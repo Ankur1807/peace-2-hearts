@@ -18,3 +18,39 @@ export function determineServiceCategory(serviceId: string): string {
   
   return 'other';
 }
+
+/**
+ * Create an immediate success response with redirect URL
+ * This allows the frontend to redirect immediately while background tasks complete
+ */
+export function createSuccessResponse(paymentId: string, orderId: string) {
+  return new Response(JSON.stringify({
+    success: true,
+    verified: true,
+    paymentId,
+    orderId,
+    redirectUrl: "/thank-you"
+  }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      ...corsHeaders
+    }
+  });
+}
+
+/**
+ * Create an error response
+ */
+export function createErrorResponse(message: string, status = 400) {
+  return new Response(JSON.stringify({
+    success: false,
+    message
+  }), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+      ...corsHeaders
+    }
+  });
+}
