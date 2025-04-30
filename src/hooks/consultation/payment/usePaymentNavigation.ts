@@ -33,7 +33,7 @@ export const usePaymentNavigation = () => {
     if (referenceId) searchParams.set('ref', referenceId);
     if (paymentId) searchParams.set('pid', paymentId);
     
-    // Also pass state for backward compatibility
+    // Navigate using query parameters
     navigate(`/payment-verification?${searchParams.toString()}`, {
       state: {
         paymentId,

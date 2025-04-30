@@ -143,13 +143,17 @@ const ThankYou = () => {
             
             <div className="space-y-4">
               <Button 
-                onClick={() => navigate('/payment-confirmation', { 
-                  state: {
-                    referenceId,
-                    ...location.state
-                  },
-                  replace: true
-                })}
+                onClick={() => {
+                  const searchParams = new URLSearchParams();
+                  if (referenceId) searchParams.set('ref', referenceId);
+                  navigate(`/payment-confirmation?${searchParams.toString()}`, { 
+                    state: {
+                      referenceId,
+                      ...location.state
+                    },
+                    replace: true
+                  });
+                }}
                 className="w-full bg-peacefulBlue hover:bg-peacefulBlue/90"
               >
                 View Booking Details
