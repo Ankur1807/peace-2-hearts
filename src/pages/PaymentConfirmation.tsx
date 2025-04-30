@@ -55,45 +55,21 @@ const PaymentConfirmation = () => {
         try {
           console.log("Fetching booking data from Supabase for reference ID:", referenceId);
           
-          // Fetch consultation data directly from Supabase
-          const { data: consultation, error } = await supabase
-            .from('consultations')
-            .select('*')
-            .eq('reference_id', referenceId)
-            .single();
-            
-          if (error) {
-            console.error("Error fetching consultation data:", error);
-            return;
-          }
+          const consultationData = await fetchConsultationData(referenceId);
           
-          if (consultation) {
-            // Convert the consultation data to BookingDetails format
-            const recoveredBookingDetails: BookingDetails = {
-              clientName: consultation.client_name || '',
-              email: consultation.client_email || '',
-              phone: consultation.client_phone || '',
-              referenceId: consultation.reference_id || '',
-              consultationType: consultation.consultation_type || '',
-              services: consultation.consultation_type ? [consultation.consultation_type] : [],
-              date: consultation.date ? new Date(consultation.date) : undefined,
-              timeSlot: consultation.time_slot || '',
-              timeframe: consultation.timeframe || '',
-              serviceCategory: consultation.service_category || '',
-              message: consultation.message || '',
-              amount: consultation.amount ? Number(consultation.amount) : undefined,
-              paymentId: consultation.payment_id || undefined
-            };
-            
-            setBookingDetails(recoveredBookingDetails);
-            setBookingRecovered(true);
-            
-            console.log("Booking details recovered from Supabase:", recoveredBookingDetails);
-            
-            toast({
-              title: "Booking Details Found",
-              description: "We've successfully retrieved your booking information."
-            });
+          if (consultationData) {
+            const recoveredBookingDetails = createBookingDetailsFromConsultation(consultationData);
+            if (recoveredBookingDetails) {
+              setBookingDetails(recoveredBookingDetails);
+              setBookingRecovered(true);
+              
+              console.log("Booking details recovered from Supabase:", recoveredBookingDetails);
+              
+              toast({
+                title: "Booking Details Found",
+                description: "We've successfully retrieved your booking information."
+              });
+            }
           } else {
             console.log("No consultation data found for reference ID:", referenceId);
           }
@@ -106,7 +82,7 @@ const PaymentConfirmation = () => {
     };
     
     fetchBookingData();
-  }, [referenceId, toast]);
+  }, [referenceId, toast, bookingDetails]);
 
   // Handle manual recovery attempt
   const handleManualRecovery = async () => {

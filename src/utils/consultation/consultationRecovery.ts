@@ -12,10 +12,15 @@ export const fetchConsultationData = async (referenceId: string): Promise<any | 
       .from('consultations')
       .select('*')
       .eq('reference_id', referenceId)
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error("Error fetching consultation data:", error);
+      return null;
+    }
+    
+    if (!data) {
+      console.log(`No consultation data found for reference ID: ${referenceId}`);
       return null;
     }
     
@@ -29,9 +34,14 @@ export const fetchConsultationData = async (referenceId: string): Promise<any | 
 
 // Convert a Supabase consultation record to BookingDetails format
 export const createBookingDetailsFromConsultation = (consultation: any): BookingDetails | null => {
-  if (!consultation) return null;
+  if (!consultation) {
+    console.log("Cannot create booking details: No consultation data provided");
+    return null;
+  }
   
   try {
+    console.log("Creating BookingDetails from consultation data:", consultation);
+    
     const bookingDetails: BookingDetails = {
       clientName: consultation.client_name || '',
       email: consultation.client_email || '',
@@ -48,6 +58,7 @@ export const createBookingDetailsFromConsultation = (consultation: any): Booking
       paymentId: consultation.payment_id || undefined
     };
     
+    console.log("Created BookingDetails:", bookingDetails);
     return bookingDetails;
   } catch (error) {
     console.error("Error creating BookingDetails from consultation:", error);

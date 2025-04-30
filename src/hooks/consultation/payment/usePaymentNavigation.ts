@@ -34,7 +34,7 @@ export const usePaymentNavigation = () => {
     if (paymentId) searchParams.set('pid', paymentId);
     
     // Also pass state for backward compatibility
-    navigate(`/payment-verification`, {
+    navigate(`/payment-verification?${searchParams.toString()}`, {
       state: {
         paymentId,
         orderId,

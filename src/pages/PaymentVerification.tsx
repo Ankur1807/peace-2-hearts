@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -16,13 +16,16 @@ const PaymentVerification = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  
+  // Get parameters from URL search params first, then fall back to location state
+  const referenceId = searchParams.get('ref') || location.state?.referenceId || null;
+  const paymentId = searchParams.get('pid') || location.state?.paymentId || null;
   
   const { 
-    paymentId, 
     orderId, 
     signature, 
     amount, 
-    referenceId,
     bookingDetails,
     isVerifying: initiallyVerifying = false
   } = location.state || {};
@@ -48,21 +51,31 @@ const PaymentVerification = () => {
 
   // Redirect to home if no payment data
   useEffect(() => {
-    if (!paymentId && !location.state) {
+    if (!paymentId && !location.state && !referenceId) {
+      console.log('No payment data found, redirecting to home');
       navigate('/', { replace: true });
     }
-  }, [paymentId, location.state, navigate]);
+  }, [paymentId, location.state, navigate, referenceId]);
 
-  // Automatically redirect to the payment-confirmation page with query parameters
+  // Automatically redirect to the thank-you page with query parameters
   useEffect(() => {
     if (paymentId && !isVerifying && !initiallyVerifying) {
       const timer = setTimeout(() => {
-        // Use URL parameters instead of state for the redirect
+        // Use URL parameters for the redirect
         const searchParams = new URLSearchParams();
         if (referenceId) searchParams.set('ref', referenceId);
         if (paymentId) searchParams.set('pid', paymentId);
         
-        navigate(`/payment-confirmation?${searchParams.toString()}`, {
+        console.log(`Redirecting to /thank-you?${searchParams.toString()}`);
+        navigate(`/thank-you?${searchParams.toString()}`, {
+          state: {
+            referenceId,
+            paymentId,
+            orderId,
+            signature,
+            amount,
+            bookingDetails
+          },
           replace: true
         });
         
@@ -71,7 +84,7 @@ const PaymentVerification = () => {
       
       return () => clearTimeout(timer);
     }
-  }, [isVerifying, initiallyVerifying, paymentId, navigate, orderId, signature, referenceId]);
+  }, [isVerifying, initiallyVerifying, paymentId, navigate, orderId, signature, referenceId, bookingDetails, amount]);
 
   // Try manual verification if needed
   const handleManualVerification = () => {
@@ -83,6 +96,12 @@ const PaymentVerification = () => {
     if (paymentId) searchParams.set('pid', paymentId);
     
     navigate(`/payment-confirmation?${searchParams.toString()}`, {
+      state: {
+        referenceId,
+        paymentId,
+        orderId,
+        amount
+      },
       replace: true
     });
     
@@ -133,7 +152,15 @@ const PaymentVerification = () => {
                 const searchParams = new URLSearchParams();
                 if (referenceId) searchParams.set('ref', referenceId);
                 if (paymentId) searchParams.set('pid', paymentId);
-                navigate(`/payment-confirmation?${searchParams.toString()}`, { replace: true });
+                navigate(`/payment-confirmation?${searchParams.toString()}`, { 
+                  state: {
+                    referenceId,
+                    paymentId,
+                    orderId,
+                    amount
+                  },
+                  replace: true 
+                });
               }}
               className="w-full bg-peacefulBlue hover:bg-peacefulBlue/80"
             >
