@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
@@ -39,18 +38,25 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   
   const handleDateSelect = (selectedDate: Date | undefined) => {
     // Add detailed logging to track the selected date
-    console.log('📅 User selected date (raw):', selectedDate);
+    console.log('📅 User clicked date (raw):', selectedDate);
     if (selectedDate) {
-      console.log('📅 User selected date (formatted):', format(selectedDate, 'yyyy-MM-dd'));
-      console.log('📅 User selected date (ISO):', selectedDate.toISOString());
-      console.log('📅 User selected date (local):', selectedDate.toLocaleDateString());
+      console.log('📅 User clicked date (formatted):', format(selectedDate, 'yyyy-MM-dd'));
+      console.log('📅 User clicked date (ISO):', selectedDate.toISOString());
+      console.log('📅 User clicked date (local):', selectedDate.toLocaleDateString());
     }
     
-    // Clone the date to ensure we're not affected by any reference issues
-    const clonedDate = selectedDate ? new Date(selectedDate) : undefined;
-    console.log('📅 Cloned date being set in state:', clonedDate);
+    // Ensure we set the correct date by setting hours to noon to avoid timezone issues
+    // This ensures the date remains the same regardless of timezone conversions
+    if (selectedDate) {
+      const correctedDate = new Date(selectedDate);
+      correctedDate.setHours(12, 0, 0, 0); // Set to noon to avoid any date shifting due to timezone
+      console.log('📅 Corrected date with noon time:', correctedDate);
+      console.log('📅 Corrected date ISO:', correctedDate.toISOString());
+      setDate(correctedDate);
+    } else {
+      setDate(undefined);
+    }
     
-    setDate(clonedDate);
     setCalendarOpen(false);
   };
   
@@ -122,4 +128,3 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 };
 
 export default DateTimePicker;
-

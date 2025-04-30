@@ -60,14 +60,13 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     if (newDate) {
       console.log('[DateTimeSection] New date ISO string:', newDate.toISOString());
       console.log('[DateTimeSection] New date formatted:', newDate.toLocaleDateString());
+      console.log('[DateTimeSection] Year:', newDate.getFullYear());
+      console.log('[DateTimeSection] Month:', newDate.getMonth() + 1);
+      console.log('[DateTimeSection] Day:', newDate.getDate());
       
-      // This fixes any time-of-day issues by normalizing the date to midnight in local timezone
-      const normalizedDate = new Date(newDate);
-      normalizedDate.setHours(0, 0, 0, 0);
-      console.log('[DateTimeSection] Normalized date:', normalizedDate);
-      console.log('[DateTimeSection] Normalized date ISO:', normalizedDate.toISOString());
-      
-      setDate(normalizedDate);
+      // Set the date directly without further manipulation
+      // The DateTimePicker has already adjusted the time to noon to prevent timezone issues
+      setDate(newDate);
     } else {
       setDate(newDate);
     }
@@ -76,9 +75,12 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
   // Log for debugging timezone issues
   React.useEffect(() => {
     if (date) {
-      console.log("[DateTimeSection] Selected date:", date);
+      console.log("[DateTimeSection] Selected date object:", date);
       console.log("[DateTimeSection] Date in ISO:", date.toISOString());
       console.log("[DateTimeSection] Local date string:", date.toString());
+      console.log("[DateTimeSection] Full year:", date.getFullYear());
+      console.log("[DateTimeSection] Month:", date.getMonth() + 1);
+      console.log("[DateTimeSection] Date:", date.getDate());
       console.log("[DateTimeSection] Local time:", date.toLocaleTimeString());
       console.log("[DateTimeSection] Selected time slot:", timeSlot);
       
@@ -115,4 +117,3 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
 };
 
 export default DateTimeSection;
-
