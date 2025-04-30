@@ -63,8 +63,12 @@ export const useOpenRazorpayCheckout = ({
         setReferenceId(receiptId);
       }
       
-      // Always navigate to verification/confirmation page, even if verification hasn't completed
-      // This ensures users see a confirmation screen regardless of email sending status
+      // Always navigate to verification page with query parameters and state
+      const searchParams = new URLSearchParams();
+      searchParams.set('ref', receiptId);
+      searchParams.set('pid', response.razorpay_payment_id);
+      
+      // Navigate to verification page
       navigateToVerification({
         paymentId: response.razorpay_payment_id,
         orderId: response.razorpay_order_id,

@@ -10,6 +10,7 @@ import { usePaymentVerification } from '@/hooks/payment/usePaymentVerification';
 import { BookingDetails } from '@/utils/types';
 import PaymentVerificationLoader from '@/components/consultation/payment/PaymentVerificationLoader';
 import { useToast } from '@/hooks/use-toast';
+import PaymentProcessingLoader from '@/components/consultation/payment/PaymentProcessingLoader';
 
 const PaymentVerification = () => {
   const location = useLocation();
@@ -29,6 +30,7 @@ const PaymentVerification = () => {
   const [isProcessing, setIsProcessing] = useState(true);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [manualVerification, setManualVerification] = useState(false);
+  const [showProcessingScreen, setShowProcessingScreen] = useState(true);
   
   const {
     isVerifying,
@@ -51,42 +53,36 @@ const PaymentVerification = () => {
     }
   }, [paymentId, location.state, navigate]);
 
-  // Automatically redirect to the thank-you page after successful verification
+  // Automatically redirect to the payment-confirmation page with query parameters
   useEffect(() => {
-    if (paymentId && !isVerifying && !initiallyVerifying && verificationResult?.success) {
+    if (paymentId && !isVerifying && !initiallyVerifying) {
       const timer = setTimeout(() => {
-        navigate('/thank-you', {
-          state: {
-            paymentId,
-            orderId,
-            signature,
-            referenceId,
-            amount,
-            bookingDetails,
-            verificationResult
-          },
+        // Use URL parameters instead of state for the redirect
+        const searchParams = new URLSearchParams();
+        if (referenceId) searchParams.set('ref', referenceId);
+        if (paymentId) searchParams.set('pid', paymentId);
+        
+        navigate(`/payment-confirmation?${searchParams.toString()}`, {
           replace: true
         });
-      }, 2000); // Short delay before redirecting
+        
+        setShowProcessingScreen(false);
+      }, 3000); // Short delay to show the processing screen
       
       return () => clearTimeout(timer);
     }
-  }, [isVerifying, initiallyVerifying, paymentId, navigate, orderId, signature, referenceId, amount, bookingDetails, verificationResult]);
+  }, [isVerifying, initiallyVerifying, paymentId, navigate, orderId, signature, referenceId]);
 
   // Try manual verification if needed
   const handleManualVerification = () => {
     setManualVerification(true);
     
-    // Navigate to confirmation page with available data
-    navigate('/payment-confirmation', {
-      state: {
-        paymentId,
-        orderId,
-        referenceId,
-        amount,
-        bookingDetails,
-        needsRecovery: true
-      },
+    // Navigate to confirmation page with query parameters
+    const searchParams = new URLSearchParams();
+    if (referenceId) searchParams.set('ref', referenceId);
+    if (paymentId) searchParams.set('pid', paymentId);
+    
+    navigate(`/payment-confirmation?${searchParams.toString()}`, {
       replace: true
     });
     
@@ -95,6 +91,11 @@ const PaymentVerification = () => {
       description: "We're trying to recover your booking information."
     });
   };
+
+  // Full-screen processing loader to prevent user from going back/refreshing
+  if (showProcessingScreen) {
+    return <PaymentProcessingLoader />;
+  }
 
   if (isVerifying || isProcessing) {
     return (
@@ -117,7 +118,7 @@ const PaymentVerification = () => {
           <h1 className="text-2xl font-semibold mb-4">Payment Processed!</h1>
           <p className="text-gray-600 mb-6">
             Your payment has been received and your booking information is being saved.
-            You'll be redirected to the thank you page in a moment.
+            You'll be redirected to the confirmation page in a moment.
           </p>
           <div className="bg-gray-50 p-4 rounded-lg mb-6 text-left">
             <p className="text-sm">
@@ -128,21 +129,15 @@ const PaymentVerification = () => {
           </div>
           <div className="space-y-3">
             <Button 
-              onClick={() => navigate('/thank-you', { 
-                state: {
-                  paymentId,
-                  orderId,
-                  signature,
-                  referenceId,
-                  amount,
-                  bookingDetails,
-                  verificationResult
-                },
-                replace: true
-              })}
+              onClick={() => {
+                const searchParams = new URLSearchParams();
+                if (referenceId) searchParams.set('ref', referenceId);
+                if (paymentId) searchParams.set('pid', paymentId);
+                navigate(`/payment-confirmation?${searchParams.toString()}`, { replace: true });
+              }}
               className="w-full bg-peacefulBlue hover:bg-peacefulBlue/80"
             >
-              Proceed to Thank You
+              View Booking Details
             </Button>
             
             {!manualVerification && (

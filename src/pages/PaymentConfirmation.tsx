@@ -13,6 +13,8 @@ import PaymentProcessing from "@/components/payment/confirmation/PaymentProcessi
 import PaymentConfirmationContainer from "@/components/payment/confirmation/PaymentConfirmationContainer";
 import BookingSuccessView from "@/components/consultation/BookingSuccessView";
 import { fetchConsultationData, createBookingDetailsFromConsultation } from "@/utils/consultation/consultationRecovery";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 const PaymentConfirmation = () => {
   const [searchParams] = useSearchParams();
@@ -20,16 +22,19 @@ const PaymentConfirmation = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Extract payment information from URL params or location state
-  const referenceId = location.state?.referenceId || searchParams.get("ref") || null;
-  const bookingDetails: BookingDetails | undefined = location.state?.bookingDetails;
-  const paymentId = searchParams.get("razorpay_payment_id") || location.state?.paymentId;
-  const orderId = searchParams.get("razorpay_order_id") || location.state?.orderId;
+  // Extract payment information from URL params first, then location state as fallback
+  const referenceId = searchParams.get("ref") || location.state?.referenceId || null;
+  const paymentId = searchParams.get("pid") || location.state?.paymentId || null;
+  const orderId = location.state?.orderId || null;
   const amount = location.state?.amount || 0;
   const paymentFailed = location.state?.paymentFailed || false;
   const verificationFailed = location.state?.verificationFailed || false;
   
+  const [bookingDetails, setBookingDetails] = useState<BookingDetails | undefined>(
+    location.state?.bookingDetails
+  );
   const [bookingRecovered, setBookingRecovered] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const { isRecovering, recoveryResult, recoverPaymentAndSendEmail } = usePaymentRecovery();
   
   const { isVerifying, setIsVerifying, verificationResult } = usePaymentConfirmation({
@@ -42,60 +47,66 @@ const PaymentConfirmation = () => {
     setBookingRecovered
   });
 
-  // Try to recover booking data if we have a reference ID but no booking details
+  // Always try to fetch booking data from Supabase if we have a reference ID
   useEffect(() => {
-    const recoverBookingData = async () => {
+    const fetchBookingData = async () => {
       if (referenceId && !bookingDetails) {
-        setIsVerifying(true);
+        setIsFetching(true);
         try {
-          console.log("Attempting to recover booking data for reference ID:", referenceId);
+          console.log("Fetching booking data from Supabase for reference ID:", referenceId);
           
-          const consultationData = await fetchConsultationData(referenceId);
-          if (consultationData) {
-            const recoveredBookingDetails = createBookingDetailsFromConsultation(consultationData);
-            if (recoveredBookingDetails) {
-              setBookingRecovered(true);
-              console.log("Booking details recovered successfully:", recoveredBookingDetails);
-              
-              // Update location state with recovered booking details
-              navigate(".", { 
-                state: {
-                  ...location.state,
-                  bookingDetails: recoveredBookingDetails
-                },
-                replace: true
-              });
-              
-              toast({
-                title: "Booking Details Recovered",
-                description: "We've successfully retrieved your booking information."
-              });
-            } else {
-              console.log("Could not create booking details from consultation data");
-            }
+          // Fetch consultation data directly from Supabase
+          const { data: consultation, error } = await supabase
+            .from('consultations')
+            .select('*')
+            .eq('reference_id', referenceId)
+            .single();
+            
+          if (error) {
+            console.error("Error fetching consultation data:", error);
+            return;
+          }
+          
+          if (consultation) {
+            // Convert the consultation data to BookingDetails format
+            const recoveredBookingDetails: BookingDetails = {
+              clientName: consultation.client_name || '',
+              email: consultation.client_email || '',
+              phone: consultation.client_phone || '',
+              referenceId: consultation.reference_id || '',
+              consultationType: consultation.consultation_type || '',
+              services: consultation.consultation_type ? [consultation.consultation_type] : [],
+              date: consultation.date ? new Date(consultation.date) : undefined,
+              timeSlot: consultation.time_slot || '',
+              timeframe: consultation.timeframe || '',
+              serviceCategory: consultation.service_category || '',
+              message: consultation.message || '',
+              amount: consultation.amount ? Number(consultation.amount) : undefined,
+              paymentId: consultation.payment_id || undefined
+            };
+            
+            setBookingDetails(recoveredBookingDetails);
+            setBookingRecovered(true);
+            
+            console.log("Booking details recovered from Supabase:", recoveredBookingDetails);
+            
+            toast({
+              title: "Booking Details Found",
+              description: "We've successfully retrieved your booking information."
+            });
           } else {
             console.log("No consultation data found for reference ID:", referenceId);
-            
-            // Check if we have a payment ID - might be an orphaned payment
-            if (paymentId && !recoveryResult) {
-              console.log("This might be an orphaned payment. Recovering payment data...");
-              
-              // We'll let the payment confirmation hook handle this case
-            }
           }
         } catch (error) {
           console.error("Error in booking data recovery:", error);
         } finally {
-          setIsVerifying(false);
+          setIsFetching(false);
         }
       }
     };
     
-    // Only try to recover if we have essential information
-    if (referenceId || paymentId) {
-      recoverBookingData();
-    }
-  }, [referenceId, bookingDetails, toast, navigate, location.state, paymentId, recoveryResult]);
+    fetchBookingData();
+  }, [referenceId, toast]);
 
   // Handle manual recovery attempt
   const handleManualRecovery = async () => {
@@ -112,27 +123,38 @@ const PaymentConfirmation = () => {
     }
   };
 
-  // Try to recover payment ID from session storage if it's not in the URL or state
-  useEffect(() => {
-    if (!paymentId && referenceId) {
-      const storedPaymentId = sessionStorage.getItem(`payment_id_${referenceId}`);
-      const storedOrderId = sessionStorage.getItem(`order_id_${referenceId}`);
-      
-      if (storedPaymentId) {
-        console.log("Found payment ID in session storage:", storedPaymentId);
-        
-        // Update location state with stored payment information
-        navigate(".", {
-          state: {
-            ...location.state,
-            paymentId: storedPaymentId,
-            orderId: storedOrderId || null
-          },
-          replace: true
-        });
-      }
-    }
-  }, [paymentId, referenceId, navigate, location.state]);
+  if (isVerifying || isRecovering || isFetching) {
+    return (
+      <>
+        <SEO title="Processing Booking" description="Verifying your booking details" />
+        <Navigation />
+        <PaymentProcessing 
+          isVerifying={isVerifying} 
+          isRecovering={isRecovering || isFetching} 
+        />
+        <Footer />
+      </>
+    );
+  }
+
+  if (!referenceId && !paymentId) {
+    return (
+      <>
+        <SEO title="Booking Confirmation" description="Your booking confirmation details" />
+        <Navigation />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="text-2xl font-semibold mb-4">Booking Information Not Found</h1>
+          <p className="text-gray-600 mb-6">
+            We couldn't find any booking information. Please check your email for confirmation details or contact support.
+          </p>
+          <Button onClick={() => navigate('/')} className="bg-peacefulBlue hover:bg-peacefulBlue/80">
+            Return to Home
+          </Button>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -143,11 +165,29 @@ const PaymentConfirmation = () => {
       />
       <Navigation />
       <main className="max-w-4xl mx-auto px-4 py-10">
-        {isVerifying || isRecovering ? (
-          <PaymentProcessing 
-            isVerifying={isVerifying} 
-            isRecovering={isRecovering} 
-          />
+        {referenceId && !bookingDetails ? (
+          <div className="text-center py-10">
+            <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+              <h2 className="text-xl font-semibold mb-4">We are finalizing your booking...</h2>
+              <p className="mb-4 text-gray-600">
+                Your payment has been received and your booking is being processed.
+              </p>
+              {referenceId && (
+                <div className="bg-gray-50 p-4 rounded-md mb-4 text-left">
+                  <p className="font-medium">Reference ID: <span className="font-normal">{referenceId}</span></p>
+                  {paymentId && <p className="font-medium">Payment ID: <span className="font-normal">{paymentId}</span></p>}
+                </div>
+              )}
+              <div className="flex justify-center mt-6">
+                <Button
+                  onClick={() => window.location.reload()}
+                  className="bg-peacefulBlue hover:bg-peacefulBlue/90"
+                >
+                  Refresh Page
+                </Button>
+              </div>
+            </div>
+          </div>
         ) : verificationResult ? (
           <PaymentConfirmationContainer
             verificationResult={verificationResult}
@@ -160,25 +200,25 @@ const PaymentConfirmation = () => {
             recoveryResult={recoveryResult}
             onManualRecovery={handleManualRecovery}
           />
-        ) : (!referenceId && !bookingDetails && !paymentId) ? (
+        ) : bookingDetails ? (
+          <BookingSuccessView
+            referenceId={referenceId}
+            bookingDetails={bookingDetails}
+          />
+        ) : (
           <div className="flex flex-col items-center justify-center px-4 py-8">
             <h1 className="text-2xl font-semibold mb-4">Booking Confirmation</h1>
             <p className="text-gray-700 mb-4">
               We received your booking request, but we couldn't find complete details.
             </p>
-            <p className="text-gray-700 mb-4">
-              If you've made a payment, it should be processed shortly.
-            </p>
-            <p className="text-gray-500">
-              Please check your email for further details!
-            </p>
+            {referenceId && (
+              <div className="bg-gray-50 p-4 rounded-md mb-4 text-left w-full max-w-md">
+                <p className="font-medium">Reference ID: <span className="font-normal">{referenceId}</span></p>
+                {paymentId && <p className="font-medium">Payment ID: <span className="font-normal">{paymentId}</span></p>}
+              </div>
+            )}
             <Button className="mt-6" onClick={() => navigate('/')}>Return to Home</Button>
           </div>
-        ) : (
-          <BookingSuccessView
-            referenceId={referenceId}
-            bookingDetails={bookingDetails}
-          />
         )}
       </main>
       <Footer />

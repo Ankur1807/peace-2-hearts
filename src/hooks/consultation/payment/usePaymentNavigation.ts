@@ -1,11 +1,20 @@
 
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { verifyPaymentAndCreateBooking } from '@/utils/payment/verificationService';
+import { BookingDetails } from '@/utils/types';
+
+interface NavigateToVerificationProps {
+  paymentId: string;
+  orderId: string;
+  signature: string;
+  amount: number;
+  referenceId: string;
+  bookingDetails: BookingDetails;
+  isVerifying?: boolean;
+  verificationFailed?: boolean;
+}
 
 export const usePaymentNavigation = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const navigateToVerification = ({
     paymentId,
@@ -14,83 +23,45 @@ export const usePaymentNavigation = () => {
     amount,
     referenceId,
     bookingDetails,
-    isVerifying,
+    isVerifying = false,
     verificationFailed = false
-  }: {
-    paymentId: string;
-    orderId: string;
-    signature?: string; // Make signature optional
-    amount: number;
-    referenceId: string;
-    bookingDetails: any;
-    isVerifying?: boolean;
-    verificationFailed?: boolean;
-  }) => {
-    // If the verification failed, show an error toast
-    if (verificationFailed) {
-      toast({
-        title: "Payment Verification Failed",
-        description: "We couldn't verify your payment. Please contact support with your payment ID.",
-        variant: "destructive"
-      });
-    }
-
-    // Navigate to the confirmation page and pass along all necessary data
-    navigate('/payment-confirmation', {
+  }: NavigateToVerificationProps) => {
+    console.log('Navigating to verification page with:', { referenceId, paymentId });
+    
+    // Create search params for the URL
+    const searchParams = new URLSearchParams();
+    if (referenceId) searchParams.set('ref', referenceId);
+    if (paymentId) searchParams.set('pid', paymentId);
+    
+    // Also pass state for backward compatibility
+    navigate(`/payment-verification`, {
       state: {
         paymentId,
         orderId,
         signature,
-        referenceId,
         amount,
+        referenceId,
+        bookingDetails,
         isVerifying,
-        bookingDetails
+        verificationFailed
       },
       replace: true
     });
   };
 
-  const handlePaymentError = async (
-    error: any,
-    paymentId: string,
-    orderId: string,
-    amount: number,
-    referenceId: string,
-    bookingDetails: any
-  ) => {
-    console.error("Payment error:", error);
+  const handlePaymentError = (error: any, referenceId?: string) => {
+    console.error('Payment error:', error);
     
-    // Show error toast
-    toast({
-      title: "Payment Failed",
-      description: error.description || error.message || "Your payment couldn't be processed. Please try again.",
-      variant: "destructive"
-    });
+    const searchParams = new URLSearchParams();
+    if (referenceId) searchParams.set('ref', referenceId);
     
-    try {
-      // Even if the payment failed, create a record with failed status
-      if (paymentId && referenceId) {
-        await verifyPaymentAndCreateBooking(
-          paymentId,
-          orderId,
-          undefined, // No signature for failed payments
-          {
-            ...bookingDetails,
-            referenceId
-          }
-        );
-      }
-    } catch (err) {
-      console.error("Error handling failed payment:", err);
-    }
-    
-    // Navigate to error page or back to booking form
-    navigate('/payment-failed', {
+    navigate(`/payment-confirmation?${searchParams.toString()}`, {
       state: {
-        error: error.description || error.message,
-        paymentId,
+        paymentFailed: true,
+        error: error.description || 'Payment processing failed',
         referenceId
-      }
+      },
+      replace: true
     });
   };
 

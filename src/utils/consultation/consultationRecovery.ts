@@ -1,13 +1,13 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDetails } from "@/utils/types";
-import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
 
-/**
- * Fetch consultation data by reference ID
- */
-export async function fetchConsultationData(referenceId: string): Promise<any> {
+// Fetch consultation data from Supabase by reference ID
+export const fetchConsultationData = async (referenceId: string): Promise<any | null> => {
   try {
+    console.log(`Fetching consultation data for reference ID: ${referenceId}`);
+    
+    // Query the consultations table for the record with matching reference_id
     const { data, error } = await supabase
       .from('consultations')
       .select('*')
@@ -15,176 +15,42 @@ export async function fetchConsultationData(referenceId: string): Promise<any> {
       .single();
     
     if (error) {
-      console.error("Error fetching consultation:", error);
+      console.error("Error fetching consultation data:", error);
       return null;
     }
     
+    console.log(`Consultation data found for ${referenceId}:`, data);
     return data;
   } catch (error) {
-    console.error("Error in fetchConsultationData:", error);
+    console.error(`Error fetching consultation data for ${referenceId}:`, error);
     return null;
   }
-}
+};
 
-/**
- * Fetch consultation by reference ID - alias for fetchConsultationData
- * for backward compatibility
- */
-export async function fetchConsultationByReferenceId(referenceId: string): Promise<any> {
-  return fetchConsultationData(referenceId);
-}
-
-/**
- * Check consultation payment status
- */
-export async function checkConsultationStatus(referenceId: string): Promise<{
-  exists: boolean;
-  status?: string;
-  paymentStatus?: string;
-  emailSent?: boolean;
-}> {
+// Convert a Supabase consultation record to BookingDetails format
+export const createBookingDetailsFromConsultation = (consultation: any): BookingDetails | null => {
+  if (!consultation) return null;
+  
   try {
-    const consultation = await fetchConsultationData(referenceId);
-    
-    if (!consultation) {
-      return { exists: false };
-    }
-    
-    return {
-      exists: true,
-      status: consultation.status,
-      paymentStatus: consultation.payment_status,
-      emailSent: consultation.email_sent
-    };
-  } catch (error) {
-    console.error("Error checking consultation status:", error);
-    return { exists: false };
-  }
-}
-
-/**
- * Create booking details from consultation record
- */
-export function createBookingDetailsFromConsultation(consultation: any): BookingDetails | null {
-  try {
-    if (!consultation) return null;
-    
-    // Determine service category
-    const serviceCategory = determineServiceCategory(consultation.consultation_type);
-    
-    // Create booking details object
     const bookingDetails: BookingDetails = {
-      referenceId: consultation.reference_id,
-      clientName: consultation.client_name,
-      email: consultation.client_email,
-      consultationType: consultation.consultation_type,
-      services: consultation.consultation_type ? consultation.consultation_type.split(',') : [],
+      clientName: consultation.client_name || '',
+      email: consultation.client_email || '',
+      phone: consultation.client_phone || '',
+      referenceId: consultation.reference_id || '',
+      consultationType: consultation.consultation_type || '',
+      services: consultation.consultation_type ? [consultation.consultation_type] : [],
       date: consultation.date ? new Date(consultation.date) : undefined,
-      timeSlot: consultation.time_slot,
-      timeframe: consultation.timeframe,
-      message: consultation.message,
-      serviceCategory: serviceCategory,
-      amount: consultation.amount
+      timeSlot: consultation.time_slot || '',
+      timeframe: consultation.timeframe || '',
+      serviceCategory: consultation.service_category || '',
+      message: consultation.message || '',
+      amount: consultation.amount ? Number(consultation.amount) : undefined,
+      paymentId: consultation.payment_id || undefined
     };
     
     return bookingDetails;
   } catch (error) {
-    console.error("Error creating booking details from consultation:", error);
+    console.error("Error creating BookingDetails from consultation:", error);
     return null;
   }
-}
-
-/**
- * Create consultation from booking details
- */
-export async function createConsultationFromBookingDetails(bookingDetails: BookingDetails): Promise<any> {
-  try {
-    if (!bookingDetails.referenceId) {
-      console.error("Missing reference ID in booking details");
-      return null;
-    }
-    
-    // Check if consultation already exists
-    const { data: existingConsultation } = await supabase
-      .from('consultations')
-      .select('id')
-      .eq('reference_id', bookingDetails.referenceId)
-      .single();
-    
-    if (existingConsultation) {
-      console.log("Consultation already exists for reference ID:", bookingDetails.referenceId);
-      return existingConsultation;
-    }
-    
-    // Create new consultation record
-    const { data, error } = await supabase
-      .from('consultations')
-      .insert({
-        reference_id: bookingDetails.referenceId,
-        client_name: bookingDetails.clientName,
-        client_email: bookingDetails.email,
-        consultation_type: bookingDetails.consultationType,
-        time_slot: bookingDetails.timeSlot,
-        timeframe: bookingDetails.timeframe,
-        date: bookingDetails.date instanceof Date ? bookingDetails.date.toISOString() : bookingDetails.date,
-        message: bookingDetails.message,
-        status: 'scheduled'
-      })
-      .select()
-      .single();
-    
-    if (error) {
-      console.error("Error creating consultation from booking details:", error);
-      return null;
-    }
-    
-    return data;
-  } catch (error) {
-    console.error("Exception in createConsultationFromBookingDetails:", error);
-    return null;
-  }
-}
-
-/**
- * Create a recovery consultation for orphaned payments
- */
-export async function createRecoveryConsultation(
-  referenceId: string, 
-  paymentId: string, 
-  amount: number,
-  orderId?: string
-): Promise<boolean> {
-  try {
-    console.log("Attempting to create a recovery consultation record");
-    
-    const clientName = 'Payment Received - Recovery Needed';
-    const consultationType = 'recovery_needed';
-    const message = `Payment received but consultation details missing. Payment ID: ${paymentId}, Amount: ${amount}`;
-    
-    const { data: recoveryData, error: recoveryError } = await supabase
-      .from('consultations')
-      .insert({
-        reference_id: referenceId,
-        status: 'payment_received_needs_details',
-        consultation_type: consultationType,
-        time_slot: 'recovery_needed',
-        client_name: clientName,
-        message: message,
-        payment_id: paymentId,
-        amount: amount,
-        order_id: orderId || null
-      })
-      .select();
-      
-    if (recoveryError) {
-      console.error("Failed to create recovery consultation:", recoveryError);
-      return false;
-    }
-    
-    console.log("Created recovery consultation record:", recoveryData);
-    return true;
-  } catch (error) {
-    console.error("Exception in createRecoveryConsultation:", error);
-    return false;
-  }
-}
+};
