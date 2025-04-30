@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -73,6 +74,9 @@ import ManualPaymentTest from './pages/ManualPaymentTest';
 
 // Add the EdgeFunctionTest page import
 import EdgeFunctionTest from './pages/EdgeFunctionTest';
+
+// Import our new confirmation test page
+import ConfirmationTest from './pages/ConfirmationTest';
 
 function App() {
   // The issue is likely here with the useEffect hook
@@ -173,6 +177,9 @@ function App() {
           
           {/* Add the EdgeFunctionTest route */}
           <Route path="/edge-function-test" element={<EdgeFunctionTest />} />
+          
+          {/* Add our new confirmation test route */}
+          <Route path="/confirmation-test" element={<ConfirmationTest />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
