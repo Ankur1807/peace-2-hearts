@@ -70,6 +70,9 @@ import TestSimulation from './pages/TestSimulation';
 // Add import for the manual payment test page
 import ManualPaymentTest from './pages/ManualPaymentTest';
 
+// Add the EdgeFunctionTest page import
+import EdgeFunctionTest from './pages/EdgeFunctionTest';
+
 function App() {
   // The issue is likely here with the useEffect hook
   useEffect(() => {
@@ -165,6 +168,9 @@ function App() {
           
           {/* Add the manual payment test route */}
           <Route path="/manual-payment-test" element={<ManualPaymentTest />} />
+          
+          {/* Add the EdgeFunctionTest route */}
+          <Route path="/edge-function-test" element={<EdgeFunctionTest />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
