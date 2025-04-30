@@ -1,3 +1,4 @@
+
 export interface PersonalDetails {
   firstName: string;
   lastName: string;
@@ -59,12 +60,13 @@ export interface Service {
   popular: boolean;
 }
 
-// Updated interface with redirectUrl field
+// Updated interface with redirectUrl and message fields
 export interface VerificationResult {
   success: boolean;
   verified: boolean;
   error?: string;
   redirectUrl?: string;
+  message?: string; // Added the missing message property
   details?: any;
 }
 
