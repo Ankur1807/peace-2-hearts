@@ -27,7 +27,25 @@ serve(async (req) => {
     
     // Parse request body
     const body = await req.json();
-    const { type, ...data } = body;
+    
+    // Extract type and data, accounting for potential nested structure
+    let type, data;
+    
+    if (body.type) {
+      // Direct structure
+      type = body.type;
+      data = body; // Use the body itself as data
+      console.log("[SEND-EMAIL] Function called with direct payload structure, type:", type);
+    } else if (body.data && body.data.type) {
+      // Nested structure (backwards compatibility)
+      type = body.data.type;
+      data = body.data;
+      console.log("[SEND-EMAIL] Function called with nested payload structure, type:", type);
+    } else {
+      // Cannot determine type
+      console.error("[SEND-EMAIL] Missing type in payload:", JSON.stringify(body));
+      throw new Error('Missing required parameter: type');
+    }
     
     console.log("[SEND-EMAIL] Function called with type:", type, "and data:", JSON.stringify(data));
     
@@ -40,10 +58,20 @@ serve(async (req) => {
     // Handle different email types
     switch (type) {
       case 'booking-confirmation':
-        // Validate required fields
-        if (!data.to || !data.clientName || !data.referenceId) {
-          console.error('Missing required fields for booking confirmation email:', data);
-          throw new Error('Missing required fields for booking confirmation email');
+        // Validate required fields with more robust error handling
+        if (!data.to && !data.email) {
+          console.error('Missing recipient email address:', data);
+          throw new Error('Missing recipient email address');
+        }
+        
+        if (!data.clientName) {
+          console.error('Missing client name for booking confirmation:', data);
+          throw new Error('Missing client name for booking confirmation');
+        }
+        
+        if (!data.referenceId) {
+          console.error('Missing reference ID for booking confirmation:', data);
+          throw new Error('Missing reference ID for booking confirmation');
         }
         
         // Get the email recipient from the correct field

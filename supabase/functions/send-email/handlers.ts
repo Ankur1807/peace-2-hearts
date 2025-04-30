@@ -22,6 +22,7 @@ interface BookingEmailData {
   highPriority?: boolean;
   isResend?: boolean;
   isRecovery?: boolean;
+  bcc?: string; // Added this field to explicitly define bcc
 }
 
 // Set up Resend client
@@ -172,9 +173,12 @@ export async function handleBookingEmail(data: BookingEmailData) {
       ]
     };
     
-    // Add BCC for high priority emails
-    if (data.highPriority) {
-      emailOptions.bcc = ["support@peace2hearts.com"];
+    // Add BCC for high priority emails or if explicitly specified
+    if (data.highPriority || data.bcc) {
+      // Use explicit BCC if provided, otherwise use support email
+      const bccEmail = data.bcc || "support@peace2hearts.com";
+      console.log(`Adding BCC to booking email: ${bccEmail}`);
+      emailOptions.bcc = [bccEmail];
       emailOptions.tags.push({
         name: "priority",
         value: "high"

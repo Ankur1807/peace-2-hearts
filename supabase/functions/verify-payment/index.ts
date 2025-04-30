@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { corsHeaders, determineServiceCategory, handleFetchResponse } from "./utils.ts";
@@ -245,27 +244,24 @@ async function sendConfirmationEmail(
       // Make sure we always include admin as BCC - Fixed admin email address
       const adminEmail = "admin@peace2hearts.com";
       
-      console.log(`[EDGE] Calling send-email function with data:`, {
-        referenceId: bookingDetails.referenceId,
-        email: bookingDetails.email,
+      // Log payload to help with debugging
+      const emailPayload = {
+        type: 'booking-confirmation',
+        to: bookingDetails.email,
+        bcc: adminEmail, // Ensure admin email is included as BCC
         clientName: bookingDetails.clientName,
-        withBcc: true,
-        bcc: adminEmail
-      });
+        referenceId: bookingDetails.referenceId,
+        serviceType: bookingDetails.consultationType || bookingDetails.services.join(', '),
+        date: bookingDetails.date || 'To be scheduled',
+        time: bookingDetails.timeSlot || bookingDetails.timeframe || '',
+        price: bookingDetails.amount ? `₹${bookingDetails.amount}` : 'To be confirmed',
+        highPriority: true
+      };
+      
+      console.log(`[EDGE] Calling send-email function with payload:`, JSON.stringify(emailPayload));
       
       const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-email', {
-        body: {
-          type: 'booking-confirmation',
-          to: bookingDetails.email,
-          bcc: adminEmail, // Ensure admin email is included as BCC
-          clientName: bookingDetails.clientName,
-          referenceId: bookingDetails.referenceId,
-          serviceType: bookingDetails.consultationType || bookingDetails.services.join(', '),
-          date: bookingDetails.date || 'To be scheduled',
-          time: bookingDetails.timeSlot || bookingDetails.timeframe || '',
-          price: bookingDetails.amount ? `₹${bookingDetails.amount}` : 'To be confirmed',
-          highPriority: true
-        }
+        body: emailPayload // IMPORTANT: Direct payload, not nested under 'data'
       });
       
       if (emailError) {
