@@ -1,43 +1,20 @@
 
-/**
- * Utility functions for payment verification
- */
+// Set up CORS headers for browser requests
+export const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 /**
- * Determines the service category based on service type
+ * Determine the service category based on the service ID
  */
-export function determineServiceCategory(serviceType: string | null | undefined): string {
-  if (!serviceType) return 'legal';
+export function determineServiceCategory(serviceId: string): string {
+  if (!serviceId) return 'other';
   
-  const serviceTypeLower = serviceType.toLowerCase();
+  if (serviceId.includes('legal')) return 'legal';
+  if (serviceId.includes('mental') || serviceId.includes('therapy') || serviceId.includes('counseling')) return 'mental-health';
+  if (serviceId.includes('holistic')) return 'holistic';
+  if (serviceId.includes('test')) return 'test';
   
-  if (serviceTypeLower.includes('divorce-prevention') || 
-      serviceTypeLower.includes('pre-marriage-clarity') ||
-      serviceTypeLower.includes('relationship-counseling')) {
-    return 'holistic';
-  }
-  
-  if (serviceTypeLower.includes('legal') || 
-      serviceTypeLower.includes('divorce') || 
-      serviceTypeLower.includes('custody')) {
-    return 'legal';
-  }
-  
-  if (serviceTypeLower.includes('therapy') || 
-      serviceTypeLower.includes('counseling') || 
-      serviceTypeLower.includes('mental')) {
-    return 'mental';
-  }
-  
-  // Default to legal if can't determine
-  return 'legal';
-}
-
-/**
- * Format price for display (converts from paise to rupees)
- */
-export function formatPrice(amount: number): string {
-  // Razorpay amounts are in paise, convert to rupees
-  const amountInRupees = amount / 100;
-  return `₹${amountInRupees.toFixed(2)}`;
+  return 'other';
 }

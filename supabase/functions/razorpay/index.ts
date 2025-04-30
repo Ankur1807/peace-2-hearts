@@ -81,9 +81,13 @@ serve(async (req: Request) => {
       });
     }
     
-    if (action === 'create_order') {
+    // FIX: Make action checking case-insensitive and support both formats
+    // (create_order and create-order)
+    const normalizedAction = action.toLowerCase().replace(/-/g, '_');
+    
+    if (normalizedAction === 'create_order') {
       // Extract params for create order
-      const { amount, currency = 'INR', receipt, orderData } = data;
+      const { amount, currency = 'INR', receipt, notes } = data;
       
       if (amount === undefined || amount === null) {
         console.error("Missing required 'amount' parameter");
@@ -107,9 +111,9 @@ serve(async (req: Request) => {
         });
       }
       
-      return await handleCreateOrder(amount, currency, receipt, orderData?.notes, auth, key_id);
+      return await handleCreateOrder(amount, currency, receipt, notes, auth, key_id);
     } 
-    else if (action === 'verify_payment') {
+    else if (normalizedAction === 'verify_payment') {
       // Extract params for verify payment
       const { paymentId, orderData, checkOnly } = data;
       
@@ -131,7 +135,8 @@ serve(async (req: Request) => {
       console.error("Unknown action requested:", action);
       return new Response(JSON.stringify({
         success: false,
-        error: `Invalid action: ${action}`
+        error: `Invalid action: ${action}`,
+        supportedActions: ['create_order', 'verify_payment']
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400

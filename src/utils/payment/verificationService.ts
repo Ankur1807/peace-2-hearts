@@ -15,11 +15,16 @@ interface VerificationResult {
 export async function verifyPaymentAndCreateBooking(
   paymentId: string, 
   orderId: string,
-  signature: string,
+  signature: string | undefined,
   bookingDetails: BookingDetails
 ): Promise<VerificationResult> {
   try {
     console.log(`Verifying payment and creating booking for ${paymentId}`);
+    
+    // Safety check for missing data - still try to proceed
+    if (!signature) {
+      console.warn("Missing signature in verification call, attempting to proceed anyway");
+    }
     
     // Call our verify-payment edge function
     const { data, error } = await supabase.functions.invoke('verify-payment', {
@@ -54,6 +59,19 @@ export async function verifyPaymentAndCreateBooking(
     }
     
     console.log("Verification result:", data);
+    
+    // If email failed but payment verified, still return success
+    if (data.verified && !data.emailSent) {
+      console.warn("Payment verified but email sending failed");
+      return {
+        success: true,
+        verified: true,
+        details: {
+          ...data,
+          emailWarning: true
+        }
+      };
+    }
     
     return {
       success: true,

@@ -10,14 +10,14 @@ type OrderSummaryProps = {
   consultationType: string;
   selectedServices?: string[];
   pricing?: Map<string, number>;
-  totalPrice?: number; // Added totalPrice prop
+  totalPrice?: number;
 };
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ 
   consultationType, 
   selectedServices = [],
   pricing,
-  totalPrice // Use the prop
+  totalPrice
 }) => {
   const getConsultationLabel = () => {
     const packageName = selectedServices.length > 0 
@@ -33,12 +33,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   const getEffectivePrice = useEffectivePrice({
     selectedServices,
     pricing,
-    totalPrice // Pass to the hook
+    totalPrice
   });
 
   const consultationLabel = getConsultationLabel();
   const effectivePrice = getEffectivePrice();
 
+  // Debug log for pricing information
   React.useEffect(() => {
     console.log("OrderSummary rendered with:", {
       consultationType,
@@ -58,6 +59,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     );
   }
 
+  // Special display for test service
+  const isTestService = selectedServices.includes('test-service');
+  
   return (
     <div className="mb-6">
       <div className="bg-gray-50 p-4 rounded-lg mb-6">
@@ -65,9 +69,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         <div className="space-y-2">
           <OrderAmount 
             effectivePrice={effectivePrice}
-            consultationLabel={consultationLabel}
+            consultationLabel={isTestService ? 'Test service for payment system validation' : consultationLabel}
           />
-          <ServiceDuration selectedServices={selectedServices} />
+          {!isTestService && <ServiceDuration selectedServices={selectedServices} />}
           
           <div className="border-t pt-3 mt-3">
             <div className="flex justify-between font-semibold">

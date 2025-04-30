@@ -22,9 +22,13 @@ export function useEffectivePrice({
       return 0;
     }
 
-    // Handle test service for development
+    // Handle test service for development - FIXED: preserve the actual price (11)
     if (selectedServices.includes('test-service')) {
-      return 1; // Use 1 rupee for test payments
+      const testServicePrice = pricing.get('test-service');
+      if (testServicePrice !== undefined && testServicePrice > 0) {
+        return testServicePrice; // Return the actual price from pricing map
+      }
+      return 11; // Default fallback price for test service
     }
 
     // Try to find the price from the pricing map
