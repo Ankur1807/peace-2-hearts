@@ -54,6 +54,9 @@ const BookConsultation = () => {
   }, [showPaymentStep, debugState.showingPaymentStep]);
 
   const createBookingDetails = (): BookingDetails => {
+    // Debug log the state values
+    console.log('[BookConsultation] Creating booking details with date:', date);
+    
     // Create the basic booking details
     const bookingDetails: BookingDetails = {
       clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
@@ -71,16 +74,20 @@ const BookConsultation = () => {
     
     // If we have both date and timeSlot, convert to UTC for storage
     if (date && timeSlot) {
-      console.log('Original date before conversion:', date);
+      console.log('[BookConsultation] Original date before conversion:', date);
       
       // Format the date string (YYYY-MM-DD) from the Date object
-      const dateStr = date instanceof Date 
-        ? date.toISOString().split('T')[0] 
-        : date;
+      // This is critical - ensure we get the correct date in local timezone 
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+      
+      console.log('[BookConsultation] Formatted date string for conversion:', dateStr);
         
       // Convert to UTC using our hardcoded function
       const utcDateString = convertISTTimeSlotToUTCString(dateStr, timeSlot);
-      console.log('Converted UTC string for storage:', utcDateString);
+      console.log('[BookConsultation] Converted UTC string for storage:', utcDateString);
       
       bookingDetails.date = utcDateString;
     } else {
@@ -167,3 +174,4 @@ const BookConsultation = () => {
 };
 
 export default BookConsultation;
+

@@ -38,7 +38,19 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   };
   
   const handleDateSelect = (selectedDate: Date | undefined) => {
-    setDate(selectedDate);
+    // Add detailed logging to track the selected date
+    console.log('📅 User selected date (raw):', selectedDate);
+    if (selectedDate) {
+      console.log('📅 User selected date (formatted):', format(selectedDate, 'yyyy-MM-dd'));
+      console.log('📅 User selected date (ISO):', selectedDate.toISOString());
+      console.log('📅 User selected date (local):', selectedDate.toLocaleDateString());
+    }
+    
+    // Clone the date to ensure we're not affected by any reference issues
+    const clonedDate = selectedDate ? new Date(selectedDate) : undefined;
+    console.log('📅 Cloned date being set in state:', clonedDate);
+    
+    setDate(clonedDate);
     setCalendarOpen(false);
   };
   
@@ -110,3 +122,4 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 };
 
 export default DateTimePicker;
+

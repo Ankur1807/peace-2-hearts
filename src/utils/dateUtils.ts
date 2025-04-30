@@ -63,13 +63,29 @@ export function addDays(date: Date, days: number): Date {
  * Always returns an ISO string for database storage
  */
 export function convertISTTimeSlotToUTCString(dateString: string, timeSlot: string): string {
+  console.log("[convertISTTimeSlotToUTCString] Input date string:", dateString);
+  console.log("[convertISTTimeSlotToUTCString] Input time slot:", timeSlot);
+  
+  // Parse hour and handle AM/PM conversion
   const [hourStr, meridian] = timeSlot.split('-');
   let hour = parseInt(hourStr, 10);
   if (meridian.toLowerCase() === 'pm' && hour < 12) hour += 12;
   if (meridian.toLowerCase() === 'am' && hour === 12) hour = 0;
-  const istDate = new Date(`${dateString}T${hour.toString().padStart(2, '0')}:00:00+05:30`);
-  console.log(`[convertISTTimeSlotToUTCString] Converting IST date: ${dateString}, time: ${timeSlot} to UTC: ${istDate.toISOString()}`);
-  return istDate.toISOString(); // returns a UTC-formatted ISO string
+  
+  // Create the IST date string with the timezone offset
+  const hourFormatted = hour.toString().padStart(2, '0');
+  const istDateTimeString = `${dateString}T${hourFormatted}:00:00+05:30`;
+  console.log("[convertISTTimeSlotToUTCString] IST datetime string:", istDateTimeString);
+  
+  // Parse to a Date object which will handle the timezone conversion
+  const istDate = new Date(istDateTimeString);
+  console.log("[convertISTTimeSlotToUTCString] Parsed date object:", istDate.toString());
+  
+  // Convert to UTC ISO string
+  const utcString = istDate.toISOString();
+  console.log("[convertISTTimeSlotToUTCString] Resulting UTC string:", utcString);
+  
+  return utcString; // returns a UTC-formatted ISO string
 }
 
 /**
@@ -162,3 +178,4 @@ export function simulateBookingFlow() {
     verificationResponse
   };
 }
+

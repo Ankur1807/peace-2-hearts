@@ -41,6 +41,8 @@ export function useConsultationPayment({
   
   // Create booking details object for payment
   const createBookingDetails = useCallback((): BookingDetails => {
+    console.log('[useConsultationPayment] Creating booking details with date:', state.date);
+    
     // Create the basic booking details
     const bookingDetails: BookingDetails = {
       clientName: `${state.personalDetails.firstName} ${state.personalDetails.lastName}`,
@@ -61,10 +63,13 @@ export function useConsultationPayment({
     if (state.date && state.timeSlot) {
       console.log('[useConsultationPayment] Original date before conversion:', state.date);
       
-      // Format the date string (YYYY-MM-DD) from the Date object
-      const dateStr = state.date instanceof Date 
-        ? state.date.toISOString().split('T')[0] 
-        : state.date;
+      // Format the date string (YYYY-MM-DD) from the Date object to ensure correct date
+      const year = state.date.getFullYear();
+      const month = String(state.date.getMonth() + 1).padStart(2, '0');
+      const day = String(state.date.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+      
+      console.log('[useConsultationPayment] Formatted date string for conversion:', dateStr);
         
       // Convert to UTC using our hardcoded function
       const utcDateString = convertISTTimeSlotToUTCString(dateStr, state.timeSlot);

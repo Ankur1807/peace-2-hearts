@@ -54,6 +54,25 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
     return date < getMinDate();
   };
 
+  // Create a wrapped setDate function to add additional logging
+  const handleDateChange = (newDate: Date | undefined) => {
+    console.log('[DateTimeSection] Setting new date:', newDate);
+    if (newDate) {
+      console.log('[DateTimeSection] New date ISO string:', newDate.toISOString());
+      console.log('[DateTimeSection] New date formatted:', newDate.toLocaleDateString());
+      
+      // This fixes any time-of-day issues by normalizing the date to midnight in local timezone
+      const normalizedDate = new Date(newDate);
+      normalizedDate.setHours(0, 0, 0, 0);
+      console.log('[DateTimeSection] Normalized date:', normalizedDate);
+      console.log('[DateTimeSection] Normalized date ISO:', normalizedDate.toISOString());
+      
+      setDate(normalizedDate);
+    } else {
+      setDate(newDate);
+    }
+  };
+
   // Log for debugging timezone issues
   React.useEffect(() => {
     if (date) {
@@ -82,7 +101,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       ) : (
         <DateTimePicker 
           date={date}
-          setDate={setDate}
+          setDate={handleDateChange}
           timeSlot={timeSlot}
           setTimeSlot={setTimeSlot}
           serviceCategory={serviceCategory}
@@ -96,3 +115,4 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
 };
 
 export default DateTimeSection;
+
