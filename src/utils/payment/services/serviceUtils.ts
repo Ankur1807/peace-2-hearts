@@ -32,7 +32,8 @@ export const determineServiceCategory = (consultationType: string): string => {
     type.includes('counselling') ||
     type.includes('mental-health') ||
     type.includes('psychological') ||
-    type.includes('psychotherapy')
+    type.includes('psychotherapy') ||
+    type.includes('test-service')  // Add our test service
   ) {
     return 'mental-health';
   }

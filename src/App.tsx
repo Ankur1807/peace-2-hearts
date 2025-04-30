@@ -64,6 +64,9 @@ import LogoExport from '@/pages/LogoExport';
 // Import our new AdminServices component
 import AdminServices from './pages/admin/AdminServices';
 
+// Add import for the TestSimulation page
+import TestSimulation from './pages/TestSimulation';
+
 function App() {
   // The issue is likely here with the useEffect hook
   useEffect(() => {
@@ -153,6 +156,9 @@ function App() {
             <Route path="settings" element={<AdminSettings />} />
             <Route path="payment-migration" element={<AdminPaymentMigration />} />
           </Route>
+          
+          {/* Add the TestSimulation route to your router configuration */}
+          <Route path="/test-simulation" element={<TestSimulation />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
