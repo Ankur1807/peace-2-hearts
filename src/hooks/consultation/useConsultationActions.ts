@@ -13,6 +13,12 @@ interface UseConsultationActionsParams {
   toast: any;
 }
 
+// Define a proper return type for the saveConsultation function
+interface ConsultationResult {
+  reference_id: string;
+  [key: string]: any;
+}
+
 export const useConsultationActions = ({
   state,
   setReferenceId,
@@ -57,7 +63,7 @@ export const useConsultationActions = ({
         state.date,
         timeSlotOrTimeframe,
         state.personalDetails
-      );
+      ) as ConsultationResult; // Type assertion to ensure proper typing
       
       console.log("Consultation saved successfully:", result);
       
@@ -74,7 +80,7 @@ export const useConsultationActions = ({
         setSubmitted(true);
       }
       
-      return result;  // This is now correctly typed as 'any'
+      return result;
     } catch (error) {
       console.error("Error in handleConfirmBooking:", error);
       
@@ -95,7 +101,7 @@ export const useConsultationActions = ({
 
   const processServiceBookings = useCallback(async () => {
     const { selectedServices, serviceCategory, date, timeSlot, timeframe, personalDetails } = state;
-    let lastResult;
+    let lastResult: ConsultationResult | null = null; // Use the defined interface
     
     console.log("processServiceBookings - Starting bookings process with state:", {
       selectedServices, 
@@ -118,7 +124,7 @@ export const useConsultationActions = ({
           serviceCategory === 'holistic' ? undefined : date,
           serviceCategory === 'holistic' ? timeframe : timeSlot,
           personalDetails
-        );
+        ) as ConsultationResult; // Type assertion to ensure proper typing
         
         if (result) {
           console.log(`Consultation created for ${service}:`, result);

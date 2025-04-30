@@ -10,7 +10,7 @@ import { BookingDetails } from "@/utils/types";
 // Re-export from specialized services
 import { loadRazorpayScript, isRazorpayAvailable } from "./razorpayLoader";
 import { createRazorpayOrder } from "./services/paymentOrderService";
-import { verifyRazorpayPayment, verifyAndSyncPayment, verifyAndRecordPayment } from "./services/paymentVerificationService";
+import { verifyRazorpayPayment, verifyAndSyncPayment } from "./services/paymentVerificationService";
 import { updateConsultationStatus } from "./services/serviceUtils";
 import { sendEmailForConsultation } from "./services/emailNotificationService";
 import { storePaymentDetailsInSession, savePaymentRecord } from "./services/paymentRecordService";
@@ -30,7 +30,6 @@ export {
   // Payment verification
   verifyRazorpayPayment,
   verifyAndSyncPayment,
-  verifyAndRecordPayment,
   
   // Consultation and email services
   updateConsultationStatus,
