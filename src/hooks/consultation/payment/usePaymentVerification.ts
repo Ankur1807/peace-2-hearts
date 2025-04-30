@@ -43,7 +43,11 @@ export const usePaymentVerification = ({
         if (setPaymentCompleted) {
           setPaymentCompleted(true);
         }
-        return { success: true, verified: true, redirectUrl: verificationResult.redirectUrl || '/thank-you' };
+        return { 
+          success: true, 
+          verified: true, 
+          redirectUrl: verificationResult.redirectUrl || '/thank-you'
+        };
       }
       
       console.warn("[VERIFY] Payment verification failed:", verificationResult);
