@@ -375,6 +375,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Payment verified successfully for ${paymentId}`);
     const paymentDetails = paymentVerification.details;
     
+    // CRITICAL FIX: Must include reference ID in redirect URL for proper data fetching
     // Return success response immediately before starting background tasks
     const responseData = { 
       success: true, 
@@ -382,6 +383,7 @@ const handler = async (req: Request): Promise<Response> => {
       consultationId: "pending", // Will be created in background
       // Always include the reference ID in the redirectUrl for proper data fetching
       redirectUrl: `/thank-you?ref=${bookingDetails.referenceId}`,
+      referenceId: bookingDetails.referenceId, // Explicitly include reference ID in response
       paymentId,
       orderId
     };

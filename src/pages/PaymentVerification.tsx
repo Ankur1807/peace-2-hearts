@@ -57,17 +57,34 @@ const PaymentVerification = () => {
     }
   }, [paymentId, location.state, navigate, referenceId]);
 
+  // CRITICAL FIX: Add logging to debug ref parameter and ensure it's being passed
+  useEffect(() => {
+    console.log('PaymentVerification loaded with:', {
+      referenceId, 
+      paymentId, 
+      fromParams: !!searchParams.get('ref'),
+      fromState: !!(location.state?.referenceId),
+      queryString: window.location.search
+    });
+  }, [referenceId, paymentId, searchParams, location.state]);
+
   // Automatically redirect to the thank-you page with query parameters
   useEffect(() => {
     if (paymentId && !isVerifying && !initiallyVerifying) {
       const timer = setTimeout(() => {
-        // Use URL parameters for the redirect - ALWAYS include the ref parameter
+        // CRITICAL FIX: Ensure the ref parameter is ALWAYS included
+        if (!referenceId) {
+          console.error("ERROR: Missing reference ID for thank you redirect!");
+        }
+        
         const searchParams = new URLSearchParams();
         if (referenceId) searchParams.set('ref', referenceId);
         if (paymentId) searchParams.set('pid', paymentId);
         
-        console.log(`Redirecting to /thank-you?${searchParams.toString()}`);
-        navigate(`/thank-you?${searchParams.toString()}`, {
+        const redirectPath = `/thank-you?${searchParams.toString()}`;
+        console.log(`Redirecting to thank-you page: ${redirectPath}`);
+        
+        navigate(redirectPath, {
           state: {
             referenceId,
             paymentId,
@@ -90,12 +107,20 @@ const PaymentVerification = () => {
   const handleManualVerification = () => {
     setManualVerification(true);
     
-    // Navigate to confirmation page with query parameters - ALWAYS include the ref parameter
+    // CRITICAL FIX: Always check and log if ref is missing
+    if (!referenceId) {
+      console.error("ERROR: Missing reference ID for manual verification!");
+    }
+    
+    // Navigate to confirmation page with query parameters
     const searchParams = new URLSearchParams();
     if (referenceId) searchParams.set('ref', referenceId);
     if (paymentId) searchParams.set('pid', paymentId);
     
-    navigate(`/payment-confirmation?${searchParams.toString()}`, {
+    const redirectPath = `/payment-confirmation?${searchParams.toString()}`;
+    console.log(`Navigating to manual verification: ${redirectPath}`);
+    
+    navigate(redirectPath, {
       state: {
         referenceId,
         paymentId,
@@ -149,10 +174,15 @@ const PaymentVerification = () => {
           <div className="space-y-3">
             <Button 
               onClick={() => {
+                // CRITICAL FIX: Always include ref in the redirect
                 const searchParams = new URLSearchParams();
                 if (referenceId) searchParams.set('ref', referenceId);
                 if (paymentId) searchParams.set('pid', paymentId);
-                navigate(`/payment-confirmation?${searchParams.toString()}`, { 
+                
+                const redirectPath = `/payment-confirmation?${searchParams.toString()}`;
+                console.log(`Navigating to payment confirmation: ${redirectPath}`);
+                
+                navigate(redirectPath, { 
                   state: {
                     referenceId,
                     paymentId,

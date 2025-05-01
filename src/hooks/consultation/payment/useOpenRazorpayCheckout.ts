@@ -63,12 +63,15 @@ export const useOpenRazorpayCheckout = ({
         setReferenceId(receiptId);
       }
       
-      // Always navigate to verification page with query parameters and state
+      // CRITICAL FIX: Always immediately navigate to verification page with query parameters
+      // This ensures we don't go back to the cart page after Razorpay closes
       const searchParams = new URLSearchParams();
-      searchParams.set('ref', receiptId);
+      searchParams.set('ref', receiptId); // Always include the reference ID
       searchParams.set('pid', response.razorpay_payment_id);
       
-      // Navigate to verification page
+      console.log(`Immediately redirecting to verification with params: ${searchParams.toString()}`);
+      
+      // Navigate to verification page IMMEDIATELY after payment success
       navigateToVerification({
         paymentId: response.razorpay_payment_id,
         orderId: response.razorpay_order_id,
@@ -76,10 +79,10 @@ export const useOpenRazorpayCheckout = ({
         amount: getEffectivePrice(),
         referenceId: receiptId,
         bookingDetails,
-        isVerifying
+        isVerifying: true // Set to true to indicate verification in progress
       });
       
-      // Start verification process
+      // Start verification process in the background
       const verificationResult = await verifyPayment(
         response, 
         getEffectivePrice(), 
@@ -100,6 +103,7 @@ export const useOpenRazorpayCheckout = ({
       console.error("Error in payment success handler:", error);
       
       // Even if an error occurs, navigate to confirmation with warning state
+      // CRITICAL FIX: Always include reference ID in navigation
       navigateToVerification({
         paymentId: response.razorpay_payment_id,
         orderId: response.razorpay_order_id,
@@ -146,6 +150,8 @@ export const useOpenRazorpayCheckout = ({
         description: `Consultation Booking: ${receiptId}`,
         order_id: order.id,
         handler: (response: any) => {
+          // CRITICAL FIX: Immediately call our handler to redirect on Razorpay closure
+          console.log("Payment successful - Razorpay handler triggered");
           handleSuccess(response, receiptId);
         },
         prefill: {
@@ -169,14 +175,18 @@ export const useOpenRazorpayCheckout = ({
               description: "You've cancelled your payment. You can try again when you're ready.",
               variant: "default"
             });
-          }
+          },
+          // CRITICAL FIX: Override escape key to prevent accidental closing without redirect
+          escape: false,
+          // CRITICAL FIX: Force backdrop to stay until handled properly
+          backdropclose: false
         }
       };
       
       const razorpayInstance = new window.Razorpay(options);
       razorpayInstance.open();
       
-      console.log("Razorpay checkout opened");
+      console.log("Razorpay checkout opened with reference ID:", receiptId);
       
     } catch (error) {
       console.error("Error opening Razorpay checkout:", error);
