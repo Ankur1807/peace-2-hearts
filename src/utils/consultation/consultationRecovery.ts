@@ -4,6 +4,11 @@ import { BookingDetails } from "@/utils/types";
 
 // Fetch consultation data from Supabase by reference ID
 export const fetchConsultationData = async (referenceId: string): Promise<any | null> => {
+  if (!referenceId) {
+    console.error("Cannot fetch consultation data: No reference ID provided");
+    return null;
+  }
+
   try {
     console.log(`Fetching consultation data for reference ID: ${referenceId}`);
     
@@ -15,7 +20,7 @@ export const fetchConsultationData = async (referenceId: string): Promise<any | 
       .maybeSingle();
     
     if (error) {
-      console.error("Error fetching consultation data:", error);
+      console.error(`Error fetching consultation data for ${referenceId}:`, error);
       return null;
     }
     
