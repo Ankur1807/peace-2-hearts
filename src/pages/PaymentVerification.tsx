@@ -61,7 +61,7 @@ const PaymentVerification = () => {
   useEffect(() => {
     if (paymentId && !isVerifying && !initiallyVerifying) {
       const timer = setTimeout(() => {
-        // Use URL parameters for the redirect
+        // Use URL parameters for the redirect - ALWAYS include the ref parameter
         const searchParams = new URLSearchParams();
         if (referenceId) searchParams.set('ref', referenceId);
         if (paymentId) searchParams.set('pid', paymentId);
@@ -90,7 +90,7 @@ const PaymentVerification = () => {
   const handleManualVerification = () => {
     setManualVerification(true);
     
-    // Navigate to confirmation page with query parameters
+    // Navigate to confirmation page with query parameters - ALWAYS include the ref parameter
     const searchParams = new URLSearchParams();
     if (referenceId) searchParams.set('ref', referenceId);
     if (paymentId) searchParams.set('pid', paymentId);

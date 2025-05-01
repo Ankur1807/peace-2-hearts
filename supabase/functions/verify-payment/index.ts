@@ -380,7 +380,8 @@ const handler = async (req: Request): Promise<Response> => {
       success: true, 
       verified: true,
       consultationId: "pending", // Will be created in background
-      redirectUrl: "/thank-you",
+      // Always include the reference ID in the redirectUrl for proper data fetching
+      redirectUrl: `/thank-you?ref=${bookingDetails.referenceId}`,
       paymentId,
       orderId
     };

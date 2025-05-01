@@ -28,12 +28,12 @@ export const usePaymentNavigation = () => {
   }: NavigateToVerificationProps) => {
     console.log('Navigating to verification page with:', { referenceId, paymentId });
     
-    // Create search params for the URL
+    // Create search params for the URL - ensure ref is always included
     const searchParams = new URLSearchParams();
     if (referenceId) searchParams.set('ref', referenceId);
     if (paymentId) searchParams.set('pid', paymentId);
     
-    // Navigate using query parameters
+    // Always include the ref in the URL for proper data fetching on page load
     navigate(`/payment-verification?${searchParams.toString()}`, {
       state: {
         paymentId,
@@ -52,6 +52,7 @@ export const usePaymentNavigation = () => {
   const handlePaymentError = (error: any, referenceId?: string) => {
     console.error('Payment error:', error);
     
+    // Always include the ref in the URL for proper data fetching on page load
     const searchParams = new URLSearchParams();
     if (referenceId) searchParams.set('ref', referenceId);
     
