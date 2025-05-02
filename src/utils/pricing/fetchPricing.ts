@@ -13,7 +13,8 @@ import {
   fetchPackagePricingData 
 } from './core/pricingFetchService';
 import {
-  expandClientToDbPackageIds
+  expandClientToDbPackageIds,
+  mapDbToClientId
 } from './core/idMappingService';
 export { 
   clearPricingCache, 
