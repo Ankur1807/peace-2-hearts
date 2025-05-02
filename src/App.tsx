@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -16,7 +15,7 @@ import Refund from '@/pages/CancellationRefund';
 import Dashboard from '@/pages/Dashboard';
 import NotFound from '@/pages/NotFound';
 import '@/App.css';
-import '@/utils/consoleRecovery'; // Import console recovery utilities
+import '@/utils/consoleRecovery'; // Import console recovery utilities - now safely restricted to payment pages
 
 // Service pages
 import MentalHealthService from '@/pages/services/MentalHealthService';
@@ -79,22 +78,24 @@ import EdgeFunctionTest from './pages/EdgeFunctionTest';
 import ConfirmationTest from './pages/ConfirmationTest';
 
 function App() {
-  // The issue is likely here with the useEffect hook
   useEffect(() => {
     // Log that the app is ready
     console.log('Peace2Hearts application initialized');
     
-    // Fix: Only access window properties if in browser environment
-    if (typeof window !== 'undefined' && window.automatedEmailRecovery) {
+    // Fix: Only run automated email recovery on payment pages
+    if (typeof window !== 'undefined') {
       const path = window.location.pathname;
-      // Only run on important pages to avoid unnecessary processing
-      if (path.includes('payment-confirmation') || 
-          path.includes('payment-verification') || 
-          path === '/' ||
-          path.includes('/admin')) {
-        console.log('Running automated email recovery...');
+      // Only run on payment-related pages to avoid unnecessary processing
+      if (path.includes('/payment-confirmation') || 
+          path.includes('/payment-verification') || 
+          path === '/thank-you') {
+        console.log('Running automated email recovery on payment page...');
+        // Delay to ensure page is fully loaded
         setTimeout(() => {
-          window.automatedEmailRecovery();
+          // Only call if the function exists (it should only exist on payment pages)
+          if (window.automatedEmailRecovery) {
+            window.automatedEmailRecovery();
+          }
         }, 5000);
       }
     }

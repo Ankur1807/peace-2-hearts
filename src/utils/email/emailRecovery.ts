@@ -7,6 +7,7 @@ import { BookingDetails } from "@/utils/types";
 /**
  * Manual recovery function for resending confirmation emails by reference ID
  * This can be called from the browser console for immediate troubleshooting
+ * but only on payment-related pages
  */
 export async function recoverEmailByReferenceId(referenceId: string): Promise<boolean> {
   console.log(`Starting manual email recovery for reference ID: ${referenceId}`);
@@ -85,9 +86,24 @@ export async function recoverEmailByReferenceId(referenceId: string): Promise<bo
 
 /**
  * Scheduled recovery function to automatically check and recover any failed emails
- * This runs on page load to catch any emails that weren't sent during payment processing
+ * This runs on page load to catch any emails that weren't sent during payment processing,
+ * but only on payment confirmation pages
  */
 export async function automatedEmailRecovery(): Promise<void> {
+  // Check if we're on a payment-related page before running
+  if (typeof window !== 'undefined') {
+    const currentPath = window.location.pathname;
+    const isPaymentPage = currentPath.includes('/payment-confirmation') || 
+                        currentPath.includes('/thank-you') || 
+                        currentPath.includes('/payment-verification') ||
+                        currentPath.includes('/admin');
+    
+    if (!isPaymentPage) {
+      // Don't run on non-payment pages
+      return;
+    }
+  }
+  
   console.log(`Running automated email recovery check`);
   
   try {
@@ -132,24 +148,5 @@ export async function automatedEmailRecovery(): Promise<void> {
   }
 }
 
-// Add to window object for easy access from console
-if (typeof window !== 'undefined') {
-  // @ts-ignore - Add to window object
-  window.recoverEmailByReferenceId = recoverEmailByReferenceId;
-  window.automatedEmailRecovery = automatedEmailRecovery;
-  
-  // Run recovery check on page load with delay
-  window.addEventListener('load', () => {
-    // Give the app time to initialize
-    setTimeout(() => {
-      const path = window.location.pathname;
-      // Only run on important pages to avoid unnecessary processing
-      if (path.includes('payment-confirmation') || 
-          path.includes('payment-verification') || 
-          path === '/' ||
-          path.includes('dashboard')) {
-        automatedEmailRecovery();
-      }
-    }, 5000);
-  });
-}
+// Only expose functions to window if we're on a payment-related page
+// This is now handled in consoleRecovery.ts
