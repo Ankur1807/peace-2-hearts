@@ -56,3 +56,33 @@ cd <YOUR_PROJECT_NAME>
 Step 3: Install dependencies
 
 Step 4: Run the development server
+
+📂 Folder Highlights
+Folder / File	Purpose
+src/pages/ThankYou.tsx	Final static thank-you page (no fetch logic)
+supabase/functions/verify-payment/index.ts	Edge function for payment confirmation
+src/hooks/useOpenRazorpayCheckout.ts	Razorpay trigger + handler logic
+src/utils/payment/services	Session management, recovery logic
+send-email (edge or service)	Handles automated emails post-booking
+
+📬 Deployment
+Deployment is managed via Netlify using the main (or release) branch.
+The custom domain peace2hearts.com is connected via Hostinger DNS.
+
+🔐 Environment Variables
+Make sure to add your .env file with the following:
+
+
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+RAZORPAY_KEY_ID=
+RAZORPAY_SECRET=
+RESEND_API_KEY=
+Never commit your .env file to version control.
+
+🧠 Contribution Policy
+This codebase is frozen as of May 2025.
+All updates must go through pull requests and follow existing project structure.
+
+👏 Credits
+Peace2Hearts core system was developed through iterative work, problem-solving, and resilience. Thanks to the collaborative effort behind the booking engine, payment flow, frontend experience, and infrastructure deployment.
