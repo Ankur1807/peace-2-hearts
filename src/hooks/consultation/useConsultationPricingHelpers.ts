@@ -1,6 +1,7 @@
 
 import { getPackageName } from '@/utils/consultation/packageUtils';
 import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing';
+import { mapClientToDbId } from '@/utils/consultation/serviceIdMapper';
 
 export async function calculatePricingMap(selectedServices, serviceCategory, setPricingError, toast) {
   let pricingMap: Map<string, number> = new Map();

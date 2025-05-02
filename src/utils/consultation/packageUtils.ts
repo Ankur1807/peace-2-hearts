@@ -1,31 +1,61 @@
+import { getServiceCategoryFromId } from './serviceIdMapper';
 
-export const getPackageName = (selectedServices: string[] | undefined) => {
-  if (!selectedServices || selectedServices.length === 0) return null;
+/**
+ * Gets package name based on selected services
+ */
+export const getPackageName = (services: string[] = []): string | null => {
+  // Sort services to ensure consistent matching regardless of order
+  const sortedServices = [...services].sort();
   
-  const divorcePrevention = [
-    'couples-counselling',
-    'mental-health-counselling',
-    'mediation',
+  // Check for divorce prevention package (by service IDs, not names)
+  const divorcePreventionServices = [
+    'couples-counselling', 
+    'mental-health-counselling', 
+    'mediation', 
     'general-legal'
-  ];
+  ].sort();
   
-  const preMarriageClarity = [
-    'pre-marriage-legal',
-    'premarital-counselling',
+  // Check for pre-marriage clarity package (by service IDs, not names)
+  const preMarriageClarityServices = [
+    'pre-marriage-legal', 
+    'premarital-counselling-individual', 
     'mental-health-counselling'
-  ];
-
-  const services = selectedServices || [];
+  ].sort();
   
-  if (services.length === divorcePrevention.length && 
-      divorcePrevention.every(s => services.includes(s))) {
-    return "Divorce Prevention Package";
+  // Direct match on package IDs
+  if (services.length === 1) {
+    if (services[0] === 'divorce-prevention') {
+      return 'Divorce Prevention Package';
+    } else if (services[0] === 'pre-marriage-clarity') {
+      return 'Pre-Marriage Clarity Package';
+    }
   }
   
-  if (services.length === preMarriageClarity.length && 
-      preMarriageClarity.every(s => services.includes(s))) {
-    return "Pre-Marriage Clarity Package";
+  // Check if selected services match a predefined package configuration
+  if (services.length === divorcePreventionServices.length && 
+      JSON.stringify(sortedServices) === JSON.stringify(divorcePreventionServices)) {
+    return 'Divorce Prevention Package';
+  }
+  
+  if (services.length === preMarriageClarityServices.length && 
+      JSON.stringify(sortedServices) === JSON.stringify(preMarriageClarityServices)) {
+    return 'Pre-Marriage Clarity Package';
   }
   
   return null;
+};
+
+/**
+ * Get the service category for a collection of services
+ */
+export const getServiceCategory = (services: string[] = []): string => {
+  if (services.length === 0) return '';
+  
+  // If there are multiple service categories, return 'holistic'
+  const categories = new Set(services.map(getServiceCategoryFromId));
+  
+  if (categories.size > 1) return 'holistic';
+  
+  // Otherwise return the single category
+  return Array.from(categories)[0] || '';
 };

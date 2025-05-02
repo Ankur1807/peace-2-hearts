@@ -1,5 +1,5 @@
 
-import { mapDbIdToClientId } from './idMappingService';
+import { mapDbToClientId } from './idMappingService';
 
 export function mapServicePricing(
   data: any[],
@@ -12,7 +12,7 @@ export function mapServicePricing(
   data.forEach((item) => {
     if (item.service_id && item.price) {
       const serviceId = item.service_id.trim();
-      const clientId = mapDbIdToClientId(serviceId);
+      const clientId = mapDbToClientId(serviceId);
       pricingMap.set(clientId, item.price);
       console.log(`Mapped service ${serviceId} → ${clientId} with price ${item.price}`);
     }
@@ -41,7 +41,7 @@ export function mapPackagePricing(
     if ((item.service_id || item.package_id) && item.price) {
       // Normalize package ID
       let packageId = item.service_id || item.package_id;
-      const clientId = mapDbIdToClientId(packageId);
+      const clientId = mapDbToClientId(packageId);
 
       console.log(`Mapping package DB ID: ${packageId} → client ID: ${clientId} with price ${item.price}`);
       pricingMap.set(clientId, item.price);
