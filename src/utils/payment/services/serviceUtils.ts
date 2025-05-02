@@ -1,5 +1,5 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { getServiceCategoryFromId } from '@/utils/consultation/serviceIdMapper';
 
 /**
  * @deprecated This function is deprecated and should not be used.
@@ -19,20 +19,34 @@ export const updateConsultationStatus = async (
 };
 
 /**
- * Determine service category from consultation type
+ * Determine the service category based on the consultation type
  */
-export function determineServiceCategory(consultationType: string | null | undefined): string {
-  if (!consultationType) return '';
+export const determineServiceCategory = (consultationType: string): string => {
+  // Convert to lowercase for consistent matching
+  const type = consultationType.toLowerCase();
   
-  // For multiple services, split by comma
-  const services = consultationType.split(',');
+  // Check for mental health services
+  if (
+    type.includes('therapy') ||
+    type.includes('counseling') ||
+    type.includes('counselling') ||
+    type.includes('mental-health') ||
+    type.includes('psychological') ||
+    type.includes('psychotherapy') ||
+    type.includes('test-service')  // Add our test service
+  ) {
+    return 'mental-health';
+  }
   
-  // Get the service category for each service
-  const categories = new Set(services.map(getServiceCategoryFromId));
+  // Check for holistic packages
+  if (
+    type.includes('package') ||
+    type.includes('holistic') ||
+    type.includes('comprehensive')
+  ) {
+    return 'holistic';
+  }
   
-  // If there are multiple service categories, return 'holistic'
-  if (categories.size > 1) return 'holistic';
-  
-  // Otherwise return the single category or default
-  return Array.from(categories)[0] || 'unknown';
-}
+  // Default to legal services
+  return 'legal';
+};

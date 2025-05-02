@@ -1,88 +1,69 @@
+# Welcome to your Lovable project
 
-Peace2Hearts – Stable Launch Codebase (v1.0)
+## Project info
 
-Welcome to the production-ready codebase of **Peace2Hearts** – a platform offering confidential support for emotional, legal, and relational challenges through a seamless consultation and payment system.
+**URL**: https://lovable.dev/projects/8dc52f24-133b-45c6-b152-8fda33a10903
 
----
+## How can I edit this code?
 
-🔒 Status: Frozen as of May 2025
+There are several ways of editing your application.
 
-This codebase is currently **frozen and production-stable**. All core systems have been tested, deployed, and verified.
+**Use Lovable**
 
-All further changes must be made via a separate branch and pull request. No direct changes to the live version (`main` or `release`) are permitted without review.
+Simply visit the [Lovable Project](https://lovable.dev/projects/8dc52f24-133b-45c6-b152-8fda33a10903) and start prompting.
 
+Changes made via Lovable will be committed automatically to this repo.
 
-✅ Features
+**Use your preferred IDE**
 
-- 🗓️ **Consultation Booking System
-- 💳 **Integrated Razorpay Payments
-- ✅ **Edge Function: Payment Verification
-- 📧 **Automated Email Confirmation (User + Admin) via Resend
-- 📄 **Static Thank-You Page (No dynamic booking fetch)
-- 🧠 **Session Storage for Payment Recovery
-- 🌐 **Responsive, accessible frontend
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-🔧 Tech Stack
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-| Technology     | Purpose                                     |
-|----------------|---------------------------------------------|
-| Supabase   | Database + Edge Functions                   |
-| Razorpay   | Payment Processing                          |
-| Resend     | Transactional Emails                        |
-| Netlify    | Frontend Hosting                            |
-| Hostinger  | Domain Management (DNS for peace2hearts.com)|
-| React      | Frontend UI                                 |
-| Vite       | Fast development tooling                    |
-| TypeScript | Static typing for safety                    |
-| Tailwind CSS | Styling and layout                        |
-| shadcn/ui  | Component system and theming                |
+Follow these steps:
 
----
-
-🚀 Live Project
-
-Production URL:[https://peace2hearts.com](https://peace2hearts.com)
-- Lovable Project: [https://lovable.dev/projects/8dc52f24-133b-45c6-b152-8fda33a10903](https://lovable.dev/projects/8dc52f24-133b-45c6-b152-8fda33a10903)
-
-
-💻 Local Development Setup
-
-Step 1: Clone the repository
+```sh
+# Step 1: Clone the repository using the project's Git URL.
 git clone <YOUR_GIT_URL>
 
-Step 2: Navigate to the project
+# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
 
-Step 3: Install dependencies
+# Step 3: Install the necessary dependencies.
+npm i
 
-Step 4: Run the development server
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
+```
 
-📂 Folder Highlights
-Folder / File	Purpose
-src/pages/ThankYou.tsx	Final static thank-you page (no fetch logic)
-supabase/functions/verify-payment/index.ts	Edge function for payment confirmation
-src/hooks/useOpenRazorpayCheckout.ts	Razorpay trigger + handler logic
-src/utils/payment/services	Session management, recovery logic
-send-email (edge or service)	Handles automated emails post-booking
+**Edit a file directly in GitHub**
 
-📬 Deployment
-Deployment is managed via Netlify using the main (or release) branch.
-The custom domain peace2hearts.com is connected via Hostinger DNS.
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-🔐 Environment Variables
-Make sure to add your .env file with the following:
+**Use GitHub Codespaces**
 
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
-RAZORPAY_KEY_ID=
-RAZORPAY_SECRET=
-RESEND_API_KEY=
-Never commit your .env file to version control.
+## What technologies are used for this project?
 
-🧠 Contribution Policy
-This codebase is frozen as of May 2025.
-All updates must go through pull requests and follow existing project structure.
+This project is built with .
 
-👏 Credits
-Peace2Hearts core system was developed through iterative work, problem-solving, and resilience. Thanks to the collaborative effort behind the booking engine, payment flow, frontend experience, and infrastructure deployment.
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/8dc52f24-133b-45c6-b152-8fda33a10903) and click on Share -> Publish.
+
+## I want to use a custom domain - is that possible?
+
+We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)

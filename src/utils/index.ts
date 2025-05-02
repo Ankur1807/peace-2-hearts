@@ -12,5 +12,11 @@ export * from './types';
 export * from './email';
 export * from './consultation/packageUtils';
 
-// No longer adding recovery functions to window object globally
-// This is now handled in consoleRecovery.ts only on payment-related pages
+// Add manual recovery function to global exports
+import { recoverEmailByReferenceId } from './email/manualEmailRecovery';
+
+// Make it available globally
+if (typeof window !== 'undefined') {
+  // @ts-ignore - Window extension
+  window.recoverEmailByReferenceId = recoverEmailByReferenceId;
+}

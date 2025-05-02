@@ -1,5 +1,5 @@
 
-// Re-export all mapping functions
+// Re-export all pricing-related functionality
 export {
   clearPricingCache,
   getPricingCache,
@@ -11,7 +11,7 @@ export {
 } from './formatService';
 
 export {
-  mapDbToClientId,  // This was incorrectly imported as mapDbIdToClientId
+  mapDbIdToClientId,
   expandClientToDbIds,
   expandClientToDbPackageIds
 } from './idMappingService';

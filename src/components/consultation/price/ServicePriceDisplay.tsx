@@ -14,7 +14,6 @@ const ServicePriceDisplay = ({
   servicePrice, 
   currency = 'INR' 
 }: ServicePriceDisplayProps) => {
-  // Get the display name for the service ID
   const serviceName = getConsultationTypeLabel(serviceId);
   
   return (
