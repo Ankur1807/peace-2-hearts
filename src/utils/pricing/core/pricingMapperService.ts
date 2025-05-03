@@ -7,7 +7,7 @@ export function mapServicePricing(
 ): Map<string, number> {
   const pricingMap = new Map<string, number>();
   
-  console.log("[PRICE DEBUG] mapServicePricing called with data:", data, "and requestedIds:", requestedIds);
+  console.log("[PRICE DEBUG] mapServicePricing input data:", data, "and requestedIds:", requestedIds);
   
   if (!data || data.length === 0) {
     console.warn("[PRICE WARNING] No service pricing data to map");
@@ -25,7 +25,7 @@ export function mapServicePricing(
     }
   });
 
-  console.log('[PRICE DEBUG] mapServicePricing result:', Object.fromEntries(pricingMap));
+  console.log('[PRICE DEBUG] Final mapServicePricing result:', Object.fromEntries(pricingMap));
   return pricingMap;
 }
 
@@ -35,7 +35,7 @@ export function mapPackagePricing(
 ): Map<string, number> {
   const pricingMap = new Map<string, number>();
   
-  console.log("[PRICE DEBUG] mapPackagePricing called with data:", data, "and requestedIds:", requestedIds);
+  console.log("[PRICE DEBUG] mapPackagePricing input data:", data, "and requestedIds:", requestedIds);
   
   if (!data || data.length === 0) {
     console.warn("[PRICE WARNING] No package pricing data to map");
@@ -55,6 +55,6 @@ export function mapPackagePricing(
     }
   });
   
-  console.log('[PRICE DEBUG] mapPackagePricing result:', Object.fromEntries(pricingMap));
+  console.log('[PRICE DEBUG] Final mapPackagePricing result:', Object.fromEntries(pricingMap));
   return pricingMap;
 }

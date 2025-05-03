@@ -1,3 +1,4 @@
+
 import { fetchPackagePricing, fetchServicePricing } from '@/utils/pricing';
 import { ToastAction } from '@/components/ui/toast';
 import { getPackageName } from '@/utils/consultation/packageUtils';
@@ -8,12 +9,15 @@ export async function calculatePricingMap(
   setPricingError: (error: string | null) => void,
   toast: any
 ): Promise<{ pricingMap: Map<string, number>, finalPrice: number }> {
+  console.log('[PRICE DEBUG] calculatePricingMap called with:', { selectedServices, serviceCategory });
+  
   try {
     // Initialize an empty pricing map
     const pricingMap = new Map<string, number>();
     
     // Check if there's a holistic package selected
     const packageName = getPackageName(selectedServices);
+    console.log('[PRICE DEBUG] Package name detected:', packageName);
     
     // Use the package ID from selectedServices if it's a package
     if (packageName) {
@@ -24,6 +28,7 @@ export async function calculatePricingMap(
       if (packageId) {
         console.log(`[PRICE DEBUG] Fetching pricing for package: ${packageId}`);
         const packagePricing = await fetchPackagePricing([packageId], true); // Skip cache
+        console.log(`[PRICE DEBUG] Package pricing fetched:`, Object.fromEntries(packagePricing));
         
         // Merge package pricing into the pricing map
         if (packagePricing.size > 0) {
@@ -40,6 +45,7 @@ export async function calculatePricingMap(
     else if (selectedServices.length > 0) {
       console.log(`[PRICE DEBUG] Fetching pricing for services: ${selectedServices.join(', ')}`);
       const servicePricing = await fetchServicePricing(selectedServices, true); // Skip cache
+      console.log(`[PRICE DEBUG] Service pricing fetched:`, Object.fromEntries(servicePricing));
       
       // Merge service pricing into the pricing map
       if (servicePricing.size > 0) {
@@ -65,6 +71,7 @@ export async function calculatePricingMap(
     }
     
     console.log(`[PRICE DEBUG] Final calculated price: ${finalPrice}`);
+    console.log('[PRICE DEBUG] Final pricing map:', Object.fromEntries(pricingMap));
     
     if (finalPrice === 0 && selectedServices.length > 0) {
       console.warn(`[PRICE WARNING] No price found for selected services/package`);
@@ -74,7 +81,13 @@ export async function calculatePricingMap(
       setPricingError(null);
     }
     
-    return { pricingMap, finalPrice };
+    const result = { pricingMap, finalPrice };
+    console.log('[PRICE DEBUG] calculatePricingMap returning:', {
+      pricingMap: Object.fromEntries(pricingMap),
+      finalPrice
+    });
+    
+    return result;
   } catch (error) {
     console.error('[PRICE ERROR] Error calculating pricing map:', error);
     setPricingError('Failed to calculate pricing information');

@@ -26,7 +26,7 @@ export async function fetchServicePricingData(serviceIds?: string[]) {
       throw error;
     }
     
-    console.log('[PRICE DEBUG] Retrieved service pricing data:', data);
+    console.log('[PRICE DEBUG] Raw service pricing data response from Supabase:', data);
     return data || [];
   } catch (err) {
     console.error('[PRICE ERROR] Exception in fetchServicePricingData:', err);
@@ -58,7 +58,7 @@ export async function fetchPackagePricingData(packageIds?: string[]) {
       throw error;
     }
     
-    console.log('[PRICE DEBUG] Retrieved package pricing data:', data);
+    console.log('[PRICE DEBUG] Raw package pricing data response from Supabase:', data);
     return data || [];
   } catch (err) {
     console.error('[PRICE ERROR] Exception in fetchPackagePricingData:', err);

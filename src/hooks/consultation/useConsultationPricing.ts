@@ -21,12 +21,17 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
   const initialFetchDone = useRef(false);
 
   const updatePricing = useCallback(async (skipCache = false) => {
+    console.log('[PRICE DEBUG] updatePricing called with skipCache:', skipCache);
+    console.log('[PRICE DEBUG] Current selectedServices:', selectedServices);
+    console.log('[PRICE DEBUG] Current serviceCategory:', serviceCategory);
+    
     const servicesChanged =
       selectedServices.length !== prevSelectedServices.current.length ||
       selectedServices.some(s => !prevSelectedServices.current.includes(s)) ||
       serviceCategory !== prevServiceCategory.current;
 
     if (!servicesChanged && initialFetchDone.current && !skipCache) {
+      console.log('[PRICE DEBUG] No changes detected, skipping price update');
       return;
     }
 
@@ -45,24 +50,31 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
         toast
       );
 
-      console.log(`[PRICE DEBUG] Received pricing data with ${pricingMap.size} items, final price: ${finalPrice}`);
+      console.log(`[PRICE DEBUG] Received pricing data: pricing map size=${pricingMap.size}, final price=${finalPrice}`);
+      console.log('[PRICE DEBUG] Received pricing map:', Object.fromEntries(pricingMap));
       
       // Verify we have pricing data before setting the state
       if (pricingMap.size === 0) {
         console.warn("[PRICE WARNING] No pricing data was fetched from Supabase");
       } else {
         console.log(`[PRICE DEBUG] Final pricing map before setting state:`, Object.fromEntries(pricingMap));
+        
         // Verify specific packages have prices
-        console.log(`[PRICE DEBUG] divorce-prevention price: ${pricingMap.get('divorce-prevention')}`);
-        console.log(`[PRICE DEBUG] pre-marriage-clarity price: ${pricingMap.get('pre-marriage-clarity')}`);
+        if (selectedServices.includes('divorce-prevention')) {
+          console.log(`[PRICE DEBUG] divorce-prevention price: ${pricingMap.get('divorce-prevention')}`);
+        }
+        if (selectedServices.includes('pre-marriage-clarity')) {
+          console.log(`[PRICE DEBUG] pre-marriage-clarity price: ${pricingMap.get('pre-marriage-clarity')}`);
+        }
       }
       
       setPricing(pricingMap);
       setTotalPrice(finalPrice);
+      console.log('[PRICE DEBUG] State updated with pricing map and total price:', finalPrice);
 
       if (finalPrice === 0 && selectedServices.length > 0) {
         const errorMsg = 'No pricing information available for selected services';
-        console.warn(errorMsg);
+        console.warn(`[PRICE WARNING] ${errorMsg}`);
         setPricingError(errorMsg);
       }
     } catch (error) {
@@ -102,10 +114,14 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
     
     // Verify specific packages have prices
     if (pricing) {
-      console.log(`[PRICE DEBUG] divorce-prevention price in state: ${pricing.get('divorce-prevention')}`);
-      console.log(`[PRICE DEBUG] pre-marriage-clarity price in state: ${pricing.get('pre-marriage-clarity')}`);
+      if (selectedServices.includes('divorce-prevention')) {
+        console.log(`[PRICE DEBUG] divorce-prevention price in state: ${pricing.get('divorce-prevention')}`);
+      }
+      if (selectedServices.includes('pre-marriage-clarity')) {
+        console.log(`[PRICE DEBUG] pre-marriage-clarity price in state: ${pricing.get('pre-marriage-clarity')}`);
+      }
     }
-  }, [pricing, totalPrice]);
+  }, [pricing, totalPrice, selectedServices]);
 
   // Debug hook to log pricing information
   useConsultationPricingDebug(totalPrice, selectedServices, pricing);

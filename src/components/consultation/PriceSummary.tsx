@@ -18,6 +18,28 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
   totalPrice,
   currency = 'INR'
 }) => {
+  // Log inputs to trace pricing data
+  React.useEffect(() => {
+    console.log('[PRICE DEBUG] PriceSummary rendering with:', {
+      services: services.join(', '),
+      pricingAvailable: !!pricing,
+      pricingSize: pricing ? pricing.size : 0,
+      totalPrice
+    });
+    
+    if (pricing && pricing.size > 0) {
+      console.log('[PRICE DEBUG] PriceSummary pricing map:', Object.fromEntries(pricing));
+      
+      // Check specific service prices
+      if (services.includes('divorce-prevention')) {
+        console.log('[PRICE DEBUG] PriceSummary divorce-prevention price:', pricing.get('divorce-prevention'));
+      }
+      if (services.includes('pre-marriage-clarity')) {
+        console.log('[PRICE DEBUG] PriceSummary pre-marriage-clarity price:', pricing.get('pre-marriage-clarity'));
+      }
+    }
+  }, [services, pricing, totalPrice]);
+
   if (services.length === 0) return null;
 
   // For holistic packages
@@ -41,6 +63,8 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
   let displayPrice = 0;
   if (packageName && packagePrice > 0) displayPrice = packagePrice;
   if (!packageName && serviceId && servicePrice > 0) displayPrice = servicePrice;
+  
+  console.log(`[PRICE DEBUG] PriceSummary final display price: ${displayPrice}`);
 
   return (
     <div className="border rounded-lg p-4 bg-gray-50">
