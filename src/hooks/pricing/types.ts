@@ -1,5 +1,5 @@
 
-import { Toast } from "@/components/ui/toast";
+import type { Toast } from "@/components/ui/toast";
 
 export type ToastFunction = (props: Toast) => void;
 

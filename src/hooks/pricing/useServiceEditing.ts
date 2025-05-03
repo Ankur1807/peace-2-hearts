@@ -4,7 +4,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAdmin } from '@/hooks/useAdminContext';
 import { updateServicePrice } from '@/utils/pricing';
 import { handleOperationError } from './pricingErrorHandler';
-import type { ServiceEditingState } from './types';
 
 export const useServiceEditing = (onServiceUpdated: () => Promise<void>) => {
   const [editMode, setEditMode] = useState<string | null>(null);
@@ -27,7 +26,6 @@ export const useServiceEditing = (onServiceUpdated: () => Promise<void>) => {
       if (!isAdmin) {
         toast({
           title: 'Authentication Required - You must be logged in as an admin to update prices.',
-          variant: 'destructive',
         });
         return;
       }
@@ -67,9 +65,5 @@ export const useServiceEditing = (onServiceUpdated: () => Promise<void>) => {
     handleEdit,
     handleCancel,
     handleSave,
-  } as ServiceEditingState & {
-    handleEdit: (id: string, currentPrice: number) => void;
-    handleCancel: () => void;
-    handleSave: (id: string) => Promise<void>;
   };
 };
