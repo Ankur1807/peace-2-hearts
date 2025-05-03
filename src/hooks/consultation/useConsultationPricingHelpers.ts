@@ -25,7 +25,12 @@ export async function calculatePricingMap(
                         
       if (packageId) {
         console.log(`[PRICE DEBUG] Fetching pricing for package: ${packageId}`);
-        const packagePricing = await fetchPackagePricing([packageId], true); // Skip cache
+        import { expandClientToDbPackageIds } from '@/utils/pricing/core/idMappingService';
+
+        const expandedPackageIds = expandClientToDbPackageIds([packageId]);
+        console.log(`[PRICE DEBUG] Expanded package ID for fetch:`, expandedPackageIds);
+
+        const packagePricing = await fetchPackagePricing(expandedPackageIds, true); // Skip cache
         console.log(`[PRICE DEBUG] Package pricing fetched:`, Object.fromEntries(packagePricing));
         
         // Merge package pricing into the pricing map
