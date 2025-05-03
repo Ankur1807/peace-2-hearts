@@ -1,5 +1,5 @@
 
-import { type Toast } from "@/hooks/use-toast";
+import { type ToastProps as Toast } from "@/components/ui/toast";
 
 export type ToastFunction = (props: Toast) => void;
 
