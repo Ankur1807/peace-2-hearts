@@ -33,7 +33,6 @@ const mentalHealthServices: ServiceOption[] = [
 ];
 
 const legalServices: ServiceOption[] = [
-  { id: 'pre-marriage-legal', label: 'Pre-marriage Legal Consultation', description: 'Guidance on rights, agreements, and legal aspects before marriage.' },
   { id: 'mediation', label: 'Mediation Services', description: 'Facilitating peaceful resolutions to legal disputes through collaborative dialogue.' },
   { id: 'divorce', label: 'Divorce Consultation', description: 'Expert insights into legal aspects of divorce to make informed decisions.' },
   { id: 'custody', label: 'Child Custody Consultation', description: 'Support for understanding and advocating in custody decisions for children.' },
@@ -52,7 +51,7 @@ const holisticPackages: HolisticPackage[] = [
     id: 'pre-marriage-clarity', 
     label: 'Pre-Marriage Clarity Package', 
     description: '1 legal + 2 mental health',
-    services: ['pre-marriage-legal', 'premarital-counselling-individual', 'mental-health-counselling'] 
+    services: ['general-legal', 'couples-counselling', 'mental-health-counselling'] 
   }
 ];
 

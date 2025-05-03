@@ -26,20 +26,8 @@ export const useBookingState = (bookingState: ConsultationBookingHook) => {
           console.log(`Setting total price to package price: ${packagePrice} for ${packageId}`);
           setTotalPrice(packagePrice);
         } else {
-          console.log(`No pricing found for package ${packageId}, calculating from services`);
-          // Calculate total from individual services
-          let sum = 0;
-          selectedServices.forEach(serviceId => {
-            if (pricing?.has(serviceId)) {
-              sum += pricing.get(serviceId)!;
-            }
-          });
-          if (sum > 0) {
-            // Apply 15% discount for packages
-            const discountedSum = Math.round(sum * 0.85);
-            console.log(`Calculated discounted package price: ${discountedSum} from sum ${sum}`);
-            setTotalPrice(discountedSum);
-          }
+          console.log(`No pricing found for package ${packageId}, setting to 0`);
+          setTotalPrice(0);
         }
       } else if (selectedServices.length === 1) {
         // Single service
@@ -49,8 +37,11 @@ export const useBookingState = (bookingState: ConsultationBookingHook) => {
           console.log(`Setting total price to service price: ${servicePrice} for ${serviceId}`);
           setTotalPrice(servicePrice);
         } else if (selectedServices.includes('test-service')) {
-          console.log('Setting test service default price: 11');
+          console.log('Setting test service price: 11');
           setTotalPrice(11);
+        } else {
+          console.log(`No pricing found for service ${serviceId}, setting to 0`);
+          setTotalPrice(0);
         }
       }
     } else {

@@ -3,7 +3,6 @@ import React from 'react';
 import ServiceLayout from "@/components/ServiceLayout";
 import MentalHealthApproach from "@/components/services/mental-health/MentalHealthApproach";
 import MentalHealthServicesList from "@/components/services/mental-health/MentalHealthServicesList";
-import SubServicesList from "@/components/SubServicesList";
 
 const MentalHealthService: React.FC = () => {
   const mentalHealthSubServices = [
@@ -68,7 +67,6 @@ const MentalHealthService: React.FC = () => {
         <div className="container mx-auto px-4">
           <MentalHealthApproach />
           <MentalHealthServicesList services={mentalHealthSubServices} />
-          <SubServicesList subServices={mentalHealthSubServices} />
         </div>
       </section>
     </ServiceLayout>

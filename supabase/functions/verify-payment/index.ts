@@ -336,11 +336,26 @@ const handler = async (req: Request): Promise<Response> => {
     const requestData = await req.json() as VerifyPaymentRequest;
     const { paymentId, orderId, signature, bookingDetails, _testMode } = requestData;
     
-    if (!paymentId || !bookingDetails || !bookingDetails.referenceId) {
+    // Validate required fields
+    if (!paymentId) {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: "Missing required parameters: paymentId or bookingDetails" 
+          error: "Missing required parameter: paymentId" 
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        }
+      );
+    }
+
+    // Check if reference ID is provided (required)
+    if (!bookingDetails || !bookingDetails.referenceId) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Missing required parameter: bookingDetails.referenceId"
         }),
         {
           status: 400,

@@ -1,5 +1,5 @@
 
-import { Toast } from "@/hooks/use-toast";
+import { type Toast } from "@/hooks/use-toast";
 
 export type ToastFunction = (props: Toast) => void;
 
