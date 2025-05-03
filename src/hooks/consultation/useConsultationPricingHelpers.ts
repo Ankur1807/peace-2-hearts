@@ -8,7 +8,7 @@ export async function calculatePricingMap(
   serviceCategory: string,
   setPricingError: (error: string | null) => void,
   toast: any
-): Promise<{ pricingMap: Map<string, number>, finalPrice: number }> {
+): Promise<{ pricingMap: Map<string, number>; finalPrice: number }> {
   console.log('[PRICE DEBUG] calculatePricingMap called with:', { selectedServices, serviceCategory });
   
   try {
