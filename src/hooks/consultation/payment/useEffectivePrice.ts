@@ -22,13 +22,13 @@ export function useEffectivePrice({
       return 0;
     }
 
-    // Handle test service for development - FIXED: preserve the actual price (11)
+    // Handle test service for development - use pricing database value only
     if (selectedServices.includes('test-service')) {
       const testServicePrice = pricing.get('test-service');
       if (testServicePrice !== undefined && testServicePrice > 0) {
         return testServicePrice; // Return the actual price from pricing map
       }
-      return 11; // Default fallback price for test service
+      return 0; // No fallback price
     }
 
     // Try to find the price from the pricing map

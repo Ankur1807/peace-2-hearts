@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { UserPlus } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const ConsultantsManagement = () => {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
@@ -38,12 +39,40 @@ const ConsultantsManagement = () => {
   const fetchConsultants = async () => {
     try {
       setLoading(true);
-      const data = await getConsultants();
-      setConsultants(data);
-    } catch (error) {
+      
+      // Direct query to ensure we get the full consultant data with profile info
+      const { data, error } = await supabase
+        .from('consultants')
+        .select('*, consultant_profiles(*)');
+        
+      if (error) {
+        throw error;
+      }
+      
+      console.log("Retrieved consultants data:", data);
+      
+      // Map the data to match our Consultant type
+      const mappedData = data.map((consultant: any) => ({
+        id: consultant.id,
+        name: consultant.name || (consultant.consultant_profiles ? consultant.consultant_profiles.full_name : null),
+        profile_id: consultant.profile_id,
+        specialization: consultant.specialization || '',
+        hourly_rate: consultant.hourly_rate || 0,
+        is_available: consultant.is_available,
+        available_days: consultant.available_days,
+        available_hours: consultant.available_hours,
+        bio: consultant.bio,
+        qualifications: consultant.qualifications,
+        profile_picture_url: consultant.profile_picture_url,
+        experience: consultant.experience
+      }));
+      
+      setConsultants(mappedData);
+    } catch (error: any) {
+      console.error("Error fetching consultants:", error);
       toast({
         title: "Error",
-        description: "Failed to load consultants",
+        description: "Failed to load consultants: " + error.message,
         variant: "destructive",
       });
     } finally {

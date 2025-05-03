@@ -18,13 +18,6 @@ export function mapServicePricing(
     }
   });
 
-  // Handle test service as a special case
-  if (requestedIds.includes('test-service') && !pricingMap.has('test-service')) {
-    pricingMap.set('test-service', 11);
-    console.log("Added fallback price for test-service: 11");
-  }
-
-  // Debug
   console.log('mapServicePricing result:', Object.fromEntries(pricingMap));
   return pricingMap;
 }
@@ -48,22 +41,6 @@ export function mapPackagePricing(
     }
   });
   
-  // For default packages, add fallback if no data found
-  if (requestedIds.includes('divorce-prevention') && !pricingMap.has('divorce-prevention')) {
-    // Calculate from individual service prices or use a default
-    const defaultPrice = 8500;
-    pricingMap.set('divorce-prevention', defaultPrice);
-    console.log(`Added fallback price for divorce-prevention: ${defaultPrice}`);
-  }
-  
-  if (requestedIds.includes('pre-marriage-clarity') && !pricingMap.has('pre-marriage-clarity')) {
-    // Calculate from individual service prices or use a default
-    const defaultPrice = 4500;
-    pricingMap.set('pre-marriage-clarity', defaultPrice);
-    console.log(`Added fallback price for pre-marriage-clarity: ${defaultPrice}`);
-  }
-  
-  // Debug
   console.log('mapPackagePricing result:', Object.fromEntries(pricingMap));
   return pricingMap;
 }

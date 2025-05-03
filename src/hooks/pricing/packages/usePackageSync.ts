@@ -1,30 +1,33 @@
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { ServicePrice } from '@/utils/pricing/types';
 
 export const usePackageSync = (packages: ServicePrice[]) => {
-  const [syncNeeded, setSyncNeeded] = useState(false);
-
-  useEffect(() => {
-    // Check if any packages need syncing (have different prices for same name)
-    const packagesMap = new Map();
+  // Determine if packages need syncing (if the same package name exists with different prices)
+  const syncNeeded = useMemo(() => {
+    const packageMap = new Map<string, Set<number>>();
+    
+    // Group packages by name and collect their prices
     packages.forEach(pkg => {
-      if (!packagesMap.has(pkg.service_name)) {
-        packagesMap.set(pkg.service_name, [pkg.price]);
-      } else {
-        packagesMap.get(pkg.service_name).push(pkg.price);
+      const name = pkg.service_name;
+      if (!packageMap.has(name)) {
+        packageMap.set(name, new Set());
       }
+      packageMap.get(name)?.add(pkg.price);
     });
-
-    // Check if any package has inconsistent prices
+    
+    // Check if any package name has multiple prices
     let needsSync = false;
-    packagesMap.forEach((prices) => {
-      if (new Set(prices).size > 1) {
+    packageMap.forEach((prices) => {
+      if (prices.size > 1) {
         needsSync = true;
       }
     });
-    setSyncNeeded(needsSync);
+    
+    return needsSync;
   }, [packages]);
 
-  return { syncNeeded };
+  return {
+    syncNeeded
+  };
 };
