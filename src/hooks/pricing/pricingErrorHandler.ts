@@ -1,27 +1,39 @@
 
-import { ToastFunction } from './types';
+import { useToast } from "@/hooks/use-toast";
+import { ToastActionElement } from "@/components/ui/toast";
 
-export const handleOperationError = (error: any, operation: string, toast: ToastFunction) => {
+type ToastProps = {
+  title?: string;
+  description?: string;
+  variant?: "default" | "destructive";
+  action?: ToastActionElement;
+};
+
+export const handleOperationError = (
+  error: any, 
+  operation: string, 
+  toast: { (props: ToastProps): void; }
+) => {
   console.error(`Error details for ${operation}:`, error);
   
   if (error.code === 'PGRST116' || error.message?.includes('JWT')) {
     toast({
-      title: `Session Expired - Your admin session has expired. Please log in again.`,
+      title: 'Session Expired',
+      description: 'Your admin session has expired. Please log in again.',
       variant: 'destructive',
     });
     localStorage.removeItem('p2h_admin_authenticated');
   } else if (error.message?.includes('Authentication required')) {
     toast({
-      title: `Authentication Required - You must be logged in as an admin to ${operation}.`,
+      title: 'Authentication Required',
+      description: `You must be logged in as an admin to ${operation}.`,
       variant: 'destructive',
     });
   } else {
     toast({
-      title: `Error - Failed to ${operation}: ${error.message}`,
+      title: 'Error',
+      description: `Failed to ${operation}: ${error.message || 'Unknown error occurred'}`,
       variant: 'destructive',
     });
   }
-  console.error(`Error: ${operation}:`, error);
 };
-
-export type { ToastFunction };

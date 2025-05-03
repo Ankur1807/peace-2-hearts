@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Brain, Scale } from 'lucide-react';
@@ -61,9 +62,13 @@ const ServicesOverview: React.FC = () => {
               <h3 className="text-2xl font-lora font-semibold text-gray-800">Legal Support</h3>
             </div>
             <p className="text-gray-600 mb-4">
-              Our legal experts guide you through the complexities of family law—whether it's divorce, custody, or other matters—always with compassion and clarity.
+              Our legal experts guide you through the complexities of family law—whether it's pre-marital agreements, divorce, or custody—always with compassion and clarity.
             </p>
             <ul className="space-y-2 mb-6">
+              <li className="flex items-center gap-2 text-gray-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+                Pre-marriage Legal Consultation - Understanding rights and agreements before marriage.
+              </li>
               <li className="flex items-center gap-2 text-gray-700">
                 <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
                 Mediation Services - Facilitating agreements without court intervention.

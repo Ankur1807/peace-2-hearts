@@ -33,6 +33,7 @@ const mentalHealthServices: ServiceOption[] = [
 ];
 
 const legalServices: ServiceOption[] = [
+  { id: 'pre-marriage-legal', label: 'Pre-marriage Legal Consultation', description: 'Guidance on rights, agreements, and legal aspects before marriage.' },
   { id: 'mediation', label: 'Mediation Services', description: 'Facilitating peaceful resolutions to legal disputes through collaborative dialogue.' },
   { id: 'divorce', label: 'Divorce Consultation', description: 'Expert insights into legal aspects of divorce to make informed decisions.' },
   { id: 'custody', label: 'Child Custody Consultation', description: 'Support for understanding and advocating in custody decisions for children.' },
@@ -43,15 +44,15 @@ const legalServices: ServiceOption[] = [
 const holisticPackages: HolisticPackage[] = [
   { 
     id: 'divorce-prevention', 
-    label: 'Divorce Prevention Solutions', 
+    label: 'Divorce Prevention Package', 
     description: '2 therapy + 1 mediation + 1 legal',
     services: ['couples-counselling', 'mental-health-counselling', 'mediation', 'general-legal']
   },
   { 
     id: 'pre-marriage-clarity', 
-    label: 'Pre-Marriage Clarity Solutions', 
+    label: 'Pre-Marriage Clarity Package', 
     description: '1 legal + 2 mental health',
-    services: ['general-legal', 'couples-counselling', 'mental-health-counselling'] 
+    services: ['pre-marriage-legal', 'premarital-counselling-individual', 'mental-health-counselling'] 
   }
 ];
 
@@ -67,18 +68,10 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
     console.log('ServiceSelectionOptions rendered with pricing:', pricing ? Object.fromEntries(pricing) : 'No pricing data');
     if (pricing) {
       console.log('Number of pricing items:', pricing.size);
-      // Log available prices for packages
-      if (pricing.has('divorce-prevention')) {
-        console.log(`Price for divorce-prevention: ${pricing.get('divorce-prevention')}`);
-      } else {
-        console.warn('No price found for divorce-prevention package');
-      }
-      
-      if (pricing.has('pre-marriage-clarity')) {
-        console.log(`Price for pre-marriage-clarity: ${pricing.get('pre-marriage-clarity')}`);
-      } else {
-        console.warn('No price found for pre-marriage-clarity package');
-      }
+      // Log some specific prices for debugging
+      pricing.forEach((price, id) => {
+        console.log(`Price for ${id}: ${price}`);
+      });
     }
   }, [pricing]);
 
@@ -104,9 +97,6 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
                     {pkg.label}{price !== undefined ? ` - ${formatPrice(price)}` : ''}
                   </span>
                   <span className="text-sm text-gray-500">{pkg.description}</span>
-                  {price === undefined && (
-                    <span className="text-xs text-amber-600">Price unavailable</span>
-                  )}
                 </Label>
               </div>
             );
@@ -142,9 +132,6 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
                 </span>
                 {service.description && (
                   <span className="text-sm text-gray-500">{service.description}</span>
-                )}
-                {price === undefined && (
-                  <span className="text-xs text-amber-600">Price unavailable</span>
                 )}
               </Label>
             </div>

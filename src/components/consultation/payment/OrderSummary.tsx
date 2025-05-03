@@ -41,24 +41,14 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
   // Debug log for pricing information
   React.useEffect(() => {
-    console.log("[PRICE DEBUG] OrderSummary rendered with:", {
+    console.log("OrderSummary rendered with:", {
       consultationType,
-      selectedServices: selectedServices.join(', '),
+      selectedServices,
       effectivePrice,
       totalPrice,
       consultationLabel,
       pricingAvailable: pricing ? Object.fromEntries(pricing) : 'none'
     });
-    
-    // Check specific package prices
-    if (selectedServices.includes('divorce-prevention') && pricing) {
-      console.log('[PRICE DEBUG] OrderSummary divorce-prevention price:', pricing.get('divorce-prevention'));
-    }
-    if (selectedServices.includes('pre-marriage-clarity') && pricing) {
-      console.log('[PRICE DEBUG] OrderSummary pre-marriage-clarity price:', pricing.get('pre-marriage-clarity'));
-    }
-    
-    console.log('[PRICE DEBUG] OrderSummary final effective price:', effectivePrice);
   }, [consultationType, selectedServices, effectivePrice, totalPrice, consultationLabel, pricing]);
 
   if (!effectivePrice || !selectedServices.length) {

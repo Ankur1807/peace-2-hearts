@@ -2,16 +2,6 @@
 export const getPackageName = (selectedServices: string[] | undefined) => {
   if (!selectedServices || selectedServices.length === 0) return null;
   
-  // If the service is directly one of our package IDs, return its name
-  if (selectedServices.includes('divorce-prevention')) {
-    return "Divorce Prevention Solutions";
-  }
-  
-  if (selectedServices.includes('pre-marriage-clarity')) {
-    return "Pre-Marriage Clarity Solutions";
-  }
-  
-  // Check if it's a collection of services that make up a package
   const divorcePrevention = [
     'couples-counselling',
     'mental-health-counselling',
@@ -19,10 +9,9 @@ export const getPackageName = (selectedServices: string[] | undefined) => {
     'general-legal'
   ];
   
-  // Updated services for pre-marriage clarity
   const preMarriageClarity = [
-    'general-legal',
-    'couples-counselling',
+    'pre-marriage-legal',
+    'premarital-counselling',
     'mental-health-counselling'
   ];
 
@@ -30,12 +19,12 @@ export const getPackageName = (selectedServices: string[] | undefined) => {
   
   if (services.length === divorcePrevention.length && 
       divorcePrevention.every(s => services.includes(s))) {
-    return "Divorce Prevention Solutions";
+    return "Divorce Prevention Package";
   }
   
   if (services.length === preMarriageClarity.length && 
       preMarriageClarity.every(s => services.includes(s))) {
-    return "Pre-Marriage Clarity Solutions";
+    return "Pre-Marriage Clarity Package";
   }
   
   return null;

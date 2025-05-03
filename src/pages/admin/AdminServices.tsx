@@ -1,12 +1,74 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { useAdmin } from '@/hooks/useAdminContext';
+import ServiceList from '@/components/pricing/ServiceList';
+import AddServiceForm from '@/components/pricing/AddServiceForm';
+import { useServiceFetching } from '@/hooks/pricing/useServiceFetching';
+import { useServiceOperations } from '@/hooks/pricing/useServiceOperations';
+import { NewServiceFormValues } from '@/utils/pricing/types';
 
 const AdminServices: React.FC = () => {
+  const [openNewServiceDialog, setOpenNewServiceDialog] = useState(false);
+  const [editMode, setEditMode] = useState<string | null>(null);
+  const [editedPrice, setEditedPrice] = useState<string>('');
   const { isAdmin } = useAdmin();
+  const { services, loading, fetchServices } = useServiceFetching();
+  const { 
+    handleToggleStatus,
+    handleEditPrice,
+    handleAddService,
+    handleDeleteService 
+  } = useServiceOperations();
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchServices();
+    }
+  }, [isAdmin, fetchServices]);
+
+  const handleEdit = (id: string, currentPrice: number) => {
+    setEditMode(id);
+    setEditedPrice(currentPrice.toString());
+  };
+
+  const handleCancel = () => {
+    setEditMode(null);
+    setEditedPrice('');
+  };
+
+  const handleSave = async (id: string) => {
+    const success = await handleEditPrice(id, Number(editedPrice));
+    if (success) {
+      setEditMode(null);
+      fetchServices();
+    }
+  };
+
+  const handleToggleServiceStatus = async (id: string, currentStatus: boolean) => {
+    const success = await handleToggleStatus(id, currentStatus);
+    if (success) {
+      fetchServices();
+    }
+  };
+
+  const handleSubmitNewService = async (data: NewServiceFormValues) => {
+    const success = await handleAddService(data);
+    if (success) {
+      setOpenNewServiceDialog(false);
+      fetchServices();
+    }
+  };
+
+  const handleDeleteServiceItem = async (id: string) => {
+    const success = await handleDeleteService(id);
+    if (success) {
+      fetchServices();
+    }
+  };
 
   return (
     <div>
@@ -15,9 +77,19 @@ const AdminServices: React.FC = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Service Catalog</CardTitle>
           <div className="flex space-x-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={fetchServices} disabled={loading}>
               <RefreshCw className="h-4 w-4 mr-1" /> Refresh
             </Button>
+            {isAdmin && (
+              <Dialog open={openNewServiceDialog} onOpenChange={setOpenNewServiceDialog}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-1" /> Add Service
+                  </Button>
+                </DialogTrigger>
+                <AddServiceForm onSubmit={handleSubmitNewService} />
+              </Dialog>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -27,10 +99,19 @@ const AdminServices: React.FC = () => {
               <p>You must be logged in as an admin to access service management.</p>
             </div>
           )}
-          <div className="p-4 text-center text-gray-500">
-            <p>Service management is now handled directly through the Supabase dashboard.</p>
-            <p className="mt-2">Please contact the development team for any service configuration changes.</p>
-          </div>
+          <ServiceList
+            services={services}
+            loading={loading}
+            onEdit={handleEdit}
+            onSave={handleSave}
+            onCancel={handleCancel}
+            onToggleStatus={handleToggleServiceStatus}
+            onDelete={handleDeleteServiceItem}
+            editMode={editMode}
+            editedPrice={editedPrice}
+            setEditedPrice={setEditedPrice}
+            isAdmin={isAdmin}
+          />
         </CardContent>
       </Card>
     </div>

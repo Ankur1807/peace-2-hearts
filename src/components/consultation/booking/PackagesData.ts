@@ -10,6 +10,6 @@ export const holisticPackages = [
     id: 'pre-marriage-clarity', 
     label: 'Pre-Marriage Clarity Solutions', 
     description: '3 sessions (1 legal + 2 mental health)',
-    services: ['general-legal', 'couples-counselling', 'mental-health-counselling'] 
+    services: ['pre-marriage-legal', 'premarital-counselling-individual', 'mental-health-counselling'] 
   }
 ];

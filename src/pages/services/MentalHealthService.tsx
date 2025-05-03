@@ -3,6 +3,7 @@ import React from 'react';
 import ServiceLayout from "@/components/ServiceLayout";
 import MentalHealthApproach from "@/components/services/mental-health/MentalHealthApproach";
 import MentalHealthServicesList from "@/components/services/mental-health/MentalHealthServicesList";
+import SubServicesList from "@/components/SubServicesList";
 
 const MentalHealthService: React.FC = () => {
   const mentalHealthSubServices = [
@@ -19,7 +20,13 @@ const MentalHealthService: React.FC = () => {
       path: "/services/mental-health/family-therapy"
     },
     {
-      id: "couples-counselling",
+      id: "premarital-counselling",
+      title: "Premarital Counselling",
+      description: "Preparing couples for a strong and fulfilling marriage through guided discussions and planning.",
+      path: "/services/mental-health/premarital-counselling"
+    },
+    {
+      id: "couples-counselling", // Make sure this ID matches what's in the selection options
       title: "Couples Counselling",
       description: "Professional guidance to strengthen communication and mutual understanding.",
       path: "/services/mental-health/couples-counselling"
@@ -30,7 +37,6 @@ const MentalHealthService: React.FC = () => {
       description: "Specialized support for addressing intimacy concerns and enhancing relationship satisfaction.",
       path: "/services/mental-health/sexual-health-counselling"
     }
-    // Removed premarital-counselling as requested
   ];
 
   const forWhom = [
@@ -62,6 +68,7 @@ const MentalHealthService: React.FC = () => {
         <div className="container mx-auto px-4">
           <MentalHealthApproach />
           <MentalHealthServicesList services={mentalHealthSubServices} />
+          <SubServicesList subServices={mentalHealthSubServices} />
         </div>
       </section>
     </ServiceLayout>

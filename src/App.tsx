@@ -34,7 +34,7 @@ import SexualHealthCounselling from '@/pages/services/mentalhealth/SexualHealthC
 
 // Legal Support sub-service pages
 import MediationServices from '@/pages/services/legal/MediationServices';
-// Removed PreMarriageLegal import
+import PreMarriageLegal from '@/pages/services/legal/PreMarriageLegal';
 import DivorceConsultation from '@/pages/services/legal/DivorceConsultation';
 import ChildCustodyConsultation from '@/pages/services/legal/ChildCustodyConsultation';
 import MaintenanceConsultation from '@/pages/services/legal/MaintenanceConsultation';
@@ -49,6 +49,7 @@ import AdminLogin from '@/pages/admin/AdminLogin';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminConsultants from '@/pages/admin/AdminConsultants';
+import AdminPricing from '@/pages/admin/AdminPricing';
 import AdminBookings from '@/pages/admin/AdminBookings';
 import AdminSettings from '@/pages/admin/AdminSettings';
 import AdminPaymentMigration from '@/pages/admin/AdminPaymentMigration';
@@ -124,7 +125,7 @@ function App() {
           
           {/* Legal Support sub-service pages */}
           <Route path="/services/legal-support/mediation" element={<MediationServices />} />
-          {/* Removed PreMarriageLegal route */}
+          <Route path="/services/legal-support/pre-marriage" element={<PreMarriageLegal />} />
           <Route path="/services/legal-support/divorce" element={<DivorceConsultation />} />
           <Route path="/services/legal-support/custody" element={<ChildCustodyConsultation />} />
           <Route path="/services/legal-support/maintenance" element={<MaintenanceConsultation />} />
@@ -161,6 +162,7 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="consultants" element={<AdminConsultants />} />
+            <Route path="pricing" element={<AdminPricing />} />
             <Route path="services" element={<AdminServices />} />
             <Route path="bookings" element={<AdminBookings />} />
             <Route path="settings" element={<AdminSettings />} />

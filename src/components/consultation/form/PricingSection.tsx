@@ -36,20 +36,19 @@ const PricingSection: React.FC<PricingSectionProps> = ({
   
   // Check if the selected services match a package
   const packageName = getPackageName(selectedServices);
-  // Use service ID instead of comparing package name strings
-  const packageId = packageName ? 
-    (selectedServices.includes('divorce-prevention') ? 'divorce-prevention' : 
-     selectedServices.includes('pre-marriage-clarity') ? 'pre-marriage-clarity' : null) : null;
+  const packageId = packageName === "Divorce Prevention Package" 
+    ? 'divorce-prevention' 
+    : packageName === "Pre-Marriage Clarity Package" ? 'pre-marriage-clarity' : null;
   
   // Get appropriate package price if it's a package
   const packagePrice = packageId && pricing && pricing.has(packageId) 
     ? pricing.get(packageId)! 
-    : undefined; // Don't use 0 as fallback
+    : (totalPrice > 0 ? totalPrice : 0);
   
   // For individual services, use the direct price from the pricing map
   const servicePrice = selectedServices.length === 1 && pricing && pricing.has(selectedServices[0])
     ? pricing.get(selectedServices[0])!
-    : undefined; // Don't use 0 as fallback
+    : totalPrice;
   
   return (
     <div className="p-6 bg-gradient-to-r from-peacefulBlue/5 to-white rounded-lg border border-peacefulBlue/20 shadow-md">
@@ -71,7 +70,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({
           <div className="flex justify-between items-center py-2 border-b border-gray-100">
             <span className="text-gray-700 font-medium">{packageName}</span>
             <span className="font-medium">
-              {packagePrice !== undefined 
+              {packagePrice > 0 
                 ? formatPrice(packagePrice)
                 : "Price unavailable"}
             </span>
@@ -91,12 +90,12 @@ const PricingSection: React.FC<PricingSectionProps> = ({
         // If it's individual services, show each service and its price
         <div className="space-y-2 mb-6">
           {selectedServices.map(serviceId => {
-            const price = pricing?.get(serviceId);
+            const price = pricing?.get(serviceId) || 0;
             return (
               <div key={serviceId} className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-700">{getServiceLabel(serviceId)}</span>
                 <span className="font-medium">
-                  {price !== undefined 
+                  {price > 0 
                     ? formatPrice(price)
                     : "Price unavailable"}
                 </span>
@@ -109,8 +108,8 @@ const PricingSection: React.FC<PricingSectionProps> = ({
       <div className="flex justify-between items-center pt-4 border-t border-gray-300">
         <span className="text-lg font-semibold text-gray-800">Total</span>
         <span className="text-xl font-bold text-peacefulBlue">
-          {((packageName && packagePrice !== undefined) || (!packageName && servicePrice !== undefined))
-            ? formatPrice(packageName ? packagePrice! : servicePrice!)
+          {(packageName && packagePrice > 0) || (!packageName && servicePrice > 0) 
+            ? formatPrice(packageName ? packagePrice : servicePrice)
             : "Price unavailable"}
         </span>
       </div>

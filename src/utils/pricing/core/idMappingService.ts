@@ -12,29 +12,15 @@ const dbToClientIdMap: Record<string, string> = {
   'P2H-H-pre-marriage-clarity-solutions': 'pre-marriage-clarity',
   'P2H-L-divorce-consultation': 'divorce',
   'P2H-MH-mental-health-counselling': 'mental-health-counselling',
-  'P2H-L-general-legal-consultation': 'general-legal',
-  'P2H-MH-premarital-counselling-individual': 'premarital-counselling-individual',
-  'P2H-MH-premarital-counselling-couple': 'premarital-counselling-couple',
+  'P2H-L-pre-marriage-legal-consultation': 'pre-marriage-legal',
+  'P2H-L-general-legal-consultation': 'general-legal'
 };
 
 export function mapDbIdToClientId(dbId: string): string {
-  if (!dbId) {
-    console.error('[PRICE DEBUG] Attempting to map undefined or null dbId');
-    return '';
-  }
-  
-  const clientId = dbToClientIdMap[dbId] || dbId;
-  console.log(`[PRICE DEBUG] Mapping DB ID to client ID: ${dbId} → ${clientId}`);
-  return clientId;
+  return dbToClientIdMap[dbId] || dbId;
 }
 
 export function expandClientToDbIds(clientIds: string[]): string[] {
-  if (!clientIds || clientIds.length === 0) {
-    return [];
-  }
-  
-  console.log(`[PRICE DEBUG] Expanding client IDs to DB IDs: ${clientIds.join(', ')}`);
-  
   const clientToDbMap = Object.entries(dbToClientIdMap).reduce((acc, [dbId, clientId]) => {
     if (!acc[clientId]) {
       acc[clientId] = [];
@@ -47,25 +33,16 @@ export function expandClientToDbIds(clientIds: string[]): string[] {
   clientIds.forEach(id => {
     if (clientToDbMap[id]) {
       expandedIds.push(...clientToDbMap[id]);
-      console.log(`[PRICE DEBUG] Expanded client ID ${id} to DB IDs: ${clientToDbMap[id].join(', ')}`);
     } else {
       expandedIds.push(id);
-      console.log(`[PRICE DEBUG] No mapping found for client ID: ${id}, using as-is`);
     }
   });
   
-  console.log(`[PRICE DEBUG] Final expanded DB IDs: ${expandedIds.join(', ')}`);
   return expandedIds;
 }
 
 export function expandClientToDbPackageIds(packageIds: string[]): string[] {
-  if (!packageIds || packageIds.length === 0) {
-    return [];
-  }
-  
-  console.log(`[PRICE DEBUG] Expanding package client IDs to DB IDs: ${packageIds.join(', ')}`);
-  
-  // Create the reverse mapping for packages specifically
+  // This is the critical mapping for packages
   const packageToDbMap: Record<string, string[]> = {
     'divorce-prevention': ['P2H-H-divorce-prevention-package'],
     'pre-marriage-clarity': ['P2H-H-pre-marriage-clarity-solutions']
@@ -75,13 +52,11 @@ export function expandClientToDbPackageIds(packageIds: string[]): string[] {
   packageIds.forEach(id => {
     if (packageToDbMap[id]) {
       expandedIds.push(...packageToDbMap[id]);
-      console.log(`[PRICE DEBUG] Expanded package client ID ${id} to DB IDs: ${packageToDbMap[id].join(', ')}`);
     } else {
       expandedIds.push(id); // Keep the original ID if no mapping exists
-      console.log(`[PRICE DEBUG] No mapping found for package client ID: ${id}, using as-is`);
     }
   });
   
-  console.log(`[PRICE DEBUG] Final expanded package IDs: ${expandedIds.join(', ')}`);
+  console.log(`Expanded package IDs: ${packageIds} → ${expandedIds}`);
   return expandedIds;
 }

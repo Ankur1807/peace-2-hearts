@@ -2,20 +2,22 @@
 import React from 'react';
 import { RadioGroup } from '@/components/ui/radio-group';
 import ServiceOption from './ServiceOption';
-import { formatPrice } from '@/utils/pricing/priceFormatter';
 
 type LegalServicesProps = {
   consultationType: string;
   handleBoxClick: (value: string) => void;
-  pricing?: Map<string, number>;
 };
 
 const LegalServices: React.FC<LegalServicesProps> = ({
   consultationType,
-  handleBoxClick,
-  pricing
+  handleBoxClick
 }) => {
   const legalOptions = [
+    {
+      id: 'pre-marriage-legal',
+      title: 'Pre-marriage Legal Consultation',
+      description: 'Guidance on rights, agreements, and legal aspects before marriage.'
+    },
     {
       id: 'mediation',
       title: 'Mediation Services',
@@ -45,25 +47,18 @@ const LegalServices: React.FC<LegalServicesProps> = ({
 
   return (
     <RadioGroup value={consultationType} onValueChange={handleBoxClick} className="space-y-4">
-      {legalOptions.map(option => {
-        const price = pricing?.get(option.id);
-        const titleWithPrice = price !== undefined
-          ? `${option.title} (${formatPrice(price)})`
-          : option.title;
-        
-        return (
-          <ServiceOption
-            key={option.id}
-            id={option.id}
-            title={titleWithPrice}
-            description={option.description}
-            isSelected={consultationType === option.id}
-            onChange={(checked) => {
-              if (checked) handleBoxClick(option.id);
-            }}
-          />
-        );
-      })}
+      {legalOptions.map(option => (
+        <ServiceOption
+          key={option.id}
+          id={option.id}
+          title={option.title}
+          description={option.description}
+          isSelected={consultationType === option.id}
+          onChange={(checked) => {
+            if (checked) handleBoxClick(option.id);
+          }}
+        />
+      ))}
     </RadioGroup>
   );
 };
