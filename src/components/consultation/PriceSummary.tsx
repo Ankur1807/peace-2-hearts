@@ -30,15 +30,15 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
   // Get package price from pricing map if available
   const packagePrice = packageId && pricing && pricing.has(packageId) 
     ? pricing.get(packageId)! 
-    : totalPrice;
+    : 0; // No fallback, use 0 if not found
 
   const serviceId = services.length > 0 ? services[0] : '';
   const servicePrice = serviceId && pricing && pricing.has(serviceId) 
     ? pricing.get(serviceId)!
-    : totalPrice;
+    : 0; // No fallback, use 0 if not found
 
   // Price to display (from pricing only)
-  let displayPrice = totalPrice;
+  let displayPrice = 0;
   if (packageName && packagePrice > 0) displayPrice = packagePrice;
   if (!packageName && serviceId && servicePrice > 0) displayPrice = servicePrice;
 

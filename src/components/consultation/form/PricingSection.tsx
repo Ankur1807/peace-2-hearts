@@ -44,12 +44,12 @@ const PricingSection: React.FC<PricingSectionProps> = ({
   // Get appropriate package price if it's a package
   const packagePrice = packageId && pricing && pricing.has(packageId) 
     ? pricing.get(packageId)! 
-    : (totalPrice > 0 ? totalPrice : 0);
+    : 0; // No fallback, use 0 if not found
   
   // For individual services, use the direct price from the pricing map
   const servicePrice = selectedServices.length === 1 && pricing && pricing.has(selectedServices[0])
     ? pricing.get(selectedServices[0])!
-    : totalPrice;
+    : 0; // No fallback, use 0 if not found
   
   return (
     <div className="p-6 bg-gradient-to-r from-peacefulBlue/5 to-white rounded-lg border border-peacefulBlue/20 shadow-md">

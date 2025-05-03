@@ -27,7 +27,7 @@ export const useBookingState = (bookingState: ConsultationBookingHook) => {
           console.log(`Setting total price to package price: ${packagePrice} for ${packageId}`);
           setTotalPrice(packagePrice);
         } else {
-          console.log(`No pricing found for package ${packageId}, setting price to 0`);
+          console.warn(`[PRICE WARNING] No price found for package ${packageId}`);
           setTotalPrice(0);
         }
       } else if (selectedServices.length === 1) {
@@ -38,7 +38,7 @@ export const useBookingState = (bookingState: ConsultationBookingHook) => {
           console.log(`Setting total price to service price: ${servicePrice} for ${serviceId}`);
           setTotalPrice(servicePrice);
         } else {
-          console.log(`No pricing found for service ${serviceId}, setting price to 0`);
+          console.warn(`[PRICE WARNING] No price found for service ${serviceId}`);
           setTotalPrice(0);
         }
       }

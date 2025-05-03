@@ -48,9 +48,9 @@ export const useEffectivePrice = ({ selectedServices, pricing, totalPrice = 0 }:
         return price;
       }
       
-      // Fallback to total price
-      console.log(`[PRICE DEBUG] Package price not found in map, using totalPrice: ${totalPrice}`);
-      return totalPrice;
+      // No fallback to totalPrice, return 0 if not found
+      console.log(`[PRICE DEBUG] Package price not found in map, using 0`);
+      return 0;
     }
     
     // For single service
@@ -61,10 +61,14 @@ export const useEffectivePrice = ({ selectedServices, pricing, totalPrice = 0 }:
         console.log(`[PRICE DEBUG] Returning single service price: ${price} for ${serviceId}`);
         return price;
       }
+      
+      // No fallback, return 0 if not found
+      console.log(`[PRICE DEBUG] Service price not found, returning 0 for ${serviceId}`);
+      return 0;
     }
     
     // Default return
-    console.log(`[PRICE DEBUG] No specific price found, using totalPrice: ${totalPrice}`);
-    return totalPrice;
+    console.log(`[PRICE DEBUG] No specific price found, returning 0`);
+    return 0;
   };
 };

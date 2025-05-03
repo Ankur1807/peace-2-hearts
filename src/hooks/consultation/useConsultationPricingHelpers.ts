@@ -82,19 +82,9 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
           pricingMap.set(packageId, finalPrice);
           console.log(`[PRICE DEBUG] Using package price: ${finalPrice} for ${packageId}`);
         } else {
-          // Calculate from individual services with discount
-          let sum = 0;
-          selectedServices.forEach((serviceId) => {
-            const price = servicePricing.get(serviceId) || 0;
-            sum += price;
-          });
-          
-          if (sum > 0) {
-            // Apply 15% discount for packages
-            finalPrice = Math.round(sum * 0.85);
-            pricingMap.set(packageId, finalPrice);
-            console.log(`[PRICE DEBUG] Calculated discounted price: ${finalPrice} (15% off ${sum})`);
-          }
+          console.warn(`[PRICE WARNING] No price found for package ${packageId}`);
+          // No fallback price, just set to 0
+          finalPrice = 0;
         }
       } catch (err) {
         console.error("[PRICE DEBUG] Error processing package pricing:", err);
@@ -113,13 +103,24 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
         
         if (selectedServices.length === 1) {
           const serviceId = selectedServices[0];
-          finalPrice = pricingMap.get(serviceId) || 0;
-          console.log(`[PRICE DEBUG] Single service price for ${serviceId}: ${finalPrice}`);
+          if (pricingMap.has(serviceId)) {
+            finalPrice = pricingMap.get(serviceId)!;
+            console.log(`[PRICE DEBUG] Single service price for ${serviceId}: ${finalPrice}`);
+          } else {
+            console.warn(`[PRICE WARNING] No price found for service ${serviceId}`);
+            finalPrice = 0;
+          }
         } else {
+          let calculatedTotal = 0;
           selectedServices.forEach((serviceId) => {
-            const price = pricingMap.get(serviceId) || 0;
-            finalPrice += price;
+            if (pricingMap.has(serviceId)) {
+              const price = pricingMap.get(serviceId)!;
+              calculatedTotal += price;
+            } else {
+              console.warn(`[PRICE WARNING] No price found for service ${serviceId}`);
+            }
           });
+          finalPrice = calculatedTotal;
           console.log(`[PRICE DEBUG] Combined services price: ${finalPrice}`);
         }
       } catch (err) {
