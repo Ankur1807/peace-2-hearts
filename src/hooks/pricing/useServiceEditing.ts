@@ -26,8 +26,7 @@ export const useServiceEditing = (onServiceUpdated: () => Promise<void>) => {
     try {
       if (!isAdmin) {
         toast({
-          title: 'Authentication Required',
-          description: 'You must be logged in as an admin to update prices.',
+          title: 'Authentication Required - You must be logged in as an admin to update prices.',
           variant: 'destructive',
         });
         return;
@@ -35,8 +34,7 @@ export const useServiceEditing = (onServiceUpdated: () => Promise<void>) => {
 
       if (!editedPrice.trim() || isNaN(Number(editedPrice)) || Number(editedPrice) <= 0) {
         toast({
-          title: 'Invalid Price',
-          description: 'Please enter a valid price.',
+          title: 'Invalid Price - Please enter a valid price.',
           variant: 'destructive',
         });
         return;
@@ -48,8 +46,7 @@ export const useServiceEditing = (onServiceUpdated: () => Promise<void>) => {
       await updateServicePrice(id, numericPrice);
 
       toast({
-        title: 'Price Updated',
-        description: 'Service price has been successfully updated.',
+        title: 'Price Updated - Service price has been successfully updated.',
       });
 
       setEditMode(null);

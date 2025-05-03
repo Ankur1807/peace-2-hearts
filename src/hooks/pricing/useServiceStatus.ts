@@ -12,8 +12,7 @@ export const useServiceStatus = (onStatusToggled: () => Promise<void>) => {
     try {
       if (!isAdmin) {
         toast({
-          title: 'Authentication Required',
-          description: 'You must be logged in as an admin to update service status.',
+          title: 'Authentication Required - You must be logged in as an admin to update service status.',
           variant: 'destructive',
         });
         return;
@@ -22,8 +21,7 @@ export const useServiceStatus = (onStatusToggled: () => Promise<void>) => {
       await toggleServiceActive(id, currentStatus);
       
       toast({
-        title: 'Status Updated',
-        description: `Service ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
+        title: `Status Updated - Service ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
       });
 
       // Add a slight delay before refreshing to ensure the database has processed the update

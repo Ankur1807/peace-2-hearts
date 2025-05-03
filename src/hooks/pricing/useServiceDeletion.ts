@@ -12,8 +12,7 @@ export const useServiceDeletion = (onServiceDeleted: () => Promise<void>) => {
     try {
       if (!isAdmin) {
         toast({
-          title: 'Authentication Required',
-          description: 'You must be logged in as an admin to delete services.',
+          title: 'Authentication Required - You must be logged in as an admin to delete services.',
           variant: 'destructive',
         });
         return false;
@@ -22,8 +21,7 @@ export const useServiceDeletion = (onServiceDeleted: () => Promise<void>) => {
       await removeService(id);
       
       toast({
-        title: 'Service Deleted',
-        description: 'Service has been successfully deleted.',
+        title: 'Service Deleted - Service has been successfully deleted.',
       });
 
       // Add a slight delay before refreshing to ensure the database has processed the update

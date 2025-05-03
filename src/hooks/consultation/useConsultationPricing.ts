@@ -58,8 +58,7 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       console.error("Error in useConsultationPricing:", error);
       setPricingError("Failed to fetch pricing information");
       toast({ 
-        title: "Error retrieving pricing information", 
-        description: "Please try again later or contact support.",
+        title: "Error retrieving pricing information - Please try again later or contact support.",
         variant: "destructive"
       });
     } finally {

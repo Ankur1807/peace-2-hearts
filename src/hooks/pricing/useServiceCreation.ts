@@ -13,8 +13,7 @@ export const useServiceCreation = (onServiceCreated: () => Promise<void>) => {
     try {
       if (!isAdmin) {
         toast({
-          title: 'Authentication Required',
-          description: 'You must be logged in as an admin to add services.',
+          title: 'Authentication Required - You must be logged in as an admin to add services.',
           variant: 'destructive',
         });
         return false;
@@ -24,8 +23,7 @@ export const useServiceCreation = (onServiceCreated: () => Promise<void>) => {
       await createService(data);
       
       toast({
-        title: 'Service Added',
-        description: 'New service has been successfully added.',
+        title: 'Service Added - New service has been successfully added.',
       });
 
       // Add a slight delay before refreshing to ensure the database has processed the update

@@ -1,26 +1,30 @@
 
-import { ToastFunction } from '../types';
+import { useToast } from '@/hooks/use-toast';
 
 export const usePackageErrorHandler = () => {
+  const { toast } = useToast();
+
   const handleError = (error: any, operation: string) => {
     console.error(`Error details for ${operation}:`, error);
     
-    // Convert error to a more useful format for display
-    let errorMessage = "Unknown error occurred";
-    
-    if (typeof error === 'object') {
-      if (error.message) {
-        errorMessage = error.message;
-      } else if (error.error) {
-        errorMessage = error.error;
-      }
-    } else if (typeof error === 'string') {
-      errorMessage = error;
+    if (error.code === 'PGRST116' || error.message?.includes('JWT')) {
+      toast({
+        title: `Session Expired - Your admin session has expired. Please log in again.`,
+        variant: 'destructive',
+      });
+      localStorage.removeItem('p2h_admin_authenticated');
+    } else if (error.message?.includes('Authentication required')) {
+      toast({
+        title: `Authentication Required - You must be logged in as an admin to ${operation}.`,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: `Error - Failed to ${operation}: ${error.message}`,
+        variant: 'destructive',
+      });
     }
-    
-    console.error(`Error: ${operation}: ${errorMessage}`);
-    return errorMessage;
   };
-  
+
   return { handleError };
 };

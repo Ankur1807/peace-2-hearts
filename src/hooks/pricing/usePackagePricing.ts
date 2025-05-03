@@ -19,8 +19,7 @@ export function usePackagePricing() {
   const handleEditPrice = async (id: string, price: number) => {
     if (!isAdmin) {
       toast({
-        title: 'Authentication Required',
-        description: 'You must be logged in as an admin to update packages.',
+        title: 'Authentication Required - You must be logged in as an admin to update packages.',
         variant: 'destructive',
       });
       return;
@@ -30,8 +29,7 @@ export function usePackagePricing() {
       setUpdating(true);
       await updatePackagePrice(id, price);
       toast({
-        title: 'Package Updated',
-        description: 'Package price has been successfully updated.',
+        title: 'Package Updated - Package price has been successfully updated.',
       });
       await fetchPackages();
     } catch (error: any) {
@@ -44,8 +42,7 @@ export function usePackagePricing() {
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     if (!isAdmin) {
       toast({
-        title: 'Authentication Required',
-        description: 'You must be logged in as an admin to update package status.',
+        title: 'Authentication Required - You must be logged in as an admin to update package status.',
         variant: 'destructive',
       });
       return;
@@ -61,8 +58,7 @@ export function usePackagePricing() {
       if (error) throw error;
 
       toast({
-        title: 'Status Updated',
-        description: `Package ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
+        title: `Status Updated - Package ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
       });
       await fetchPackages();
     } catch (error: any) {
@@ -75,8 +71,7 @@ export function usePackagePricing() {
   const handleSyncPackages = async () => {
     if (!isAdmin) {
       toast({
-        title: 'Authentication Required',
-        description: 'You must be logged in as an admin to sync packages.',
+        title: 'Authentication Required - You must be logged in as an admin to sync packages.',
         variant: 'destructive',
       });
       return;
@@ -106,8 +101,7 @@ export function usePackagePricing() {
       }
 
       toast({
-        title: 'Packages Synced',
-        description: 'All packages with the same name now have consistent pricing.',
+        title: 'Packages Synced - All packages with the same name now have consistent pricing.',
       });
       await fetchPackages();
     } catch (error: any) {
