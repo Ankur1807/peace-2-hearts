@@ -65,7 +65,7 @@ export function expandClientToDbPackageIds(packageIds: string[]): string[] {
   
   console.log(`[PRICE DEBUG] Expanding package client IDs to DB IDs: ${packageIds.join(', ')}`);
   
-  // This is the critical mapping for packages
+  // Create the reverse mapping for packages specifically
   const packageToDbMap: Record<string, string[]> = {
     'divorce-prevention': ['P2H-H-divorce-prevention-package'],
     'pre-marriage-clarity': ['P2H-H-pre-marriage-clarity-solutions']
@@ -82,6 +82,6 @@ export function expandClientToDbPackageIds(packageIds: string[]): string[] {
     }
   });
   
-  console.log(`[PRICE DEBUG] Expanded package IDs: ${packageIds} → ${expandedIds}`);
+  console.log(`[PRICE DEBUG] Final expanded package IDs: ${expandedIds.join(', ')}`);
   return expandedIds;
 }

@@ -1,135 +1,89 @@
-
+import { fetchPackagePricing, fetchServicePricing } from '@/utils/pricing';
+import { ToastAction } from '@/components/ui/toast';
 import { getPackageName } from '@/utils/consultation/packageUtils';
-import { fetchServicePricing, fetchPackagePricing } from '@/utils/pricing';
 
-export async function calculatePricingMap(selectedServices, serviceCategory, setPricingError, toast) {
-  let pricingMap: Map<string, number> = new Map();
-  let finalPrice = 0;
-
+export async function calculatePricingMap(
+  selectedServices: string[],
+  serviceCategory: string,
+  setPricingError: (error: string | null) => void,
+  toast: any
+): Promise<{ pricingMap: Map<string, number>, finalPrice: number }> {
   try {
-    console.log(`[PRICE DEBUG] Calculating pricing for services: ${selectedServices.join(', ')}`);
+    // Initialize an empty pricing map
+    const pricingMap = new Map<string, number>();
     
-    // Define all possible service IDs to fetch prices for
-    const mentalHealthIds = [
-      'mental-health-counselling', 
-      'family-therapy', 
-      'premarital-counselling-individual',
-      'premarital-counselling-couple',
-      'couples-counselling',
-      'sexual-health-counselling'
-    ];
-    
-    const legalIds = [
-      'mediation',
-      'divorce',
-      'custody',
-      'maintenance',
-      'general-legal'
-    ];
-    
-    const packageIds = [
-      'divorce-prevention',
-      'pre-marriage-clarity'
-    ];
-    
-    console.log('[PRICE DEBUG] Fetching all service and package pricing data');
-    
-    try {
-      // Load all pricing data regardless of selection to populate the form
-      const [servicePricing, packagePricing] = await Promise.all([
-        fetchServicePricing([...mentalHealthIds, ...legalIds]),
-        fetchPackagePricing(packageIds)
-      ]);
-      
-      console.log('[PRICE DEBUG] Service pricing data:', Object.fromEntries(servicePricing));
-      console.log('[PRICE DEBUG] Package pricing data:', Object.fromEntries(packagePricing));
-      
-      // Combine pricing maps
-      pricingMap = new Map([...servicePricing, ...packagePricing]);
-      console.log('[PRICE DEBUG] Combined pricing map:', Object.fromEntries(pricingMap));
-    } catch (err) {
-      console.error('[PRICE ERROR] Error loading initial pricing data:', err);
-      // Continue execution to handle selected services
-    }
-    
-    // Standard handling for selected services
-    // Check if selected services match a package
+    // Check if there's a holistic package selected
     const packageName = getPackageName(selectedServices);
+    
+    // Use the package ID from selectedServices if it's a package
     if (packageName) {
-      // Use service ID instead of comparing package name strings
-      const packageId = selectedServices.includes('divorce-prevention')
-        ? 'divorce-prevention'
-        : 'pre-marriage-clarity';
-          
-      console.log(`[PRICE DEBUG] Services match package: ${packageName} (${packageId})`);
-      
-      try {
-        // First get all individual prices
-        const servicePricing = await fetchServicePricing(selectedServices);
-        pricingMap = new Map([...pricingMap, ...servicePricing]);
+      // Determine package ID based on selected services
+      const packageId = selectedServices.includes('divorce-prevention') ? 'divorce-prevention' : 
+                        selectedServices.includes('pre-marriage-clarity') ? 'pre-marriage-clarity' : null;
+                        
+      if (packageId) {
+        console.log(`[PRICE DEBUG] Fetching pricing for package: ${packageId}`);
+        const packagePricing = await fetchPackagePricing([packageId], true); // Skip cache
         
-        // Then try to get package price
-        const packagePricing = await fetchPackagePricing([packageId]);
-        console.log('[PRICE DEBUG] Package pricing fetch result:', Object.fromEntries(packagePricing));
-        
-        if (packagePricing.has(packageId)) {
-          // If package has price, use it
-          finalPrice = packagePricing.get(packageId)!;
-          pricingMap.set(packageId, finalPrice);
-          console.log(`[PRICE DEBUG] Using package price: ${finalPrice} for ${packageId}`);
-        } else {
-          console.warn(`[PRICE WARNING] No price found for package ${packageId}`);
-          finalPrice = 0;
-        }
-      } catch (err) {
-        console.error("[PRICE ERROR] Error processing package pricing:", err);
-        setPricingError('Error calculating package pricing');
-      }
-    } else if (selectedServices.length > 0) {
-      // Regular services
-      try {
-        // Get prices for selected services
-        const selectedServicePricing = await fetchServicePricing(selectedServices);
-        
-        // Update the pricing map with these prices
-        selectedServicePricing.forEach((price, id) => {
-          pricingMap.set(id, price);
-        });
-        
-        if (selectedServices.length === 1) {
-          const serviceId = selectedServices[0];
-          if (pricingMap.has(serviceId)) {
-            finalPrice = pricingMap.get(serviceId)!;
-            console.log(`[PRICE DEBUG] Single service price for ${serviceId}: ${finalPrice}`);
-          } else {
-            console.warn(`[PRICE WARNING] No price found for service ${serviceId}`);
-            finalPrice = 0;
+        // Merge package pricing into the pricing map
+        if (packagePricing.size > 0) {
+          for (const [id, price] of packagePricing.entries()) {
+            pricingMap.set(id, price);
+            console.log(`[PRICE DEBUG] Added package price: ${id} = ${price}`);
           }
         } else {
-          let calculatedTotal = 0;
-          selectedServices.forEach((serviceId) => {
-            if (pricingMap.has(serviceId)) {
-              const price = pricingMap.get(serviceId)!;
-              calculatedTotal += price;
-            } else {
-              console.warn(`[PRICE WARNING] No price found for service ${serviceId}`);
-            }
-          });
-          finalPrice = calculatedTotal;
-          console.log(`[PRICE DEBUG] Combined services price: ${finalPrice}`);
+          console.warn(`[PRICE WARNING] No pricing found for package: ${packageId}`);
         }
-      } catch (err) {
-        console.error("[PRICE ERROR] Error fetching service pricing:", err);
-        setPricingError('Error retrieving service pricing');
+      }
+    } 
+    // Otherwise, fetch individual service pricing
+    else if (selectedServices.length > 0) {
+      console.log(`[PRICE DEBUG] Fetching pricing for services: ${selectedServices.join(', ')}`);
+      const servicePricing = await fetchServicePricing(selectedServices, true); // Skip cache
+      
+      // Merge service pricing into the pricing map
+      if (servicePricing.size > 0) {
+        for (const [id, price] of servicePricing.entries()) {
+          pricingMap.set(id, price);
+          console.log(`[PRICE DEBUG] Added service price: ${id} = ${price}`);
+        }
+      } else {
+        console.warn(`[PRICE WARNING] No pricing found for services: ${selectedServices.join(', ')}`);
       }
     }
-
-    console.log(`[PRICE DEBUG] Final price calculated: ${finalPrice}, Pricing map has ${pricingMap.size} items`);
-    console.log('[PRICE DEBUG] Final pricing map:', Object.fromEntries(pricingMap));
+    
+    // Calculate the final price based on the selected services/package
+    let finalPrice = 0;
+    
+    if (packageName && selectedServices[0]) {
+      const packageId = selectedServices[0];
+      finalPrice = pricingMap.get(packageId) || 0;
+      console.log(`[PRICE DEBUG] Using package price for ${packageId}: ${finalPrice}`);
+    } else if (selectedServices.length === 1) {
+      finalPrice = pricingMap.get(selectedServices[0]) || 0;
+      console.log(`[PRICE DEBUG] Using service price for ${selectedServices[0]}: ${finalPrice}`);
+    }
+    
+    console.log(`[PRICE DEBUG] Final calculated price: ${finalPrice}`);
+    
+    if (finalPrice === 0 && selectedServices.length > 0) {
+      console.warn(`[PRICE WARNING] No price found for selected services/package`);
+      // Set error but don't provide fallback price - let UI handle missing price
+      setPricingError('No pricing information available for the selected service');
+    } else {
+      setPricingError(null);
+    }
+    
     return { pricingMap, finalPrice };
   } catch (error) {
-    console.error('[PRICE ERROR] Error calculating pricing:', error);
-    setPricingError('Failed to calculate pricing');
-    return { pricingMap, finalPrice };
+    console.error('[PRICE ERROR] Error calculating pricing map:', error);
+    setPricingError('Failed to calculate pricing information');
+    toast({
+      title: "Error retrieving pricing data",
+      description: "Please try again later or contact support.",
+      variant: "destructive",
+      action: <ToastAction altText="Try again">Try again</ToastAction>,
+    });
+    return { pricingMap: new Map<string, number>(), finalPrice: 0 };
   }
 }

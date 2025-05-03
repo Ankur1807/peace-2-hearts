@@ -5,15 +5,14 @@ import { expandClientToDbIds, expandClientToDbPackageIds } from './idMappingServ
 export async function fetchServicePricingData(serviceIds?: string[]) {
   console.log('[PRICE DEBUG] Fetching service pricing data for:', serviceIds);
   
-  const expandedIds = serviceIds ? expandClientToDbIds(serviceIds) : [];
-  console.log('[PRICE DEBUG] Expanded service IDs for DB query:', expandedIds);
-  
   let query = supabase
     .from('service_pricing')
     .select('service_id, price, is_active')
     .eq('type', 'service');
   
-  if (expandedIds.length > 0) {
+  if (serviceIds && serviceIds.length > 0) {
+    const expandedIds = expandClientToDbIds(serviceIds);
+    console.log('[PRICE DEBUG] Expanded service IDs for DB query:', expandedIds);
     query = query.in('service_id', expandedIds);
   }
   
@@ -23,14 +22,14 @@ export async function fetchServicePricingData(serviceIds?: string[]) {
     const { data, error } = await query;
     
     if (error) {
-      console.error('[PRICE DEBUG] Error fetching service pricing data:', error);
+      console.error('[PRICE ERROR] Error fetching service pricing data:', error);
       throw error;
     }
     
     console.log('[PRICE DEBUG] Retrieved service pricing data:', data);
     return data || [];
   } catch (err) {
-    console.error('[PRICE DEBUG] Exception in fetchServicePricingData:', err);
+    console.error('[PRICE ERROR] Exception in fetchServicePricingData:', err);
     throw err;
   }
 }
@@ -55,14 +54,14 @@ export async function fetchPackagePricingData(packageIds?: string[]) {
       .eq('is_active', true);
     
     if (error) {
-      console.error('[PRICE DEBUG] Error fetching package pricing:', error);
+      console.error('[PRICE ERROR] Error fetching package pricing:', error);
       throw error;
     }
     
     console.log('[PRICE DEBUG] Retrieved package pricing data:', data);
     return data || [];
   } catch (err) {
-    console.error('[PRICE DEBUG] Exception in fetchPackagePricingData:', err);
+    console.error('[PRICE ERROR] Exception in fetchPackagePricingData:', err);
     throw err;
   }
 }

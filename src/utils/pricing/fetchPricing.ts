@@ -89,10 +89,7 @@ export async function fetchPackagePricing(
   
   try {
     console.log('[PRICE DEBUG] Cache miss or skip, fetching package pricing from Supabase');
-    // Expand the client IDs to DB IDs before fetching
-    const expandedIds = expandClientToDbPackageIds(packageIds);
-    console.log('[PRICE DEBUG] Expanded package IDs:', expandedIds);
-    
+    // Use the packageIds directly - the fetch function will handle the expansion
     const data = await fetchPackagePricingData(packageIds);
     console.log('[PRICE DEBUG] Raw package pricing data from DB:', data);
     
