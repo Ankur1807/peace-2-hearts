@@ -17,6 +17,11 @@ const LegalServices: React.FC<LegalServicesProps> = ({
 }) => {
   const legalOptions = [
     {
+      id: 'pre-marriage-legal',
+      title: 'Pre-marriage Legal Consultation',
+      description: 'Legal guidance to ensure your marriage starts on a secure foundation.'
+    },
+    {
       id: 'mediation',
       title: 'Mediation Services',
       description: 'Facilitating peaceful resolutions to legal disputes through collaborative dialogue.'

@@ -41,6 +41,7 @@ const MentalHealthServices: React.FC<MentalHealthServicesProps> = ({
       title: 'Test Service',
       description: 'For testing payment gateway functionality.'
     }
+    // Removed premarital-counselling entry
   ];
 
   useEffect(() => {

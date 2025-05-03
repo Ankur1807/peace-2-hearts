@@ -19,13 +19,7 @@ const MentalHealthService: React.FC = () => {
       path: "/services/mental-health/family-therapy"
     },
     {
-      id: "premarital-counselling",
-      title: "Premarital Counselling",
-      description: "Preparing couples for a strong and fulfilling marriage through guided discussions and planning.",
-      path: "/services/mental-health/premarital-counselling"
-    },
-    {
-      id: "couples-counselling", // Make sure this ID matches what's in the selection options
+      id: "couples-counselling",
       title: "Couples Counselling",
       description: "Professional guidance to strengthen communication and mutual understanding.",
       path: "/services/mental-health/couples-counselling"
@@ -36,6 +30,7 @@ const MentalHealthService: React.FC = () => {
       description: "Specialized support for addressing intimacy concerns and enhancing relationship satisfaction.",
       path: "/services/mental-health/sexual-health-counselling"
     }
+    // Removed premarital-counselling as requested
   ];
 
   const forWhom = [
