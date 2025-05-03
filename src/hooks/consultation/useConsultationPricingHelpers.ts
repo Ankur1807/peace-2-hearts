@@ -22,7 +22,6 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
       ];
       
       const legalIds = [
-        'pre-marriage-legal',
         'mediation',
         'divorce',
         'custody',
@@ -58,10 +57,10 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
     // Check if selected services match a package
     const packageName = getPackageName(selectedServices);
     if (packageName) {
-      const packageId =
-        packageName === 'Divorce Prevention Package'
-          ? 'divorce-prevention'
-          : 'pre-marriage-clarity';
+      // Use service ID instead of comparing package name strings
+      const packageId = selectedServices.includes('divorce-prevention')
+        ? 'divorce-prevention'
+        : 'pre-marriage-clarity';
           
       console.log(`Services match package: ${packageName} (${packageId})`);
       

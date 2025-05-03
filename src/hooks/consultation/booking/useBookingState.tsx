@@ -16,7 +16,8 @@ export const useBookingState = (bookingState: ConsultationBookingHook) => {
       // Check if it's a package
       const packageName = getPackageName(selectedServices);
       if (packageName) {
-        const packageId = packageName === "Divorce Prevention Package" 
+        // Use service ID instead of comparing package name strings
+        const packageId = selectedServices.includes('divorce-prevention') 
           ? 'divorce-prevention' 
           : 'pre-marriage-clarity';
           

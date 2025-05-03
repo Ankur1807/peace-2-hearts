@@ -22,9 +22,10 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({
 
   // For holistic packages
   const packageName = services.length > 0 ? getPackageName(services) : null;
-  const packageId = packageName === "Divorce Prevention Package" 
-    ? 'divorce-prevention' 
-    : packageName === "Pre-Marriage Clarity Package" ? 'pre-marriage-clarity' : null;
+  // Use ID-based comparison instead of string names
+  const packageId = packageName ? 
+    (services.includes('divorce-prevention') ? 'divorce-prevention' : 
+     services.includes('pre-marriage-clarity') ? 'pre-marriage-clarity' : null) : null;
 
   // Get package price from pricing map if available
   const packagePrice = packageId && pricing && pricing.has(packageId) 

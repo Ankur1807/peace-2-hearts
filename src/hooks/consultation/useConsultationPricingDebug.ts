@@ -13,10 +13,10 @@ export function useConsultationPricingDebug(totalPrice, selectedServices, pricin
 
     const packageName = getPackageName(selectedServices);
     if (packageName) {
-      const packageId =
-        packageName === 'Divorce Prevention Package'
-          ? 'divorce-prevention'
-          : 'pre-marriage-clarity';
+      // Use service ID instead of comparing package name strings
+      const packageId = selectedServices.includes('divorce-prevention')
+        ? 'divorce-prevention'
+        : 'pre-marriage-clarity';
       console.log(`Selected package: ${packageName} (${packageId}), Price: ${pricing.get(packageId) || 'not found'}`);
     }
   }, [totalPrice, selectedServices, pricing]);

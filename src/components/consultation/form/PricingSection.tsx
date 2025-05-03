@@ -36,9 +36,10 @@ const PricingSection: React.FC<PricingSectionProps> = ({
   
   // Check if the selected services match a package
   const packageName = getPackageName(selectedServices);
-  const packageId = packageName === "Divorce Prevention Package" 
-    ? 'divorce-prevention' 
-    : packageName === "Pre-Marriage Clarity Package" ? 'pre-marriage-clarity' : null;
+  // Use service ID instead of comparing package name strings
+  const packageId = packageName ? 
+    (selectedServices.includes('divorce-prevention') ? 'divorce-prevention' : 
+     selectedServices.includes('pre-marriage-clarity') ? 'pre-marriage-clarity' : null) : null;
   
   // Get appropriate package price if it's a package
   const packagePrice = packageId && pricing && pricing.has(packageId) 
