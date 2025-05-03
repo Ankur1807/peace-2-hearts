@@ -11,8 +11,10 @@ export async function fetchServicePricingData(serviceIds?: string[]) {
     .eq('type', 'service');
   
   if (serviceIds && serviceIds.length > 0) {
-    const expandedIds = expandClientToDbIds(serviceIds);
-    console.log('[PRICE DEBUG] Expanded service IDs for DB query:', expandedIds);
+    // const expandedIds = expandClientToDbIds(serviceIds);
+// console.log('[PRICE DEBUG] Expanded service IDs for DB query:', expandedIds);
+const expandedIds = ['P2H-MH-mental-health-counselling']; // hardcoded ID known to exist in your Supabase
+console.log('[PRICE TEST] Using hardcoded test ID for pricing fetch:', expandedIds);
     query = query.in('service_id', expandedIds);
   }
   
