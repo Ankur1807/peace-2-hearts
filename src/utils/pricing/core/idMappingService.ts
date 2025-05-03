@@ -16,10 +16,13 @@ const dbToClientIdMap: Record<string, string> = {
 };
 
 export function mapDbIdToClientId(dbId: string): string {
+  console.log(`[PRICE DEBUG] Mapping DB ID to client ID: ${dbId} → ${dbToClientIdMap[dbId] || dbId}`);
   return dbToClientIdMap[dbId] || dbId;
 }
 
 export function expandClientToDbIds(clientIds: string[]): string[] {
+  console.log(`[PRICE DEBUG] Expanding client IDs to DB IDs: ${clientIds.join(', ')}`);
+  
   const clientToDbMap = Object.entries(dbToClientIdMap).reduce((acc, [dbId, clientId]) => {
     if (!acc[clientId]) {
       acc[clientId] = [];
@@ -32,15 +35,20 @@ export function expandClientToDbIds(clientIds: string[]): string[] {
   clientIds.forEach(id => {
     if (clientToDbMap[id]) {
       expandedIds.push(...clientToDbMap[id]);
+      console.log(`[PRICE DEBUG] Expanded client ID ${id} to DB IDs: ${clientToDbMap[id].join(', ')}`);
     } else {
       expandedIds.push(id);
+      console.log(`[PRICE DEBUG] No mapping found for client ID: ${id}, using as-is`);
     }
   });
   
+  console.log(`[PRICE DEBUG] Final expanded DB IDs: ${expandedIds.join(', ')}`);
   return expandedIds;
 }
 
 export function expandClientToDbPackageIds(packageIds: string[]): string[] {
+  console.log(`[PRICE DEBUG] Expanding package client IDs to DB IDs: ${packageIds.join(', ')}`);
+  
   // This is the critical mapping for packages
   const packageToDbMap: Record<string, string[]> = {
     'divorce-prevention': ['P2H-H-divorce-prevention-package'],
@@ -51,11 +59,13 @@ export function expandClientToDbPackageIds(packageIds: string[]): string[] {
   packageIds.forEach(id => {
     if (packageToDbMap[id]) {
       expandedIds.push(...packageToDbMap[id]);
+      console.log(`[PRICE DEBUG] Expanded package client ID ${id} to DB IDs: ${packageToDbMap[id].join(', ')}`);
     } else {
       expandedIds.push(id); // Keep the original ID if no mapping exists
+      console.log(`[PRICE DEBUG] No mapping found for package client ID: ${id}, using as-is`);
     }
   });
   
-  console.log(`Expanded package IDs: ${packageIds} → ${expandedIds}`);
+  console.log(`[PRICE DEBUG] Expanded package IDs: ${packageIds} → ${expandedIds}`);
   return expandedIds;
 }

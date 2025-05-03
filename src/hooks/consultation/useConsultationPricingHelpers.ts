@@ -42,14 +42,16 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
         fetchPackagePricing(packageIds)
       ]);
       
-      console.log('Service pricing data:', Object.fromEntries(servicePricing));
-      console.log('Package pricing data:', Object.fromEntries(packagePricing));
+      console.log('[PRICE DEBUG] Service pricing data:', Object.fromEntries(servicePricing));
+      console.log('[PRICE DEBUG] Package pricing data:', Object.fromEntries(packagePricing));
+      console.log('[PRICE DEBUG] Divorce prevention package price:', packagePricing.get('divorce-prevention'));
       
       // Combine pricing maps
       pricingMap = new Map([...servicePricing, ...packagePricing]);
-      console.log('Combined pricing map:', Object.fromEntries(pricingMap));
+      console.log('[PRICE DEBUG] Combined pricing map:', Object.fromEntries(pricingMap));
+      console.log('[PRICE DEBUG] Divorce prevention price in combined map:', pricingMap.get('divorce-prevention'));
     } catch (err) {
-      console.error('Error loading initial pricing data:', err);
+      console.error('[PRICE DEBUG] Error loading initial pricing data:', err);
       // Continue execution to handle selected services
     }
     
@@ -62,7 +64,7 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
         ? 'divorce-prevention'
         : 'pre-marriage-clarity';
           
-      console.log(`Services match package: ${packageName} (${packageId})`);
+      console.log(`[PRICE DEBUG] Services match package: ${packageName} (${packageId})`);
       
       try {
         // First get all individual prices
@@ -71,12 +73,14 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
         
         // Then try to get package price
         const packagePricing = await fetchPackagePricing([packageId]);
+        console.log('[PRICE DEBUG] Package pricing fetch result:', Object.fromEntries(packagePricing));
+        console.log('[PRICE DEBUG] Divorce prevention package price:', packagePricing.get(packageId));
         
         if (packagePricing.has(packageId)) {
           // If package has price, use it
           finalPrice = packagePricing.get(packageId)!;
           pricingMap.set(packageId, finalPrice);
-          console.log(`Using package price: ${finalPrice}`);
+          console.log(`[PRICE DEBUG] Using package price: ${finalPrice} for ${packageId}`);
         } else {
           // Calculate from individual services with discount
           let sum = 0;
@@ -89,11 +93,11 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
             // Apply 15% discount for packages
             finalPrice = Math.round(sum * 0.85);
             pricingMap.set(packageId, finalPrice);
-            console.log(`Calculated discounted price: ${finalPrice} (15% off ${sum})`);
+            console.log(`[PRICE DEBUG] Calculated discounted price: ${finalPrice} (15% off ${sum})`);
           }
         }
       } catch (err) {
-        console.error("Error processing package pricing:", err);
+        console.error("[PRICE DEBUG] Error processing package pricing:", err);
         setPricingError('Error calculating package pricing');
       }
     } else if (selectedServices.length > 0) {
@@ -110,24 +114,25 @@ export async function calculatePricingMap(selectedServices, serviceCategory, set
         if (selectedServices.length === 1) {
           const serviceId = selectedServices[0];
           finalPrice = pricingMap.get(serviceId) || 0;
-          console.log(`Single service price for ${serviceId}: ${finalPrice}`);
+          console.log(`[PRICE DEBUG] Single service price for ${serviceId}: ${finalPrice}`);
         } else {
           selectedServices.forEach((serviceId) => {
             const price = pricingMap.get(serviceId) || 0;
             finalPrice += price;
           });
-          console.log(`Combined services price: ${finalPrice}`);
+          console.log(`[PRICE DEBUG] Combined services price: ${finalPrice}`);
         }
       } catch (err) {
-        console.error("Error fetching service pricing:", err);
+        console.error("[PRICE DEBUG] Error fetching service pricing:", err);
         setPricingError('Error retrieving service pricing');
       }
     }
 
-    console.log(`Final price calculated: ${finalPrice}, Pricing map has ${pricingMap.size} items`);
+    console.log(`[PRICE DEBUG] Final price calculated: ${finalPrice}, Pricing map has ${pricingMap.size} items`);
+    console.log('[PRICE DEBUG] Final pricing map:', Object.fromEntries(pricingMap));
     return { pricingMap, finalPrice };
   } catch (error) {
-    console.error('Error calculating pricing:', error);
+    console.error('[PRICE DEBUG] Error calculating pricing:', error);
     setPricingError('Failed to calculate pricing');
     return { pricingMap, finalPrice };
   }

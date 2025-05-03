@@ -37,7 +37,7 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
     setPricingError(null);
 
     try {
-      console.log(`Fetching pricing data for category: ${serviceCategory}, services: ${selectedServices.join(', ')}`);
+      console.log(`[PRICE DEBUG] Fetching pricing data for category: ${serviceCategory}, services: ${selectedServices.join(', ')}`);
       const { pricingMap, finalPrice } = await calculatePricingMap(
         selectedServices, 
         serviceCategory, 
@@ -45,7 +45,10 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
         toast
       );
 
-      console.log(`Received pricing data with ${pricingMap.size} items, final price: ${finalPrice}`);
+      console.log(`[PRICE DEBUG] Received pricing data with ${pricingMap.size} items, final price: ${finalPrice}`);
+      console.log(`[PRICE DEBUG] Final pricing map before setting state:`, Object.fromEntries(pricingMap));
+      console.log(`[PRICE DEBUG] Divorce prevention price before setting state:`, pricingMap.get('divorce-prevention'));
+      
       setPricing(pricingMap);
       setTotalPrice(finalPrice);
 
@@ -55,7 +58,7 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
         setPricingError(errorMsg);
       }
     } catch (error) {
-      console.error("Error in useConsultationPricing:", error);
+      console.error("[PRICE DEBUG] Error in useConsultationPricing:", error);
       setPricingError("Failed to fetch pricing information");
       toast({ 
         title: "Error retrieving pricing information - Please try again later or contact support.",
@@ -70,13 +73,20 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
   // Always fetch initial pricing data when component mounts
   useEffect(() => {
     if (!initialFetchDone.current) {
-      console.log("Initial pricing fetch triggered");
+      console.log("[PRICE DEBUG] Initial pricing fetch triggered");
       updatePricing();
     } else if (selectedServices.length > 0) {
-      console.log("Service selection changed, updating pricing");
+      console.log("[PRICE DEBUG] Service selection changed, updating pricing");
       updatePricing();
     }
   }, [updatePricing, selectedServices]);
+
+  // After state update, log the pricing information
+  useEffect(() => {
+    console.log(`[PRICE DEBUG] Current pricing state:`, Object.fromEntries(pricing));
+    console.log(`[PRICE DEBUG] Current divorce prevention price:`, pricing.get('divorce-prevention'));
+    console.log(`[PRICE DEBUG] Current total price:`, totalPrice);
+  }, [pricing, totalPrice]);
 
   // Debug hook to log pricing information
   useConsultationPricingDebug(totalPrice, selectedServices, pricing);

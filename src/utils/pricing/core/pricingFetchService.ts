@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { expandClientToDbIds, expandClientToDbPackageIds } from './idMappingService';
 
 export async function fetchServicePricingData(serviceIds?: string[]) {
-  console.log('Fetching service pricing data for:', serviceIds);
+  console.log('[PRICE DEBUG] Fetching service pricing data for:', serviceIds);
   
   const expandedIds = serviceIds ? expandClientToDbIds(serviceIds) : [];
   
@@ -21,24 +21,24 @@ export async function fetchServicePricingData(serviceIds?: string[]) {
   const { data, error } = await query;
   
   if (error) {
-    console.error('Error fetching service pricing data:', error);
+    console.error('[PRICE DEBUG] Error fetching service pricing data:', error);
     throw error;
   }
   
-  console.log('Retrieved service pricing data:', data);
+  console.log('[PRICE DEBUG] Retrieved service pricing data:', data);
   return data || [];
 }
 
 export async function fetchPackagePricingData(packageIds?: string[]) {
-  console.log('Fetching package pricing from DB for:', packageIds);
+  console.log('[PRICE DEBUG] Fetching package pricing from DB for:', packageIds);
   
   if (!packageIds || packageIds.length === 0) {
-    console.log('No package IDs provided, returning empty array');
+    console.log('[PRICE DEBUG] No package IDs provided, returning empty array');
     return [];
   }
   
   const expandedIds = expandClientToDbPackageIds(packageIds);
-  console.log('Expanded package IDs for DB query:', expandedIds);
+  console.log('[PRICE DEBUG] Expanded package IDs for DB query:', expandedIds);
   
   try {
     const { data, error } = await supabase
@@ -49,14 +49,14 @@ export async function fetchPackagePricingData(packageIds?: string[]) {
       .eq('is_active', true);
     
     if (error) {
-      console.error('Error fetching package pricing:', error);
+      console.error('[PRICE DEBUG] Error fetching package pricing:', error);
       throw error;
     }
     
-    console.log('Retrieved package pricing data:', data);
+    console.log('[PRICE DEBUG] Retrieved package pricing data:', data);
     return data || [];
   } catch (err) {
-    console.error('Exception in fetchPackagePricingData:', err);
+    console.error('[PRICE DEBUG] Exception in fetchPackagePricingData:', err);
     throw err;
   }
 }
