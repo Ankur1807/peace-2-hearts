@@ -1,7 +1,12 @@
 
-import type { Toast } from "@/components/ui/toast";
+// Define a clean custom interface for toast messages
+export interface ToastMessage {
+  title: string;
+  variant?: 'default' | 'destructive';
+  description?: string;
+}
 
-export type ToastFunction = (props: Toast) => void;
+export type ToastFunction = (props: ToastMessage) => void;
 
 export interface ServicePrice {
   id: string;
