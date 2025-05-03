@@ -67,10 +67,18 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
     console.log('ServiceSelectionOptions rendered with pricing:', pricing ? Object.fromEntries(pricing) : 'No pricing data');
     if (pricing) {
       console.log('Number of pricing items:', pricing.size);
-      // Log some specific prices for debugging
-      pricing.forEach((price, id) => {
-        console.log(`Price for ${id}: ${price}`);
-      });
+      // Log available prices for packages
+      if (pricing.has('divorce-prevention')) {
+        console.log(`Price for divorce-prevention: ${pricing.get('divorce-prevention')}`);
+      } else {
+        console.warn('No price found for divorce-prevention package');
+      }
+      
+      if (pricing.has('pre-marriage-clarity')) {
+        console.log(`Price for pre-marriage-clarity: ${pricing.get('pre-marriage-clarity')}`);
+      } else {
+        console.warn('No price found for pre-marriage-clarity package');
+      }
     }
   }, [pricing]);
 
@@ -96,6 +104,9 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
                     {pkg.label}{price !== undefined ? ` - ${formatPrice(price)}` : ''}
                   </span>
                   <span className="text-sm text-gray-500">{pkg.description}</span>
+                  {price === undefined && (
+                    <span className="text-xs text-amber-600">Price unavailable</span>
+                  )}
                 </Label>
               </div>
             );
@@ -131,6 +142,9 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
                 </span>
                 {service.description && (
                   <span className="text-sm text-gray-500">{service.description}</span>
+                )}
+                {price === undefined && (
+                  <span className="text-xs text-amber-600">Price unavailable</span>
                 )}
               </Label>
             </div>

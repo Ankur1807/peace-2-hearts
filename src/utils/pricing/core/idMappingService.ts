@@ -12,15 +12,27 @@ const dbToClientIdMap: Record<string, string> = {
   'P2H-H-pre-marriage-clarity-solutions': 'pre-marriage-clarity',
   'P2H-L-divorce-consultation': 'divorce',
   'P2H-MH-mental-health-counselling': 'mental-health-counselling',
-  'P2H-L-general-legal-consultation': 'general-legal'
+  'P2H-L-general-legal-consultation': 'general-legal',
+  'P2H-MH-premarital-counselling-individual': 'premarital-counselling-individual',
+  'P2H-MH-premarital-counselling-couple': 'premarital-counselling-couple',
 };
 
 export function mapDbIdToClientId(dbId: string): string {
-  console.log(`[PRICE DEBUG] Mapping DB ID to client ID: ${dbId} → ${dbToClientIdMap[dbId] || dbId}`);
-  return dbToClientIdMap[dbId] || dbId;
+  if (!dbId) {
+    console.error('[PRICE DEBUG] Attempting to map undefined or null dbId');
+    return '';
+  }
+  
+  const clientId = dbToClientIdMap[dbId] || dbId;
+  console.log(`[PRICE DEBUG] Mapping DB ID to client ID: ${dbId} → ${clientId}`);
+  return clientId;
 }
 
 export function expandClientToDbIds(clientIds: string[]): string[] {
+  if (!clientIds || clientIds.length === 0) {
+    return [];
+  }
+  
   console.log(`[PRICE DEBUG] Expanding client IDs to DB IDs: ${clientIds.join(', ')}`);
   
   const clientToDbMap = Object.entries(dbToClientIdMap).reduce((acc, [dbId, clientId]) => {
@@ -47,6 +59,10 @@ export function expandClientToDbIds(clientIds: string[]): string[] {
 }
 
 export function expandClientToDbPackageIds(packageIds: string[]): string[] {
+  if (!packageIds || packageIds.length === 0) {
+    return [];
+  }
+  
   console.log(`[PRICE DEBUG] Expanding package client IDs to DB IDs: ${packageIds.join(', ')}`);
   
   // This is the critical mapping for packages

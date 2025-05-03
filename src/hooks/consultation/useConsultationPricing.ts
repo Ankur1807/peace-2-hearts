@@ -46,8 +46,16 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
       );
 
       console.log(`[PRICE DEBUG] Received pricing data with ${pricingMap.size} items, final price: ${finalPrice}`);
-      console.log(`[PRICE DEBUG] Final pricing map before setting state:`, Object.fromEntries(pricingMap));
-      console.log(`[PRICE DEBUG] Divorce prevention price before setting state:`, pricingMap.get('divorce-prevention'));
+      
+      // Verify we have pricing data before setting the state
+      if (pricingMap.size === 0) {
+        console.warn("[PRICE WARNING] No pricing data was fetched from Supabase");
+      } else {
+        console.log(`[PRICE DEBUG] Final pricing map before setting state:`, Object.fromEntries(pricingMap));
+        // Verify specific packages have prices
+        console.log(`[PRICE DEBUG] divorce-prevention price: ${pricingMap.get('divorce-prevention')}`);
+        console.log(`[PRICE DEBUG] pre-marriage-clarity price: ${pricingMap.get('pre-marriage-clarity')}`);
+      }
       
       setPricing(pricingMap);
       setTotalPrice(finalPrice);
@@ -58,7 +66,7 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
         setPricingError(errorMsg);
       }
     } catch (error) {
-      console.error("[PRICE DEBUG] Error in useConsultationPricing:", error);
+      console.error("[PRICE ERROR] Error in useConsultationPricing:", error);
       setPricingError("Failed to fetch pricing information");
       toast({ 
         title: "Error retrieving pricing information - Please try again later or contact support.",
@@ -74,18 +82,29 @@ export function useConsultationPricing({ selectedServices, serviceCategory }: Us
   useEffect(() => {
     if (!initialFetchDone.current) {
       console.log("[PRICE DEBUG] Initial pricing fetch triggered");
-      updatePricing();
+      updatePricing(true); // Skip cache on initial fetch
     } else if (selectedServices.length > 0) {
       console.log("[PRICE DEBUG] Service selection changed, updating pricing");
       updatePricing();
     }
   }, [updatePricing, selectedServices]);
 
+  // Always force initial pricing fetch on mount
+  useEffect(() => {
+    console.log("[PRICE DEBUG] Component mounted, forcing initial pricing fetch");
+    updatePricing(true);
+  }, []);
+
   // After state update, log the pricing information
   useEffect(() => {
     console.log(`[PRICE DEBUG] Current pricing state:`, Object.fromEntries(pricing));
-    console.log(`[PRICE DEBUG] Current divorce prevention price:`, pricing.get('divorce-prevention'));
     console.log(`[PRICE DEBUG] Current total price:`, totalPrice);
+    
+    // Verify specific packages have prices
+    if (pricing) {
+      console.log(`[PRICE DEBUG] divorce-prevention price in state: ${pricing.get('divorce-prevention')}`);
+      console.log(`[PRICE DEBUG] pre-marriage-clarity price in state: ${pricing.get('pre-marriage-clarity')}`);
+    }
   }, [pricing, totalPrice]);
 
   // Debug hook to log pricing information

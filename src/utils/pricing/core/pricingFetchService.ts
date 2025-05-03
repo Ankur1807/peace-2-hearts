@@ -6,6 +6,7 @@ export async function fetchServicePricingData(serviceIds?: string[]) {
   console.log('[PRICE DEBUG] Fetching service pricing data for:', serviceIds);
   
   const expandedIds = serviceIds ? expandClientToDbIds(serviceIds) : [];
+  console.log('[PRICE DEBUG] Expanded service IDs for DB query:', expandedIds);
   
   let query = supabase
     .from('service_pricing')
@@ -18,15 +19,20 @@ export async function fetchServicePricingData(serviceIds?: string[]) {
   
   query = query.eq('is_active', true);
   
-  const { data, error } = await query;
-  
-  if (error) {
-    console.error('[PRICE DEBUG] Error fetching service pricing data:', error);
-    throw error;
+  try {
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('[PRICE DEBUG] Error fetching service pricing data:', error);
+      throw error;
+    }
+    
+    console.log('[PRICE DEBUG] Retrieved service pricing data:', data);
+    return data || [];
+  } catch (err) {
+    console.error('[PRICE DEBUG] Exception in fetchServicePricingData:', err);
+    throw err;
   }
-  
-  console.log('[PRICE DEBUG] Retrieved service pricing data:', data);
-  return data || [];
 }
 
 export async function fetchPackagePricingData(packageIds?: string[]) {

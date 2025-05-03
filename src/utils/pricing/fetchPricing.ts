@@ -44,14 +44,20 @@ export async function fetchServicePricing(
     }
   }
 
-  const data = await fetchServicePricingData(serviceIds);
-  console.log('[PRICE DEBUG] Raw service pricing data from DB:', data);
-  
-  const pricingMap = mapServicePricing(data, serviceIds);
-  console.log('[PRICE DEBUG] Mapped service pricing:', Object.fromEntries(pricingMap));
-  
-  setPricingCache(cacheKey, pricingMap);
-  return pricingMap;
+  try {
+    console.log('[PRICE DEBUG] Cache miss or skip, fetching service pricing from Supabase');
+    const data = await fetchServicePricingData(serviceIds);
+    console.log('[PRICE DEBUG] Raw service pricing data from DB:', data);
+    
+    const pricingMap = mapServicePricing(data, serviceIds);
+    console.log('[PRICE DEBUG] Mapped service pricing:', Object.fromEntries(pricingMap));
+    
+    setPricingCache(cacheKey, pricingMap);
+    return pricingMap;
+  } catch (error) {
+    console.error('[PRICE ERROR] Error fetching service pricing:', error);
+    return new Map<string, number>();
+  }
 }
 
 /**
@@ -82,6 +88,7 @@ export async function fetchPackagePricing(
   }
   
   try {
+    console.log('[PRICE DEBUG] Cache miss or skip, fetching package pricing from Supabase');
     // Expand the client IDs to DB IDs before fetching
     const expandedIds = expandClientToDbPackageIds(packageIds);
     console.log('[PRICE DEBUG] Expanded package IDs:', expandedIds);
@@ -95,7 +102,7 @@ export async function fetchPackagePricing(
     setPricingCache(cacheKey, pricingMap);
     return pricingMap;
   } catch (error) {
-    console.error('[PRICE DEBUG] Error in fetchPackagePricing:', error);
+    console.error('[PRICE ERROR] Error in fetchPackagePricing:', error);
     // Return empty map on error
     return new Map<string, number>();
   }
