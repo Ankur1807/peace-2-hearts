@@ -57,12 +57,8 @@ const ServicesSection = () => {
               </div>
               <h3 className="text-2xl font-lora font-semibold text-gray-800">Legal Clarity & Guidance</h3>
             </div>
-            <p className="text-gray-600 mb-4">Our legal experts guide you through the complexities of family law—whether it's pre-marital agreements, divorce, or custody—always with compassion and clarity.</p>
+            <p className="text-gray-600 mb-4">Our legal experts guide you through the complexities of family law—whether it's divorce, or custody—always with compassion and clarity.</p>
             <ul className="space-y-2 mb-6">
-              <li className="flex items-center gap-2 text-gray-700">
-                <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
-                Pre-marital legal advice
-              </li>
               <li className="flex items-center gap-2 text-gray-700">
                 <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
                 Divorce consultation and guidance
@@ -78,6 +74,10 @@ const ServicesSection = () => {
               <li className="flex items-center gap-2 text-gray-700">
                 <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
                 Help with custody & co-parenting arrangements
+              </li>
+              <li className="flex items-center gap-2 text-gray-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+                Mediation services for peaceful resolutions
               </li>
             </ul>
             <Button asChild variant="link" className="text-peacefulBlue hover:text-peacefulBlue/90 p-0 gap-1 font-medium">

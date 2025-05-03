@@ -1,4 +1,3 @@
-
 // Define mapping for known IDs
 const dbToClientIdMap: Record<string, string> = {
   'P2H-MH-sexual-health-counselling': 'sexual-health-counselling',
@@ -12,11 +11,8 @@ const dbToClientIdMap: Record<string, string> = {
   'P2H-H-pre-marriage-clarity-solutions': 'pre-marriage-clarity',
   'P2H-L-divorce-consultation': 'divorce',
   'P2H-MH-mental-health-counselling': 'mental-health-counselling',
-  'P2H-L-general-legal-consultation': 'general-legal',
-  'P2H-L-pre-marriage-legal-consultation': 'pre-marriage-legal'
-  // Removed:
-  // - premarital-counselling-individual
-  // - pre-marriage-legal (old format)
+  'P2H-L-general-legal-consultation': 'general-legal'
+  // Removed: 'P2H-L-pre-marriage-legal-consultation': 'pre-marriage-legal'
 };
 
 export function mapDbIdToClientId(dbId: string): string {
