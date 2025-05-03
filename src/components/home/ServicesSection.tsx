@@ -1,3 +1,4 @@
+
 import { ArrowRight, HeartPulse, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';

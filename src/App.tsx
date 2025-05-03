@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -33,7 +34,7 @@ import SexualHealthCounselling from '@/pages/services/mentalhealth/SexualHealthC
 
 // Legal Support sub-service pages
 import MediationServices from '@/pages/services/legal/MediationServices';
-import PreMarriageLegal from '@/pages/services/legal/PreMarriageLegal';
+// Removed PreMarriageLegal import
 import DivorceConsultation from '@/pages/services/legal/DivorceConsultation';
 import ChildCustodyConsultation from '@/pages/services/legal/ChildCustodyConsultation';
 import MaintenanceConsultation from '@/pages/services/legal/MaintenanceConsultation';
@@ -123,7 +124,7 @@ function App() {
           
           {/* Legal Support sub-service pages */}
           <Route path="/services/legal-support/mediation" element={<MediationServices />} />
-          <Route path="/services/legal-support/pre-marriage" element={<PreMarriageLegal />} />
+          {/* Removed PreMarriageLegal route */}
           <Route path="/services/legal-support/divorce" element={<DivorceConsultation />} />
           <Route path="/services/legal-support/custody" element={<ChildCustodyConsultation />} />
           <Route path="/services/legal-support/maintenance" element={<MaintenanceConsultation />} />

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -29,7 +30,6 @@ const mentalHealthServices: ServiceOption[] = [
   { id: 'couples-counselling', label: 'Couples Counselling', description: 'Professional guidance to strengthen communication and mutual understanding.' },
   { id: 'sexual-health-counselling', label: 'Sexual Health Counselling', description: 'Specialized support for addressing intimacy concerns and enhancing relationship satisfaction.' },
   { id: 'test-service', label: 'Test Service', description: 'For testing payment gateway functionality.' }
-  // Removed premarital-counselling entry
 ];
 
 const legalServices: ServiceOption[] = [
