@@ -33,7 +33,6 @@ export const useServiceEditing = (onServiceUpdated: () => Promise<void>) => {
       if (!editedPrice.trim() || isNaN(Number(editedPrice)) || Number(editedPrice) <= 0) {
         toast({
           title: 'Invalid Price - Please enter a valid price.',
-          variant: 'destructive',
         });
         return;
       }

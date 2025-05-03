@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -49,7 +48,6 @@ import AdminLogin from '@/pages/admin/AdminLogin';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminConsultants from '@/pages/admin/AdminConsultants';
-import AdminPricing from '@/pages/admin/AdminPricing';
 import AdminBookings from '@/pages/admin/AdminBookings';
 import AdminSettings from '@/pages/admin/AdminSettings';
 import AdminPaymentMigration from '@/pages/admin/AdminPaymentMigration';
@@ -162,7 +160,6 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="consultants" element={<AdminConsultants />} />
-            <Route path="pricing" element={<AdminPricing />} />
             <Route path="services" element={<AdminServices />} />
             <Route path="bookings" element={<AdminBookings />} />
             <Route path="settings" element={<AdminSettings />} />
