@@ -1,6 +1,5 @@
 
 import { fetchPackagePricing, fetchServicePricing } from '@/utils/pricing';
-import { ToastAction } from '@/components/ui/toast';
 import { getPackageName } from '@/utils/consultation/packageUtils';
 
 export async function calculatePricingMap(
@@ -21,9 +20,8 @@ export async function calculatePricingMap(
     
     // Use the package ID from selectedServices if it's a package
     if (packageName) {
-      // Determine package ID based on selected services
-      const packageId = selectedServices.includes('divorce-prevention') ? 'divorce-prevention' : 
-                        selectedServices.includes('pre-marriage-clarity') ? 'pre-marriage-clarity' : null;
+      // Use the first service in the array as the package ID since we've already confirmed it's a package
+      const packageId = selectedServices[0];
                         
       if (packageId) {
         console.log(`[PRICE DEBUG] Fetching pricing for package: ${packageId}`);
@@ -91,12 +89,18 @@ export async function calculatePricingMap(
   } catch (error) {
     console.error('[PRICE ERROR] Error calculating pricing map:', error);
     setPricingError('Failed to calculate pricing information');
+    
+    // Fix JSX usage - replace with plain object for toast
     toast({
       title: "Error retrieving pricing data",
       description: "Please try again later or contact support.",
       variant: "destructive",
-      action: <ToastAction altText="Try again">Try again</ToastAction>,
+      action: {
+        altText: "Try again",
+        children: "Try again"
+      }
     });
+    
     return { pricingMap: new Map<string, number>(), finalPrice: 0 };
   }
 }
