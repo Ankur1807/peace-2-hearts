@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { formatPrice } from '@/utils/pricing';
+import { getFallbackPrice } from '@/utils/pricing/fallbackPrices';
 
 interface PackagePriceDisplayProps {
   packageName: string;

@@ -1,6 +1,7 @@
 
 import { ConsultationBookingHook } from '@/hooks/useConsultationBooking';
 import { getPackageName } from '@/utils/consultation/packageUtils';
+import { getFallbackPrice } from '@/utils/pricing/fallbackPrices';
 import { useEffect } from 'react';
 
 export const useBookingState = (bookingState: ConsultationBookingHook) => {
