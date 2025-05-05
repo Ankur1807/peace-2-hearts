@@ -1,19 +1,7 @@
 
-import { useToast } from "@/hooks/use-toast";
-import { ToastActionElement } from "@/components/ui/toast";
+import { ToastType } from '@/components/ui/use-toast';
 
-type ToastProps = {
-  title?: string;
-  description?: string;
-  variant?: "default" | "destructive";
-  action?: ToastActionElement;
-};
-
-export const handleOperationError = (
-  error: any, 
-  operation: string, 
-  toast: { (props: ToastProps): void; }
-) => {
+export function handleOperationError(error: any, operation: string, toast: ToastType): void {
   console.error(`Error details for ${operation}:`, error);
   
   if (error.code === 'PGRST116' || error.message?.includes('JWT')) {
@@ -32,8 +20,9 @@ export const handleOperationError = (
   } else {
     toast({
       title: 'Error',
-      description: `Failed to ${operation}: ${error.message || 'Unknown error occurred'}`,
+      description: `Failed to ${operation}: ${error.message}`,
       variant: 'destructive',
     });
   }
-};
+  console.error(`Error: ${operation}:`, error);
+}
