@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/utils/pricing/priceFormatter';
 import { Check, X, Pencil, Save } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const AdminPricing: React.FC = () => {
   const {
@@ -22,9 +23,29 @@ const AdminPricing: React.FC = () => {
     handleSave,
   } = usePricingServices();
 
+  // Only fetch on initial mount, not on re-renders
   useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+    // Use an AbortController to handle cleanup
+    const abortController = new AbortController();
+    const fetchData = async () => {
+      await fetchServices();
+    };
+    
+    fetchData();
+    
+    // Cleanup function to abort fetch if component unmounts
+    return () => {
+      abortController.abort();
+    };
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  const renderLoadingState = () => (
+    <div className="space-y-2">
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} className="h-10 w-full" />
+      ))}
+    </div>
+  );
 
   return (
     <AdminLayout>
@@ -42,11 +63,7 @@ const AdminPricing: React.FC = () => {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="space-y-2">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-10 bg-gray-100 animate-pulse rounded-md"/>
-                ))}
-              </div>
+              renderLoadingState()
             ) : (
               <Table>
                 <TableHeader>

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ServicePrice, NewServiceFormValues } from '@/utils/pricing/types';
 import { 
@@ -20,7 +20,8 @@ export const usePricingServices = () => {
   const { toast } = useToast();
   const { isAdmin } = useAdmin();
 
-  const fetchServices = async () => {
+  // Use useCallback to memoize the fetchServices function
+  const fetchServices = useCallback(async () => {
     if (!isAdmin) {
       toast({
         title: 'Authentication Required',
@@ -69,19 +70,19 @@ export const usePricingServices = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAdmin, toast]);
 
-  const handleEdit = (id: string, currentPrice: number) => {
+  const handleEdit = useCallback((id: string, currentPrice: number) => {
     setEditMode(id);
     setEditedPrice(currentPrice.toString());
-  };
+  }, []);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setEditMode(null);
     setEditedPrice('');
-  };
+  }, []);
 
-  const handleSave = async (id: string) => {
+  const handleSave = useCallback(async (id: string) => {
     try {
       if (!isAdmin) {
         toast({
@@ -113,16 +114,21 @@ export const usePricingServices = () => {
 
       setEditMode(null);
       
-      // Add a slight delay before refreshing to ensure the database has processed the update
-      setTimeout(async () => {
-        await fetchServices();
-      }, 500);
+      // Update the service in the local state without refetching
+      setServices(prevServices => 
+        prevServices.map(service => 
+          service.id === id 
+            ? { ...service, price: numericPrice } 
+            : service
+        )
+      );
+      
     } catch (error: any) {
       handleOperationError(error, 'update price');
     }
-  };
+  }, [editedPrice, isAdmin, toast]);
 
-  const toggleServiceStatus = async (id: string, currentStatus: boolean) => {
+  const toggleServiceStatus = useCallback(async (id: string, currentStatus: boolean) => {
     try {
       if (!isAdmin) {
         toast({
@@ -140,16 +146,21 @@ export const usePricingServices = () => {
         description: `Service ${currentStatus ? 'deactivated' : 'activated'} successfully.`,
       });
 
-      // Add a slight delay before refreshing to ensure the database has processed the update
-      setTimeout(async () => {
-        await fetchServices();
-      }, 500);
+      // Update local state without refetching
+      setServices(prevServices => 
+        prevServices.map(service => 
+          service.id === id 
+            ? { ...service, is_active: !currentStatus } 
+            : service
+        )
+      );
+      
     } catch (error: any) {
       handleOperationError(error, 'update status');
     }
-  };
+  }, [isAdmin, toast]);
 
-  const addNewService = async (data: NewServiceFormValues) => {
+  const addNewService = useCallback(async (data: NewServiceFormValues) => {
     try {
       if (!isAdmin) {
         toast({
@@ -168,18 +179,16 @@ export const usePricingServices = () => {
         description: 'New service has been successfully added.',
       });
 
-      // Add a slight delay before refreshing to ensure the database has processed the update
-      setTimeout(async () => {
-        await fetchServices();
-      }, 500);
+      // Fetch services again to include the new one
+      await fetchServices();
       return true;
     } catch (error: any) {
       handleOperationError(error, 'add service');
       return false;
     }
-  };
+  }, [isAdmin, toast, fetchServices]);
 
-  const deleteService = async (id: string) => {
+  const deleteService = useCallback(async (id: string) => {
     try {
       if (!isAdmin) {
         toast({
@@ -197,16 +206,14 @@ export const usePricingServices = () => {
         description: 'Service has been successfully deleted.',
       });
 
-      // Add a slight delay before refreshing to ensure the database has processed the update
-      setTimeout(async () => {
-        await fetchServices();
-      }, 500);
+      // Update local state without refetching
+      setServices(prevServices => prevServices.filter(service => service.id !== id));
       return true;
     } catch (error: any) {
       handleOperationError(error, 'delete service');
       return false;
     }
-  };
+  }, [isAdmin, toast]);
 
   const handleOperationError = (error: any, operation: string) => {
     console.error(`Error details for ${operation}:`, error);
