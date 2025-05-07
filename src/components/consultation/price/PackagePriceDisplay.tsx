@@ -5,20 +5,29 @@ import { getFallbackPrice } from '@/utils/pricing/fallbackPrices';
 
 interface PackagePriceDisplayProps {
   packageName: string;
-  packagePrice: number;
+  packagePrice?: number;
+  serviceId?: string;
   currency?: string;
 }
 
 const PackagePriceDisplay = ({ 
   packageName, 
   packagePrice, 
+  serviceId,
   currency = 'INR' 
 }: PackagePriceDisplayProps) => {
+  // Determine price based on priority: provided packagePrice > serviceId lookup > undefined
+  const displayPrice = packagePrice || (serviceId ? getFallbackPrice(serviceId) : undefined);
+  
+  if (!displayPrice && !packagePrice && serviceId) {
+    console.warn(`No price found for package ${packageName} with serviceId ${serviceId}`);
+  }
+  
   return (
     <div className="mb-3 py-2">
       <div className="flex justify-between items-center text-gray-700">
         <span>{packageName}</span>
-        <span>{formatPrice(packagePrice, currency)}</span>
+        <span>{displayPrice !== undefined ? formatPrice(displayPrice, currency) : 'Price unavailable'}</span>
       </div>
     </div>
   );
