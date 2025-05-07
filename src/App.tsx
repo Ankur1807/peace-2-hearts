@@ -78,24 +78,31 @@ import EdgeFunctionTest from './pages/EdgeFunctionTest';
 // Import our new confirmation test page
 import ConfirmationTest from './pages/ConfirmationTest';
 
+// App-level flag to prevent multiple recovery runs
+let emailRecoveryHasRun = false;
+
 function App() {
-  // The issue is likely here with the useEffect hook
   useEffect(() => {
     // Log that the app is ready
     console.log('Peace2Hearts application initialized');
     
-    // Fix: Only access window properties if in browser environment
-    if (typeof window !== 'undefined' && window.automatedEmailRecovery) {
+    // Only run email recovery once per app load, and only for certain pages
+    if (!emailRecoveryHasRun && typeof window !== 'undefined') {
       const path = window.location.pathname;
-      // Only run on important pages to avoid unnecessary processing
-      if (path.includes('payment-confirmation') || 
-          path.includes('payment-verification') || 
-          path === '/' ||
-          path.includes('/admin')) {
-        console.log('Running automated email recovery...');
+      
+      // Only run on payment-related pages, thank you page, or admin dashboard
+      const shouldRunRecovery = 
+        path.includes('payment-confirmation') || 
+        path.includes('payment-verification') || 
+        path.includes('thank-you') ||
+        path.includes('/admin');
+      
+      if (shouldRunRecovery && window.automatedEmailRecovery) {
+        console.log('Running automated email recovery from App component...');
         setTimeout(() => {
           window.automatedEmailRecovery();
-        }, 5000);
+          emailRecoveryHasRun = true;
+        }, 3000);
       }
     }
   }, []);

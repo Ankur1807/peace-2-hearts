@@ -86,50 +86,18 @@ export async function recoverEmailByReferenceId(referenceId: string): Promise<bo
 /**
  * Scheduled recovery function to automatically check and recover any failed emails
  * This runs on page load to catch any emails that weren't sent during payment processing
+ * 
+ * NOTE: This function is now centralized and called from App.tsx 
+ * to avoid duplicate runs across the application
  */
 export async function automatedEmailRecovery(): Promise<void> {
-  console.log(`Running automated email recovery check`);
+  // This implementation is kept for backward compatibility
+  // The actual implementation is in emailRecovery.ts
+  console.log('Using automated email recovery from manualEmailRecovery.ts - consider updating your imports');
   
-  try {
-    // Find consultations that have completed payments but no confirmation email
-    const { data: pendingEmails, error } = await supabase
-      .from('consultations')
-      .select('*')
-      .eq('payment_status', 'completed')
-      .eq('email_sent', false)
-      .order('created_at', { ascending: false })
-      .limit(10);
-    
-    if (error) {
-      console.error(`Error checking for pending emails:`, error);
-      return;
-    }
-    
-    if (!pendingEmails || pendingEmails.length === 0) {
-      console.log(`No pending emails found that need recovery`);
-      return;
-    }
-    
-    console.log(`Found ${pendingEmails.length} consultations needing email recovery`);
-    
-    // Process each consultation in sequence
-    for (const consultation of pendingEmails) {
-      try {
-        const result = await recoverEmailByReferenceId(consultation.reference_id);
-        if (result) {
-          console.log(`Recovered email for ${consultation.reference_id}`);
-        } else {
-          console.error(`Failed to recover email for ${consultation.reference_id}`);
-        }
-        // Add delay between sends to avoid rate limits
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (e) {
-        console.error(`Error processing recovery for ${consultation.reference_id}:`, e);
-      }
-    }
-  } catch (error) {
-    console.error(`Error in automated email recovery:`, error);
-  }
+  // Import and call the central implementation
+  const { automatedEmailRecovery: centralizedRecovery } = await import('./emailRecovery');
+  return centralizedRecovery();
 }
 
 // Add to window object for easy access from console
@@ -138,18 +106,5 @@ if (typeof window !== 'undefined') {
   window.recoverEmailByReferenceId = recoverEmailByReferenceId;
   window.automatedEmailRecovery = automatedEmailRecovery;
   
-  // Run recovery check on page load with delay
-  window.addEventListener('load', () => {
-    // Give the app time to initialize
-    setTimeout(() => {
-      const path = window.location.pathname;
-      // Only run on important pages to avoid unnecessary processing
-      if (path.includes('payment-confirmation') || 
-          path.includes('payment-verification') || 
-          path === '/' ||
-          path.includes('dashboard')) {
-        automatedEmailRecovery();
-      }
-    }, 5000);
-  });
+  // REMOVED duplicate initialization here to prevent multiple runs
 }

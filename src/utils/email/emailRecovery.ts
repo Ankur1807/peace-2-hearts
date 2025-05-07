@@ -4,6 +4,9 @@ import { sendBookingConfirmationEmail } from "./bookingEmails";
 import { determineServiceCategory } from "@/utils/payment/services/serviceUtils";
 import { BookingDetails } from "@/utils/types";
 
+// Flag to prevent multiple recovery runs
+let emailRecoveryHasRun = false;
+
 /**
  * Manual recovery function for resending confirmation emails by reference ID
  * This can be called from the browser console for immediate troubleshooting
@@ -88,7 +91,14 @@ export async function recoverEmailByReferenceId(referenceId: string): Promise<bo
  * This runs on page load to catch any emails that weren't sent during payment processing
  */
 export async function automatedEmailRecovery(): Promise<void> {
+  // Prevent duplicate runs during a single page session
+  if (emailRecoveryHasRun) {
+    console.log('Automated email recovery has already run in this session, skipping.');
+    return;
+  }
+  
   console.log(`Running automated email recovery check`);
+  emailRecoveryHasRun = true;
   
   try {
     // Find consultations that have completed payments but no confirmation email
@@ -138,18 +148,5 @@ if (typeof window !== 'undefined') {
   window.recoverEmailByReferenceId = recoverEmailByReferenceId;
   window.automatedEmailRecovery = automatedEmailRecovery;
   
-  // Run recovery check on page load with delay
-  window.addEventListener('load', () => {
-    // Give the app time to initialize
-    setTimeout(() => {
-      const path = window.location.pathname;
-      // Only run on important pages to avoid unnecessary processing
-      if (path.includes('payment-confirmation') || 
-          path.includes('payment-verification') || 
-          path === '/' ||
-          path.includes('dashboard')) {
-        automatedEmailRecovery();
-      }
-    }, 5000);
-  });
+  // REMOVED duplicate initialization here to prevent multiple runs
 }

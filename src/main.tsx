@@ -9,8 +9,7 @@ import './styles/animations.css';
 import './styles/borders.css';
 import { fetchInitialServices } from './utils/pricing/serviceInitializer';
 import { HelmetProvider } from 'react-helmet-async';
-import './utils/email/manualEmailRecovery'; // Import for initialization
-import './utils/email/emailRecovery'; // Import for initialization
+import './utils/consoleRecovery'; // Import for functionality only, App.tsx will handle execution
 
 // Initialize default services if needed
 fetchInitialServices()
