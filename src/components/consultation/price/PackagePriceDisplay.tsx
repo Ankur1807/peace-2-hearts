@@ -6,7 +6,7 @@ import { getFallbackPrice } from '@/utils/pricing/fallbackPrices';
 interface PackagePriceDisplayProps {
   packageName: string;
   packagePrice?: number;
-  serviceId?: string;
+  serviceId: string;
   currency?: string;
 }
 
@@ -17,7 +17,9 @@ const PackagePriceDisplay = ({
   currency = 'INR' 
 }: PackagePriceDisplayProps) => {
   // Determine price based on priority: provided packagePrice > serviceId lookup > undefined
-  const displayPrice = packagePrice || (serviceId ? getFallbackPrice(serviceId) : undefined);
+  const displayPrice = packagePrice !== undefined 
+    ? packagePrice 
+    : getFallbackPrice(serviceId);
   
   if (!displayPrice && !packagePrice && serviceId) {
     console.warn(`No price found for package ${packageName} with serviceId ${serviceId}`);

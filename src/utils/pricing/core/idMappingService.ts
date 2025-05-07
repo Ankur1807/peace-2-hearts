@@ -1,5 +1,5 @@
 
-// Define mapping for known IDs
+// Define mapping for known IDs - with full Supabase IDs as keys
 const dbToClientIdMap: Record<string, string> = {
   'P2H-MH-sexual-health-counselling': 'sexual-health-counselling',
   'P2H-MH-couples-counselling': 'couples-counselling',
@@ -21,6 +21,7 @@ export function mapDbIdToClientId(dbId: string): string {
 }
 
 export function expandClientToDbIds(clientIds: string[]): string[] {
+  // Create reverse mapping (client ID to DB IDs)
   const clientToDbMap = Object.entries(dbToClientIdMap).reduce((acc, [dbId, clientId]) => {
     if (!acc[clientId]) {
       acc[clientId] = [];
@@ -42,7 +43,7 @@ export function expandClientToDbIds(clientIds: string[]): string[] {
 }
 
 export function expandClientToDbPackageIds(packageIds: string[]): string[] {
-  // This is the critical mapping for packages
+  // This is the critical mapping for packages - use full Supabase IDs
   const packageToDbMap: Record<string, string[]> = {
     'divorce-prevention': ['P2H-H-divorce-prevention-package'],
     'pre-marriage-clarity': ['P2H-H-pre-marriage-clarity-solutions']
