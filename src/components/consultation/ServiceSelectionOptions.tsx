@@ -3,6 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { formatPrice } from '@/utils/pricing';
+import { getFallbackPrice } from '@/utils/pricing/fallbackPrices';
 
 interface ServiceOption {
   id: string;
@@ -56,6 +57,23 @@ const holisticPackages: HolisticPackage[] = [
   }
 ];
 
+// Map client IDs to Supabase IDs for getFallbackPrice lookup
+const clientToSupabaseIdMap: Record<string, string> = {
+  'divorce-prevention': 'P2H-H-divorce-prevention-package',
+  'pre-marriage-clarity': 'P2H-H-pre-marriage-clarity-solutions',
+  'mental-health-counselling': 'P2H-MH-mental-health-counselling',
+  'family-therapy': 'P2H-MH-family-therapy',
+  'couples-counselling': 'P2H-MH-couples-counselling',
+  'sexual-health-counselling': 'P2H-MH-sexual-health-counselling',
+  'test-service': 'P2H-MH-test-service',
+  'pre-marriage-legal': 'P2H-L-pre-marriage-legal-consultation',
+  'mediation': 'P2H-L-mediation-services',
+  'divorce': 'P2H-L-divorce-consultation',
+  'custody': 'P2H-L-child-custody-consultation',
+  'maintenance': 'P2H-L-maintenance-consultation',
+  'general-legal': 'P2H-L-general-legal-consultation'
+};
+
 const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.memo(({
   serviceCategory,
   selectedServices,
@@ -75,6 +93,22 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
     }
   }, [pricing]);
 
+  // Helper function to get price, prioritizing pricing map (if Supabase-aligned) then fallback
+  const getServicePrice = (clientId: string): number | undefined => {
+    // First try to get from pricing map if available
+    if (pricing?.has(clientId)) {
+      return pricing.get(clientId);
+    }
+    
+    // If no price in map, use the fallback with Supabase ID mapping
+    const supabaseId = clientToSupabaseIdMap[clientId];
+    if (supabaseId) {
+      return getFallbackPrice(supabaseId);
+    }
+    
+    return undefined;
+  };
+
   // For holistic package selection
   if (serviceCategory === 'holistic') {
     return (
@@ -86,8 +120,8 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
           value={selectedServices.length > 0 ? selectedServices[0] : undefined}
         >
           {holisticPackages.map(pkg => {
-            // Show package price if available
-            const price = pricing?.get(pkg.id);
+            // Get package price using the helper function
+            const price = getServicePrice(pkg.id);
             
             return (
               <div key={pkg.id} className="flex items-start space-x-2">
@@ -120,8 +154,8 @@ const ServiceSelectionOptions: React.FC<ServiceSelectionOptionsProps> = React.me
         value={selectedServices.length > 0 ? selectedServices[0] : undefined}
       >
         {servicesToDisplay.map(service => {
-          // Get price for this service
-          const price = pricing?.get(service.id);
+          // Get service price using the helper function
+          const price = getServicePrice(service.id);
           
           return (
             <div key={service.id} className="flex items-start space-x-2">
