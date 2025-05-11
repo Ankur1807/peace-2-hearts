@@ -9,11 +9,14 @@ interface ServiceDetailsProps {
 }
 
 const ServiceDetails = ({ services, date, timeSlot }: ServiceDetailsProps) => {
+  // Filter out pre-marriage-legal service if present
+  const displayServices = services.filter(service => service !== 'pre-marriage-legal');
+  
   return (
     <>
       <p className="font-medium mb-2">Services Selected:</p>
       <ul className="list-disc pl-5 mb-4">
-        {services.map((service, index) => (
+        {displayServices.map((service, index) => (
           <li key={index}>{getServiceLabel(service)}</li>
         ))}
       </ul>

@@ -5,12 +5,6 @@ import SubServicesList from "@/components/SubServicesList";
 const LegalSupportService: React.FC = () => {
   const legalSubServices = [
     {
-      id: "pre-marriage-legal",
-      title: "Pre-marriage Legal Consultation",
-      description: "Guidance on rights, agreements, and legal aspects to ensure a secure foundation before marriage.",
-      path: "/services/legal-support/pre-marriage"
-    },
-    {
       id: "mediation",
       title: "Mediation Services",
       description: "Facilitating peaceful resolutions to legal disputes through guided, collaborative dialogue.",
