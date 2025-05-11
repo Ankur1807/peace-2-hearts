@@ -12,6 +12,7 @@ export interface Consultant {
   profile_picture_url?: string | null;
   name?: string | null;
   experience?: number | null;
+  phone?: string | null;
 }
 
 export interface CreateConsultantData extends Omit<Consultant, 'id'> {

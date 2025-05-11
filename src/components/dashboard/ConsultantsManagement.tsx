@@ -14,53 +14,80 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { UserPlus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UserPlus, Filter, Search, SortDesc, SortAsc } from "lucide-react";
 
-const ConsultantsManagement = () => {
-  const [consultants, setConsultants] = useState<Consultant[]>([]);
-  const [loading, setLoading] = useState(true);
+interface ConsultantsManagementProps {
+  consultants: Consultant[];
+  loading?: boolean;
+  onConsultantUpdated: (updatedConsultant: Consultant) => void;
+  onRefresh: () => void;
+}
+
+const ConsultantsManagement = ({ 
+  consultants, 
+  loading = false,
+  onConsultantUpdated,
+  onRefresh 
+}: ConsultantsManagementProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [specialization, setSpecialization] = useState<string>("");
+  const [availability, setAvailability] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [filteredConsultants, setFilteredConsultants] = useState<Consultant[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     // Check if admin is already authenticated
     const adminAuthenticated = localStorage.getItem('p2h_admin_authenticated') === 'true';
     setIsAuthenticated(adminAuthenticated);
-    
-    if (adminAuthenticated) {
-      fetchConsultants();
-    } else {
-      setLoading(false);
-    }
   }, []);
 
-  const fetchConsultants = async () => {
-    try {
-      setLoading(true);
-      const data = await getConsultants();
-      setConsultants(data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load consultants",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    // Apply filters and sorting to consultants
+    let filtered = [...consultants];
+    
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(c => 
+        (c.name?.toLowerCase().includes(query) || false) ||
+        (c.specialization?.toLowerCase().includes(query) || false)
+      );
     }
-  };
-
-  const handleConsultantUpdated = (updatedConsultant: Consultant) => {
-    setConsultants(
-      consultants.map(c => 
-        c.id === updatedConsultant.id ? updatedConsultant : c
-      )
-    );
-  };
+    
+    // Filter by specialization
+    if (specialization) {
+      filtered = filtered.filter(c => c.specialization === specialization);
+    }
+    
+    // Filter by availability
+    if (availability === "available") {
+      filtered = filtered.filter(c => c.is_available);
+    } else if (availability === "unavailable") {
+      filtered = filtered.filter(c => !c.is_available);
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      const nameA = a.name?.toLowerCase() || "";
+      const nameB = b.name?.toLowerCase() || "";
+      
+      if (sortOrder === "asc") {
+        return nameA.localeCompare(nameB);
+      } else {
+        return nameB.localeCompare(nameA);
+      }
+    });
+    
+    setFilteredConsultants(filtered);
+  }, [consultants, searchQuery, specialization, availability, sortOrder]);
   
   const handleConsultantAdded = (newConsultant: Consultant) => {
-    setConsultants([...consultants, newConsultant]);
+    onConsultantUpdated(newConsultant);
     setDialogOpen(false);
     toast({
       title: "Success",
@@ -70,8 +97,23 @@ const ConsultantsManagement = () => {
 
   const handleAuthenticated = () => {
     setIsAuthenticated(true);
-    fetchConsultants();
   };
+
+  const toggleSortOrder = () => {
+    setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+  };
+
+  const handleReset = () => {
+    setSearchQuery("");
+    setSpecialization("");
+    setAvailability("");
+    setSortOrder("asc");
+  };
+
+  // Extract unique specializations for filter dropdown
+  const specializations = Array.from(
+    new Set(consultants.map(c => c.specialization).filter(Boolean))
+  );
 
   if (loading) {
     return <DashboardLoader />;
@@ -106,7 +148,7 @@ const ConsultantsManagement = () => {
                 Add Consultant
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh]">
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Consultant</DialogTitle>
               </DialogHeader>
@@ -119,9 +161,77 @@ const ConsultantsManagement = () => {
         </div>
       </div>
       
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="relative">
+            <Input
+              placeholder="Search by name or specialization"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          </div>
+          
+          <Select value={specialization} onValueChange={setSpecialization}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by specialization" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Specializations</SelectItem>
+              {specializations.map(spec => (
+                <SelectItem key={spec} value={spec || ""}>
+                  {spec}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={availability} onValueChange={setAvailability}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by availability" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Availability</SelectItem>
+              <SelectItem value="available">Available</SelectItem>
+              <SelectItem value="unavailable">Unavailable</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={toggleSortOrder}
+            >
+              {sortOrder === "asc" ? (
+                <>
+                  <SortAsc className="h-4 w-4" />
+                  A-Z
+                </>
+              ) : (
+                <>
+                  <SortDesc className="h-4 w-4" />
+                  Z-A
+                </>
+              )}
+            </Button>
+            
+            <Button variant="outline" onClick={handleReset}>
+              Reset
+            </Button>
+            
+            <Button variant="outline" onClick={onRefresh}>
+              Refresh
+            </Button>
+          </div>
+        </div>
+      </div>
+      
       <ConsultantList 
-        consultants={consultants}
-        onConsultantUpdated={handleConsultantUpdated}
+        consultants={filteredConsultants}
+        onConsultantUpdated={onConsultantUpdated}
       />
     </div>
   );

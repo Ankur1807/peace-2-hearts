@@ -1,3 +1,4 @@
+
 import { Switch } from "@/components/ui/switch";
 import { 
   Table, 
@@ -11,8 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Consultant, updateConsultantAvailability, deleteConsultant } from "@/utils/consultants";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Eye, Trash2, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,7 @@ interface ConsultantListProps {
 
 const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: ConsultantListProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleAvailabilityChange = async (consultantId: string, isAvailable: boolean) => {
     try {
@@ -70,12 +72,26 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
       .substring(0, 2);
   };
 
+  const handleViewDetail = (consultantId: string) => {
+    navigate(`/admin/consultants/${consultantId}`);
+  };
+
   const handleDelete = async (consultantId: string) => {
     try {
       await deleteConsultant(consultantId);
       // Remove consultant from the list by updating parent state
       const updatedConsultants = consultants.filter(c => c.id !== consultantId);
-      onConsultantUpdated(updatedConsultants[0]); // Trigger parent update
+      if (updatedConsultants.length > 0) {
+        onConsultantUpdated(updatedConsultants[0]); // Trigger parent update
+      } else {
+        onConsultantUpdated({
+          id: "",
+          specialization: "",
+          is_available: false,
+          hourly_rate: 0,
+          profile_id: ""
+        });
+      }
       
       toast({
         title: "Success",
@@ -110,81 +126,83 @@ const ConsultantList = ({ consultants, onConsultantUpdated, loading = false }: C
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Profile</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Specialization</TableHead>
-          <TableHead>Experience</TableHead>
-          <TableHead>Hourly Rate</TableHead>
-          <TableHead>Available Days</TableHead>
-          <TableHead>Available</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {consultants.map((consultant) => (
-          <TableRow key={consultant.id}>
-            <TableCell>
-              <Avatar className="h-10 w-10">
-                {consultant.profile_picture_url ? (
-                  <AvatarImage src={consultant.profile_picture_url} alt={consultant.name || "Consultant"} />
-                ) : (
-                  <AvatarFallback>{getInitials(consultant.name)}</AvatarFallback>
-                )}
-              </Avatar>
-            </TableCell>
-            <TableCell>{consultant.name || "Unnamed"}</TableCell>
-            <TableCell>{consultant.specialization}</TableCell>
-            <TableCell>{consultant.experience || 0} years</TableCell>
-            <TableCell>₹{consultant.hourly_rate}</TableCell>
-            <TableCell>
-              {consultant.available_days?.join(", ") || "Not specified"}
-            </TableCell>
-            <TableCell>
-              <Switch 
-                checked={consultant.is_available} 
-                onCheckedChange={(checked) => handleAvailabilityChange(consultant.id, checked)}
-              />
-            </TableCell>
-            <TableCell className="space-x-2">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to={`/consultants/${consultant.id}`}>
-                  <Eye className="h-4 w-4 mr-1" />
-                  View
-                </Link>
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-destructive">
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Consultant</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this consultant? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => handleDelete(consultant.id)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </TableCell>
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Profile</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Specialization</TableHead>
+            <TableHead>Experience</TableHead>
+            <TableHead>Hourly Rate</TableHead>
+            <TableHead>Available Days</TableHead>
+            <TableHead>Available</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {consultants.map((consultant) => (
+            <TableRow key={consultant.id}>
+              <TableCell>
+                <Avatar className="h-10 w-10">
+                  {consultant.profile_picture_url ? (
+                    <AvatarImage src={consultant.profile_picture_url} alt={consultant.name || "Consultant"} />
+                  ) : (
+                    <AvatarFallback><User className="h-5 w-5" /></AvatarFallback>
+                  )}
+                </Avatar>
+              </TableCell>
+              <TableCell>{consultant.name || "Unnamed"}</TableCell>
+              <TableCell>{consultant.specialization}</TableCell>
+              <TableCell>{consultant.experience || 0} years</TableCell>
+              <TableCell>₹{consultant.hourly_rate}</TableCell>
+              <TableCell className="max-w-[150px] truncate">
+                {consultant.available_days?.join(", ") || "Not specified"}
+              </TableCell>
+              <TableCell>
+                <Switch 
+                  checked={consultant.is_available} 
+                  onCheckedChange={(checked) => handleAvailabilityChange(consultant.id, checked)}
+                />
+              </TableCell>
+              <TableCell>
+                <div className="flex space-x-2">
+                  <Button variant="ghost" size="sm" onClick={() => handleViewDetail(consultant.id)}>
+                    <Eye className="h-4 w-4 mr-1" />
+                    View
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="text-destructive">
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Consultant</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this consultant? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(consultant.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 
