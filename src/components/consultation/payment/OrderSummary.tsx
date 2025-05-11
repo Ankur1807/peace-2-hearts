@@ -13,6 +13,22 @@ type OrderSummaryProps = {
   totalPrice?: number;
 };
 
+// Map from legacy client IDs to Supabase-aligned IDs
+const legacyToSupabaseIdMap: Record<string, string> = {
+  'divorce-prevention': 'P2H-H-divorce-prevention-package',
+  'pre-marriage-clarity': 'P2H-H-pre-marriage-clarity-solutions',
+  'mental-health-counselling': 'P2H-MH-mental-health-counselling',
+  'family-therapy': 'P2H-MH-family-therapy',
+  'couples-counselling': 'P2H-MH-couples-counselling',
+  'sexual-health-counselling': 'P2H-MH-sexual-health-counselling',
+  'test-service': 'P2H-MH-test-service',
+  'mediation': 'P2H-L-mediation-services',
+  'divorce': 'P2H-L-divorce-consultation',
+  'custody': 'P2H-L-child-custody-consultation',
+  'maintenance': 'P2H-L-maintenance-consultation',
+  'general-legal': 'P2H-L-general-legal-consultation'
+};
+
 const OrderSummary: React.FC<OrderSummaryProps> = ({ 
   consultationType, 
   selectedServices = [],
