@@ -5,7 +5,6 @@ import ConsultationDetailsForm from './ConsultationDetailsForm';
 import { useBookingState } from './booking/useBookingState';
 import PaymentStepContainer from './PaymentStepContainer';
 import { Card } from '@/components/ui/card';
-import DiagnosticsRunner from './DiagnosticsRunner';
 
 interface BookingFormContainerProps {
   bookingState: ConsultationBookingHook & {
@@ -103,13 +102,6 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ bookingStat
   
   return (
     <div className="container mx-auto px-4 py-10">
-      {/* Add our diagnostics runner */}
-      <DiagnosticsRunner
-        pricing={pricing}
-        selectedServices={selectedServices}
-        totalPrice={totalPrice}
-      />
-
       <div className="max-w-4xl mx-auto">
         {showPaymentStep ? (
           <Card className="backdrop-blur-sm bg-white/80 p-6 md:p-8 border border-gray-100 shadow-xl rounded-xl relative z-10">

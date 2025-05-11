@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -76,9 +75,6 @@ import EdgeFunctionTest from './pages/EdgeFunctionTest';
 
 // Import our new confirmation test page
 import ConfirmationTest from './pages/ConfirmationTest';
-
-// Import our new diagnostics page
-import DiagnosticsPage from './pages/DiagnosticsPage';
 
 // App-level flag to prevent multiple recovery runs
 let emailRecoveryHasRun = false;
@@ -188,9 +184,6 @@ function App() {
           
           {/* Add our new confirmation test route */}
           <Route path="/confirmation-test" element={<ConfirmationTest />} />
-          
-          {/* Add our new diagnostics page route */}
-          <Route path="/diagnostics" element={<DiagnosticsPage />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
