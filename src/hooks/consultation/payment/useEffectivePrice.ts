@@ -35,48 +35,51 @@ export function useEffectivePrice({
   selectedServices, 
   pricing, 
   totalPrice 
-}: UseEffectivePriceProps) {
+}: UseEffectivePriceProps): () => number {
   return useMemo(() => {
-    // If no services selected, return provided totalPrice or 0
-    if (selectedServices.length === 0) {
-      return totalPrice || 0;
-    }
+    // Return a function that calculates the effective price
+    return () => {
+      // If no services selected, return provided totalPrice or 0
+      if (selectedServices.length === 0) {
+        return totalPrice || 0;
+      }
 
-    // For packages
-    const packageName = getPackageName(selectedServices);
-    if (packageName) {
-      const packageId = packageNameToSupabaseId[packageName];
-      if (packageId) {
+      // For packages
+      const packageName = getPackageName(selectedServices);
+      if (packageName) {
+        const packageId = packageNameToSupabaseId[packageName];
+        if (packageId) {
+          // First try pricing map
+          if (pricing && pricing.has(packageId)) {
+            return pricing.get(packageId)!;
+          }
+          // Then try fallback price
+          const fallbackPrice = getFallbackPrice(packageId);
+          if (fallbackPrice !== undefined) {
+            return fallbackPrice;
+          }
+        }
+      }
+
+      // For individual services
+      const serviceId = selectedServices[0];
+      if (serviceId) {
+        // Normalize ID for lookup
+        const resolvedId = legacyToSupabaseIdMap[serviceId] || serviceId;
+        
         // First try pricing map
-        if (pricing && pricing.has(packageId)) {
-          return pricing.get(packageId)!;
+        if (pricing && pricing.has(resolvedId)) {
+          return pricing.get(resolvedId)!;
         }
         // Then try fallback price
-        const fallbackPrice = getFallbackPrice(packageId);
+        const fallbackPrice = getFallbackPrice(resolvedId);
         if (fallbackPrice !== undefined) {
           return fallbackPrice;
         }
       }
-    }
 
-    // For individual services
-    const serviceId = selectedServices[0];
-    if (serviceId) {
-      // Normalize ID for lookup
-      const resolvedId = legacyToSupabaseIdMap[serviceId] || serviceId;
-      
-      // First try pricing map
-      if (pricing && pricing.has(resolvedId)) {
-        return pricing.get(resolvedId)!;
-      }
-      // Then try fallback price
-      const fallbackPrice = getFallbackPrice(resolvedId);
-      if (fallbackPrice !== undefined) {
-        return fallbackPrice;
-      }
-    }
-
-    // Default to provided totalPrice or 0
-    return totalPrice || 0;
+      // Default to provided totalPrice or 0
+      return totalPrice || 0;
+    };
   }, [selectedServices, pricing, totalPrice]);
 }

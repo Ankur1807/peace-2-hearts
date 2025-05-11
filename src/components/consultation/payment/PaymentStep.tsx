@@ -50,7 +50,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   useEffect(() => {
     console.log("PaymentStep - Debug Information:", {
       selectedServices,
-      effectivePrice,
+      effectivePrice: effectivePrice(),
       totalPrice,
       pricing: pricing ? Object.fromEntries(pricing) : {},
       isTestService: selectedServices.includes('test-service')
@@ -136,13 +136,13 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         <Button 
           type="submit" 
           className="bg-peacefulBlue hover:bg-peacefulBlue/90"
-          disabled={isProcessing || !acceptTerms || !razorpayLoaded || effectivePrice <= 0}
+          disabled={isProcessing || !acceptTerms || !razorpayLoaded || effectivePrice() <= 0}
           onClick={handleSubmit}
         >
           {!razorpayLoaded ? "Loading Payment..." : 
            isProcessing ? "Processing..." : 
-           effectivePrice <= 0 ? "Price Not Available" : 
-           `Pay ₹${effectivePrice}`}
+           effectivePrice() <= 0 ? "Price Not Available" : 
+           `Pay ₹${effectivePrice()}`}
         </Button>
       </div>
       
@@ -152,7 +152,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         </div>
       )}
       
-      {effectivePrice <= 0 && (
+      {effectivePrice() <= 0 && (
         <div className="text-center text-amber-600 text-sm mt-2">
           Unable to calculate price. Please try selecting your services again or contact support.
         </div>

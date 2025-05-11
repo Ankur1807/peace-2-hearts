@@ -60,14 +60,14 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     console.log("OrderSummary rendered with:", {
       consultationType,
       selectedServices,
-      effectivePrice,
+      effectivePrice: effectivePrice(),
       totalPrice,
       consultationLabel,
       pricingAvailable: pricing ? Object.fromEntries(pricing) : 'none'
     });
   }, [consultationType, selectedServices, effectivePrice, totalPrice, consultationLabel, pricing]);
 
-  if (!effectivePrice || !selectedServices.length) {
+  if (!effectivePrice() || !selectedServices.length) {
     return (
       <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
         <p className="text-amber-800">Please select a service to see pricing details.</p>
@@ -84,7 +84,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         <h3 className="font-semibold mb-3">Order Summary</h3>
         <div className="space-y-2">
           <OrderAmount 
-            effectivePrice={effectivePrice}
+            effectivePrice={effectivePrice()}
             consultationLabel={isTestService ? 'Test service for payment system validation' : consultationLabel}
           />
           {!isTestService && <ServiceDuration selectedServices={selectedServices} />}
@@ -92,7 +92,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           <div className="border-t pt-3 mt-3">
             <div className="flex justify-between font-semibold">
               <span>Total</span>
-              <span>₹{effectivePrice}</span>
+              <span>₹{effectivePrice()}</span>
             </div>
           </div>
         </div>
