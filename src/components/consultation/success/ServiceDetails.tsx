@@ -9,8 +9,19 @@ interface ServiceDetailsProps {
 }
 
 const ServiceDetails = ({ services, date, timeSlot }: ServiceDetailsProps) => {
-  // Filter out pre-marriage-legal service if present
-  const displayServices = services.filter(service => service !== 'pre-marriage-legal');
+  // Filter out pre-marriage-legal service and any undefined/null services if present
+  const displayServices = (services || []).filter(service => 
+    service && 
+    service !== 'pre-marriage-legal'
+  );
+  
+  if (displayServices.length === 0) {
+    return (
+      <div className="py-2">
+        <p className="text-amber-600">No service details available</p>
+      </div>
+    );
+  }
   
   return (
     <>
