@@ -1,10 +1,15 @@
-
 import React from 'react';
 import ServiceLayout from "@/components/ServiceLayout";
 import SubServicesList from "@/components/SubServicesList";
 
 const LegalSupportService: React.FC = () => {
   const legalSubServices = [
+    {
+      id: "pre-marriage-legal",
+      title: "Pre-marriage Legal Consultation",
+      description: "Guidance on rights, agreements, and legal aspects to ensure a secure foundation before marriage.",
+      path: "/services/legal-support/pre-marriage"
+    },
     {
       id: "mediation",
       title: "Mediation Services",
@@ -56,7 +61,7 @@ const LegalSupportService: React.FC = () => {
   return (
     <ServiceLayout
       title="Legal Support & Consultation"
-      description="Our experienced legal team provides compassionate guidance on all aspects of relationship law, including divorce proceedings, custody arrangements, and legal counseling."
+      description="Our experienced legal team provides compassionate guidance on all aspects of relationship law, including divorce proceedings, custody arrangements, and pre-marital legal counseling."
       image="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
       forWhom={forWhom}
       howItWorks={howItWorks}
@@ -74,7 +79,7 @@ const LegalSupportService: React.FC = () => {
                 We pride ourselves on explaining complex legal concepts in clear, accessible language, ensuring you fully understand your options and can make informed decisions during difficult times.
               </p>
               <p className="text-gray-600">
-                Whether you need assistance with divorce proceedings, custody arrangements, or mediation services, our team will provide the knowledgeable support you need.
+                Whether you need assistance with divorce proceedings, custody arrangements, or preventative legal measures like pre-nuptial agreements, our team will provide the knowledgeable support you need.
               </p>
             </div>
             <div>
@@ -91,6 +96,12 @@ const LegalSupportService: React.FC = () => {
                     <span className="text-peacefulBlue text-sm">✓</span>
                   </div>
                   <p className="text-gray-600">Child custody and support arrangements</p>
+                </li>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-peacefulBlue/20 flex items-center justify-center mr-3 mt-1">
+                    <span className="text-peacefulBlue text-sm">✓</span>
+                  </div>
+                  <p className="text-gray-600">Pre-nuptial and post-nuptial agreements</p>
                 </li>
                 <li className="flex items-start">
                   <div className="flex-shrink-0 h-6 w-6 rounded-full bg-peacefulBlue/20 flex items-center justify-center mr-3 mt-1">

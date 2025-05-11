@@ -10,6 +10,7 @@ export const getPackageName = (selectedServices: string[] | undefined) => {
   ];
   
   const preMarriageClarity = [
+    'pre-marriage-legal',
     'premarital-counselling',
     'mental-health-counselling'
   ];

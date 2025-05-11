@@ -6,10 +6,9 @@ interface ServiceDetailsProps {
   services: string[];
   date?: Date;
   timeSlot?: string;
-  timeframe?: string;
 }
 
-const ServiceDetails = ({ services, date, timeSlot, timeframe }: ServiceDetailsProps) => {
+const ServiceDetails = ({ services, date, timeSlot }: ServiceDetailsProps) => {
   return (
     <>
       <p className="font-medium mb-2">Services Selected:</p>
@@ -28,12 +27,6 @@ const ServiceDetails = ({ services, date, timeSlot, timeframe }: ServiceDetailsP
         <>
           <p className="font-medium mb-2">Time:</p>
           <p>{timeSlot.replace('-', ':').toUpperCase()}</p>
-        </>
-      )}
-      {timeframe && (
-        <>
-          <p className="font-medium mb-2">Preferred Timeframe:</p>
-          <p>{timeframe}</p>
         </>
       )}
     </>

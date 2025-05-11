@@ -36,13 +36,13 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
   React.useEffect(() => {
     console.log("PaymentActions - Price Info:", {
       selectedServices: selectedServices.join(','),
-      effectivePrice: effectivePrice(),
+      effectivePrice,
       totalPrice,
       pricingAvailable: pricing ? Object.fromEntries(pricing) : 'none'
     });
   }, [selectedServices, effectivePrice, pricing, totalPrice]);
 
-  const canProceed = razorpayLoaded && acceptTerms && effectivePrice() > 0;
+  const canProceed = razorpayLoaded && acceptTerms && effectivePrice > 0;
   
   return (
     <div className="pt-6 flex justify-between">
@@ -54,14 +54,14 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
         className="bg-peacefulBlue hover:bg-peacefulBlue/90"
         disabled={isProcessing || !canProceed}
         onClick={(e) => {
-          console.log(`Payment button clicked with price: ${effectivePrice()}`);
+          console.log(`Payment button clicked with price: ${effectivePrice}`);
           onSubmit(e);
         }}
       >
         {!razorpayLoaded ? "Loading Payment..." : 
          isProcessing ? "Processing..." : 
-         !effectivePrice() ? "Select a service" :
-         `Pay ${formatPrice(effectivePrice())}`}
+         !effectivePrice ? "Select a service" :
+         `Pay ${formatPrice(effectivePrice)}`}
       </Button>
     </div>
   );

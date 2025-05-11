@@ -36,7 +36,7 @@ const PaymentStepContainer: React.FC<PaymentStepContainerProps> = ({
     console.log("PaymentStepContainer - Price Info:", {
       consultationType,
       selectedServices: selectedServices.join(','),
-      effectivePrice: effectivePrice(),
+      effectivePrice,
       totalPrice,
       hasPricing: !!pricing,
       pricingData: pricing ? Object.fromEntries(pricing) : {}
@@ -55,7 +55,7 @@ const PaymentStepContainer: React.FC<PaymentStepContainerProps> = ({
         onPrevStep={() => setShowPaymentStep(false)}
         onSubmit={handlePaymentSubmit}
         isProcessing={isProcessing}
-        totalPrice={effectivePrice()}
+        totalPrice={effectivePrice}
         pricing={pricing}
       />
     </form>
