@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -55,7 +56,7 @@ const holisticPackages: HolisticPackage[] = [
     supabaseId: 'P2H-H-pre-marriage-clarity-solutions',
     label: 'Pre-Marriage Clarity Package', 
     description: '1 legal + 2 mental health',
-    services: ['pre-marriage-legal', 'premarital-counselling-individual', 'mental-health-counselling'] 
+    services: ['premarital-counselling-individual', 'mental-health-counselling'] 
   }
 ];
 
