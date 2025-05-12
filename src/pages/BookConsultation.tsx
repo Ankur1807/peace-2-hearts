@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
@@ -51,6 +50,13 @@ const BookConsultation = () => {
       setDebugState(prev => ({ ...prev, showingPaymentStep: showPaymentStep }));
     }
   }, [showPaymentStep, debugState.showingPaymentStep]);
+
+  // Scroll to top when payment step is shown
+  useEffect(() => {
+    if (showPaymentStep) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [showPaymentStep]);
 
   const createBookingDetails = (): BookingDetails => ({
     clientName: `${personalDetails.firstName} ${personalDetails.lastName}`,
