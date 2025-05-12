@@ -179,7 +179,7 @@ const ConsultantsManagement = ({
               <SelectValue placeholder="Filter by specialization" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Specializations</SelectItem>
+              <SelectItem value="all">All Specializations</SelectItem>
               {specializations.map(spec => (
                 <SelectItem key={spec} value={spec || ""}>
                   {spec}
@@ -193,7 +193,7 @@ const ConsultantsManagement = ({
               <SelectValue placeholder="Filter by availability" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Availability</SelectItem>
+              <SelectItem value="all">All Availability</SelectItem>
               <SelectItem value="available">Available</SelectItem>
               <SelectItem value="unavailable">Unavailable</SelectItem>
             </SelectContent>
