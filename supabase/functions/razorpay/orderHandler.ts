@@ -49,12 +49,10 @@ export async function handleCreateOrder(
       });
     }
     
-    // Ensure amount is in paise (smallest currency unit)
-    // If amount is too small (like 11), it's likely in rupees and needs conversion
-    // If it's already large (like 1100), it might already be in paise
-    const amountInPaise = numericAmount < 100 ? Math.round(numericAmount * 100) : Math.round(numericAmount);
+    // Always assume frontend sends INR (rupees); convert to paise for Razorpay
+    const amountInPaise = Math.round(numericAmount * 100);
     
-    console.log(`Converting amount ${numericAmount} to paise: ${amountInPaise}`);
+    console.log('Razorpay Order: INR received =', numericAmount, ', Paise sent =', amountInPaise);
     
     // Build the order data object
     const orderData = {
