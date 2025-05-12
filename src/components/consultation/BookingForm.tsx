@@ -4,7 +4,6 @@ import { PersonalDetails } from '@/utils/types';
 import ServiceSection from './form/ServiceSection';
 import DateTimeSection from './form/DateTimeSection';
 import PersonalDetailsFields from './PersonalDetailsFields';
-import PricingSection from './form/PricingSection';
 import FormActions from './FormActions';
 import { isFormValid } from './form/ValidationHelper';
 import { Card } from '@/components/ui/card';
@@ -138,20 +137,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </motion.div>
         )}
       </div>
-      
-      {currentStep >= 3 && (
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={fadeInAnimation}
-        >
-          <PricingSection
-            selectedServices={selectedServices}
-            pricing={pricing}
-            totalPrice={totalPrice}
-          />
-        </motion.div>
-      )}
       
       <FormActions 
         isFormValid={isFormValid(
