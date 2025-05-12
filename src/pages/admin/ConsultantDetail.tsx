@@ -22,7 +22,6 @@ const ConsultantDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
-    phone: '',
     bio: '',
     is_available: true
   });
@@ -50,7 +49,6 @@ const ConsultantDetail: React.FC = () => {
       
       setConsultant(data);
       setFormData({
-        phone: data.phone || '',
         bio: data.bio || '',
         is_available: data.is_available
       });
