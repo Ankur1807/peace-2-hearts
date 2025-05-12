@@ -49,6 +49,18 @@ export async function handleCreateOrder(
       });
     }
     
+    // Validate currency - ensure only INR is accepted
+    if (currency !== 'INR') {
+      console.error("Unsupported currency:", currency);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Only INR currency is supported at the moment'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      });
+    }
+    
     // Always assume frontend sends INR (rupees); convert to paise for Razorpay
     const amountInPaise = Math.round(numericAmount * 100);
     
