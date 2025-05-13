@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -21,9 +20,6 @@ import '@/utils/consoleRecovery'; // Import console recovery utilities
 // Service pages
 import MentalHealthService from '@/pages/services/MentalHealthService';
 import LegalSupportService from '@/pages/services/LegalSupportService';
-import TherapyService from '@/pages/services/TherapyService';
-import DivorceService from '@/pages/services/DivorceService';
-import CustodyService from '@/pages/services/CustodyService';
 
 // Mental Health sub-service pages
 import MentalHealthCounselling from '@/pages/services/mentalhealth/MentalHealthCounselling';
@@ -119,9 +115,11 @@ function App() {
           {/* Main service pages */}
           <Route path="/services/mental-health" element={<MentalHealthService />} />
           <Route path="/services/legal-support" element={<LegalSupportService />} />
-          <Route path="/services/therapy" element={<TherapyService />} />
-          <Route path="/services/divorce" element={<DivorceService />} />
-          <Route path="/services/custody" element={<CustodyService />} />
+          
+          {/* 301 Redirects for removed standalone pages */}
+          <Route path="/services/therapy" element={<Navigate to="/services/mental-health/couples-counselling" replace />} />
+          <Route path="/services/divorce" element={<Navigate to="/services/legal-support/divorce" replace />} />
+          <Route path="/services/custody" element={<Navigate to="/services/legal-support/custody" replace />} />
           
           {/* Mental Health sub-service pages */}
           <Route path="/services/mental-health/counselling" element={<MentalHealthCounselling />} />

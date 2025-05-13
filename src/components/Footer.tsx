@@ -86,9 +86,9 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><Link to="/services/mental-health" className="text-white/90 hover:text-white">Mental Health Support</Link></li>
               <li><Link to="/services/legal-support" className="text-white/90 hover:text-white">Legal Consultations</Link></li>
-              <li><Link to="/services/therapy" className="text-white/90 hover:text-white">Relationship Therapy</Link></li>
-              <li><Link to="/services/divorce" className="text-white/90 hover:text-white">Divorce Guidance</Link></li>
-              <li><Link to="/services/custody" className="text-white/90 hover:text-white">Custody Support</Link></li>
+              <li><Link to="/services/mental-health/couples-counselling" className="text-white/90 hover:text-white">Relationship Therapy</Link></li>
+              <li><Link to="/services/legal-support/divorce" className="text-white/90 hover:text-white">Divorce Guidance</Link></li>
+              <li><Link to="/services/legal-support/custody" className="text-white/90 hover:text-white">Custody Support</Link></li>
             </ul>
           </div>
           
