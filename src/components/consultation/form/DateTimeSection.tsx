@@ -2,7 +2,6 @@
 import React from 'react';
 import DateTimePicker from '../DateTimePicker';
 import TimeframeSelector from '../TimeframeSelector';
-import { isSaturday, isSunday } from 'date-fns';
 
 interface DateTimeSectionProps {
   serviceCategory: string;
@@ -46,11 +45,7 @@ const DateTimeSection: React.FC<DateTimeSectionProps> = ({
 
   // Function to check if a date should be disabled
   const isDateDisabled = (date: Date) => {
-    if (serviceCategory === 'legal') {
-      // Only allow Saturdays and Sundays for legal consultations
-      return !(isSaturday(date) || isSunday(date));
-    }
-    // For other services, only disable past dates
+    // For all services, only disable past dates
     return date < getMinDate();
   };
 
