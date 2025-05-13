@@ -19,7 +19,7 @@ const FormActions: React.FC<FormActionsProps> = ({
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6">
       <div>
         <p className="text-sm text-gray-500">
-          By proceeding, you agree to our <a href="/terms" className="text-peacefulBlue hover:underline">Terms of Service</a> and <a href="/privacy-policy" className="text-peacefulBlue hover:underline">Privacy Policy</a>.
+          By proceeding, you agree to our <a href="/terms" className="text-peacefulBlue hover:underline">Terms of Service</a> and <a href="/privacy" className="text-peacefulBlue hover:underline">Privacy Policy</a>.
         </p>
       </div>
       <Button 

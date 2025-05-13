@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import CircuitHeartLogo from './navigation/CircuitHeartLogo';
@@ -75,7 +76,7 @@ const Footer = () => {
               <li><Link to="/services" className="text-white/90 hover:text-white">Our Services</Link></li>
               <li><Link to="/contact" className="text-white/90 hover:text-white">Contact Us</Link></li>
               <li><Link to="/terms" className="text-white/90 hover:text-white">Terms & Conditions</Link></li>
-              <li><Link to="/privacy-policy" className="text-white/90 hover:text-white">Privacy Policy</Link></li>
+              <li><Link to="/privacy" className="text-white/90 hover:text-white">Privacy Policy</Link></li>
             </ul>
           </div>
           

@@ -27,7 +27,7 @@ const PaymentTerms: React.FC<PaymentTermsProps> = ({ acceptTerms, setAcceptTerms
             Terms of Service
           </Link>
           ,{' '}
-          <Link to="/privacy-policy" target="_blank" className="text-peacefulBlue hover:underline">
+          <Link to="/privacy" target="_blank" className="text-peacefulBlue hover:underline">
             Privacy Policy
           </Link>
           ,{' '}
