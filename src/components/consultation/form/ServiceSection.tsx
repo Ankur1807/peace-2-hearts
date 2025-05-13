@@ -1,9 +1,7 @@
-
 import React from 'react';
 import ServiceCategorySelector from '../ServiceCategorySelector';
 import ServiceSelectionOptions from '../ServiceSelectionOptions';
 import { motion } from 'framer-motion';
-
 interface ServiceSectionProps {
   serviceCategory: string;
   setServiceCategory: (category: string) => void;
@@ -12,7 +10,6 @@ interface ServiceSectionProps {
   handlePackageSelection: (packageId: string) => void;
   pricing?: Map<string, number>;
 }
-
 const ServiceSection: React.FC<ServiceSectionProps> = ({
   serviceCategory,
   setServiceCategory,
@@ -30,39 +27,20 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
       pricingSize: pricing ? pricing.size : 0
     });
   }, [pricing, serviceCategory, selectedServices]);
-  
-  return (
-    <div className="space-y-8">
-      <ServiceCategorySelector
-        serviceCategory={serviceCategory}
-        setServiceCategory={setServiceCategory}
-      />
+  return <div className="space-y-8">
+      <ServiceCategorySelector serviceCategory={serviceCategory} setServiceCategory={setServiceCategory} />
       
-      {serviceCategory && (
-        <motion.div 
-          key={serviceCategory}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="mt-8"
-        >
-          <ServiceSelectionOptions 
-            serviceCategory={serviceCategory}
-            selectedServices={selectedServices}
-            handleServiceSelection={handleServiceSelection}
-            handlePackageSelection={handlePackageSelection}
-            pricing={pricing}
-          />
+      {serviceCategory && <motion.div key={serviceCategory} initial={{
+      opacity: 0
+    }} animate={{
+      opacity: 1
+    }} transition={{
+      duration: 0.5
+    }} className="mt-8">
+          <ServiceSelectionOptions serviceCategory={serviceCategory} selectedServices={selectedServices} handleServiceSelection={handleServiceSelection} handlePackageSelection={handlePackageSelection} pricing={pricing} />
 
-          {serviceCategory === 'legal' && (
-            <p className="mt-4 text-sm text-gray-600 italic text-center">
-              Currently available only on Saturday and Sunday
-            </p>
-          )}
-        </motion.div>
-      )}
-    </div>
-  );
+          {serviceCategory === 'legal' && <p className="mt-4 text-sm text-gray-600 italic text-center">Legal consultations are scheduled in the evenings due to daytime court commitments.</p>}
+        </motion.div>}
+    </div>;
 };
-
 export default ServiceSection;
