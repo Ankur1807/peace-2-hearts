@@ -14,6 +14,7 @@ interface ServiceInfoSectionProps {
   whoCanBenefitClassName?: string;
   howItWorksClassName?: string;
   isDivorcePage?: boolean;
+  useNewLayout?: boolean;
 }
 
 const ServiceInfoSection = ({ 
@@ -22,7 +23,8 @@ const ServiceInfoSection = ({
   mandalaColor = "bg-peacefulBlue/5",
   whoCanBenefitClassName,
   howItWorksClassName,
-  isDivorcePage = false
+  isDivorcePage = false,
+  useNewLayout = true
 }: ServiceInfoSectionProps) => {
   return (
     <section className="relative py-16 md:py-20 overflow-hidden">
@@ -38,7 +40,7 @@ const ServiceInfoSection = ({
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 relative z-10">
           
-          {/* Who Can Benefit Card */}
+          {/* Who Can Benefit Card - renamed to "Who is this for?" in the new layout */}
           <div className={cn(
             "rounded-xl p-6 md:p-8 shadow-lg border border-gray-100 text-center",
             isDivorcePage ? 
@@ -46,7 +48,7 @@ const ServiceInfoSection = ({
               (whoCanBenefitClassName || "bg-gradient-2")
           )}>
             <h2 className="section-title text-2xl md:text-3xl mb-6 text-center">
-              {isDivorcePage ? "Who Can Benefit" : "Who is this for?"}
+              {useNewLayout ? "Who is this for?" : (isDivorcePage ? "Who Can Benefit" : "Who is this for?")}
             </h2>
             <ul className="space-y-4">
               {Array.isArray(whoCanBenefit) && whoCanBenefit.map((item, index) => (

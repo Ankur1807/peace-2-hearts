@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -77,32 +78,18 @@ const SubServiceLayout = ({
     }
   };
 
-  // Function to get gradient class based on index for divorce page
+  // Function to get gradient class based on index for benefit cards
   const getBenefitCardClass = (index: number) => {
-    if (serviceType === 'legal-support' && serviceName === 'divorce') {
-      const gradientClasses = [
-        'bg-gradient-1',
-        'bg-gradient-2',
-        'bg-gradient-3',
-        'bg-gradient-4',
-        'bg-gradient-5',
-        'bg-gradient-6'
-      ];
-      return cn(
-        "divorce-benefit-card",
-        gradientClasses[index % gradientClasses.length]
-      );
-    }
-    
-    // For non-divorce pages, use gradient classes in a rotation for all service pages
+    // Apply different gradient classes in rotation for visual variety
     const gradientClasses = [
       'bg-gradient-1',
       'bg-gradient-2',
-      'bg-gradient-3',
+      'bg-gradient-3', 
       'bg-gradient-4',
       'bg-gradient-5',
       'bg-gradient-6'
     ];
+    
     return gradientClasses[index % gradientClasses.length];
   };
   
@@ -163,21 +150,20 @@ const SubServiceLayout = ({
           </div>
         </section>
         
+        {/* Key Benefits Section - Updated to match new unified layout */}
         <section className="py-12 bg-softGray">
           <div className="container mx-auto px-4">
-            <h2 className="section-title text-2xl mb-8 text-center">Key Benefits</h2>
+            <h2 className="section-title text-3xl mb-8 text-center">Key Benefits</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {benefits.map((benefit, index) => (
                 <div key={index} className={cn(
-                  "p-5 rounded-xl shadow-sm border border-gray-100", 
+                  "p-5 rounded-xl shadow-sm border border-gray-100 flex items-start", 
                   getBenefitCardClass(index)
                 )}>
-                  <div className="flex items-start relative z-10">
-                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-peacefulBlue/20 flex items-center justify-center mr-3 mt-1">
-                      <span className="text-peacefulBlue text-sm">✓</span>
-                    </div>
-                    <p className="text-gray-700">{benefit}</p>
+                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-peacefulBlue/20 flex items-center justify-center mr-3 mt-1">
+                    <span className="text-peacefulBlue text-sm">✓</span>
                   </div>
+                  <p className="text-gray-700">{benefit}</p>
                 </div>
               ))}
             </div>

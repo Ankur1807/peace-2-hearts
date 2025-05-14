@@ -4,6 +4,7 @@ import ServiceLayout from "@/components/ServiceLayout";
 import MentalHealthApproach from "@/components/services/mental-health/MentalHealthApproach";
 import MentalHealthServicesList from "@/components/services/mental-health/MentalHealthServicesList";
 import SubServicesList from "@/components/SubServicesList";
+import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 
 const MentalHealthService: React.FC = () => {
   const mentalHealthSubServices = [
@@ -61,6 +62,26 @@ const MentalHealthService: React.FC = () => {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <MentalHealthApproach />
+          
+          <ServiceInfoSection 
+            whoCanBenefit={[
+              { text: "Individuals experiencing emotional distress related to relationships" },
+              { text: "Those navigating difficult life transitions or relationship changes" },
+              { text: "People dealing with anxiety, depression, or trauma from relationships" },
+              { text: "Anyone seeking to improve their emotional wellbeing and resilience" }
+            ]}
+            howItWorks={[
+              { text: "Schedule a consultation to discuss your specific needs" },
+              { text: "Get matched with the right mental health professional" },
+              { text: "Engage in personalized therapy sessions focused on your goals" },
+              { text: "Develop practical tools and strategies for emotional wellness" }
+            ]}
+            mandalaColor="bg-blue-50"
+            whoCanBenefitClassName="bg-gradient-5"
+            howItWorksClassName="bg-gradient-2"
+            useNewLayout={true}
+          />
+          
           <MentalHealthServicesList services={mentalHealthSubServices} />
           <SubServicesList subServices={mentalHealthSubServices} />
         </div>

@@ -35,58 +35,8 @@ const FamilyTherapy = () => {
         mandalaColor="bg-purple-50"
         whoCanBenefitClassName="bg-gradient-6"
         howItWorksClassName="bg-gradient-1"
+        useNewLayout={true}
       />
-
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="section-title text-2xl mb-6">About Our Family Therapy</h2>
-            <p className="text-gray-600 mb-4">
-              Family therapy at Peace2Hearts focuses on improving relationships and resolving conflicts within the family system. We work with all types of families – traditional, single-parent, blended, extended, and chosen families – to help strengthen bonds and create healthier patterns of interaction.
-            </p>
-            <p className="text-gray-600 mb-4">
-              Our therapists create a safe, neutral space where all family members can express themselves and feel heard. Through structured sessions, we help identify unhealthy patterns, improve communication, and develop strategies to navigate challenges together.
-            </p>
-            <p className="text-gray-600 mb-8">
-              Family therapy is particularly beneficial during major life transitions such as divorce, remarriage, relocation, or when facing challenges with children's behavior, grief, or other stressors that affect the family unit.
-            </p>
-            
-            <h3 className="text-xl font-lora font-semibold text-gray-800 mb-4">Our Family Therapy Approach</h3>
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-start">
-                <div className="flex-shrink-0 h-5 w-5 rounded-full bg-peacefulBlue/20 flex items-center justify-center mr-3 mt-1">
-                  <span className="text-peacefulBlue text-xs">✓</span>
-                </div>
-                <p className="text-gray-600">Initial family assessment to understand dynamics and challenges</p>
-              </li>
-              <li className="flex items-start">
-                <div className="flex-shrink-0 h-5 w-5 rounded-full bg-peacefulBlue/20 flex items-center justify-center mr-3 mt-1">
-                  <span className="text-peacefulBlue text-xs">✓</span>
-                </div>
-                <p className="text-gray-600">Collaborative goal-setting with all family members</p>
-              </li>
-              <li className="flex items-start">
-                <div className="flex-shrink-0 h-5 w-5 rounded-full bg-peacefulBlue/20 flex items-center justify-center mr-3 mt-1">
-                  <span className="text-peacefulBlue text-xs">✓</span>
-                </div>
-                <p className="text-gray-600">Structured sessions that ensure everyone's voice is heard</p>
-              </li>
-              <li className="flex items-start">
-                <div className="flex-shrink-0 h-5 w-5 rounded-full bg-peacefulBlue/20 flex items-center justify-center mr-3 mt-1">
-                  <span className="text-peacefulBlue text-xs">✓</span>
-                </div>
-                <p className="text-gray-600">Practical communication tools to use at home</p>
-              </li>
-              <li className="flex items-start">
-                <div className="flex-shrink-0 h-5 w-5 rounded-full bg-peacefulBlue/20 flex items-center justify-center mr-3 mt-1">
-                  <span className="text-peacefulBlue text-xs">✓</span>
-                </div>
-                <p className="text-gray-600">Strategies for maintaining progress after therapy concludes</p>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
     </SubServiceLayout>
   );
 };
