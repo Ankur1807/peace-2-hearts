@@ -50,11 +50,10 @@ const ServiceInfoSection = ({
             </h2>
             <ul className="space-y-4">
               {whoCanBenefit.map((item, index) => (
-                <li key={index} className="flex items-start">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-peacefulBlue/20 flex items-center justify-center mr-3 mt-0.5">
-                    <span className="text-peacefulBlue text-sm">•</span>
+                <li key={index} className="flex items-center justify-center">
+                  <div className="max-w-md text-center">
+                    <p className="text-gray-700">{item.text}</p>
                   </div>
-                  <p className="text-gray-700 text-left">{item.text}</p>
                 </li>
               ))}
             </ul>
@@ -68,16 +67,15 @@ const ServiceInfoSection = ({
               (howItWorksClassName || "bg-gradient-3")
           )}>
             <h2 className="section-title text-2xl md:text-3xl mb-6 text-center">How It Works</h2>
-            <ol className="space-y-4">
+            <ul className="space-y-4">
               {howItWorks.map((item, index) => (
-                <li key={index} className="flex items-start">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-peacefulBlue flex items-center justify-center text-white font-medium mr-3">
-                    {index + 1}
+                <li key={index} className="flex items-center justify-center">
+                  <div className="max-w-md text-center">
+                    <p className="text-gray-700">{item.text}</p>
                   </div>
-                  <p className="text-gray-700 text-left">{item.text}</p>
                 </li>
               ))}
-            </ol>
+            </ul>
           </div>
         </div>
       </div>

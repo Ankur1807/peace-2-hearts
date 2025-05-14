@@ -2,29 +2,48 @@
 import ServiceLayout from "@/components/ServiceLayout";
 import { Check } from "lucide-react";
 import HolisticHeroBanner from "@/components/services/holistic/HolisticHeroBanner";
+import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 
 const DivorcePreventionPackage = () => {
+  const whoIsThisFor = [
+    { text: "Individuals considering separation but unsure of next steps" },
+    { text: "Those facing emotional or legal pressure in a failing marriage" },
+    { text: "People seeking clarity before initiating or responding to a divorce" },
+    { text: "Anyone looking to protect their peace without escalating conflict" }
+  ];
+
+  const howItWorks = [
+    { text: "Schedule a clarity session to share what you're experiencing" },
+    { text: "Speak with both a legal and mental health expert collaboratively" },
+    { text: "Receive guidance tailored to your emotional and legal needs" },
+    { text: "Walk away informed, grounded, and equipped to choose your next steps" }
+  ];
+
+  const keyBenefits = [
+    "Neutral, judgment-free space to process big decisions",
+    "Emotional support paired with legal insight",
+    "Awareness of your rights and options — before taking action",
+    "Conflict de-escalation and long-term wellbeing planning",
+    "Customized clarity plan to support your values and priorities",
+    "Prevent unnecessary legal steps and trauma through early guidance"
+  ];
+
   return (
     <ServiceLayout
       title="Divorce Prevention Package"
       description="A comprehensive approach to resolving relationship challenges before they lead to separation, combining therapy and legal mediation."
       image="https://images.unsplash.com/photo-1516302752625-fcc3c50ae61f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
       customHeroBanner={<HolisticHeroBanner serviceType="divorce-prevention" className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />}
-      forWhom={[
-        "Couples experiencing recurring conflicts and communication breakdown",
-        "Partners considering separation but willing to explore reconciliation",
-        "Couples seeking professional guidance before making life-changing decisions",
-        "Relationships affected by trust issues, infidelity, or major life changes",
-        "Partners wanting to rebuild their emotional connection"
-      ]}
-      howItWorks={[
-        "Initial assessment to understand your specific relationship challenges",
-        "Two therapy sessions focused on communication and conflict resolution",
-        "One mediation session to address specific points of conflict",
-        "One legal consultation to understand options and implications",
-        "Development of a personalized action plan for moving forward"
-      ]}
+      forWhom={keyBenefits}
     >
+      <ServiceInfoSection 
+        whoCanBenefit={whoIsThisFor}
+        howItWorks={howItWorks}
+        mandalaColor="bg-peacefulBlue/5"
+        whoCanBenefitClassName="bg-gradient-2"
+        howItWorksClassName="bg-gradient-3"
+      />
+
       <section className="py-16 bg-softGray">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
