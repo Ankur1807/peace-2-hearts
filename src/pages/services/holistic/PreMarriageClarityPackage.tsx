@@ -28,6 +28,13 @@ const PreMarriageClarityPackage = () => {
     "Confidence in your decision to marry — or pause to reflect"
   ];
 
+  const howItWorksSteps = [
+    "Join a pre-marital clarity session together or individually",
+    "Talk through beliefs, expectations, and communication habits",
+    "Identify potential tension points early",
+    "Strengthen trust and alignment through personalized guidance"
+  ];
+
   return (
     <ServiceLayout 
       title="Pre-Marriage Clarity Package" 
@@ -35,6 +42,7 @@ const PreMarriageClarityPackage = () => {
       image="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" 
       customHeroBanner={<HolisticHeroBanner serviceType="pre-marriage-clarity" className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />}
       forWhom={keyBenefits}
+      howItWorks={howItWorksSteps}
     >
       <ServiceInfoSection 
         whoCanBenefit={whoIsThisFor}

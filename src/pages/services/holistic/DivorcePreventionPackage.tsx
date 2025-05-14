@@ -28,6 +28,13 @@ const DivorcePreventionPackage = () => {
     "Prevent unnecessary legal steps and trauma through early guidance"
   ];
 
+  const howItWorksSteps = [
+    "Schedule a clarity session to share what you're experiencing",
+    "Speak with both a legal and mental health expert collaboratively",
+    "Receive guidance tailored to your emotional and legal needs",
+    "Walk away informed, grounded, and equipped to choose your next steps"
+  ];
+
   return (
     <ServiceLayout
       title="Divorce Prevention Package"
@@ -35,6 +42,7 @@ const DivorcePreventionPackage = () => {
       image="https://images.unsplash.com/photo-1516302752625-fcc3c50ae61f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
       customHeroBanner={<HolisticHeroBanner serviceType="divorce-prevention" className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />}
       forWhom={keyBenefits}
+      howItWorks={howItWorksSteps}
     >
       <ServiceInfoSection 
         whoCanBenefit={whoIsThisFor}
@@ -42,6 +50,7 @@ const DivorcePreventionPackage = () => {
         mandalaColor="bg-peacefulBlue/5"
         whoCanBenefitClassName="bg-gradient-2"
         howItWorksClassName="bg-gradient-3"
+        isDivorcePage={false}
       />
 
       <section className="py-16 bg-softGray">

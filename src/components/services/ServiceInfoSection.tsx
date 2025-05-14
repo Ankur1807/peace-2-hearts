@@ -17,8 +17,8 @@ interface ServiceInfoSectionProps {
 }
 
 const ServiceInfoSection = ({ 
-  whoCanBenefit, 
-  howItWorks, 
+  whoCanBenefit = [], 
+  howItWorks = [], 
   mandalaColor = "bg-peacefulBlue/5",
   whoCanBenefitClassName,
   howItWorksClassName,
@@ -49,7 +49,7 @@ const ServiceInfoSection = ({
               {isDivorcePage ? "Who Can Benefit" : "Who is this for?"}
             </h2>
             <ul className="space-y-4">
-              {whoCanBenefit.map((item, index) => (
+              {Array.isArray(whoCanBenefit) && whoCanBenefit.map((item, index) => (
                 <li key={index} className="flex items-center justify-center">
                   <div className="max-w-md text-center">
                     <p className="text-gray-700">{item.text}</p>
@@ -68,7 +68,7 @@ const ServiceInfoSection = ({
           )}>
             <h2 className="section-title text-2xl md:text-3xl mb-6 text-center">How It Works</h2>
             <ul className="space-y-4">
-              {howItWorks.map((item, index) => (
+              {Array.isArray(howItWorks) && howItWorks.map((item, index) => (
                 <li key={index} className="flex items-center justify-center">
                   <div className="max-w-md text-center">
                     <p className="text-gray-700">{item.text}</p>

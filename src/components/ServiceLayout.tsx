@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -21,8 +22,8 @@ interface ServiceLayoutProps {
 const ServiceLayout = ({ 
   title, 
   description, 
-  forWhom, 
-  howItWorks, 
+  forWhom = [], 
+  howItWorks = [], 
   image, 
   children, 
   serviceType,
@@ -90,7 +91,7 @@ const ServiceLayout = ({
           <div className="container mx-auto px-4">
             <h2 className="section-title text-3xl mb-8 text-center">Who Can Benefit</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {forWhom.map((item, index) => (
+              {Array.isArray(forWhom) && forWhom.map((item, index) => (
                 <div key={index} className="bg-white p-6 rounded-xl shadow-sm">
                   <div className="flex items-center justify-center w-12 h-12 rounded-full bg-peacefulBlue/20 text-peacefulBlue mb-4">
                     {index + 1}
@@ -106,7 +107,7 @@ const ServiceLayout = ({
           <div className="container mx-auto px-4">
             <h2 className="section-title text-3xl mb-8 text-center">How It Works</h2>
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-              {howItWorks.map((step, index) => (
+              {Array.isArray(howItWorks) && howItWorks.map((step, index) => (
                 <div key={index} className="relative">
                   <div className="flex flex-col items-center text-center">
                     <div className="w-16 h-16 flex items-center justify-center rounded-full bg-peacefulBlue text-white text-xl font-semibold mb-4">
