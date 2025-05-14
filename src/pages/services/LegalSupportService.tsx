@@ -79,6 +79,30 @@ const LegalSupportService: React.FC = () => {
     >
       <section className="py-16">
         <div className="container mx-auto px-4">
+          {/* Our Offerings Section - Moved to top */}
+          <div className="mb-16">
+            <h3 className="text-2xl font-lora font-semibold text-gray-800 mb-6 text-center">Our Offerings</h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              {legalSubServices.map((service, index) => (
+                <div 
+                  key={service.id}
+                  className={cn(
+                    "p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300",
+                    "transform hover:-translate-y-1 cursor-pointer relative overflow-hidden",
+                    getGradientClass(index)
+                  )}
+                  onClick={() => window.location.href = service.path}
+                >
+                  <div className="ripple-container">
+                    <div className="ripple-effect"></div>
+                  </div>
+                  <h4 className="font-medium text-gray-800 text-xl mb-2 text-center">{service.title}</h4>
+                  <p className="text-gray-600 text-center">{service.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          
           {/* Key Benefits Section */}
           <div className="mb-16">
             <h2 className="section-title text-3xl mb-8 text-center">Key Benefits</h2>
@@ -139,8 +163,6 @@ const LegalSupportService: React.FC = () => {
               </ul>
             </SiteCard>
           </div>
-          
-          <SubServicesList subServices={legalSubServices} />
         </div>
       </section>
     </ServiceLayout>

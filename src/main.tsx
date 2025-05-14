@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
@@ -10,6 +9,7 @@ import './styles/borders.css';
 import { fetchInitialServices } from './utils/pricing/serviceInitializer';
 import { HelmetProvider } from 'react-helmet-async';
 import './utils/consoleRecovery'; // Import for functionality only, App.tsx will handle execution
+import './utils/rippleEffect'; // Import the ripple effect
 
 // Initialize default services if needed
 fetchInitialServices()
