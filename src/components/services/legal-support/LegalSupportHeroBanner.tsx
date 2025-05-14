@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Scale, Gavel, Handshake } from 'lucide-react';
 
@@ -28,7 +29,7 @@ const LegalSupportHeroBanner: React.FC<LegalSupportHeroBannerProps> = ({
   };
   
   return (
-    <div className={`relative w-full h-full min-h-[300px] overflow-hidden rounded-xl ${className}`}>
+    <div className={`relative w-full h-full min-h-[250px] sm:min-h-[300px] overflow-hidden rounded-xl ${className}`}>
       <div className="absolute inset-0 bg-gradient-to-br from-peacefulBlue/5 to-paleYellow/15 z-0"></div>
       <div className="absolute inset-0 z-10">
         {renderIllustration()}
@@ -42,31 +43,31 @@ const GeneralLegalIllustration = () => (
   <div className="w-full h-full flex items-center justify-center">
     <div className="relative w-full h-full">
       {/* Background elements */}
-      <div className="absolute top-1/4 left-1/3 w-40 h-40 bg-peacefulBlue/10 rounded-full animate-pulse-fractal"></div>
-      <div className="absolute bottom-1/3 right-1/4 w-32 h-32 bg-paleYellow/10 rounded-full animate-pulse-fractal" style={{ animationDelay: '0.5s' }}></div>
+      <div className="absolute top-1/4 left-1/3 w-24 sm:w-40 h-24 sm:h-40 bg-peacefulBlue/10 rounded-full animate-pulse-fractal"></div>
+      <div className="absolute bottom-1/3 right-1/4 w-20 sm:w-32 h-20 sm:h-32 bg-paleYellow/10 rounded-full animate-pulse-fractal" style={{ animationDelay: '0.5s' }}></div>
       
       {/* Legal scale symbol */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <div className="relative">
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-peacefulBlue/20 to-paleYellow/20 flex items-center justify-center animate-wave">
-            <Scale className="w-14 h-14 md:w-18 md:h-18 text-peacefulBlue animate-heartbeat-glow" />
+          <div className="w-20 h-20 sm:w-24 md:w-32 sm:h-24 md:h-32 rounded-full bg-gradient-to-br from-peacefulBlue/20 to-paleYellow/20 flex items-center justify-center animate-wave">
+            <Scale className="w-10 h-10 sm:w-14 md:w-18 sm:h-14 md:h-18 text-peacefulBlue animate-heartbeat-glow" />
           </div>
-          <div className="absolute -top-2 -left-2 w-8 h-8 rounded-full bg-peacefulBlue/20 animate-bounce" style={{ animationDuration: '3s' }}></div>
-          <div className="absolute -bottom-2 -right-2 w-6 h-6 rounded-full bg-paleYellow/20 animate-bounce" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }}></div>
+          <div className="absolute -top-2 -left-2 w-6 sm:w-8 h-6 sm:h-8 rounded-full bg-peacefulBlue/20 animate-bounce" style={{ animationDuration: '3s' }}></div>
+          <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-4 sm:w-6 h-4 sm:h-6 rounded-full bg-paleYellow/20 animate-bounce" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }}></div>
         </div>
       </div>
       
       {/* Document elements */}
       <div className="absolute top-1/3 right-1/3 transform rotate-6">
-        <div className="w-12 h-16 bg-white/60 rounded shadow-sm flex items-center justify-center animate-wave" style={{ animationDuration: '4s' }}>
-          <div className="w-8 h-1 bg-gray-300/60 mb-2"></div>
-          <div className="w-8 h-1 bg-gray-300/60 mb-2"></div>
-          <div className="w-6 h-1 bg-gray-300/60"></div>
+        <div className="w-10 sm:w-12 h-12 sm:h-16 bg-white/60 rounded shadow-sm flex items-center justify-center animate-wave" style={{ animationDuration: '4s' }}>
+          <div className="w-6 sm:w-8 h-1 bg-gray-300/60 mb-2"></div>
+          <div className="w-6 sm:w-8 h-1 bg-gray-300/60 mb-2"></div>
+          <div className="w-4 sm:w-6 h-1 bg-gray-300/60"></div>
         </div>
       </div>
       
       <div className="absolute bottom-1/3 left-1/4 transform -rotate-12">
-        <div className="w-10 h-14 bg-white/50 rounded shadow-sm animate-wave" style={{ animationDuration: '3.5s', animationDelay: '0.7s' }}></div>
+        <div className="w-8 sm:w-10 h-10 sm:h-14 bg-white/50 rounded shadow-sm animate-wave" style={{ animationDuration: '3.5s', animationDelay: '0.7s' }}></div>
       </div>
       
       {/* Wave patterns */}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Heart, Users, MessageSquare } from 'lucide-react';
 
@@ -27,7 +26,7 @@ const MentalHealthHeroBanner: React.FC<MentalHealthHeroBannerProps> = ({
   };
   
   return (
-    <div className={`relative w-full h-full min-h-[300px] overflow-hidden rounded-xl ${className}`}>
+    <div className={`relative w-full h-full min-h-[250px] sm:min-h-[300px] overflow-hidden rounded-xl ${className}`}>
       <div className="absolute inset-0 bg-gradient-to-br from-peacefulBlue/10 to-vibrantPurple/20 z-0"></div>
       <div className="absolute inset-0 z-10">
         {renderIllustration()}
@@ -41,17 +40,17 @@ const CounsellingIllustration = () => (
   <div className="w-full h-full flex items-center justify-center">
     <div className="relative w-full h-full">
       {/* Background elements */}
-      <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-peacefulBlue/10 rounded-full animate-pulse-fractal"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-softPink/10 rounded-full animate-pulse-fractal" style={{ animationDelay: '0.5s' }}></div>
+      <div className="absolute top-1/4 left-1/4 w-20 sm:w-32 h-20 sm:h-32 bg-peacefulBlue/10 rounded-full animate-pulse-fractal"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-28 sm:w-48 h-28 sm:h-48 bg-softPink/10 rounded-full animate-pulse-fractal" style={{ animationDelay: '0.5s' }}></div>
       
       {/* Mind with heart icon */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <div className="relative">
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-peacefulBlue/30 to-vibrantPurple/30 flex items-center justify-center animate-wave">
-            <Heart className="w-12 h-12 md:w-16 md:h-16 text-peacefulBlue animate-heartbeat-glow" />
+          <div className="w-20 h-20 sm:w-24 md:w-32 sm:h-24 md:h-32 rounded-full bg-gradient-to-br from-peacefulBlue/30 to-vibrantPurple/30 flex items-center justify-center animate-wave">
+            <Heart className="w-10 h-10 sm:w-12 md:w-16 sm:h-12 md:h-16 text-peacefulBlue animate-heartbeat-glow" />
           </div>
-          <div className="absolute -top-4 -left-4 w-8 h-8 rounded-full bg-softGreen/30 animate-bounce" style={{ animationDuration: '3s' }}></div>
-          <div className="absolute -bottom-2 -right-2 w-6 h-6 rounded-full bg-softPink/30 animate-bounce" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }}></div>
+          <div className="absolute -top-2 sm:-top-4 -left-2 sm:-left-4 w-6 sm:w-8 h-6 sm:h-8 rounded-full bg-softGreen/30 animate-bounce" style={{ animationDuration: '3s' }}></div>
+          <div className="absolute -bottom-1 sm:-bottom-2 -right-1 sm:-right-2 w-4 sm:w-6 h-4 sm:h-6 rounded-full bg-softPink/30 animate-bounce" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }}></div>
         </div>
       </div>
       

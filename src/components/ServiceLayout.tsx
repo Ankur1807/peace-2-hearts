@@ -33,9 +33,9 @@ const ServiceLayout = ({
     
   const renderHeroBanner = () => {
     if (serviceType === 'mental-health') {
-      return <MentalHealthHeroBanner className="h-full min-h-[350px] shadow-lg" />;
+      return <MentalHealthHeroBanner className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />;
     } else if (serviceType === 'legal-support') {
-      return <LegalSupportHeroBanner className="h-full min-h-[350px] shadow-lg" />;
+      return <LegalSupportHeroBanner className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />;
     } else {
       // Fallback to the image
       return (
@@ -53,26 +53,26 @@ const ServiceLayout = ({
       <Navigation />
       
       <main>
-        <section className="py-16 md:py-24 wave-pattern">
+        <section className="py-12 md:py-24 wave-pattern">
           <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center gap-12">
-              <div className="md:w-1/2 space-y-6">
-                <h1 className="section-title text-4xl md:text-5xl">{title}</h1>
-                <p className="text-gray-600 text-lg">{description}</p>
-                <div className="pt-4">
+            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12">
+              <div className="w-full md:w-1/2 space-y-4 md:space-y-6 mb-6 md:mb-0">
+                <h1 className="section-title text-3xl md:text-5xl">{title}</h1>
+                <p className="text-gray-600 text-base md:text-lg">{description}</p>
+                <div className="pt-2 md:pt-4">
                   <Link to={bookingUrl}>
                     <MandalaButton 
                       variant="primary"
                       mandalaType="simple"
-                      className="rounded-full px-14 py-7 text-2xl font-bold"
+                      className="rounded-full px-8 md:px-14 py-4 md:py-7 text-lg md:text-2xl font-bold"
                     >
                       Book a Consultation
-                      <ArrowRight className="ml-2 h-6 w-6" />
+                      <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />
                     </MandalaButton>
                   </Link>
                 </div>
               </div>
-              <div className="md:w-1/2">
+              <div className="w-full md:w-1/2 min-h-[250px]">
                 {renderHeroBanner()}
               </div>
             </div>

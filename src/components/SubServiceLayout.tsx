@@ -47,7 +47,7 @@ const SubServiceLayout = ({
         bannerType = 'counselling'; // Default or for mental-health-counselling
       }
       
-      return <MentalHealthHeroBanner serviceType={bannerType} className="h-full min-h-[350px] shadow-lg" />;
+      return <MentalHealthHeroBanner serviceType={bannerType} className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />;
     } else if (serviceType === 'legal-support') {
       // Map service name to appropriate banner type
       let bannerType: 'divorce' | 'mediation' | 'custody' | 'maintenance' | 'general' = 'general';
@@ -64,7 +64,7 @@ const SubServiceLayout = ({
         bannerType = 'general';
       }
       
-      return <LegalSupportHeroBanner serviceType={bannerType} className="h-full min-h-[350px] shadow-lg" />;
+      return <LegalSupportHeroBanner serviceType={bannerType} className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />;
     } else {
       // Fallback to the image
       return (
