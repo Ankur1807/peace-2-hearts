@@ -2,7 +2,8 @@
 import React from 'react';
 import ServiceLayout from "@/components/ServiceLayout";
 import SubServicesList from "@/components/SubServicesList";
-import ServiceInfoSection from "@/components/services/ServiceInfoSection";
+import { cn } from "@/lib/utils";
+import SiteCard from "@/components/SiteCard";
 
 const LegalSupportService: React.FC = () => {
   const legalSubServices = [
@@ -54,6 +55,19 @@ const LegalSupportService: React.FC = () => {
     "Develop a strategic plan tailored to your specific situation and goals"
   ];
 
+  // Function to get gradient class based on index for cards
+  const getGradientClass = (index: number) => {
+    const gradientClasses = [
+      'bg-gradient-4',
+      'bg-gradient-1',
+      'bg-gradient-6', 
+      'bg-gradient-3',
+      'bg-gradient-2',
+      'bg-gradient-5'
+    ];
+    return gradientClasses[index % gradientClasses.length];
+  };
+
   return (
     <ServiceLayout
       title="Legal Support Services"
@@ -65,24 +79,66 @@ const LegalSupportService: React.FC = () => {
     >
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <ServiceInfoSection 
-            whoCanBenefit={[
-              { text: "Individuals seeking legal clarity during relationship transitions" },
-              { text: "Those navigating divorce, custody, or maintenance issues" },
-              { text: "People looking for alternative dispute resolution methods" },
-              { text: "Anyone needing to understand their rights in relationship matters" }
-            ]}
-            howItWorks={[
-              { text: "Schedule an initial confidential consultation" },
-              { text: "Meet with a specialized family law attorney" },
-              { text: "Discuss your specific situation and legal concerns" },
-              { text: "Receive strategic guidance tailored to your goals" }
-            ]}
-            mandalaColor="bg-indigo-50"
-            whoCanBenefitClassName="bg-gradient-1"
-            howItWorksClassName="bg-gradient-4"
-            useNewLayout={true}
-          />
+          {/* Key Benefits Section */}
+          <div className="mb-16">
+            <h2 className="section-title text-3xl mb-8 text-center">Key Benefits</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                "Expert legal guidance from attorneys specializing in family law",
+                "Clear understanding of your rights and options in relationship matters",
+                "Strategic planning to protect your interests and achieve favorable outcomes",
+                "Compassionate support during emotionally challenging legal processes",
+                "Practical advice on navigating complex legal procedures and documentation",
+                "Solutions focused on minimizing conflict and emotional distress"
+              ].map((benefit, index) => (
+                <div key={index} className={cn(
+                  "p-5 rounded-xl shadow-sm border border-gray-100 flex items-start text-center", 
+                  getGradientClass(index)
+                )}>
+                  <p className="text-gray-700 mx-auto">{benefit}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Who is this for? and How It Works sections side by side */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <SiteCard className="bg-gradient-1 flex flex-col h-full">
+              <h2 className="section-title text-2xl md:text-3xl mb-6 text-center">Who is this for?</h2>
+              <ul className="space-y-4 text-center">
+                {[
+                  "Individuals seeking legal clarity during relationship transitions",
+                  "Those navigating divorce, custody, or maintenance issues",
+                  "People looking for alternative dispute resolution methods",
+                  "Anyone needing to understand their rights in relationship matters"
+                ].map((item, index) => (
+                  <li key={index} className="flex items-center justify-center">
+                    <div className="max-w-md text-center">
+                      <p className="text-gray-700">{item}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </SiteCard>
+            
+            <SiteCard className="bg-gradient-4 flex flex-col h-full">
+              <h2 className="section-title text-2xl md:text-3xl mb-6 text-center">How It Works</h2>
+              <ul className="space-y-4 text-center">
+                {[
+                  "Schedule an initial confidential consultation",
+                  "Meet with a specialized family law attorney",
+                  "Discuss your specific situation and legal concerns",
+                  "Receive strategic guidance tailored to your goals"
+                ].map((item, index) => (
+                  <li key={index} className="flex items-center justify-center">
+                    <div className="max-w-md text-center">
+                      <p className="text-gray-700">{item}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </SiteCard>
+          </div>
           
           <SubServicesList subServices={legalSubServices} />
         </div>

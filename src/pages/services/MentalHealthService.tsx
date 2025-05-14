@@ -1,8 +1,9 @@
 
 import React from 'react';
 import ServiceLayout from "@/components/ServiceLayout";
-import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 import SubServicesList from "@/components/SubServicesList";
+import { cn } from "@/lib/utils";
+import SiteCard from "@/components/SiteCard";
 
 const MentalHealthService: React.FC = () => {
   const mentalHealthSubServices = [
@@ -48,6 +49,19 @@ const MentalHealthService: React.FC = () => {
     "Engage in regular therapy sessions to address your mental health needs"
   ];
 
+  // Function to get gradient class based on index for cards
+  const getGradientClass = (index: number) => {
+    const gradientClasses = [
+      'bg-gradient-1',
+      'bg-gradient-2',
+      'bg-gradient-3', 
+      'bg-gradient-5',
+      'bg-gradient-6',
+      'bg-gradient-4'
+    ];
+    return gradientClasses[index % gradientClasses.length];
+  };
+
   return (
     <ServiceLayout
       title="Mental Health Support"
@@ -59,24 +73,66 @@ const MentalHealthService: React.FC = () => {
     >
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <ServiceInfoSection 
-            whoCanBenefit={[
-              { text: "Individuals experiencing emotional distress related to relationships" },
-              { text: "Those navigating difficult life transitions or relationship changes" },
-              { text: "People dealing with anxiety, depression, or trauma from relationships" },
-              { text: "Anyone seeking to improve their emotional wellbeing and resilience" }
-            ]}
-            howItWorks={[
-              { text: "Schedule a consultation to discuss your specific needs" },
-              { text: "Get matched with the right mental health professional" },
-              { text: "Engage in personalized therapy sessions focused on your goals" },
-              { text: "Develop practical tools and strategies for emotional wellness" }
-            ]}
-            mandalaColor="bg-blue-50"
-            whoCanBenefitClassName="bg-gradient-5"
-            howItWorksClassName="bg-gradient-2"
-            useNewLayout={true}
-          />
+          {/* Key Benefits Section */}
+          <div className="mb-16">
+            <h2 className="section-title text-3xl mb-8 text-center">Key Benefits</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                "Specialized support from professionals trained in relationship psychology",
+                "Safe space to process difficult emotions and develop coping strategies",
+                "Personalized treatment plans tailored to your specific situation",
+                "Practical tools to improve communication and set healthy boundaries",
+                "Ongoing support to build resilience and strengthen emotional wellbeing",
+                "Integrated approach addressing both emotional and practical concerns"
+              ].map((benefit, index) => (
+                <div key={index} className={cn(
+                  "p-5 rounded-xl shadow-sm border border-gray-100 flex items-start text-center", 
+                  getGradientClass(index)
+                )}>
+                  <p className="text-gray-700 mx-auto">{benefit}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Who is this for? and How It Works sections side by side */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <SiteCard className="flex flex-col h-full">
+              <h2 className="section-title text-2xl md:text-3xl mb-6 text-center">Who is this for?</h2>
+              <ul className="space-y-4 text-center">
+                {[
+                  "Individuals experiencing emotional distress related to relationships",
+                  "Those navigating difficult life transitions or relationship changes",
+                  "People dealing with anxiety, depression, or trauma from relationships",
+                  "Anyone seeking to improve their emotional wellbeing and resilience"
+                ].map((item, index) => (
+                  <li key={index} className="flex items-center justify-center">
+                    <div className="max-w-md text-center">
+                      <p className="text-gray-700">{item}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </SiteCard>
+            
+            <SiteCard className="bg-gradient-to-br from-white to-blue-50 flex flex-col h-full">
+              <h2 className="section-title text-2xl md:text-3xl mb-6 text-center">How It Works</h2>
+              <ul className="space-y-4 text-center">
+                {[
+                  "Schedule a consultation to discuss your specific needs",
+                  "Get matched with the right mental health professional",
+                  "Engage in personalized therapy sessions focused on your goals",
+                  "Develop practical tools and strategies for emotional wellness"
+                ].map((item, index) => (
+                  <li key={index} className="flex items-center justify-center">
+                    <div className="max-w-md text-center">
+                      <p className="text-gray-700">{item}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </SiteCard>
+          </div>
           
           <SubServicesList subServices={mentalHealthSubServices} />
         </div>
