@@ -6,6 +6,8 @@ import { MandalaButton } from './MandalaButton';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from './ui/breadcrumb';
+import MentalHealthHeroBanner from './services/mental-health/MentalHealthHeroBanner';
+import LegalSupportHeroBanner from './services/legal-support/LegalSupportHeroBanner';
 
 interface SubServiceLayoutProps {
   title: string;
@@ -29,6 +31,51 @@ const SubServiceLayout = ({
   const serviceTypeLabel = serviceType === 'mental-health' ? 'Mental Health Services' : 'Legal Services';
   
   const bookingUrl = `/book-consultation?service=${serviceType}&subservice=${serviceName}`;
+  
+  const renderHeroBanner = () => {
+    if (serviceType === 'mental-health') {
+      // Map service name to appropriate banner type
+      let bannerType: 'counselling' | 'family-therapy' | 'couples-counselling' | 'sexual-health-counselling' = 'counselling';
+      
+      if (serviceName === 'family-therapy') {
+        bannerType = 'family-therapy';
+      } else if (serviceName === 'couples-counselling') {
+        bannerType = 'couples-counselling';
+      } else if (serviceName === 'sexual-health-counselling') {
+        bannerType = 'sexual-health-counselling';
+      } else {
+        bannerType = 'counselling'; // Default or for mental-health-counselling
+      }
+      
+      return <MentalHealthHeroBanner serviceType={bannerType} className="h-full min-h-[350px] shadow-lg" />;
+    } else if (serviceType === 'legal-support') {
+      // Map service name to appropriate banner type
+      let bannerType: 'divorce' | 'mediation' | 'custody' | 'maintenance' | 'general' = 'general';
+      
+      if (serviceName === 'divorce') {
+        bannerType = 'divorce';
+      } else if (serviceName === 'mediation') {
+        bannerType = 'mediation';
+      } else if (serviceName === 'custody') {
+        bannerType = 'custody';
+      } else if (serviceName === 'maintenance') {
+        bannerType = 'maintenance';
+      } else {
+        bannerType = 'general';
+      }
+      
+      return <LegalSupportHeroBanner serviceType={bannerType} className="h-full min-h-[350px] shadow-lg" />;
+    } else {
+      // Fallback to the image
+      return (
+        <img 
+          src={image} 
+          alt={title} 
+          className="rounded-xl shadow-lg w-full h-auto object-cover"
+        />
+      );
+    }
+  };
   
   return (
     <>
@@ -81,11 +128,7 @@ const SubServiceLayout = ({
                 </div>
               </div>
               <div className="md:w-1/2">
-                <img 
-                  src={image} 
-                  alt={title} 
-                  className="rounded-xl shadow-lg w-full h-auto object-cover"
-                />
+                {renderHeroBanner()}
               </div>
             </div>
           </div>

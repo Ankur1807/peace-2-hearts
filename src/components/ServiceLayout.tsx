@@ -2,10 +2,11 @@
 import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
-import { FractalButton } from './FractalButton';
 import { MandalaButton } from './MandalaButton';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import MentalHealthHeroBanner from './services/mental-health/MentalHealthHeroBanner';
+import LegalSupportHeroBanner from './services/legal-support/LegalSupportHeroBanner';
 
 interface ServiceLayoutProps {
   title: string;
@@ -30,6 +31,23 @@ const ServiceLayout = ({
     ? `/book-consultation?service=${serviceType}` 
     : '/book-consultation';
     
+  const renderHeroBanner = () => {
+    if (serviceType === 'mental-health') {
+      return <MentalHealthHeroBanner className="h-full min-h-[350px] shadow-lg" />;
+    } else if (serviceType === 'legal-support') {
+      return <LegalSupportHeroBanner className="h-full min-h-[350px] shadow-lg" />;
+    } else {
+      // Fallback to the image
+      return (
+        <img 
+          src={image} 
+          alt={title} 
+          className="rounded-xl shadow-lg w-full h-auto object-cover"
+        />
+      );
+    }
+  };
+  
   return (
     <>
       <Navigation />
@@ -55,11 +73,7 @@ const ServiceLayout = ({
                 </div>
               </div>
               <div className="md:w-1/2">
-                <img 
-                  src={image} 
-                  alt={title} 
-                  className="rounded-xl shadow-lg w-full h-auto object-cover"
-                />
+                {renderHeroBanner()}
               </div>
             </div>
           </div>
