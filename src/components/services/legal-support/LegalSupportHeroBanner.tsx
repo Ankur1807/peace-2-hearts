@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Balance, Gavel, Scale, Handshake } from 'lucide-react';
+import { Scale, Gavel, Handshake } from 'lucide-react';
 
 interface LegalSupportHeroBannerProps {
   serviceType?: 'divorce' | 'mediation' | 'custody' | 'maintenance' | 'general';
@@ -136,7 +135,7 @@ const MediationIllustration = () => (
       {/* Central mediation symbol */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center">
         <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-peacefulBlue/20 to-softGreen/20 flex items-center justify-center animate-wave">
-          <Balance className="w-14 h-14 md:w-18 md:h-18 text-peacefulBlue animate-heartbeat-glow" />
+          <Scale className="w-14 h-14 md:w-18 md:h-18 text-peacefulBlue animate-heartbeat-glow" />
         </div>
       </div>
       
@@ -182,7 +181,7 @@ const CustodyIllustration = () => (
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <div className="relative">
           <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-peacefulBlue/20 to-softPink/10 flex items-center justify-center animate-wave">
-            <Balance className="w-14 h-14 md:w-18 md:h-18 text-peacefulBlue/80 animate-heartbeat-glow" />
+            <Scale className="w-14 h-14 md:w-18 md:h-18 text-peacefulBlue/80 animate-heartbeat-glow" />
           </div>
         </div>
       </div>
