@@ -1,7 +1,28 @@
 import ServiceLayout from "@/components/ServiceLayout";
 import { Check } from "lucide-react";
+import HolisticHeroBanner from "@/components/services/holistic/HolisticHeroBanner";
+
 const PreMarriageClarityPackage = () => {
-  return <ServiceLayout title="Pre-Marriage Clarity Package" description="Start your marriage journey with confidence by addressing both emotional readiness and legal considerations through our comprehensive pre-marriage package." image="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" forWhom={["Engaged couples planning their wedding and future together", "Partners considering marriage who want to ensure compatibility", "Couples with significant assets or financial disparities", "Individuals entering second marriages with children from previous relationships", "Partners from different cultural or religious backgrounds navigating expectations"]} howItWorks={["Initial assessment to understand your relationship and specific concerns", "Two mental health sessions exploring relationship dynamics and expectations", "One legal consultation addressing marriage laws and financial considerations", "Personalized guidance and resources for your specific situation"]}>
+  return (
+    <ServiceLayout 
+      title="Pre-Marriage Clarity Package" 
+      description="Start your marriage journey with confidence by addressing both emotional readiness and legal considerations through our comprehensive pre-marriage package." 
+      image="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" 
+      customHeroBanner={<HolisticHeroBanner serviceType="pre-marriage-clarity" className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />}
+      forWhom={[
+        "Engaged couples planning their wedding and future together", 
+        "Partners considering marriage who want to ensure compatibility", 
+        "Couples with significant assets or financial disparities", 
+        "Individuals entering second marriages with children from previous relationships", 
+        "Partners from different cultural or religious backgrounds navigating expectations"
+      ]} 
+      howItWorks={[
+        "Initial assessment to understand your relationship and specific concerns", 
+        "Two mental health sessions exploring relationship dynamics and expectations", 
+        "One legal consultation addressing marriage laws and financial considerations", 
+        "Personalized guidance and resources for your specific situation"
+      ]}
+    >
       <section className="py-16 bg-softGray">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -130,6 +151,8 @@ const PreMarriageClarityPackage = () => {
           </div>
         </div>
       </section>
-    </ServiceLayout>;
+    </ServiceLayout>
+  );
 };
+
 export default PreMarriageClarityPackage;

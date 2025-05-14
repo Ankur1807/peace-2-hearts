@@ -1,6 +1,7 @@
 
 import ServiceLayout from "@/components/ServiceLayout";
 import { Check } from "lucide-react";
+import HolisticHeroBanner from "@/components/services/holistic/HolisticHeroBanner";
 
 const DivorcePreventionPackage = () => {
   return (
@@ -8,6 +9,7 @@ const DivorcePreventionPackage = () => {
       title="Divorce Prevention Package"
       description="A comprehensive approach to resolving relationship challenges before they lead to separation, combining therapy and legal mediation."
       image="https://images.unsplash.com/photo-1516302752625-fcc3c50ae61f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+      customHeroBanner={<HolisticHeroBanner serviceType="divorce-prevention" className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />}
       forWhom={[
         "Couples experiencing recurring conflicts and communication breakdown",
         "Partners considering separation but willing to explore reconciliation",
