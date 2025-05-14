@@ -25,7 +25,6 @@ import LegalSupportService from '@/pages/services/LegalSupportService';
 import MentalHealthCounselling from '@/pages/services/mentalhealth/MentalHealthCounselling';
 import CouplesCounselling from '@/pages/services/mentalhealth/CouplesCounselling';
 import FamilyTherapy from '@/pages/services/mentalhealth/FamilyTherapy';
-import PremaritalCounselling from '@/pages/services/mentalhealth/PremaritalCounselling';
 import SexualHealthCounselling from '@/pages/services/mentalhealth/SexualHealthCounselling';
 
 // Legal Support sub-service pages
@@ -125,7 +124,6 @@ function App() {
           <Route path="/services/mental-health/counselling" element={<MentalHealthCounselling />} />
           <Route path="/services/mental-health/couples-counselling" element={<CouplesCounselling />} />
           <Route path="/services/mental-health/family-therapy" element={<FamilyTherapy />} />
-          <Route path="/services/mental-health/premarital-counselling" element={<PremaritalCounselling />} />
           <Route path="/services/mental-health/sexual-health-counselling" element={<SexualHealthCounselling />} />
           
           {/* Legal Support sub-service pages */}
