@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { SEO } from '@/components/SEO';
 import { sendContactEmail } from '@/utils/email/contactEmailService';
+import SocialMediaIcons from '@/components/navigation/SocialMediaIcons';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -212,6 +213,17 @@ const Contact = () => {
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
+              
+              {/* Social Media Icons */}
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <div className="flex flex-col items-center">
+                  <p className="text-gray-600 mb-3">Follow us on social media</p>
+                  <SocialMediaIcons 
+                    iconClassName="text-peacefulBlue/70 hover:text-peacefulBlue" 
+                    iconSize={24} 
+                  />
+                </div>
+              </div>
             </div>
             
             <div>

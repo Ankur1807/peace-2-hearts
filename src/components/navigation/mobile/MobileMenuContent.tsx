@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { MandalaButton } from "@/components/MandalaButton";
+import SocialMediaIcons from "@/components/navigation/SocialMediaIcons";
 
 interface MobileMenuContentProps {
   isOpen: boolean;
@@ -99,6 +100,14 @@ const MobileMenuContent = ({ isOpen, onClose, onMenuItemClick, isLoggedIn }: Mob
               Book Your Session
             </MandalaButton>
           </Link>
+        </div>
+        
+        {/* Social Media Icons */}
+        <div className="px-6 mt-8 border-t border-white/20 pt-6">
+          <div className="flex flex-col items-center">
+            <p className="text-white/80 mb-3 text-sm">Follow us</p>
+            <SocialMediaIcons iconSize={24} />
+          </div>
         </div>
       </div>
     </motion.div>

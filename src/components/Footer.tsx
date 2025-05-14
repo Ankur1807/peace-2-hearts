@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import CircuitHeartLogo from './navigation/CircuitHeartLogo';
 import { useIsMobile } from '../hooks/use-mobile';
+import SocialMediaIcons from './navigation/SocialMediaIcons';
 
 const Footer = () => {
   const location = useLocation();
@@ -66,6 +67,9 @@ const Footer = () => {
             <p className="text-white/90 mb-4 ml-1">
               Your emotional well-being matters—let's explore solutions together.
             </p>
+            
+            {/* Social Media Icons */}
+            <SocialMediaIcons className="mb-4" />
           </div>
           
           {/* Quick Links column */}
