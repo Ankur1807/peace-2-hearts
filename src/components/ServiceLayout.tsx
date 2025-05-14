@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -6,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import MentalHealthHeroBanner from './services/mental-health/MentalHealthHeroBanner';
 import LegalSupportHeroBanner from './services/legal-support/LegalSupportHeroBanner';
+
 interface ServiceLayoutProps {
   title: string;
   description: string;
@@ -16,23 +18,27 @@ interface ServiceLayoutProps {
   serviceType?: string;
   customHeroBanner?: ReactNode;
 }
-const ServiceLayout = ({
-  title,
-  description,
-  forWhom = [],
-  howItWorks = [],
-  image,
-  children,
+
+const ServiceLayout = ({ 
+  title, 
+  description, 
+  forWhom = [], 
+  howItWorks = [], 
+  image, 
+  children, 
   serviceType,
-  customHeroBanner
+  customHeroBanner 
 }: ServiceLayoutProps) => {
-  const bookingUrl = serviceType ? `/book-consultation?service=${serviceType}` : '/book-consultation';
+  const bookingUrl = serviceType 
+    ? `/book-consultation?service=${serviceType}` 
+    : '/book-consultation';
+    
   const renderHeroBanner = () => {
     // If a custom banner is provided, use it
     if (customHeroBanner) {
       return customHeroBanner;
     }
-
+    
     // Otherwise, use the default banner logic
     if (serviceType === 'mental-health') {
       return <MentalHealthHeroBanner className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />;
@@ -40,10 +46,18 @@ const ServiceLayout = ({
       return <LegalSupportHeroBanner className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />;
     } else {
       // Fallback to the image
-      return <img src={image} alt={title} className="rounded-xl shadow-lg w-full h-auto object-cover" />;
+      return (
+        <img 
+          src={image} 
+          alt={title} 
+          className="rounded-xl shadow-lg w-full h-auto object-cover"
+        />
+      );
     }
   };
-  return <>
+  
+  return (
+    <>
       <Navigation />
       
       <main>
@@ -55,7 +69,11 @@ const ServiceLayout = ({
                 <p className="text-gray-600 text-base md:text-lg">{description}</p>
                 <div className="pt-2 md:pt-4">
                   <Link to={bookingUrl}>
-                    <MandalaButton variant="primary" mandalaType="simple" className="rounded-full px-8 md:px-14 py-4 md:py-7 text-lg md:text-2xl font-bold">
+                    <MandalaButton 
+                      variant="primary"
+                      mandalaType="simple"
+                      className="rounded-full px-8 md:px-14 py-4 md:py-7 text-lg md:text-2xl font-bold"
+                    >
                       Book a Consultation
                       <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />
                     </MandalaButton>
@@ -69,9 +87,42 @@ const ServiceLayout = ({
           </div>
         </section>
         
+        <section className="py-16 bg-softGray">
+          <div className="container mx-auto px-4">
+            <h2 className="section-title text-3xl mb-8 text-center">Who Can Benefit</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.isArray(forWhom) && forWhom.map((item, index) => (
+                <div key={index} className="bg-white p-6 rounded-xl shadow-sm">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-peacefulBlue/20 text-peacefulBlue mb-4">
+                    {index + 1}
+                  </div>
+                  <p className="text-gray-700">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
         
-        
-        
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="section-title text-3xl mb-8 text-center">How It Works</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {Array.isArray(howItWorks) && howItWorks.map((step, index) => (
+                <div key={index} className="relative">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 flex items-center justify-center rounded-full bg-peacefulBlue text-white text-xl font-semibold mb-4">
+                      {index + 1}
+                    </div>
+                    <p className="text-gray-700">{step}</p>
+                  </div>
+                  {index < howItWorks.length - 1 && (
+                    <div className="hidden lg:block absolute top-8 left-[calc(100%_-_1rem)] w-full h-0.5 bg-gray-200"></div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
         
         {children}
         
@@ -86,7 +137,11 @@ const ServiceLayout = ({
                 Our initial consultation helps us understand your needs and create a personalized support plan.
               </p>
               <Link to={bookingUrl}>
-                <MandalaButton variant="primary" mandalaType="simple" className="rounded-full px-14 py-7 text-2xl font-bold">
+                <MandalaButton
+                  variant="primary"
+                  mandalaType="simple"
+                  className="rounded-full px-14 py-7 text-2xl font-bold"
+                >
                   Book Your Consultation Today
                 </MandalaButton>
               </Link>
@@ -96,6 +151,8 @@ const ServiceLayout = ({
       </main>
       
       <Footer />
-    </>;
+    </>
+  );
 };
+
 export default ServiceLayout;
