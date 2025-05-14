@@ -1,6 +1,8 @@
 
 import SubServiceLayout from "@/components/SubServiceLayout";
 import ServiceInfoSection from "@/components/services/ServiceInfoSection";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const DivorceConsultation = () => {
   return (
@@ -33,6 +35,8 @@ const DivorceConsultation = () => {
           { text: "Decide what's right for you, informed and calm" }
         ]}
         mandalaColor="bg-blue-50"
+        whoCanBenefitClassName="bg-gradient-to-br from-softPink/30 to-white"
+        howItWorksClassName="bg-gradient-to-br from-lightBlue/30 to-white"
       />
 
       <section className="py-12">

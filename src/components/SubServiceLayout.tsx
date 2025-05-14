@@ -8,6 +8,7 @@ import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from './ui/breadcrumb';
 import MentalHealthHeroBanner from './services/mental-health/MentalHealthHeroBanner';
 import LegalSupportHeroBanner from './services/legal-support/LegalSupportHeroBanner';
+import { cn } from "@/lib/utils";
 
 interface SubServiceLayoutProps {
   title: string;
@@ -76,6 +77,25 @@ const SubServiceLayout = ({
       );
     }
   };
+
+  // Function to get gradient class based on index for divorce page
+  const getBenefitCardClass = (index: number) => {
+    if (serviceType === 'legal-support' && serviceName === 'divorce') {
+      const gradientClasses = [
+        'bg-gradient-1',
+        'bg-gradient-2',
+        'bg-gradient-3',
+        'bg-gradient-4',
+        'bg-gradient-5',
+        'bg-gradient-6'
+      ];
+      return cn(
+        "divorce-benefit-card",
+        gradientClasses[index % gradientClasses.length]
+      );
+    }
+    return "bg-white";
+  };
   
   return (
     <>
@@ -139,8 +159,11 @@ const SubServiceLayout = ({
             <h2 className="section-title text-2xl mb-8 text-center">Key Benefits</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {benefits.map((benefit, index) => (
-                <div key={index} className="bg-white p-5 rounded-xl shadow-sm">
-                  <div className="flex items-start">
+                <div key={index} className={cn(
+                  "p-5 rounded-xl shadow-sm border border-gray-100", 
+                  getBenefitCardClass(index)
+                )}>
+                  <div className="flex items-start relative z-10">
                     <div className="flex-shrink-0 h-6 w-6 rounded-full bg-peacefulBlue/20 flex items-center justify-center mr-3 mt-1">
                       <span className="text-peacefulBlue text-sm">✓</span>
                     </div>

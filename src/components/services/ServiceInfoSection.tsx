@@ -1,6 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import SimpleMandalaPattern from '../mandala/SimpleMandalaPattern';
+import { cn } from "@/lib/utils";
 
 interface ServiceInfoItem {
   text: string;
@@ -10,12 +11,16 @@ interface ServiceInfoSectionProps {
   whoCanBenefit: ServiceInfoItem[];
   howItWorks: ServiceInfoItem[];
   mandalaColor?: string;
+  whoCanBenefitClassName?: string;
+  howItWorksClassName?: string;
 }
 
 const ServiceInfoSection = ({ 
   whoCanBenefit, 
   howItWorks, 
-  mandalaColor = "bg-peacefulBlue/5" 
+  mandalaColor = "bg-peacefulBlue/5",
+  whoCanBenefitClassName,
+  howItWorksClassName 
 }: ServiceInfoSectionProps) => {
   return (
     <section className="relative py-16 md:py-20 overflow-hidden">
@@ -32,7 +37,10 @@ const ServiceInfoSection = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 relative z-10">
           
           {/* Who Can Benefit Card */}
-          <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg border border-gray-100">
+          <div className={cn(
+            "rounded-xl p-6 md:p-8 shadow-lg border border-gray-100",
+            whoCanBenefitClassName || "bg-white"
+          )}>
             <h2 className="section-title text-2xl md:text-3xl mb-6 text-center">Who Can Benefit</h2>
             <ul className="space-y-4">
               {whoCanBenefit.map((item, index) => (
@@ -47,7 +55,10 @@ const ServiceInfoSection = ({
           </div>
           
           {/* How It Works Card */}
-          <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg border border-gray-100">
+          <div className={cn(
+            "rounded-xl p-6 md:p-8 shadow-lg border border-gray-100",
+            howItWorksClassName || "bg-white"
+          )}>
             <h2 className="section-title text-2xl md:text-3xl mb-6 text-center">How It Works</h2>
             <ol className="space-y-4">
               {howItWorks.map((item, index) => (

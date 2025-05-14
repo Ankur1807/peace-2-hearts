@@ -41,3 +41,54 @@
 .animate-spin-reverse-slow {
   animation: spin-very-slow 12s linear reverse infinite;
 }
+
+/* Gradient Backgrounds for Service Pages */
+.bg-gradient-1 {
+  background: linear-gradient(135deg, rgba(109, 174, 219, 0.4), rgba(247, 202, 201, 0.2));
+}
+
+.bg-gradient-2 {
+  background: linear-gradient(135deg, rgba(247, 202, 201, 0.4), rgba(136, 216, 176, 0.2));
+}
+
+.bg-gradient-3 {
+  background: linear-gradient(135deg, rgba(136, 216, 176, 0.4), rgba(109, 174, 219, 0.2));
+}
+
+.bg-gradient-4 {
+  background: linear-gradient(135deg, rgba(109, 174, 219, 0.3), rgba(136, 216, 176, 0.3), rgba(247, 202, 201, 0.3));
+}
+
+.bg-gradient-5 {
+  background: linear-gradient(135deg, rgba(247, 202, 201, 0.3), rgba(109, 174, 219, 0.3), rgba(136, 216, 176, 0.3));
+}
+
+.bg-gradient-6 {
+  background: linear-gradient(135deg, rgba(136, 216, 176, 0.3), rgba(247, 202, 201, 0.3), rgba(109, 174, 219, 0.3));
+}
+
+/* Divorce page specific styling */
+.divorce-benefit-card {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  background-size: 200% 200%;
+}
+
+.divorce-benefit-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.divorce-benefit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
