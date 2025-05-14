@@ -1,10 +1,8 @@
 
 import React from 'react';
 import ServiceLayout from "@/components/ServiceLayout";
-import MentalHealthApproach from "@/components/services/mental-health/MentalHealthApproach";
-import MentalHealthServicesList from "@/components/services/mental-health/MentalHealthServicesList";
-import SubServicesList from "@/components/SubServicesList";
 import ServiceInfoSection from "@/components/services/ServiceInfoSection";
+import SubServicesList from "@/components/SubServicesList";
 
 const MentalHealthService: React.FC = () => {
   const mentalHealthSubServices = [
@@ -21,7 +19,7 @@ const MentalHealthService: React.FC = () => {
       path: "/services/mental-health/family-therapy"
     },
     {
-      id: "couples-counselling", // Make sure this ID matches what's in the selection options
+      id: "couples-counselling",
       title: "Couples Counselling",
       description: "Professional guidance to strengthen communication and mutual understanding.",
       path: "/services/mental-health/couples-counselling"
@@ -61,8 +59,6 @@ const MentalHealthService: React.FC = () => {
     >
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <MentalHealthApproach />
-          
           <ServiceInfoSection 
             whoCanBenefit={[
               { text: "Individuals experiencing emotional distress related to relationships" },
@@ -82,7 +78,6 @@ const MentalHealthService: React.FC = () => {
             useNewLayout={true}
           />
           
-          <MentalHealthServicesList services={mentalHealthSubServices} />
           <SubServicesList subServices={mentalHealthSubServices} />
         </div>
       </section>

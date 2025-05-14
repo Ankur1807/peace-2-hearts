@@ -3,7 +3,6 @@ import React from 'react';
 import ServiceLayout from "@/components/ServiceLayout";
 import SubServicesList from "@/components/SubServicesList";
 import ServiceInfoSection from "@/components/services/ServiceInfoSection";
-import { Card } from "@/components/ui/card";
 
 const LegalSupportService: React.FC = () => {
   const legalSubServices = [
@@ -66,18 +65,6 @@ const LegalSupportService: React.FC = () => {
     >
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto mb-12">
-            <h2 className="section-title text-3xl mb-6 text-center">Our Legal Support Approach</h2>
-            <Card className="p-6 shadow-md">
-              <p className="text-gray-600 mb-4">
-                At Peace2Hearts, our legal support services focus on providing clarity, compassion, and practical guidance during challenging relationship transitions. We understand that legal issues related to relationships can be emotionally complex, which is why our approach combines expert legal advice with sensitivity to the personal aspects of your situation.
-              </p>
-              <p className="text-gray-600">
-                Our team of experienced attorneys specializes in family law and relationship matters, offering strategic counsel that protects your interests while minimizing conflict whenever possible. Whether you're facing divorce, custody disputes, maintenance issues, or need general legal advice, we provide the knowledge and support you need to navigate the legal system with confidence.
-              </p>
-            </Card>
-          </div>
-          
           <ServiceInfoSection 
             whoCanBenefit={[
               { text: "Individuals seeking legal clarity during relationship transitions" },
