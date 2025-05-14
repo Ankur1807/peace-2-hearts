@@ -20,12 +20,6 @@ const MentalHealthService: React.FC = () => {
       path: "/services/mental-health/family-therapy"
     },
     {
-      id: "premarital-counselling",
-      title: "Premarital Counselling",
-      description: "Preparing couples for a strong and fulfilling marriage through guided discussions and planning.",
-      path: "/services/mental-health/premarital-counselling"
-    },
-    {
       id: "couples-counselling", // Make sure this ID matches what's in the selection options
       title: "Couples Counselling",
       description: "Professional guidance to strengthen communication and mutual understanding.",
