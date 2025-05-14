@@ -1,6 +1,6 @@
 
 import React, { ReactNode } from 'react';
-import { SimpleMandalaPattern } from '../mandala/SimpleMandalaPattern';
+import SimpleMandalaPattern from '../mandala/SimpleMandalaPattern';
 
 interface ServiceInfoItem {
   text: string;
@@ -23,7 +23,7 @@ const ServiceInfoSection = ({
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className={`w-[150%] md:w-[120%] lg:w-[100%] aspect-square rounded-full ${mandalaColor} opacity-70`}>
           <div className="w-full h-full animate-spin-very-slow">
-            <SimpleMandalaPattern className="w-full h-full text-peacefulBlue/20" />
+            <SimpleMandalaPattern isHovered={false} animated={true} />
           </div>
         </div>
       </div>
