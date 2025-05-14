@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -16,6 +15,7 @@ interface ServiceLayoutProps {
   image: string;
   children?: ReactNode;
   serviceType?: string;
+  customHeroBanner?: ReactNode;
 }
 
 const ServiceLayout = ({ 
@@ -25,13 +25,20 @@ const ServiceLayout = ({
   howItWorks, 
   image, 
   children, 
-  serviceType 
+  serviceType,
+  customHeroBanner 
 }: ServiceLayoutProps) => {
   const bookingUrl = serviceType 
     ? `/book-consultation?service=${serviceType}` 
     : '/book-consultation';
     
   const renderHeroBanner = () => {
+    // If a custom banner is provided, use it
+    if (customHeroBanner) {
+      return customHeroBanner;
+    }
+    
+    // Otherwise, use the default banner logic
     if (serviceType === 'mental-health') {
       return <MentalHealthHeroBanner className="h-full w-full min-h-[250px] sm:min-h-[350px] shadow-lg" />;
     } else if (serviceType === 'legal-support') {

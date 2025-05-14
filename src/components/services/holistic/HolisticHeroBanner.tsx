@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bridge, Heart, MessageCircle, Users, Handshake } from 'lucide-react';
+import { Handshake, Heart, MessageCircle, Users, Link } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type HolisticServiceType = 'divorce-prevention' | 'pre-marriage-clarity';
@@ -19,7 +19,7 @@ const HolisticHeroBanner = ({ serviceType, className }: HolisticHeroBannerProps)
             {/* Bridge/Light connection between couple */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full">
               <div className="w-full h-1 bg-gradient-to-r from-peacefulBlue/20 via-peacefulBlue/60 to-peacefulBlue/20 animate-pulse"></div>
-              <Bridge className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-peacefulBlue w-12 h-12 animate-heartbeat-glow" />
+              <Link className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-peacefulBlue w-12 h-12 animate-heartbeat-glow" />
             </div>
             
             {/* Couple */}
