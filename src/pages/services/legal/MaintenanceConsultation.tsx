@@ -33,6 +33,8 @@ const MaintenanceConsultation = () => {
           { text: "Decide next steps with both clarity and caution" }
         ]}
         mandalaColor="bg-amber-50"
+        whoCanBenefitClassName="bg-gradient-5"
+        howItWorksClassName="bg-gradient-6"
       />
 
       <section className="py-12">

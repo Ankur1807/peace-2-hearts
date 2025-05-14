@@ -33,6 +33,8 @@ const ChildCustodyConsultation = () => {
           { text: "Make child-focused choices, with clear guidance" }
         ]}
         mandalaColor="bg-teal-50"
+        whoCanBenefitClassName="bg-gradient-1"
+        howItWorksClassName="bg-gradient-4"
       />
 
       <section className="py-12">

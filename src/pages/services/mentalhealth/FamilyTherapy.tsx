@@ -33,6 +33,8 @@ const FamilyTherapy = () => {
           { text: "Build communication and respect at every level" }
         ]}
         mandalaColor="bg-purple-50"
+        whoCanBenefitClassName="bg-gradient-6"
+        howItWorksClassName="bg-gradient-1"
       />
 
       <section className="py-12">

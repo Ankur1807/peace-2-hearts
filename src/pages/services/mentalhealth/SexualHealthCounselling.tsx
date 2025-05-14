@@ -33,6 +33,8 @@ const SexualHealthCounselling = () => {
           { text: "Move toward confidence, comfort, and connection" }
         ]}
         mandalaColor="bg-pink-50"
+        whoCanBenefitClassName="bg-gradient-3"
+        howItWorksClassName="bg-gradient-6"
       />
 
       <section className="py-12">

@@ -40,6 +40,8 @@ const GeneralConsultation = () => {
             { text: "Walk away with clarity, not confusion" }
           ]}
           mandalaColor="bg-gray-50"
+          whoCanBenefitClassName="bg-gradient-3"
+          howItWorksClassName="bg-gradient-2"
         />
         
         <section className="py-12">

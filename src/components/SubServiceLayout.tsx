@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -94,7 +93,17 @@ const SubServiceLayout = ({
         gradientClasses[index % gradientClasses.length]
       );
     }
-    return "bg-white";
+    
+    // For non-divorce pages, use gradient classes in a rotation for all service pages
+    const gradientClasses = [
+      'bg-gradient-1',
+      'bg-gradient-2',
+      'bg-gradient-3',
+      'bg-gradient-4',
+      'bg-gradient-5',
+      'bg-gradient-6'
+    ];
+    return gradientClasses[index % gradientClasses.length];
   };
   
   return (

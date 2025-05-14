@@ -33,6 +33,8 @@ const MentalHealthCounselling = () => {
           { text: "Move at your pace — no pressure, no judgment" }
         ]}
         mandalaColor="bg-peacefulBlue/5"
+        whoCanBenefitClassName="bg-gradient-4"
+        howItWorksClassName="bg-gradient-1"
       />
 
       <section className="py-12">

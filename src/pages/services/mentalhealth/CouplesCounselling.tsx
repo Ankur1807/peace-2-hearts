@@ -33,6 +33,8 @@ const CouplesCounselling = () => {
           { text: "Learn tools to reconnect and rebuild understanding" }
         ]}
         mandalaColor="bg-softGreen/5"
+        whoCanBenefitClassName="bg-gradient-5"
+        howItWorksClassName="bg-gradient-3"
       />
 
       <section className="py-12">

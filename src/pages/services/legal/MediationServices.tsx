@@ -33,6 +33,8 @@ const MediationServices = () => {
           { text: "Work toward peaceful, actionable solutions" }
         ]}
         mandalaColor="bg-indigo-50"
+        whoCanBenefitClassName="bg-gradient-2"
+        howItWorksClassName="bg-gradient-5"
       />
 
       <section className="py-12">
