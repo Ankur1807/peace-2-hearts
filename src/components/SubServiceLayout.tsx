@@ -127,7 +127,7 @@ const SubServiceLayout = ({
                   </Link>
                 </div>
               </div>
-              <div className="md:w-1/2">
+              <div className="md:w-1/2 w-full">
                 {renderHeroBanner()}
               </div>
             </div>
