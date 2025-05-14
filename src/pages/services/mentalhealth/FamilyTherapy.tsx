@@ -1,5 +1,6 @@
 
 import SubServiceLayout from "@/components/SubServiceLayout";
+import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 
 const FamilyTherapy = () => {
   return (
@@ -18,6 +19,22 @@ const FamilyTherapy = () => {
         "Framework for developing mutual respect and understanding"
       ]}
     >
+      <ServiceInfoSection 
+        whoCanBenefit={[
+          { text: "Families navigating constant tension, blame, or emotional distance" },
+          { text: "Parents and teens with unresolved conflict" },
+          { text: "Blended families adjusting to change" },
+          { text: "Households struggling with unspoken pain or fractured trust" }
+        ]}
+        howItWorks={[
+          { text: "Share your family's unique situation" },
+          { text: "Meet a therapist trained in multi-person dynamics" },
+          { text: "Attend joint or split sessions as needed" },
+          { text: "Build communication and respect at every level" }
+        ]}
+        mandalaColor="bg-purple-50"
+      />
+
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">

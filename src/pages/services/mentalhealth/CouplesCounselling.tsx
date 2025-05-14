@@ -1,5 +1,6 @@
 
 import SubServiceLayout from "@/components/SubServiceLayout";
+import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 
 const CouplesCounselling = () => {
   return (
@@ -8,7 +9,7 @@ const CouplesCounselling = () => {
       description="Professional guidance to strengthen communication and mutual understanding in your relationship."
       image="https://images.unsplash.com/photo-1516058575910-2d692b5206e5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
       serviceType="mental-health"
-      serviceName="couples-counselling" // Make sure this matches the ID in other files
+      serviceName="couples-counselling" 
       benefits={[
         "Improved communication skills to express needs effectively",
         "Strategies to resolve recurring conflicts constructively",
@@ -18,6 +19,22 @@ const CouplesCounselling = () => {
         "Techniques to rebuild trust and heal from past hurts"
       ]}
     >
+      <ServiceInfoSection 
+        whoCanBenefit={[
+          { text: "Couples struggling with miscommunication, resentment, or mistrust" },
+          { text: "Partners drifting apart emotionally or facing recurring conflict" },
+          { text: "Those dealing with infidelity, jealousy, or unmet expectations" },
+          { text: "Couples preparing for a major life decision (marriage, children, relocation)" }
+        ]}
+        howItWorks={[
+          { text: "Tell us what you're facing as a couple" },
+          { text: "Get matched with a relationship counselor" },
+          { text: "Work through challenges together in safe, guided sessions" },
+          { text: "Learn tools to reconnect and rebuild understanding" }
+        ]}
+        mandalaColor="bg-softGreen/5"
+      />
+
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">

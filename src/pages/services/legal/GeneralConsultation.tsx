@@ -1,5 +1,7 @@
+
 import SubServiceLayout from "@/components/SubServiceLayout";
 import { SEO } from '@/components/SEO';
+import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 
 const GeneralConsultation = () => {
   return (
@@ -24,6 +26,22 @@ const GeneralConsultation = () => {
           "Comprehensive approach addressing all aspects of your situation"
         ]}
       >
+        <ServiceInfoSection 
+          whoCanBenefit={[
+            { text: "Individuals feeling legally lost in their relationship journey" },
+            { text: "Those unsure whether they need a lawyer yet" },
+            { text: "People facing early red flags or emotional/legal grey areas" },
+            { text: "Anyone seeking legal peace of mind before making decisions" }
+          ]}
+          howItWorks={[
+            { text: "Tell us what's worrying you" },
+            { text: "Speak to a legal consultant in a relaxed setting" },
+            { text: "Ask anything — no documentation needed yet" },
+            { text: "Walk away with clarity, not confusion" }
+          ]}
+          mandalaColor="bg-gray-50"
+        />
+        
         <section className="py-12">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">

@@ -1,5 +1,6 @@
 
 import SubServiceLayout from "@/components/SubServiceLayout";
+import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 
 const SexualHealthCounselling = () => {
   return (
@@ -18,6 +19,22 @@ const SexualHealthCounselling = () => {
         "Safe space to discuss sensitive topics with professional guidance"
       ]}
     >
+      <ServiceInfoSection 
+        whoCanBenefit={[
+          { text: "Individuals struggling with shame, performance anxiety, or identity conflict" },
+          { text: "Couples facing disconnect or unspoken issues in intimacy" },
+          { text: "People recovering from past sexual trauma or conditioning" },
+          { text: "Anyone seeking safe, non-judgmental clarity around their sexual health" }
+        ]}
+        howItWorks={[
+          { text: "Share your concerns confidentially" },
+          { text: "Speak to a therapist trained in sexual health" },
+          { text: "Explore beliefs, fears, and experiences" },
+          { text: "Move toward confidence, comfort, and connection" }
+        ]}
+        mandalaColor="bg-pink-50"
+      />
+
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">

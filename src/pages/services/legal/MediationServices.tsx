@@ -1,5 +1,6 @@
 
 import SubServiceLayout from "@/components/SubServiceLayout";
+import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 
 const MediationServices = () => {
   return (
@@ -18,6 +19,22 @@ const MediationServices = () => {
         "Confidential process that protects your privacy"
       ]}
     >
+      <ServiceInfoSection 
+        whoCanBenefit={[
+          { text: "Couples wanting to resolve disputes without going to court" },
+          { text: "Families looking to settle calmly and cooperatively" },
+          { text: "Those seeking a structured but empathetic conversation" },
+          { text: "Anyone needing help to reach fair terms without escalation" }
+        ]}
+        howItWorks={[
+          { text: "Explain the conflict you're dealing with" },
+          { text: "Meet with a trained legal mediator" },
+          { text: "Join structured sessions that balance both sides" },
+          { text: "Work toward peaceful, actionable solutions" }
+        ]}
+        mandalaColor="bg-indigo-50"
+      />
+
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">

@@ -1,5 +1,6 @@
 
 import SubServiceLayout from "@/components/SubServiceLayout";
+import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 
 const DivorceConsultation = () => {
   return (
@@ -18,6 +19,22 @@ const DivorceConsultation = () => {
         "Support for drafting and reviewing divorce petitions and agreements"
       ]}
     >
+      <ServiceInfoSection 
+        whoCanBenefit={[
+          { text: "Individuals considering separation but unsure of next steps" },
+          { text: "Those facing emotional or legal pressure in a failing marriage" },
+          { text: "People seeking clarity before initiating or responding to a divorce" },
+          { text: "Anyone looking to protect their peace without escalating conflict" }
+        ]}
+        howItWorks={[
+          { text: "Tell us where you stand emotionally and legally" },
+          { text: "Speak with a family lawyer trained in divorce mediation" },
+          { text: "Get your rights explained — no pressure to litigate" },
+          { text: "Decide what's right for you, informed and calm" }
+        ]}
+        mandalaColor="bg-blue-50"
+      />
+
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">

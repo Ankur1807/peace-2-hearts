@@ -1,5 +1,6 @@
 
 import SubServiceLayout from "@/components/SubServiceLayout";
+import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 
 const MentalHealthCounselling = () => {
   return (
@@ -18,6 +19,22 @@ const MentalHealthCounselling = () => {
         "Techniques to establish healthy boundaries in relationships"
       ]}
     >
+      <ServiceInfoSection 
+        whoCanBenefit={[
+          { text: "Individuals facing emotional overwhelm, anxiety, or prolonged sadness" },
+          { text: "People feeling stuck in toxic patterns or self-doubt" },
+          { text: "Those navigating grief, betrayal, or a loss of direction" },
+          { text: "Anyone seeking emotional clarity and inner peace" }
+        ]}
+        howItWorks={[
+          { text: "Share your current emotional struggles with us" },
+          { text: "Get matched with a counselor suited to your needs" },
+          { text: "Start safe, confidential sessions on your own terms" },
+          { text: "Move at your pace — no pressure, no judgment" }
+        ]}
+        mandalaColor="bg-peacefulBlue/5"
+      />
+
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">

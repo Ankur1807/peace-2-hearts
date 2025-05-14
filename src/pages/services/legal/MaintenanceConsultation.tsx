@@ -1,5 +1,6 @@
 
 import SubServiceLayout from "@/components/SubServiceLayout";
+import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 
 const MaintenanceConsultation = () => {
   return (
@@ -18,6 +19,22 @@ const MaintenanceConsultation = () => {
         "Support for addressing maintenance payment issues"
       ]}
     >
+      <ServiceInfoSection 
+        whoCanBenefit={[
+          { text: "Spouses unsure about their financial rights after separation" },
+          { text: "Individuals struggling to receive or provide post-divorce support" },
+          { text: "Women left financially vulnerable after marital breakdown" },
+          { text: "Anyone considering or contesting a maintenance order" }
+        ]}
+        howItWorks={[
+          { text: "Brief us on your financial and marital situation" },
+          { text: "Consult with a lawyer who understands spousal support law" },
+          { text: "Learn what you're entitled to — and what's realistic" },
+          { text: "Decide next steps with both clarity and caution" }
+        ]}
+        mandalaColor="bg-amber-50"
+      />
+
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">

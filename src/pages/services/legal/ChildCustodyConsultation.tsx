@@ -1,5 +1,6 @@
 
 import SubServiceLayout from "@/components/SubServiceLayout";
+import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 
 const ChildCustodyConsultation = () => {
   return (
@@ -18,6 +19,22 @@ const ChildCustodyConsultation = () => {
         "Support in navigating emotionally challenging custody disputes"
       ]}
     >
+      <ServiceInfoSection 
+        whoCanBenefit={[
+          { text: "Parents uncertain about custody rights and responsibilities" },
+          { text: "Those facing co-parenting challenges or disputes" },
+          { text: "Individuals concerned about child welfare during separation" },
+          { text: "Anyone needing clarity on legal steps around guardianship" }
+        ]}
+        howItWorks={[
+          { text: "Share your parenting or custody concerns" },
+          { text: "Connect with a legal expert in custody law" },
+          { text: "Understand your rights, options, and risks" },
+          { text: "Make child-focused choices, with clear guidance" }
+        ]}
+        mandalaColor="bg-teal-50"
+      />
+
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
