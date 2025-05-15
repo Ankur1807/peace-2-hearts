@@ -81,7 +81,7 @@ const MentalHealthService: React.FC = () => {
                   key={service.id}
                   className={cn(
                     "p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300",
-                    "transform hover:-translate-y-1 cursor-pointer relative overflow-hidden",
+                    "transform hover:-translate-y-1 cursor-pointer relative overflow-hidden offering-card",
                     getGradientClass(index)
                   )}
                   onClick={() => window.location.href = service.path}
@@ -109,7 +109,7 @@ const MentalHealthService: React.FC = () => {
                 "Integrated approach addressing both emotional and practical concerns"
               ].map((benefit, index) => (
                 <div key={index} className={cn(
-                  "p-5 rounded-xl shadow-sm border border-gray-100 flex items-start text-center", 
+                  "p-5 rounded-xl shadow-sm border border-gray-100 flex items-start text-center benefit-card", 
                   getGradientClass(index)
                 )}>
                   <p className="text-gray-700 mx-auto">{benefit}</p>
