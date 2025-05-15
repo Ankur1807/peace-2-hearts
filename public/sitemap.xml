@@ -1,196 +1,155 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Main pages -->
   <url>
     <loc>https://peace2hearts.com/</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://peace2hearts.com/about</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peace2hearts.com/services</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://peace2hearts.com/resources</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peace2hearts.com/news</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://peace2hearts.com/contact</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   
-  <!-- Mental Health Service Pages -->
+  <!-- Service Category Pages -->
+  <url>
+    <loc>https://peace2hearts.com/services</loc>
+    <lastmod>2025-05-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
   <url>
     <loc>https://peace2hearts.com/services/mental-health</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://peace2hearts.com/services/legal-support</loc>
+    <lastmod>2025-05-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Mental Health Service Pages -->
+  <url>
     <loc>https://peace2hearts.com/services/mental-health/counselling</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://peace2hearts.com/services/mental-health/family-therapy</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peace2hearts.com/services/mental-health/premarital-counselling</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://peace2hearts.com/services/mental-health/couples-counselling</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://peace2hearts.com/services/mental-health/premarital-counselling</loc>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://peace2hearts.com/services/mental-health/sexual-health-counselling</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <!-- Legal Service Pages -->
   <url>
-    <loc>https://peace2hearts.com/services/legal-support</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peace2hearts.com/services/legal-support/pre-marriage</loc>
-    <lastmod>2023-11-20</lastmod>
+    <loc>https://peace2hearts.com/services/legal-support/divorce</loc>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://peace2hearts.com/services/legal-support/mediation</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peace2hearts.com/services/legal-support/divorce</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://peace2hearts.com/services/legal-support/custody</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://peace2hearts.com/services/legal-support/maintenance</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://peace2hearts.com/services/legal-support/general</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   
-  <!-- Legacy Service Pages -->
+  <!-- Holistic Package Pages -->
   <url>
-    <loc>https://peace2hearts.com/services/therapy</loc>
-    <lastmod>2023-11-20</lastmod>
+    <loc>https://peace2hearts.com/services/holistic/pre-marriage-clarity</loc>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://peace2hearts.com/services/divorce</loc>
-    <lastmod>2023-11-20</lastmod>
+    <loc>https://peace2hearts.com/services/holistic/divorce-prevention</loc>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://peace2hearts.com/services/custody</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
   
-  <!-- Consultants & Booking -->
-  <url>
-    <loc>https://peace2hearts.com/consultants</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://peace2hearts.com/book-consultation</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <!-- Policy Pages -->
-  <url>
-    <loc>https://peace2hearts.com/terms</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
-  </url>
+  <!-- Legal Policy Pages -->
   <url>
     <loc>https://peace2hearts.com/privacy-policy</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://peace2hearts.com/cancellation-refund</loc>
-    <lastmod>2023-11-20</lastmod>
+    <loc>https://peace2hearts.com/terms</loc>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://peace2hearts.com/shipping-delivery</loc>
-    <lastmod>2023-11-20</lastmod>
+    <lastmod>2025-05-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://peace2hearts.com/cancellation-refund</loc>
+    <lastmod>2025-05-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   
-  <!-- Authentication & Dashboard -->
+  <!-- Booking Pages -->
   <url>
-    <loc>https://peace2hearts.com/sign-in</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://peace2hearts.com/book-consultation</loc>
+    <lastmod>2025-05-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://peace2hearts.com/sign-up</loc>
-    <lastmod>2023-11-20</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://peace2hearts.com/thank-you</loc>
+    <lastmod>2025-05-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>
