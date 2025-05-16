@@ -1,59 +1,117 @@
+import { Heart, BookOpen, MessageSquare, Shield, Bell, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import SiteCard from "@/components/SiteCard";
 
-import React from 'react';
-import { Heart, ShieldCheck, CheckCircle } from 'lucide-react';
+const featureBgGradient = "bg-gradient-to-br from-white to-softPink/10";
+const featureShadow = "shadow-md hover:shadow-lg transition-all duration-300";
 
 const WhyChooseUsSection = () => {
+  const isMobile = useIsMobile();
+  
+  const features = [
+    {
+      icon: Heart,
+      color: "vibrantPurple",
+      title: "Compassionate Care",
+      description: "We approach every client with empathy, recognizing the emotional complexities of relationship struggles."
+    },
+    {
+      icon: BookOpen,
+      color: "peacefulBlue",
+      title: "Expert Knowledge",
+      description: "Our team brings deep expertise in both mental health and family law to offer well-rounded, practical support."
+    },
+    {
+      icon: MessageSquare,
+      color: "brightOrange",
+      title: "Tailored Approach",
+      description: "No two relationships are the same. We adapt our care to meet your unique needs, stage, and story."
+    },
+    {
+      icon: Shield,
+      color: "vividPink",
+      title: "No-Strings-Attached Legal Help",
+      description: "Legal consultations without pressure—just honest advice, without the push to litigate."
+    },
+    {
+      icon: Bell,
+      color: "softGreen",
+      title: "Divorce Prevention Focus",
+      description: "We believe separation isn't always the only option. When there's a chance for repair, we'll help you explore it."
+    },
+    {
+      icon: Users,
+      color: "brightOrange",
+      title: "Empathetic, Trusted Team",
+      description: "From your first call to every session, expect warmth, care, and zero judgment."
+    }
+  ];
+
+  // Consistent Icon color classes
+  const iconColorClass = (color: string) => {
+    switch (color) {
+      case "vibrantPurple": return "text-vibrantPurple bg-vibrantPurple/15";
+      case "peacefulBlue": return "text-peacefulBlue bg-peacefulBlue/15";
+      case "brightOrange": return "text-brightOrange bg-brightOrange/15";
+      case "vividPink": return "text-vividPink bg-vividPink/15";
+      case "softGreen": return "text-softGreen bg-softGreen/15";
+      default: return "text-vibrantPurple bg-vibrantPurple/15";
+    }
+  };
+
+  const FeatureCard = ({ feature }) => (
+    <SiteCard className="mx-2 my-3 flex flex-col items-center text-center">
+      <div className={`p-4 rounded-full flex items-center justify-center mb-4 ${iconColorClass(feature.color)}`}>
+        <feature.icon className="h-9 w-9" />
+      </div>
+      <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">{feature.title}</h3>
+      <p className="text-gray-600">{feature.description}</p>
+    </SiteCard>
+  );
+
   return (
-    <section className="py-16 bg-gradient-to-r from-slate-50 to-blue-50">
+    <section className="py-16">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-lora font-bold text-gray-800 mb-4">Why Choose Peace2Hearts</h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            We've built a service that we wish existed when we needed help - 
-            combining professional guidance with human warmth and accessibility.
-          </p>
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <h2 className="section-title">Why Expert Guidance Matters</h2>
+          <p className="text-gray-600">Relationship challenges can be complex—our holistic approach ensures both your emotional and legal needs are addressed.</p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Compassionate Approach */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex flex-col items-center text-center">
-              <div className="p-3 rounded-full bg-peacefulBlue/10 mb-4">
-                <Heart className="h-8 w-8 text-peacefulBlue" />
+        
+        {isMobile ? (
+          <div className="relative">
+            <Carousel className="w-full">
+              <CarouselContent>
+                {features.map((feature, index) => (
+                  <CarouselItem key={index} className="md:basis-1/1 lg:basis-1/1">
+                    <FeatureCard feature={feature} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <CarouselPrevious className="relative -left-0 top-0 translate-y-0 h-9 w-9" />
+                <div className="text-sm text-gray-500">Swipe to see more</div>
+                <CarouselNext className="relative -right-0 top-0 translate-y-0 h-9 w-9" />
               </div>
-              <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">Compassionate Approach</h3>
-              <p className="text-gray-600">
-                Every consultation is handled with dignity, respect, and deep understanding of how vulnerable relationship challenges can feel.
-              </p>
+            </Carousel>
+            <div className="flex justify-center mt-4">
+              <div className="flex space-x-1 mt-2">
+                {features.map((_, index) => (
+                  <div 
+                    key={index} 
+                    className="h-1.5 w-1.5 rounded-full bg-gray-300"
+                  />
+                ))}
+              </div>
             </div>
           </div>
-
-          {/* Verified Experts */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex flex-col items-center text-center">
-              <div className="p-3 rounded-full bg-peacefulBlue/10 mb-4">
-                <ShieldCheck className="h-8 w-8 text-peacefulBlue" />
-              </div>
-              <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">Verified Experts</h3>
-              <p className="text-gray-600">
-                Our consultants are rigorously vetted professionals with specialized experience in relationship dynamics and family law.
-              </p>
-            </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-10">
+            {features.map((feature, index) => (
+              <FeatureCard key={index} feature={feature} />
+            ))}
           </div>
-
-          {/* Integrated Support */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex flex-col items-center text-center">
-              <div className="p-3 rounded-full bg-peacefulBlue/10 mb-4">
-                <CheckCircle className="h-8 w-8 text-peacefulBlue" />
-              </div>
-              <h3 className="text-xl font-lora font-semibold text-gray-800 mb-3">Integrated Support</h3>
-              <p className="text-gray-600">
-                Our unique approach combines emotional and legal support to address the full spectrum of relationship challenges.
-              </p>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );
