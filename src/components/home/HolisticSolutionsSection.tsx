@@ -1,109 +1,103 @@
-import { ArrowRight, PackageCheck, Heart, Gavel } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+
+import React from 'react';
 import { Link } from 'react-router-dom';
-import SiteCard from "@/components/SiteCard";
+import { Sparkles, Gem } from 'lucide-react';
+import { FractalButton } from '@/components/FractalButton';
 
 const HolisticSolutionsSection = () => {
   return (
-    <section className="py-16">
+    <section className="py-16 bg-gradient-to-br from-white to-blue-50">
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <h2 className="section-title gradient-text">Holistic Solutions</h2>
-          <p className="text-gray-600">Comprehensive care packages combining mental health support and legal guidance for your specific relationship journey.</p>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-lora font-bold text-gray-800 mb-4">Our Holistic Solutions</h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Specially designed packages that combine mental health support and legal guidance
+            for comprehensive care during critical relationship transitions.
+          </p>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-10">
-          <SiteCard>
-            <div className="mb-6 flex items-center">
-              <div className="p-4 rounded-full bg-vibrantPurple/15 mr-4 flex items-center justify-center">
-                <PackageCheck className="h-9 w-9 text-vibrantPurple" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* Pre-Marriage Clarity */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full offering-card">
+            <div className="p-8">
+              <div className="flex items-center mb-6">
+                <div className="p-3 rounded-full bg-vibrantPurple/15 mr-4">
+                  <Sparkles className="h-8 w-8 text-vibrantPurple" />
+                </div>
+                <h3 className="text-xl font-lora font-semibold text-gray-800">Pre-Marriage Clarity</h3>
               </div>
-              <h3 className="text-xl font-lora font-semibold text-gray-800">Divorce Prevention Package</h3>
+              <p className="text-gray-600 mb-6">
+                Start your marriage journey with confidence by addressing emotional compatibility, communication patterns, 
+                and legal considerations before tying the knot.
+              </p>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
+                  <span className="text-gray-700">Psychological and emotional readiness assessment</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
+                  <span className="text-gray-700">Communication and conflict resolution skills</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
+                  <span className="text-gray-700">Financial compatibility planning</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-vibrantPurple"></span>
+                  <span className="text-gray-700">Pre-nuptial agreement consultation</span>
+                </li>
+              </ul>
             </div>
-            
-            <p className="text-gray-600 mb-4">
-              A comprehensive approach to resolving relationship challenges before they lead to separation, combining therapy and legal mediation.
-            </p>
-            
-            <div className="mb-6 space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-1">
-                  <Heart className="h-6 w-6 text-vibrantPurple" />
-                </div>
-                <div>
-                  <p className="text-gray-700 font-medium">2 Therapy Sessions</p>
-                  <p className="text-gray-600 text-sm">Address emotional challenges and improve communication</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-1">
-                  <Gavel className="h-6 w-6 text-peacefulBlue" />
-                </div>
-                <div>
-                  <p className="text-gray-700 font-medium">1 Mediation Session</p>
-                  <p className="text-gray-600 text-sm">Resolve conflicts with professional guidance</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-1">
-                  <Gavel className="h-6 w-6 text-peacefulBlue" />
-                </div>
-                <div>
-                  <p className="text-gray-700 font-medium">1 Legal Consultation</p>
-                  <p className="text-gray-600 text-sm">Understand your legal rights and options</p>
-                </div>
-              </div>
+            <div className="mt-auto p-8 pt-0">
+              <FractalButton asChild fractalType="primary" className="w-full">
+                <Link to="/services/holistic/pre-marriage-clarity">
+                  Learn More
+                </Link>
+              </FractalButton>
             </div>
-            
-            <Button asChild variant="link" className="text-vibrantPurple hover:text-vibrantPurple/90 p-0 gap-1 font-medium">
-              <Link to="/services/holistic/divorce-prevention">
-                Learn More <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </SiteCard>
+          </div>
           
-          <SiteCard className="bg-gradient-to-br from-white to-peacefulBlue/10">
-            <div className="mb-6 flex items-center">
-              <div className="p-4 rounded-full bg-peacefulBlue/15 mr-4 flex items-center justify-center">
-                <PackageCheck className="h-9 w-9 text-peacefulBlue" />
+          {/* Divorce Prevention */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full offering-card">
+            <div className="p-8">
+              <div className="flex items-center mb-6">
+                <div className="p-3 rounded-full bg-peacefulBlue/15 mr-4">
+                  <Gem className="h-8 w-8 text-peacefulBlue" />
+                </div>
+                <h3 className="text-xl font-lora font-semibold text-gray-800">Divorce Prevention</h3>
               </div>
-              <h3 className="text-xl font-lora font-semibold text-gray-800">Pre-Marriage Clarity Package</h3>
+              <p className="text-gray-600 mb-6">
+                For couples on the brink, our integrated approach helps you evaluate whether the relationship 
+                can be rebuilt or if a respectful separation is the healthier path.
+              </p>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+                  <span className="text-gray-700">Crisis intervention counseling</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+                  <span className="text-gray-700">Relationship repair assessment</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+                  <span className="text-gray-700">Legal implications overview</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-peacefulBlue"></span>
+                  <span className="text-gray-700">Separation planning (if needed)</span>
+                </li>
+              </ul>
             </div>
-            
-            <p className="text-gray-600 mb-4">
-              Start your marriage journey with confidence by addressing both emotional readiness and legal considerations.
-            </p>
-            
-            <div className="mb-6 space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-1">
-                  <Gavel className="h-6 w-6 text-peacefulBlue" />
-                </div>
-                <div>
-                  <p className="text-gray-700 font-medium">1 Legal Consultation</p>
-                  <p className="text-gray-600 text-sm">Understand marriage laws and financial implications</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-1">
-                  <Heart className="h-6 w-6 text-vibrantPurple" />
-                </div>
-                <div>
-                  <p className="text-gray-700 font-medium">2 Mental Health Sessions</p>
-                  <p className="text-gray-600 text-sm">Explore relationship expectations and communication styles</p>
-                </div>
-              </div>
+            <div className="mt-auto p-8 pt-0">
+              <FractalButton asChild fractalType="secondary" className="w-full">
+                <Link to="/services/holistic/divorce-prevention">
+                  Learn More
+                </Link>
+              </FractalButton>
             </div>
-            
-            <Button asChild variant="link" className="text-peacefulBlue hover:text-peacefulBlue/90 p-0 gap-1 font-medium">
-              <Link to="/services/holistic/pre-marriage-clarity">
-                Learn More <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </SiteCard>
+          </div>
         </div>
       </div>
     </section>

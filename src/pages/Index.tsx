@@ -15,10 +15,9 @@ import CTASection from '@/components/home/CTASection';
 const HomePage = () => {
   // Organization social media links for schema
   const socialLinks = [
-    "https://facebook.com/peace2hearts",
-    "https://twitter.com/peace2hearts",
-    "https://instagram.com/peace2hearts",
-    "https://linkedin.com/company/peace2hearts"
+    "https://facebook.com/people/Peace2Hearts/61576144408544/",
+    "https://x.com/Peace2Hearts_1",
+    "https://instagram.com/peace2hearts_1"
   ];
 
   return (
