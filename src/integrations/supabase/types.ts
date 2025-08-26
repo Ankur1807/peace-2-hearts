@@ -285,6 +285,45 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          currency: string | null
+          email: string | null
+          id: string
+          notes: Json | null
+          rzp_order_id: string | null
+          rzp_payment_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          currency?: string | null
+          email?: string | null
+          id?: string
+          notes?: Json | null
+          rzp_order_id?: string | null
+          rzp_payment_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          currency?: string | null
+          email?: string | null
+          id?: string
+          notes?: Json | null
+          rzp_order_id?: string | null
+          rzp_payment_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       pricing_history: {
         Row: {
           changed_by: string | null
