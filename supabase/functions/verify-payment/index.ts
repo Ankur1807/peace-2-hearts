@@ -176,14 +176,18 @@ async function upsertPaymentRecord(payment: RazorpayPayment, bookingDetails?: an
     
     console.log(`Successfully upserted payment record for ${payment.id} with status ${finalStatus}`);
     
-    // Upsert consultations record if payment is captured
+    // Handle consultation record based on payment status
     if (finalStatus === 'captured') {
+      // For captured payments, create/update consultation and send email if newly captured
       await upsertConsultationRecord(payment, bookingDetails);
-    }
-    
-    // Send booking confirmation email if payment is newly captured
-    if (finalStatus === 'captured' && !wasAlreadyCaptured) {
-      await sendBookingConfirmationEmailForPayment(payment.id);
+      
+      // Send booking confirmation email if payment is newly captured
+      if (!wasAlreadyCaptured) {
+        await sendBookingConfirmationEmailForPayment(payment.id);
+      }
+    } else if (finalStatus === 'failed') {
+      // For failed payments, update consultation status if it exists and isn't already captured
+      await updateConsultationStatusForFailedPayment(payment);
     }
     
     return { success: true };
@@ -198,66 +202,62 @@ async function upsertPaymentRecord(payment: RazorpayPayment, bookingDetails?: an
  */
 async function upsertConsultationRecord(payment: RazorpayPayment, bookingDetails?: any): Promise<void> {
   try {
-    // Try to find existing consultation by payment_id or order_id
+    // Try to find existing consultation by payment_id or order_id (using existing table columns)
     const { data: existingConsultation } = await supabase
       .from('consultations')
       .select('*')
-      .or(`rzp_payment_id.eq.${payment.id},rzp_order_id.eq.${payment.order_id}`)
+      .or(`payment_id.eq.${payment.id},order_id.eq.${payment.order_id}`)
       .maybeSingle();
 
     const consultationData = {
-      rzp_payment_id: payment.id,
-      rzp_order_id: payment.order_id,
+      payment_id: payment.id,  // Map to existing column
+      order_id: payment.order_id,  // Map to existing column
       status: 'confirmed',
-      email: bookingDetails?.email || payment.email || null,
-      scheduled_at: bookingDetails?.scheduled_at || bookingDetails?.date || null,
-      notes: {
-        razorpay_payment: payment,
-        booking_details: bookingDetails || {},
-        updated_at: new Date().toISOString()
-      }
+      payment_status: 'paid',
+      client_email: bookingDetails?.email || payment.email || null,
+      amount: payment.amount,
+      email_sent: false,  // Will be set to true when email is sent
+      updated_at: new Date().toISOString()
     };
 
     if (existingConsultation) {
-      // Update existing consultation
-      const { error } = await supabase
-        .from('consultations')
-        .update(consultationData)
-        .eq('id', existingConsultation.id);
-      
-      if (error) {
-        console.error(`Failed to update consultation for payment ${payment.id}:`, error);
+      // Update existing consultation - only update if not already captured/confirmed
+      if (existingConsultation.status !== 'confirmed' || existingConsultation.payment_status !== 'paid') {
+        const { error } = await supabase
+          .from('consultations')
+          .update(consultationData)
+          .eq('id', existingConsultation.id);
+        
+        if (error) {
+          console.error(`Failed to update consultation for payment ${payment.id}:`, error);
+        } else {
+          console.log(`Updated consultation for payment ${payment.id}`);
+        }
       } else {
-        console.log(`Updated consultation for payment ${payment.id}`);
+        console.log(`Consultation for payment ${payment.id} already confirmed`);
       }
     } else {
-      // Insert new consultation with error handling for missing columns
+      // Insert new consultation with minimal required fields
       try {
         const { error } = await supabase
           .from('consultations')
-          .insert(consultationData);
+          .insert({
+            payment_id: payment.id,
+            order_id: payment.order_id,
+            status: 'confirmed',
+            payment_status: 'paid',
+            client_email: bookingDetails?.email || payment.email || null,
+            amount: payment.amount,
+            email_sent: false,
+            consultation_type: bookingDetails?.consultation_type || 'General Consultation',
+            time_slot: bookingDetails?.time_slot || 'To be scheduled',
+            reference_id: `P2H-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
         
         if (error) {
-          // If insert fails due to missing columns, retry with minimal fields
-          console.warn(`Full consultation insert failed, retrying with minimal fields:`, error);
-          
-          const minimalData = {
-            rzp_payment_id: payment.id,
-            rzp_order_id: payment.order_id,
-            status: 'confirmed',
-            email: bookingDetails?.email || payment.email || null,
-            notes: consultationData.notes
-          };
-          
-          const { error: retryError } = await supabase
-            .from('consultations')
-            .insert(minimalData);
-          
-          if (retryError) {
-            console.error(`Failed to insert minimal consultation for payment ${payment.id}:`, retryError);
-          } else {
-            console.log(`Inserted minimal consultation for payment ${payment.id}`);
-          }
+          console.error(`Failed to insert consultation for payment ${payment.id}:`, error);
         } else {
           console.log(`Inserted consultation for payment ${payment.id}`);
         }
@@ -267,6 +267,46 @@ async function upsertConsultationRecord(payment: RazorpayPayment, bookingDetails
     }
   } catch (error) {
     console.error(`Error upserting consultation for payment ${payment.id}:`, error);
+  }
+}
+
+/**
+ * Update consultation status for failed payment
+ */
+async function updateConsultationStatusForFailedPayment(payment: RazorpayPayment): Promise<void> {
+  try {
+    // Find existing consultation by payment_id or order_id
+    const { data: existingConsultation } = await supabase
+      .from('consultations')
+      .select('*')
+      .or(`payment_id.eq.${payment.id},order_id.eq.${payment.order_id}`)
+      .maybeSingle();
+
+    if (existingConsultation) {
+      // Only update to failed if not already confirmed/paid
+      if (existingConsultation.status !== 'confirmed' && existingConsultation.payment_status !== 'paid') {
+        const { error } = await supabase
+          .from('consultations')
+          .update({
+            status: 'failed',
+            payment_status: 'failed',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingConsultation.id);
+        
+        if (error) {
+          console.error(`Failed to update consultation status for failed payment ${payment.id}:`, error);
+        } else {
+          console.log(`Updated consultation status to failed for payment ${payment.id}`);
+        }
+      } else {
+        console.log(`Consultation for payment ${payment.id} already confirmed, not updating to failed`);
+      }
+    } else {
+      console.log(`No consultation found for failed payment ${payment.id}`);
+    }
+  } catch (error) {
+    console.error(`Error updating consultation status for failed payment ${payment.id}:`, error);
   }
 }
 

@@ -73,6 +73,10 @@ import EdgeFunctionTest from './pages/EdgeFunctionTest';
 // Import our new confirmation test page
 import ConfirmationTest from './pages/ConfirmationTest';
 
+// Import webhook test pages
+import WebhookIntegrationTest from './pages/WebhookIntegrationTest';
+import QuickWebhookTest from './pages/QuickWebhookTest';
+
 // App-level flag to prevent multiple recovery runs
 let emailRecoveryHasRun = false;
 
@@ -183,6 +187,10 @@ function App() {
           
           {/* Add our new confirmation test route */}
           <Route path="/confirmation-test" element={<ConfirmationTest />} />
+          
+          {/* Add webhook test routes */}
+          <Route path="/webhook-integration-test" element={<WebhookIntegrationTest />} />
+          <Route path="/quick-webhook-test" element={<QuickWebhookTest />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
