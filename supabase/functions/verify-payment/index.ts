@@ -1,13 +1,11 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
-import { determineServiceCategory } from "./utils.ts";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-const razorpayKeyId = Deno.env.get('RAZORPAY_KEY_ID') || '';
-const razorpayKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET') || '';
+const razorpayKeyId = Deno.env.get('RZP_KEY_ID') || '';
+const razorpayKeySecret = Deno.env.get('RZP_KEY_SECRET') || '';
 
 // Set up CORS headers for browser requests
 const corsHeaders = {
@@ -19,27 +17,10 @@ const corsHeaders = {
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 interface VerifyPaymentRequest {
-  paymentId: string;
-  orderId: string;
-  signature?: string;
-  bookingDetails: {
-    clientName: string;
-    email: string;
-    phone?: string;
-    referenceId: string;
-    consultationType: string;
-    services: string[];
-    date?: string;
-    timeSlot?: string;
-    timeframe?: string;
-    serviceCategory: string;
-    message?: string;
-    amount?: number;
-  };
-  _testMode?: boolean; // Flag to indicate test mode
+  razorpay_order_id: string;
 }
 
-interface RazorpayPaymentDetail {
+interface RazorpayPayment {
   id: string;
   entity: string;
   amount: number;
@@ -47,38 +28,28 @@ interface RazorpayPaymentDetail {
   status: string;
   order_id: string;
   method: string;
-  // Add other fields as needed
+  email?: string;
+  contact?: string;
+  notes?: any;
+  created_at: number;
 }
 
 /**
- * Verify payment with Razorpay API
+ * Fetch payments for a Razorpay order
  */
-async function verifyPaymentWithRazorpay(paymentId: string, isTestMode = false): Promise<{
-  verified: boolean;
-  details?: RazorpayPaymentDetail;
+async function fetchOrderPayments(orderId: string): Promise<{
+  success: boolean;
+  payments?: RazorpayPayment[];
   error?: string;
 }> {
-  // For test mode, return a mock successful response
-  if (isTestMode) {
-    console.log("Using mock Razorpay response for test mode");
-    return {
-      verified: true,
-      details: {
-        id: paymentId,
-        entity: "payment",
-        amount: 99900, // Amount in paise (999 INR)
-        currency: "INR",
-        status: "captured",
-        order_id: "test_order_123",
-        method: "card",
-      }
-    };
-  }
-  
   try {
+    if (!razorpayKeyId || !razorpayKeySecret) {
+      throw new Error('Razorpay credentials not configured');
+    }
+    
     const auth = btoa(`${razorpayKeyId}:${razorpayKeySecret}`);
     
-    const response = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+    const response = await fetch(`https://api.razorpay.com/v1/orders/${orderId}/payments`, {
       method: 'GET',
       headers: {
         'Authorization': `Basic ${auth}`,
@@ -91,237 +62,52 @@ async function verifyPaymentWithRazorpay(paymentId: string, isTestMode = false):
       throw new Error(`Razorpay API error: ${response.status} ${errorText}`);
     }
     
-    const paymentDetails = await response.json();
-    console.log("Payment details from Razorpay:", paymentDetails);
+    const data = await response.json();
+    console.log(`Fetched ${data.items?.length || 0} payments for order ${orderId}`);
     
-    // Consider payment verified if status is authorized or captured
-    const validStatuses = ['authorized', 'captured'];
-    const verified = validStatuses.includes(paymentDetails.status);
-    
-    return { verified, details: paymentDetails };
+    return { success: true, payments: data.items || [] };
   } catch (error) {
-    console.error("Error verifying payment with Razorpay:", error);
-    return { verified: false, error: error.message };
-  }
-}
-
-/**
- * Create consultation record in database
- */
-async function createConsultationRecord(
-  bookingDetails: VerifyPaymentRequest['bookingDetails'],
-  paymentId: string,
-  orderId: string,
-  amount: number,
-  paymentStatus: string,
-  bookingStatus: string
-): Promise<{
-  success: boolean;
-  consultationId?: string;
-  error?: string;
-}> {
-  try {
-    // Extract data from booking details
-    const {
-      clientName,
-      email,
-      phone,
-      referenceId,
-      consultationType,
-      services,
-      date,
-      timeSlot,
-      timeframe,
-      serviceCategory,
-      message
-    } = bookingDetails;
-    
-    console.log(`Creating consultation record with reference ID: ${referenceId}`);
-    
-    // Check if a record already exists with this reference ID
-    const { data: existingConsultation, error: checkError } = await supabase
-      .from('consultations')
-      .select('id')
-      .eq('reference_id', referenceId)
-      .maybeSingle();
-    
-    if (checkError) {
-      console.error("Error checking for existing consultation:", checkError);
-      return { success: false, error: checkError.message };
-    }
-    
-    if (existingConsultation) {
-      console.log(`Consultation with reference ID ${referenceId} already exists, updating status`);
-      
-      // Update existing record
-      const { data: updatedData, error: updateError } = await supabase
-        .from('consultations')
-        .update({
-          payment_id: paymentId,
-          order_id: orderId,
-          amount: amount,
-          payment_status: paymentStatus,
-          status: bookingStatus,
-          source: "edge", // Mark source as edge
-          updated_at: new Date().toISOString()
-        })
-        .eq('reference_id', referenceId)
-        .select('id')
-        .single();
-      
-      if (updateError) {
-        console.error("Error updating consultation:", updateError);
-        return { success: false, error: updateError.message };
-      }
-      
-      return { success: true, consultationId: updatedData.id };
-    } else {
-      // Create new consultation record
-      const { data: newConsultation, error: insertError } = await supabase
-        .from('consultations')
-        .insert({
-          client_name: clientName,
-          client_email: email,
-          client_phone: phone,
-          reference_id: referenceId,
-          consultation_type: consultationType || services.join(','),
-          service_category: serviceCategory || determineServiceCategory(services[0]),
-          date: date ? new Date(date).toISOString() : null,
-          time_slot: timeSlot || null,
-          timeframe: timeframe || null,
-          message: message || null,
-          payment_id: paymentId,
-          order_id: orderId,
-          amount: amount,
-          payment_status: paymentStatus,
-          status: bookingStatus,
-          source: "edge", // Mark source as edge
-          email_sent: false // Will be updated after email is sent
-        })
-        .select('id')
-        .single();
-      
-      if (insertError) {
-        console.error("Error creating consultation record:", insertError);
-        return { success: false, error: insertError.message };
-      }
-      
-      return { success: true, consultationId: newConsultation.id };
-    }
-  } catch (error) {
-    console.error("Error in createConsultationRecord:", error);
+    console.error("Error fetching order payments:", error);
     return { success: false, error: error.message };
   }
 }
 
 /**
- * Send confirmation email
+ * Upsert payment record in database
  */
-async function sendConfirmationEmail(
-  bookingDetails: VerifyPaymentRequest['bookingDetails'],
-  referenceId: string
-): Promise<{
+async function upsertPaymentRecord(payment: RazorpayPayment): Promise<{
   success: boolean;
   error?: string;
 }> {
   try {
-    console.log(`Sending confirmation email for booking ${referenceId}`);
-    
-    // Format date and time for the email if available
-    let serviceType = bookingDetails.consultationType || "";
-    if (Array.isArray(bookingDetails.services) && bookingDetails.services.length > 0) {
-      serviceType = bookingDetails.services.join(", ");
-    }
-    
-    // Add additional error handling for email sending
-    try {
-      const { data: emailResponse, error: emailError } = await supabase.functions.invoke('send-email', {
-        body: {
-          type: 'booking-confirmation',
-          data: {
-            to: bookingDetails.email,
-            clientName: bookingDetails.clientName,
-            referenceId: bookingDetails.referenceId,
-            serviceType: serviceType,
-            date: bookingDetails.date ? new Date(bookingDetails.date).toLocaleDateString() : 'To be scheduled',
-            time: bookingDetails.timeSlot || bookingDetails.timeframe || '',
-            price: 'Payment completed',
-            highPriority: true
-          }
-        }
+    const { error } = await supabase
+      .from('payments')
+      .upsert({
+        rzp_payment_id: payment.id,
+        rzp_order_id: payment.order_id,
+        amount: payment.amount,
+        currency: payment.currency,
+        status: payment.status,
+        email: payment.email || null,
+        notes: payment.notes || {}
+      }, {
+        onConflict: 'rzp_payment_id'
       });
-      
-      if (emailError) {
-        console.error("Error sending confirmation email:", emailError);
-        return { success: false, error: emailError.message };
+    
+    if (error) {
+      // Ignore duplicate key errors as they indicate the payment was already processed
+      if (error.code === '23505') {
+        console.log(`Payment ${payment.id} already exists, ignoring duplicate`);
+        return { success: true };
       }
-      
-      console.log("Email sent successfully:", emailResponse);
-      
-      // Update the consultation record to mark email as sent
-      try {
-        const { error: updateError } = await supabase
-          .from('consultations')
-          .update({ email_sent: true })
-          .eq('reference_id', referenceId);
-        
-        if (updateError) {
-          console.error("Error updating email_sent status:", updateError);
-        } else {
-          console.log(`Marked email as sent for consultation ${referenceId}`);
-        }
-      } catch (updateErr) {
-        console.error("Exception updating email_sent status:", updateErr);
-      }
-    } catch (emailErr) {
-      // Don't fail the entire process if email sending fails
-      console.error("Exception in email sending:", emailErr);
-      return { success: false, error: emailErr.message };
+      throw error;
     }
     
-    // Return success since we've tried to send the email
+    console.log(`Successfully upserted payment record for ${payment.id}`);
     return { success: true };
   } catch (error) {
-    console.error("Exception in sendConfirmationEmail:", error);
+    console.error("Error upserting payment record:", error);
     return { success: false, error: error.message };
-  }
-}
-
-/**
- * Process background tasks for payment verification
- */
-async function processBackgroundTasks(
-  bookingDetails: VerifyPaymentRequest['bookingDetails'],
-  paymentId: string,
-  orderId: string,
-  paymentDetails: RazorpayPaymentDetail
-) {
-  try {
-    // Step 1: Create or update consultation record
-    const consultationResult = await createConsultationRecord(
-      bookingDetails,
-      paymentId,
-      orderId,
-      paymentDetails.amount / 100, // Convert from paise to rupees
-      'completed',
-      'confirmed'
-    );
-    
-    if (!consultationResult.success) {
-      console.error("Failed to create consultation record:", consultationResult.error);
-      return;
-    }
-    
-    console.log("Consultation record created successfully");
-    
-    // Step 2: Send confirmation email
-    const emailResult = await sendConfirmationEmail(bookingDetails, bookingDetails.referenceId);
-    
-    if (!emailResult.success) {
-      console.error("Failed to send confirmation email:", emailResult.error);
-    }
-  } catch (error) {
-    console.error("Error in background tasks:", error);
   }
 }
 
@@ -334,13 +120,13 @@ const handler = async (req: Request): Promise<Response> => {
   
   try {
     const requestData = await req.json() as VerifyPaymentRequest;
-    const { paymentId, orderId, signature, bookingDetails, _testMode } = requestData;
+    const { razorpay_order_id } = requestData;
     
-    if (!paymentId || !bookingDetails || !bookingDetails.referenceId) {
+    if (!razorpay_order_id) {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: "Missing required parameters: paymentId or bookingDetails" 
+          reason: "Missing required parameter: razorpay_order_id" 
         }),
         {
           status: 400,
@@ -349,20 +135,16 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
     
-    console.log(`Processing payment verification for: ${paymentId}, reference: ${bookingDetails.referenceId}`);
+    console.log(`Processing payment verification for order: ${razorpay_order_id}`);
     
-    // Step 1: Verify payment with Razorpay
-    const paymentVerification = await verifyPaymentWithRazorpay(paymentId, _testMode);
+    // Step 1: Fetch payments from Razorpay
+    const orderPayments = await fetchOrderPayments(razorpay_order_id);
     
-    if (!paymentVerification.verified) {
-      console.log(`Payment verification failed for ${paymentId}`);
-      
+    if (!orderPayments.success) {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          verified: false,
-          error: "Payment verification failed",
-          details: paymentVerification.error || "Unknown error"
+          reason: `Failed to fetch payments: ${orderPayments.error}`
         }),
         {
           status: 400,
@@ -371,38 +153,37 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
     
-    // Payment successfully verified
-    console.log(`Payment verified successfully for ${paymentId}`);
-    const paymentDetails = paymentVerification.details;
+    // Step 2: Check for captured payments
+    const capturedPayments = orderPayments.payments?.filter(p => p.status === 'captured') || [];
     
-    // CRITICAL FIX: Must include reference ID in redirect URL for proper data fetching
-    // Return success response immediately before starting background tasks
-    const responseData = { 
-      success: true, 
-      verified: true,
-      consultationId: "pending", // Will be created in background
-      // Always include the reference ID in the redirectUrl for proper data fetching
-      redirectUrl: `/thank-you?ref=${bookingDetails.referenceId}`,
-      referenceId: bookingDetails.referenceId, // Explicitly include reference ID in response
-      paymentId,
-      orderId
-    };
-    
-    // Start background tasks without awaiting
-    if (typeof EdgeRuntime !== 'undefined' && typeof EdgeRuntime.waitUntil === 'function') {
-      EdgeRuntime.waitUntil(
-        processBackgroundTasks(bookingDetails, paymentId, orderId, paymentDetails!)
+    if (capturedPayments.length === 0) {
+      console.log(`No captured payments found for order ${razorpay_order_id}`);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          reason: "Payment not found or failed"
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        }
       );
-    } else {
-      // Fallback for environments that don't support waitUntil
-      setTimeout(() => {
-        processBackgroundTasks(bookingDetails, paymentId, orderId, paymentDetails!);
-      }, 0);
     }
     
-    // Return success response immediately
+    // Step 3: Upsert captured payments to database
+    for (const payment of capturedPayments) {
+      const upsertResult = await upsertPaymentRecord(payment);
+      if (!upsertResult.success) {
+        console.error(`Failed to upsert payment ${payment.id}:`, upsertResult.error);
+        // Continue processing other payments even if one fails
+      }
+    }
+    
+    console.log(`Successfully verified ${capturedPayments.length} captured payment(s) for order ${razorpay_order_id}`);
+    
+    // Return success response
     return new Response(
-      JSON.stringify(responseData),
+      JSON.stringify({ success: true }),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders }
@@ -415,7 +196,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message || "Internal server error"
+        reason: error.message || "Internal server error"
       }),
       {
         status: 500,
