@@ -132,7 +132,7 @@ async function fetchOrderPayments(orderId: string): Promise<{
 /**
  * Upsert payment record in database and send confirmation email if captured
  */
-async function upsertPaymentRecord(payment: RazorpayPayment): Promise<{
+async function upsertPaymentRecord(payment: RazorpayPayment, bookingDetails?: any): Promise<{
   success: boolean;
   error?: string;
 }> {
@@ -146,6 +146,11 @@ async function upsertPaymentRecord(payment: RazorpayPayment): Promise<{
 
     const wasAlreadyCaptured = existingPayment?.status === 'captured';
     
+    // Never downgrade captured status
+    const finalStatus = (existingPayment?.status === 'captured' && payment.status !== 'captured') 
+      ? 'captured' 
+      : payment.status;
+    
     const { error } = await supabase
       .from('payments')
       .upsert({
@@ -153,7 +158,7 @@ async function upsertPaymentRecord(payment: RazorpayPayment): Promise<{
         rzp_order_id: payment.order_id,
         amount: payment.amount,
         currency: payment.currency,
-        status: payment.status,
+        status: finalStatus,
         email: payment.email || null,
         notes: payment.notes || {}
       }, {
@@ -169,10 +174,15 @@ async function upsertPaymentRecord(payment: RazorpayPayment): Promise<{
       throw error;
     }
     
-    console.log(`Successfully upserted payment record for ${payment.id}`);
+    console.log(`Successfully upserted payment record for ${payment.id} with status ${finalStatus}`);
+    
+    // Upsert consultations record if payment is captured
+    if (finalStatus === 'captured') {
+      await upsertConsultationRecord(payment, bookingDetails);
+    }
     
     // Send booking confirmation email if payment is newly captured
-    if (payment.status === 'captured' && !wasAlreadyCaptured) {
+    if (finalStatus === 'captured' && !wasAlreadyCaptured) {
       await sendBookingConfirmationEmailForPayment(payment.id);
     }
     
@@ -180,6 +190,83 @@ async function upsertPaymentRecord(payment: RazorpayPayment): Promise<{
   } catch (error) {
     console.error("Error upserting payment record:", error);
     return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Upsert consultation record for captured payment
+ */
+async function upsertConsultationRecord(payment: RazorpayPayment, bookingDetails?: any): Promise<void> {
+  try {
+    // Try to find existing consultation by payment_id or order_id
+    const { data: existingConsultation } = await supabase
+      .from('consultations')
+      .select('*')
+      .or(`rzp_payment_id.eq.${payment.id},rzp_order_id.eq.${payment.order_id}`)
+      .maybeSingle();
+
+    const consultationData = {
+      rzp_payment_id: payment.id,
+      rzp_order_id: payment.order_id,
+      status: 'confirmed',
+      email: bookingDetails?.email || payment.email || null,
+      scheduled_at: bookingDetails?.scheduled_at || bookingDetails?.date || null,
+      notes: {
+        razorpay_payment: payment,
+        booking_details: bookingDetails || {},
+        updated_at: new Date().toISOString()
+      }
+    };
+
+    if (existingConsultation) {
+      // Update existing consultation
+      const { error } = await supabase
+        .from('consultations')
+        .update(consultationData)
+        .eq('id', existingConsultation.id);
+      
+      if (error) {
+        console.error(`Failed to update consultation for payment ${payment.id}:`, error);
+      } else {
+        console.log(`Updated consultation for payment ${payment.id}`);
+      }
+    } else {
+      // Insert new consultation with error handling for missing columns
+      try {
+        const { error } = await supabase
+          .from('consultations')
+          .insert(consultationData);
+        
+        if (error) {
+          // If insert fails due to missing columns, retry with minimal fields
+          console.warn(`Full consultation insert failed, retrying with minimal fields:`, error);
+          
+          const minimalData = {
+            rzp_payment_id: payment.id,
+            rzp_order_id: payment.order_id,
+            status: 'confirmed',
+            email: bookingDetails?.email || payment.email || null,
+            notes: consultationData.notes
+          };
+          
+          const { error: retryError } = await supabase
+            .from('consultations')
+            .insert(minimalData);
+          
+          if (retryError) {
+            console.error(`Failed to insert minimal consultation for payment ${payment.id}:`, retryError);
+          } else {
+            console.log(`Inserted minimal consultation for payment ${payment.id}`);
+          }
+        } else {
+          console.log(`Inserted consultation for payment ${payment.id}`);
+        }
+      } catch (insertError) {
+        console.error(`Exception inserting consultation for payment ${payment.id}:`, insertError);
+      }
+    }
+  } catch (error) {
+    console.error(`Error upserting consultation for payment ${payment.id}:`, error);
   }
 }
 
@@ -466,10 +553,12 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
   } else {
-    // Handle as client verification request
+    // Handle as client verification request (DEPRECATED - for backward compatibility)
     try {
-      const requestData = await req.json() as VerifyPaymentRequest;
-      const { razorpay_order_id } = requestData;
+      console.warn('DEPRECATED: Client verify-payment called. Migrate to GET /payment-status');
+      
+      const requestData = await req.json();
+      const { razorpay_order_id, booking } = requestData;
       
       if (!razorpay_order_id) {
         return new Response(
@@ -521,7 +610,7 @@ const handler = async (req: Request): Promise<Response> => {
       
       // Step 3: Upsert captured payments to database
       for (const payment of capturedPayments) {
-        const upsertResult = await upsertPaymentRecord(payment);
+        const upsertResult = await upsertPaymentRecord(payment, booking);
         if (!upsertResult.success) {
           console.error(`Failed to upsert payment ${payment.id}:`, upsertResult.error);
           // Continue processing other payments even if one fails
