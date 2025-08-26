@@ -76,6 +76,8 @@ import ConfirmationTest from './pages/ConfirmationTest';
 // Import webhook test pages
 import WebhookIntegrationTest from './pages/WebhookIntegrationTest';
 import QuickWebhookTest from './pages/QuickWebhookTest';
+import EndToEndBookingTest from './pages/EndToEndBookingTest';
+import TestDashboard from './pages/TestDashboard';
 
 // App-level flag to prevent multiple recovery runs
 let emailRecoveryHasRun = false;
@@ -191,6 +193,8 @@ function App() {
           {/* Add webhook test routes */}
           <Route path="/webhook-integration-test" element={<WebhookIntegrationTest />} />
           <Route path="/quick-webhook-test" element={<QuickWebhookTest />} />
+          <Route path="/end-to-end-booking-test" element={<EndToEndBookingTest />} />
+          <Route path="/test-dashboard" element={<TestDashboard />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
