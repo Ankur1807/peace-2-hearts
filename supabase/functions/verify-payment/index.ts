@@ -130,13 +130,22 @@ async function fetchOrderPayments(orderId: string): Promise<{
 }
 
 /**
- * Upsert payment record in database
+ * Upsert payment record in database and send confirmation email if captured
  */
 async function upsertPaymentRecord(payment: RazorpayPayment): Promise<{
   success: boolean;
   error?: string;
 }> {
   try {
+    // Check if payment already exists to determine if email should be sent
+    const { data: existingPayment } = await supabase
+      .from('payments')
+      .select('status')
+      .eq('rzp_payment_id', payment.id)
+      .maybeSingle();
+
+    const wasAlreadyCaptured = existingPayment?.status === 'captured';
+    
     const { error } = await supabase
       .from('payments')
       .upsert({
@@ -161,6 +170,12 @@ async function upsertPaymentRecord(payment: RazorpayPayment): Promise<{
     }
     
     console.log(`Successfully upserted payment record for ${payment.id}`);
+    
+    // Send booking confirmation email if payment is newly captured
+    if (payment.status === 'captured' && !wasAlreadyCaptured) {
+      await sendBookingConfirmationEmailForPayment(payment.id);
+    }
+    
     return { success: true };
   } catch (error) {
     console.error("Error upserting payment record:", error);
@@ -168,6 +183,165 @@ async function upsertPaymentRecord(payment: RazorpayPayment): Promise<{
   }
 }
 
+/**
+ * Send booking confirmation email for a captured payment
+ */
+async function sendBookingConfirmationEmailForPayment(paymentId: string): Promise<void> {
+  try {
+    console.log(`Attempting to send booking confirmation for payment ${paymentId}`);
+    
+    // Find consultation by payment_id
+    const { data: consultation, error: fetchError } = await supabase
+      .from('consultations')
+      .select('*')
+      .eq('payment_id', paymentId)
+      .maybeSingle();
+    
+    if (fetchError) {
+      console.error(`Error fetching consultation for payment ${paymentId}:`, fetchError);
+      return;
+    }
+    
+    if (!consultation) {
+      console.log(`No consultation found for payment ${paymentId}`);
+      return;
+    }
+    
+    // Check if email was already sent
+    if (consultation.email_sent) {
+      console.log(`Email already sent for consultation ${consultation.reference_id}`);
+      return;
+    }
+    
+    // Prepare booking confirmation email data
+    const emailPayload = {
+      type: 'booking-confirmation',
+      data: {
+        to: consultation.client_email,
+        clientName: consultation.client_name || 'Valued Client',
+        referenceId: consultation.reference_id,
+        serviceType: consultation.consultation_type,
+        date: consultation.date ? new Date(consultation.date).toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }) : 'To be scheduled',
+        time: consultation.time_slot || consultation.timeframe || 'To be confirmed',
+        price: consultation.amount ? `₹${consultation.amount}` : 'Confirmed',
+        highPriority: true
+      }
+    };
+    
+    // Send email using send-email edge function
+    const { data, error: emailError } = await supabase.functions.invoke('send-email', {
+      body: emailPayload
+    });
+    
+    if (emailError) {
+      console.error(`Error sending email for consultation ${consultation.reference_id}:`, emailError);
+      return;
+    }
+    
+    // Update consultation to mark email as sent
+    const { error: updateError } = await supabase
+      .from('consultations')
+      .update({ 
+        email_sent: true,
+        payment_status: 'paid'
+      })
+      .eq('reference_id', consultation.reference_id);
+    
+    if (updateError) {
+      console.error(`Error updating consultation ${consultation.reference_id}:`, updateError);
+    } else {
+      console.log(`Successfully sent confirmation email for ${consultation.reference_id}`);
+    }
+    
+  } catch (error) {
+    console.error(`Exception sending confirmation email for payment ${paymentId}:`, error);
+  }
+}
+
+/**
+ * Send booking confirmation email for payments by order ID
+ */
+async function sendBookingConfirmationEmailForOrder(orderId: string): Promise<void> {
+  try {
+    console.log(`Attempting to send booking confirmation for order ${orderId}`);
+    
+    // Find consultation by looking for payment_id that matches any payment for this order
+    const { data: consultation, error: fetchError } = await supabase
+      .from('consultations')
+      .select('*')
+      .eq('order_id', orderId)
+      .maybeSingle();
+    
+    if (fetchError) {
+      console.error(`Error fetching consultation for order ${orderId}:`, fetchError);
+      return;
+    }
+    
+    if (!consultation) {
+      console.log(`No consultation found for order ${orderId}`);
+      return;
+    }
+    
+    // Check if email was already sent
+    if (consultation.email_sent) {
+      console.log(`Email already sent for consultation ${consultation.reference_id}`);
+      return;
+    }
+    
+    // Prepare booking confirmation email data
+    const emailPayload = {
+      type: 'booking-confirmation',
+      data: {
+        to: consultation.client_email,
+        clientName: consultation.client_name || 'Valued Client',
+        referenceId: consultation.reference_id,
+        serviceType: consultation.consultation_type,
+        date: consultation.date ? new Date(consultation.date).toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }) : 'To be scheduled',
+        time: consultation.time_slot || consultation.timeframe || 'To be confirmed',
+        price: consultation.amount ? `₹${consultation.amount}` : 'Confirmed',
+        highPriority: true
+      }
+    };
+    
+    // Send email using send-email edge function
+    const { data, error: emailError } = await supabase.functions.invoke('send-email', {
+      body: emailPayload
+    });
+    
+    if (emailError) {
+      console.error(`Error sending email for consultation ${consultation.reference_id}:`, emailError);
+      return;
+    }
+    
+    // Update consultation to mark email as sent
+    const { error: updateError } = await supabase
+      .from('consultations')
+      .update({ 
+        email_sent: true,
+        payment_status: 'paid'
+      })
+      .eq('reference_id', consultation.reference_id);
+    
+    if (updateError) {
+      console.error(`Error updating consultation ${consultation.reference_id}:`, updateError);
+    } else {
+      console.log(`Successfully sent confirmation email for ${consultation.reference_id}`);
+    }
+    
+  } catch (error) {
+    console.error(`Exception sending confirmation email for order ${orderId}:`, error);
+  }
+}
 /**
  * Handle webhook events from Razorpay
  */
@@ -304,7 +478,7 @@ const handler = async (req: Request): Promise<Response> => {
             reason: "Missing required parameter: razorpay_order_id" 
           }),
           {
-            status: 400,
+            status: 200,
             headers: { "Content-Type": "application/json", ...corsHeaders }
           }
         );
@@ -322,7 +496,7 @@ const handler = async (req: Request): Promise<Response> => {
             reason: `Failed to fetch payments: ${orderPayments.error}`
           }),
           {
-            status: 400,
+            status: 200,
             headers: { "Content-Type": "application/json", ...corsHeaders }
           }
         );
@@ -354,6 +528,9 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
       
+      // Step 4: Send booking confirmation email for the order
+      await sendBookingConfirmationEmailForOrder(razorpay_order_id);
+      
       console.log(`Successfully verified ${capturedPayments.length} captured payment(s) for order ${razorpay_order_id}`);
       
       // Return success response
@@ -374,7 +551,7 @@ const handler = async (req: Request): Promise<Response> => {
           reason: error.message || "Internal server error"
         }),
         {
-          status: 500,
+          status: 200,
           headers: { "Content-Type": "application/json", ...corsHeaders }
         }
       );
