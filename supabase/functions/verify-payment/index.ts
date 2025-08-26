@@ -4,8 +4,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-const razorpayKeyId = Deno.env.get('RZP_KEY_ID') || '';
-const razorpayKeySecret = Deno.env.get('RZP_KEY_SECRET') || '';
+const razorpayKeyId = Deno.env.get('RAZORPAY_KEY_ID') || '';
+const razorpayKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET') || '';
 const webhookSecret = Deno.env.get('RZP_WEBHOOK_SECRET') || '';
 
 // Set up CORS headers for browser requests
