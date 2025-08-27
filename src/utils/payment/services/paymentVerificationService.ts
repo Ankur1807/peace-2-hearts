@@ -17,16 +17,23 @@ export async function verifyRazorpayPayment(
     console.log(`Checking payment status for order: ${orderId}`);
     
     // Use the new payment-status endpoint instead of deprecated verify-payment  
-    const { data, error } = await supabase.functions.invoke('payment-status', {
-      body: {
-        order_id: orderId
+    const supabaseUrl = 'https://mcbdxszoozmlelejvizn.supabase.co';
+    const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jYmR4c3pvb3ptbGVsZWp2aXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4NzM3NjUsImV4cCI6MjA1NzQ0OTc2NX0.e4Nw3vrz2qewoZMKJvsYExgnyFCkHMLdV9ecty5xlf0';
+    const url = `${supabaseUrl}/functions/v1/payment-status?order_id=${encodeURIComponent(orderId)}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${anonKey}`,
+        'Content-Type': 'application/json'
       }
     });
     
-    if (error) {
-      console.error("Error checking payment status:", error);
-      return { success: false, error: error.message };
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
+    
+    const data = await response.json();
     
     const isVerified = data.success && data.status === 'captured';
     if (!isVerified) {

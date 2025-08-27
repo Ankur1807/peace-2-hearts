@@ -9,8 +9,9 @@ const razorpayKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET') || '';
 const webhookSecret = Deno.env.get('RZP_WEBHOOK_SECRET') || '';
 
 // Set up CORS headers for browser requests
+const appOrigin = Deno.env.get('APP_ORIGIN') || '*';
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": appOrigin,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-razorpay-signature",
 };
 
@@ -543,9 +544,12 @@ const handler = async (req: Request): Promise<Response> => {
       
       if (!webhookSecret) {
         console.error('Webhook secret not configured');
-        return new Response('Webhook secret not configured', { 
-          status: 500,
-          headers: corsHeaders 
+        return new Response(JSON.stringify({ 
+          received: false, 
+          reason: "webhook_secret_not_configured" 
+        }), { 
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
         });
       }
       
@@ -557,9 +561,12 @@ const handler = async (req: Request): Promise<Response> => {
       
       if (!isValid) {
         console.error('Invalid webhook signature');
-        return new Response('Invalid signature', { 
-          status: 400,
-          headers: corsHeaders 
+        return new Response(JSON.stringify({ 
+          received: false, 
+          reason: "invalid_signature" 
+        }), { 
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
         });
       }
       
@@ -587,15 +594,20 @@ const handler = async (req: Request): Promise<Response> => {
       
     } catch (error) {
       console.error("Error processing webhook:", error);
-      return new Response('Webhook processing error', { 
-        status: 400,
-        headers: corsHeaders 
+      return new Response(JSON.stringify({ 
+        received: false, 
+        reason: "webhook_processing_error",
+        details: error.message 
+      }), { 
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders }
       });
     }
-  } else {
+  } else if (req.method === "POST") {
     // Handle as client verification request (DEPRECATED - for backward compatibility)
+    // Client POST without signature should NOT write to DB
     try {
-      console.warn('DEPRECATED: Client verify-payment called. Migrate to GET /payment-status');
+      console.warn('DEPRECATED: Client verify-payment POST called without signature');
       
       const requestData = await req.json();
       const { razorpay_order_id, booking } = requestData;
@@ -604,7 +616,7 @@ const handler = async (req: Request): Promise<Response> => {
         return new Response(
           JSON.stringify({ 
             success: false, 
-            reason: "Missing required parameter: razorpay_order_id" 
+            reason: "missing_order_id" 
           }),
           {
             status: 200,
@@ -613,58 +625,15 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
       
-      console.log(`Processing manual payment verification for order: ${razorpay_order_id}`);
+      console.log(`Client POST without signature - returning pending_webhook for order: ${razorpay_order_id}`);
       
-      // Step 1: Fetch payments from Razorpay
-      const orderPayments = await fetchOrderPayments(razorpay_order_id);
-      
-      if (!orderPayments.success) {
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            reason: `Failed to fetch payments: ${orderPayments.error}`
-          }),
-          {
-            status: 200,
-            headers: { "Content-Type": "application/json", ...corsHeaders }
-          }
-        );
-      }
-      
-      // Step 2: Check for captured payments
-      const capturedPayments = orderPayments.payments?.filter(p => p.status === 'captured') || [];
-      
-      if (capturedPayments.length === 0) {
-        console.log(`No captured payments found for order ${razorpay_order_id}`);
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            reason: "pending_webhook"
-          }),
-          {
-            status: 200,
-            headers: { "Content-Type": "application/json", ...corsHeaders }
-          }
-        );
-      }
-      
-      // Step 3: Upsert captured payments to database
-      for (const payment of capturedPayments) {
-        const upsertResult = await upsertPaymentRecord(payment, booking);
-        if (!upsertResult.success) {
-          console.error(`Failed to upsert payment ${payment.id}:`, upsertResult.error);
-          // Continue processing other payments even if one fails
-        }
-      }
-      
-      // Step 4: Send booking confirmation email for the order
-      await sendBookingConfirmationEmailForOrder(razorpay_order_id);
-      
-      console.log(`Successfully verified ${capturedPayments.length} captured payment(s) for order ${razorpay_order_id}`);
-      
-      // Return success response
+      // Do NOT write to DB for client requests without signature
+      // Direct them to use GET /payment-status instead
       return new Response(
-        JSON.stringify({ success: true }),
+        JSON.stringify({ 
+          success: false, 
+          reason: "pending_webhook"
+        }),
         {
           status: 200,
           headers: { "Content-Type": "application/json", ...corsHeaders }
@@ -672,12 +641,12 @@ const handler = async (req: Request): Promise<Response> => {
       );
       
     } catch (error) {
-      console.error("Error in manual payment verification:", error);
+      console.error("Error in client POST verification:", error);
       
       return new Response(
         JSON.stringify({ 
           success: false, 
-          reason: error.message || "Internal server error"
+          reason: "pending_webhook"
         }),
         {
           status: 200,
@@ -685,6 +654,18 @@ const handler = async (req: Request): Promise<Response> => {
         }
       );
     }
+  } else {
+    // Handle non-POST methods (GET, etc.)
+    return new Response(
+      JSON.stringify({ 
+        ok: false, 
+        reason: "method_not_allowed" 
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders }
+      }
+    );
   }
 };
 

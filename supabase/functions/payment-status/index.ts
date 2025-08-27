@@ -26,9 +26,12 @@ const handler = async (req: Request): Promise<Response> => {
 
   if (req.method !== "GET") {
     return new Response(
-      JSON.stringify({ error: "Method not allowed" }),
+      JSON.stringify({ 
+        ok: false, 
+        reason: "method_not_allowed" 
+      }),
       {
-        status: 405,
+        status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders }
       }
     );
@@ -42,10 +45,12 @@ const handler = async (req: Request): Promise<Response> => {
     if (!orderId && !paymentId) {
       return new Response(
         JSON.stringify({ 
-          error: "Missing required parameter: order_id or payment_id" 
+          success: false,
+          status: "error",
+          reason: "missing_parameters" 
         }),
         {
-          status: 400,
+          status: 200,
           headers: { "Content-Type": "application/json", ...corsHeaders }
         }
       );
@@ -69,11 +74,12 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Error fetching payment status:", error);
       return new Response(
         JSON.stringify({ 
-          error: "Database error",
-          details: error.message 
+          success: false,
+          status: "error",
+          reason: "database_error"
         }),
         {
-          status: 500,
+          status: 200,
           headers: { "Content-Type": "application/json", ...corsHeaders }
         }
       );
@@ -82,8 +88,8 @@ const handler = async (req: Request): Promise<Response> => {
     if (!payments || payments.length === 0) {
       return new Response(
         JSON.stringify({ 
-          status: "not_found",
-          message: "Payment not found" 
+          success: false,
+          status: "not_found"
         }),
         {
           status: 200,
@@ -98,7 +104,8 @@ const handler = async (req: Request): Promise<Response> => {
     )[0];
 
     const response = {
-      status: payment.status,
+      success: payment.status === 'captured',
+      status: payment.status === 'captured' ? 'captured' : (payment.status === 'failed' ? 'failed' : 'pending_webhook'),
       amount: payment.amount,
       currency: payment.currency,
       rzp_order_id: payment.rzp_order_id,
@@ -122,11 +129,12 @@ const handler = async (req: Request): Promise<Response> => {
     
     return new Response(
       JSON.stringify({ 
-        error: "Internal server error",
-        message: error.message 
+        success: false,
+        status: "error",
+        reason: "internal_error"
       }),
       {
-        status: 500,
+        status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders }
       }
     );
