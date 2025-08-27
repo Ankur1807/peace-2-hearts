@@ -639,7 +639,7 @@ const handler = async (req: Request): Promise<Response> => {
         return new Response(
           JSON.stringify({ 
             success: false, 
-            reason: "Payment not found or failed"
+            reason: "pending_webhook"
           }),
           {
             status: 200,
