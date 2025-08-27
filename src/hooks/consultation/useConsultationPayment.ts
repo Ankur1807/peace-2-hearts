@@ -181,7 +181,7 @@ export function useConsultationPayment({
 
           console.log("Payment verification result:", verificationResult);
           
-          if (verificationResult.success) {
+          if (verificationResult.success && verificationResult.status === 'captured') {
             console.log("Payment verified successfully, calling handleConfirmBooking");
             
             // Complete the booking process
@@ -189,11 +189,32 @@ export function useConsultationPayment({
             
             // Redirect to thank you page
             navigate("/thank-you");
-          } else {
-            console.error("Payment verification failed:", verificationResult.error);
+          } else if (verificationResult.status === 'pending_webhook' || verificationResult.status === 'not_found') {
+            console.log("Payment still processing, status:", verificationResult.status);
+            // Show neutral processing message, don't show error toast
             toast({
-              title: "Payment Verification Failed",
-              description: verificationResult.error || "Please contact support with your reference ID.",
+              title: "Processing Payment",
+              description: "Your payment is being processed. Please wait a moment...",
+              variant: "default"
+            });
+            
+            // Continue processing, don't stop loading state
+            // The payment verification will continue in the background
+          } else if (verificationResult.status === 'failed') {
+            console.error("Payment failed:", verificationResult.error);
+            toast({
+              title: "Payment Failed",
+              description: "Your payment could not be processed. Please try again or contact support.",
+              variant: "destructive"
+            });
+            
+            setIsProcessing(false);
+          } else {
+            // Only show error toast for actual errors, not processing states
+            console.error("Payment verification error:", verificationResult.error);
+            toast({
+              title: "Payment Error",
+              description: verificationResult.error || "There was an error verifying your payment. Please contact support.",
               variant: "destructive"
             });
             

@@ -9,10 +9,11 @@ const razorpayKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET') || '';
 const webhookSecret = Deno.env.get('RZP_WEBHOOK_SECRET') || '';
 
 // Set up CORS headers for browser requests
-const appOrigin = Deno.env.get('APP_ORIGIN') || '*';
+const appOrigin = Deno.env.get('APP_ORIGIN') || 'https://peace2hearts.com';
 const corsHeaders = {
   "Access-Control-Allow-Origin": appOrigin,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-razorpay-signature",
+  "Access-Control-Allow-Credentials": "true",
 };
 
 // Create Supabase client with service role for admin access
@@ -565,7 +566,7 @@ const handler = async (req: Request): Promise<Response> => {
           received: false, 
           reason: "invalid_signature" 
         }), { 
-          status: 200,
+          status: 400,
           headers: { "Content-Type": "application/json", ...corsHeaders }
         });
       }
@@ -662,7 +663,7 @@ const handler = async (req: Request): Promise<Response> => {
         reason: "method_not_allowed" 
       }),
       {
-        status: 200,
+        status: 405,
         headers: { "Content-Type": "application/json", ...corsHeaders }
       }
     );

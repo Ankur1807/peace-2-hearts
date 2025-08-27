@@ -3,13 +3,14 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-const appOrigin = Deno.env.get('APP_ORIGIN') || '*';
+const appOrigin = Deno.env.get('APP_ORIGIN') || 'https://peace2hearts.com';
 
 // Set up CORS headers
 const corsHeaders = {
   "Access-Control-Allow-Origin": appOrigin,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, OPTIONS"
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Credentials": "true"
 };
 
 // Create Supabase client with service role for read access
@@ -31,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
         reason: "method_not_allowed" 
       }),
       {
-        status: 200,
+        status: 405,
         headers: { "Content-Type": "application/json", ...corsHeaders }
       }
     );

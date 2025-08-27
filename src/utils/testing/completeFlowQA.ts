@@ -46,15 +46,21 @@ export const simulateCompletePaymentFlow = async () => {
 
     // Step 2: Test payment status endpoint with non-existent order (should return not_found)
     console.log('\n🔍 Step 2: Testing Payment Status API');
-    const { data: statusData, error: statusError } = await supabase.functions.invoke('payment-status', {
-      body: {
-        order_id: testOrderId
+    const supabaseUrl = 'https://mcbdxszoozmlelejvizn.supabase.co';
+    const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jYmR4c3pvb3ptbGVsZWp2aXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4NzM3NjUsImV4cCI6MjA1NzQ0OTc2NX0.e4Nw3vrz2qewoZMKJvsYExgnyFCkHMLdV9ecty5xlf0';
+    
+    const statusResponse = await fetch(`${supabaseUrl}/functions/v1/payment-status?order_id=${encodeURIComponent(testOrderId)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${anonKey}`,
+        'Content-Type': 'application/json'
       }
     });
+    const statusData = await statusResponse.json();
 
-    if (statusError) {
-      console.error('❌ Payment status check failed:', statusError);
-      testResults.errors.push(`Payment status error: ${statusError.message}`);
+    if (!statusResponse.ok) {
+      console.error('❌ Payment status check failed:', statusResponse.statusText);
+      testResults.errors.push(`Payment status error: ${statusResponse.statusText}`);
     } else {
       console.log('✅ Payment status response:', statusData);
       testResults.statusCheck = { success: true, data: statusData };
@@ -150,15 +156,18 @@ export const simulateCompletePaymentFlow = async () => {
 
     // Step 6: Test payment status after webhook
     console.log('\n🔄 Step 6: Testing Payment Status After Webhook');
-    const { data: finalStatusData, error: finalStatusError } = await supabase.functions.invoke('payment-status', {
-      body: {
-        order_id: testOrderId
+    const finalStatusResponse = await fetch(`${supabaseUrl}/functions/v1/payment-status?order_id=${encodeURIComponent(testOrderId)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${anonKey}`,
+        'Content-Type': 'application/json'
       }
     });
+    const finalStatusData = await finalStatusResponse.json();
 
-    if (finalStatusError) {
-      console.error('❌ Final payment status check failed:', finalStatusError);
-      testResults.errors.push(`Final status error: ${finalStatusError.message}`);
+    if (!finalStatusResponse.ok) {
+      console.error('❌ Final payment status check failed:', finalStatusResponse.statusText);
+      testResults.errors.push(`Final status error: ${finalStatusResponse.statusText}`);
     } else {
       console.log('✅ Final payment status response:', finalStatusData);
       testResults.statusCheck.finalData = finalStatusData;

@@ -7,6 +7,9 @@ export const executeLiveQATests = async () => {
   console.log('🚀 EXECUTING LIVE QA TESTS...');
   console.log('=============================');
   
+  const supabaseUrl = 'https://mcbdxszoozmlelejvizn.supabase.co';
+  const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jYmR4c3pvb3ptbGVsZWp2aXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4NzM3NjUsImV4cCI6MjA1NzQ0OTc2NX0.e4Nw3vrz2qewoZMKJvsYExgnyFCkHMLdV9ecty5xlf0';
+  
   const testResults = {
     timestamp: new Date().toISOString(),
     tests: {
@@ -26,16 +29,21 @@ export const executeLiveQATests = async () => {
   // Test 1: Payment Status - Non-existent Order
   console.log('\n🔍 Test 1: Payment Status API - Non-existent Order');
   try {
-    const { data, error } = await supabase.functions.invoke('payment-status', {
-      body: {
-        order_id: 'order_QA_TEST_NONEXISTENT_' + Date.now()
+    const testOrderId = 'order_QA_TEST_NONEXISTENT_' + Date.now();
+    
+    const response = await fetch(`${supabaseUrl}/functions/v1/payment-status?order_id=${encodeURIComponent(testOrderId)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${anonKey}`,
+        'Content-Type': 'application/json'
       }
     });
+    const data = await response.json();
 
-    if (error) {
-      console.error('❌ Payment status error:', error);
-      testResults.tests.paymentStatusNonExistent = { success: false, error: error.message };
-      testResults.errors.push(`Test 1 Error: ${error.message}`);
+    if (!response.ok) {
+      console.error('❌ Payment status error:', response.statusText);
+      testResults.tests.paymentStatusNonExistent = { success: false, error: response.statusText };
+      testResults.errors.push(`Test 1 Error: ${response.statusText}`);
       testResults.summary.failed++;
     } else {
       console.log('✅ Payment status response:', data);
@@ -65,16 +73,19 @@ export const executeLiveQATests = async () => {
   console.log('\n🔍 Test 2: Payment Status API - Existing Order');
   const existingOrderId = 'order_RA0deuFIfZjPDh'; // From database query
   try {
-    const { data, error } = await supabase.functions.invoke('payment-status', {
-      body: {
-        order_id: existingOrderId
+    const response2 = await fetch(`${supabaseUrl}/functions/v1/payment-status?order_id=${encodeURIComponent(existingOrderId)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${anonKey}`,
+        'Content-Type': 'application/json'
       }
     });
+    const data = await response2.json();
 
-    if (error) {
-      console.error('❌ Payment status error for existing order:', error);
-      testResults.tests.paymentStatusExisting = { success: false, error: error.message };
-      testResults.errors.push(`Test 2 Error: ${error.message}`);
+    if (!response2.ok) {
+      console.error('❌ Payment status error for existing order:', response2.statusText);
+      testResults.tests.paymentStatusExisting = { success: false, error: response2.statusText };
+      testResults.errors.push(`Test 2 Error: ${response2.statusText}`);
       testResults.summary.failed++;
     } else {
       console.log('✅ Payment status response for existing order:', data);
