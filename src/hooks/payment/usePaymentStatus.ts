@@ -90,9 +90,15 @@ export const usePaymentStatus = ({
       // Continue polling if not at max retries
       if (retryCount < maxRetries) {
         setRetryCount(prev => prev + 1);
-        setTimeout(pollStatus, pollInterval);
+        
+        // Jittered backoff: start 1.5s, cap at 6s
+        const baseDelay = Math.min(1500 + (retryCount * 300), 6000);
+        const jitter = Math.random() * 500; // Add 0-500ms jitter
+        const delay = baseDelay + jitter;
+        
+        setTimeout(pollStatus, delay);
       } else {
-        console.log("Max polling retries reached, stopping");
+        console.log("Max polling retries reached - showing gentle processing message");
         setIsPolling(false);
       }
     };

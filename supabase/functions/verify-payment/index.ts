@@ -8,6 +8,28 @@ const razorpayKeyId = Deno.env.get('RAZORPAY_KEY_ID') || '';
 const razorpayKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET') || '';
 const webhookSecret = Deno.env.get('RZP_WEBHOOK_SECRET') || '';
 
+// Environment sanity check (mode only, no secrets)
+console.log(JSON.stringify({
+  fn: "verify-payment",
+  event: "startup",
+  mode: razorpayKeyId?.includes('_test_') ? 'test' : 'live',
+  has_webhook_secret: !!webhookSecret,
+  has_service_key: !!supabaseServiceKey,
+  ts: new Date().toISOString()
+}));
+
+/**
+ * Structured logging helper
+ */
+function logEvent(event: string, data: any = {}) {
+  console.log(JSON.stringify({
+    fn: "verify-payment",
+    event,
+    ...data,
+    ts: new Date().toISOString()
+  }));
+}
+
 // Set up CORS headers for browser requests
 const appOrigin = Deno.env.get('APP_ORIGIN') || 'https://peace2hearts.com';
 const corsHeaders = {
@@ -530,6 +552,8 @@ async function handleWebhookEvent(event: WebhookEvent): Promise<{
 
 // Main handler function
 const handler = async (req: Request): Promise<Response> => {
+  logEvent("request_received", { method: req.method });
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -541,7 +565,7 @@ const handler = async (req: Request): Promise<Response> => {
   if (webhookSignature) {
     // Handle as webhook request
     try {
-      console.log('Processing Razorpay webhook request');
+      logEvent("webhook_request", { has_signature: true });
       
       if (!webhookSecret) {
         console.error('Webhook secret not configured');
@@ -561,7 +585,7 @@ const handler = async (req: Request): Promise<Response> => {
       const isValid = await verifyWebhookSignature(rawBody, webhookSignature, webhookSecret);
       
       if (!isValid) {
-        console.error('Invalid webhook signature');
+        logEvent("signature_verification_failed", { http_status: 400 });
         return new Response(JSON.stringify({ 
           received: false, 
           reason: "invalid_signature" 
@@ -571,16 +595,28 @@ const handler = async (req: Request): Promise<Response> => {
         });
       }
       
-      console.log('Webhook signature verified successfully');
+      logEvent("signature_verification_success", {});
       
       // Parse the webhook event
       const event = JSON.parse(new TextDecoder().decode(rawBody)) as WebhookEvent;
+      const orderId = event.payload.payment?.entity?.order_id || event.payload.order?.entity?.id || 'unknown';
+      logEvent("webhook_event_parsed", { event: event.event, order_id: orderId });
       
       // Handle the webhook event
       const result = await handleWebhookEvent(event);
+      logEvent("webhook_event_processed", { 
+        event: event.event, 
+        order_id: orderId, 
+        success: result.success, 
+        http_status: 200 
+      });
       
       if (!result.success) {
-        console.error(`Webhook event handling failed: ${result.error}`);
+        logEvent("webhook_processing_failed", { 
+          event: event.event, 
+          order_id: orderId, 
+          error: result.error 
+        });
         // Still return 200 to prevent Razorpay retries for processing errors
       }
       
@@ -626,7 +662,10 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
       
-      console.log(`Client POST without signature - returning pending_webhook for order: ${razorpay_order_id}`);
+      logEvent("client_post_deprecated", { 
+        order_id: razorpay_order_id, 
+        http_status: 200 
+      });
       
       // Do NOT write to DB for client requests without signature
       // Direct them to use GET /payment-status instead
@@ -657,6 +696,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
   } else {
     // Handle non-POST methods (GET, etc.)
+    logEvent("method_not_allowed", { method: req.method, http_status: 405 });
     return new Response(
       JSON.stringify({ 
         ok: false, 

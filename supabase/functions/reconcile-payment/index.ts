@@ -5,8 +5,28 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 const razorpayKeyId = Deno.env.get('RZP_KEY_ID') || '';
 const razorpayKeySecret = Deno.env.get('RZP_KEY_SECRET') || '';
-const adminToken = Deno.env.get('ADMIN_RECONCILE_TOKEN') || '';
-const appOrigin = Deno.env.get('APP_ORIGIN') || '*';
+const internalAuthToken = Deno.env.get('ADMIN_RECONCILE_TOKEN') || '';
+const appOrigin = Deno.env.get('APP_ORIGIN') || 'https://peace2hearts.com';
+
+// Environment sanity check
+console.log(JSON.stringify({
+  fn: "reconcile-payment", 
+  event: "startup",
+  mode: razorpayKeyId?.includes('_test_') ? 'test' : 'live',
+  has_service_key: !!supabaseServiceKey,
+  has_rzp_creds: !!(razorpayKeyId && razorpayKeySecret),
+  ts: new Date().toISOString()
+}));
+
+// Structured logging helper
+function logEvent(event: string, data: any = {}) {
+  console.log(JSON.stringify({
+    fn: "reconcile-payment",
+    event,
+    ...data,
+    ts: new Date().toISOString()
+  }));
+}
 
 // Set up CORS headers
 const corsHeaders = {
@@ -333,44 +353,34 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     // Check admin token
-    const adminTokenHeader = req.headers.get('X-Admin-Token');
+    const adminTokenHeader = req.headers.get('X-Internal-Auth');
+    const body = await req.json();
     
-    if (!adminToken || adminTokenHeader !== adminToken) {
-      console.warn('Unauthorized reconcile-payment access attempt');
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        {
-          status: 401,
-          headers: { "Content-Type": "application/json", ...corsHeaders }
-        }
-      );
-    }
-
-    const { razorpay_order_id, booking } = await req.json();
-    
-    if (!razorpay_order_id) {
+    // For debugging, but replace with admin token logic in production
+    if (!internalAuthToken || adminTokenHeader !== internalAuthToken) {
+      logEvent("unauthorized", { http_status: 403 });
       return new Response(
         JSON.stringify({ 
-          success: false, 
-          reason: "Missing required parameter: razorpay_order_id" 
+          reconciled: false, 
+          status: "error", 
+          reason: "unauthorized" 
         }),
         {
-          status: 400,
+          status: 403,
           headers: { "Content-Type": "application/json", ...corsHeaders }
         }
       );
     }
 
-    console.log(`Reconciling payment for order: ${razorpay_order_id}`);
-
-    // Fetch payments from Razorpay
-    const orderPayments = await fetchOrderPayments(razorpay_order_id);
+    const { order_id } = body;
     
-    if (!orderPayments.success) {
+    if (!order_id) {
+      logEvent("missing_order_id", { http_status: 200 });
       return new Response(
         JSON.stringify({ 
-          success: false, 
-          reason: `Failed to fetch payments: ${orderPayments.error}`
+          reconciled: false, 
+          status: "error", 
+          reason: "missing_order_id" 
         }),
         {
           status: 200,
@@ -379,88 +389,37 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const payments = orderPayments.payments || [];
-    const newestPayment = payments.sort((a, b) => b.created_at - a.created_at)[0];
+    logEvent("request_received", { order_id, http_status: 200 });
     
-    if (!newestPayment) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          reason: "No payments found for order"
-        }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders }
-        }
-      );
-    }
-
-    let finalPayment = newestPayment;
-
-    // If payment is authorized, attempt to capture it
-    if (newestPayment.status === 'authorized') {
-      console.log(`Attempting to capture authorized payment ${newestPayment.id}`);
-      
-      const captureResult = await capturePayment(
-        newestPayment.id, 
-        newestPayment.amount, 
-        newestPayment.currency
-      );
-      
-      if (captureResult.success && captureResult.payment) {
-        finalPayment = captureResult.payment;
-        console.log(`Successfully captured payment ${newestPayment.id}`);
-      } else {
-        console.error(`Failed to capture payment ${newestPayment.id}: ${captureResult.error}`);
-      }
-    }
-
-    // Upsert payment and consultation records
-    const upsertResult = await upsertPaymentAndConsultation(finalPayment, booking);
+    const result = await reconcilePayment(order_id);
+    logEvent("request_completed", { 
+      order_id, 
+      reconciled: result.reconciled, 
+      status: result.status,
+      http_status: 200 
+    });
     
-    if (!upsertResult.success) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          reason: `Database error: ${upsertResult.error}`
-        }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders }
-        }
-      );
-    }
-
-    const success = finalPayment.status === 'captured';
-    const reason = success ? 'captured' : finalPayment.status;
-
-    console.log(`Reconciliation completed for order ${razorpay_order_id}: ${reason}`);
-
     return new Response(
-      JSON.stringify({ 
-        success, 
-        reason,
-        payment_id: finalPayment.id,
-        order_id: finalPayment.order_id,
-        amount: finalPayment.amount,
-        status: finalPayment.status
-      }),
+      JSON.stringify(result),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders }
       }
     );
 
-  } catch (error) {
-    console.error("Error in reconcile-payment handler:", error);
+    logEvent("request_error", { 
+      error: error.message, 
+      http_status: 200 
+    });
     
     return new Response(
       JSON.stringify({ 
-        success: false, 
-        reason: error.message || "Internal server error"
+        reconciled: false, 
+        status: "error", 
+        reason: "internal_error" 
       }),
       {
-        status: 500,
+        status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders }
       }
     );
