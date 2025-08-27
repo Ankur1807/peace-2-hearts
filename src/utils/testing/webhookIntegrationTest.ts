@@ -73,41 +73,32 @@ export async function testWebhookIntegration() {
     console.error('❌ Reconcile Payment health test error:', error);
   }
 
-  // Test 3: Manual Verification (Backward Compatibility)
-  console.log('\n🔄 TEST 3: Manual Verification (Backward Compatibility)');
-  console.log('Testing POST /verify-payment without webhook signature');
+  // Test 3: Payment Status Check
+  console.log('\n🔄 TEST 3: Payment Status Check');
+  console.log('Testing GET /payment-status endpoint');
   
-  const manualPayload = {
-    razorpay_order_id: 'order_TEST987654321',
-    booking: {
-      email: 'test@peace2hearts.com',
-      scheduled_at: '2024-01-15T10:00:00Z',
-      clientName: 'Test User'
-    }
-  };
+  const testOrderId = 'order_TEST987654321';
   
   try {
-    const manualResponse = await fetch(`https://mcbdxszoozmlelejvizn.supabase.co/functions/v1/verify-payment`, {
-      method: 'POST',
+    const statusResponse = await fetch(`https://mcbdxszoozmlelejvizn.supabase.co/functions/v1/payment-status?order_id=${testOrderId}`, {
+      method: 'GET',
       headers: {
         'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jYmR4c3pvb3ptbGVsZWp2aXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4NzM3NjUsImV4cCI6MjA1NzQ0OTc2NX0.e4Nw3vrz2qewoZMKJvsYExgnyFCkHMLdV9ecty5xlf0',
-        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jYmR4c3pvb3ptbGVsZWp2aXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4NzM3NjUsImV4cCI6MjA1NzQ0OTc2NX0.e4Nw3vrz2qewoZMKJvsYExgnyFCkHMLdV9ecty5xlf0`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(manualPayload)
+        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jYmR4c3pvb3ptbGVsZWp2aXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4NzM3NjUsImV4cCI6MjA1NzQ0OTc2NX0.e4Nw3vrz2qewoZMKJvsYExgnyFCkHMLdV9ecty5xlf0`
+      }
     });
     
-    console.log(`Status Code: ${manualResponse.status}`);
-    const manualData = await manualResponse.json();
-    console.log('Response:', JSON.stringify(manualData, null, 2));
+    console.log(`Status Code: ${statusResponse.status}`);
+    const statusData = await statusResponse.json();
+    console.log('Response:', JSON.stringify(statusData, null, 2));
     
-    // Expected: 200 with success: false, reason: "Payment not found or failed"
-    // Since we're using a test order ID that doesn't exist in Razorpay
-    if (manualResponse.status === 200 && manualData.success === false) {
-      console.log('✅ Manual verification working (correctly failed for non-existent order)');
+    // Expected: 200 with success: false, status: "not_found"
+    // Since we're using a test order ID that doesn't exist
+    if (statusResponse.status === 200 && statusData.status === 'not_found') {
+      console.log('✅ Payment status check working (correctly returned not_found)');
       testResults.manualVerification = true;
     } else {
-      console.log('❌ Manual verification failed unexpectedly');
+      console.log('❌ Payment status check failed unexpectedly');
     }
   } catch (error) {
     console.error('❌ Manual verification test error:', error);

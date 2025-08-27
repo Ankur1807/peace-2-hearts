@@ -10,7 +10,7 @@ interface VerificationResult {
 }
 
 /**
- * Verify payment and create booking in one call
+ * Check payment status using the new payment-status endpoint
  */
 export async function verifyPaymentAndCreateBooking(
   paymentId: string, 
@@ -19,38 +19,17 @@ export async function verifyPaymentAndCreateBooking(
   bookingDetails: BookingDetails
 ): Promise<VerificationResult> {
   try {
-    console.log(`Verifying payment and creating booking for ${paymentId}`);
+    console.log(`Checking payment status for order ${orderId}`);
     
-    // Safety check for missing data - still try to proceed
-    if (!signature) {
-      console.warn("Missing signature in verification call, attempting to proceed anyway");
-    }
-    
-    // Call our verify-payment edge function
-    const { data, error } = await supabase.functions.invoke('verify-payment', {
+    // Use the new payment-status endpoint instead of deprecated verify-payment
+    const { data, error } = await supabase.functions.invoke('payment-status', {
       body: {
-        paymentId,
-        orderId,
-        signature,
-        bookingDetails: {
-          clientName: bookingDetails.clientName,
-          email: bookingDetails.email,
-          phone: bookingDetails.phone,
-          referenceId: bookingDetails.referenceId,
-          consultationType: bookingDetails.consultationType,
-          services: bookingDetails.services || [bookingDetails.consultationType],
-          date: bookingDetails.date instanceof Date ? bookingDetails.date.toISOString() : bookingDetails.date,
-          timeSlot: bookingDetails.timeSlot,
-          timeframe: bookingDetails.timeframe,
-          serviceCategory: bookingDetails.serviceCategory,
-          message: bookingDetails.message,
-          amount: bookingDetails.amount
-        }
+        order_id: orderId
       }
     });
     
     if (error) {
-      console.error("Error verifying payment with edge function:", error);
+      console.error("Error checking payment status:", error);
       return { 
         success: false, 
         verified: false, 
@@ -58,24 +37,14 @@ export async function verifyPaymentAndCreateBooking(
       };
     }
     
-    console.log("Verification result:", data);
+    console.log("Payment status result:", data);
     
-    // If email failed but payment verified, still return success
-    if (data.verified && !data.emailSent) {
-      console.warn("Payment verified but email sending failed");
-      return {
-        success: true,
-        verified: true,
-        details: {
-          ...data,
-          emailWarning: true
-        }
-      };
-    }
+    // Check if payment is captured
+    const isVerified = data.success && data.status === 'captured';
     
     return {
-      success: true,
-      verified: data.verified || false,
+      success: data.success || false,
+      verified: isVerified,
       details: data
     };
   } catch (err) {

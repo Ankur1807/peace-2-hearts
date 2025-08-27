@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { verifyPaymentAndCreateBooking } from '@/utils/payment/verificationService';
+import { usePaymentStatus } from './usePaymentStatus';
 import { BookingDetails } from '@/utils/types';
 
 interface UsePaymentVerificationProps {
@@ -32,54 +32,66 @@ export const usePaymentVerification = ({
     error?: string;
   } | null>(null);
 
-  // If we have direct payment details, verify automatically
+  const { statusResult, isPolling, startPolling } = usePaymentStatus({
+    orderId: orderId || null
+  });
+
+  // Monitor payment status changes
   useEffect(() => {
-    if (paymentId && orderId && signature && referenceId && amount && bookingDetails) {
-      verifyPayment({
-        razorpay_payment_id: paymentId,
-        razorpay_order_id: orderId,
-        razorpay_signature: signature
-      }, amount, bookingDetails, referenceId);
+    if (statusResult) {
+      const isVerified = statusResult.success && statusResult.status === 'captured';
+      
+      setVerificationResult({
+        success: statusResult.success,
+        verified: isVerified,
+        error: statusResult.error || statusResult.reason
+      });
+      
+      if (isVerified) {
+        console.log("Payment captured successfully");
+        if (setPaymentCompleted) {
+          setPaymentCompleted(true);
+        }
+        setIsProcessing(false);
+      } else if (statusResult.status === 'failed') {
+        console.log("Payment failed");
+        setIsProcessing(false);
+      }
     }
-  }, [paymentId, orderId, signature, referenceId, amount, bookingDetails]);
+  }, [statusResult, setPaymentCompleted, setIsProcessing]);
+
+  // Auto-start verification when we have order details
+  useEffect(() => {
+    if (orderId && !verificationResult && !isPolling) {
+      setIsVerifying(true);
+      console.log("Starting payment verification for order:", orderId);
+      
+      // Start polling for payment status
+      startPolling();
+    }
+  }, [orderId, verificationResult, isPolling, startPolling]);
 
   const verifyPayment = async (response: any, amount: number, bookingDetails: BookingDetails, referenceId: string) => {
     try {
       setIsVerifying(true);
       
-      console.log("Verifying payment with unified verification service");
+      console.log("Starting payment status check for order:", response.razorpay_order_id);
       
-      // Convert amount to string for verification if needed
-      const amountString = amount.toString();
+      // Start polling for the payment status
+      startPolling();
       
-      // Use our unified verification service
-      const verificationResult = await verifyPaymentAndCreateBooking(
-        response.razorpay_payment_id,
-        response.razorpay_order_id,
-        response.razorpay_signature,
-        {
-          ...bookingDetails,
-          referenceId,
-          amount
-        }
-      );
-      
-      console.log("Payment verification result:", verificationResult);
-      setVerificationResult(verificationResult);
-      
-      if (verificationResult.success && verificationResult.verified) {
-        if (setPaymentCompleted) {
-          setPaymentCompleted(true);
-        }
-        return { success: true, verified: true };
-      }
-      
-      return { success: false, verified: false };
-    } finally {
+      return { success: true, verified: false }; // Will be updated via polling
+    } catch (error) {
+      console.error("Error starting payment verification:", error);
       setIsVerifying(false);
       setIsProcessing(false);
+      return { success: false, verified: false };
     }
   };
 
-  return { verifyPayment, isVerifying, verificationResult };
+  return { 
+    verifyPayment, 
+    isVerifying: isVerifying || isPolling, 
+    verificationResult 
+  };
 };

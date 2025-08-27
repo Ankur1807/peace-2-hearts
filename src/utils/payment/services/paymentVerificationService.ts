@@ -14,44 +14,27 @@ export async function verifyRazorpayPayment(
   bookingDetails?: BookingDetails
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log(`Verifying payment: ${paymentId} for reference: ${referenceId}`);
+    console.log(`Checking payment status for order: ${orderId}`);
     
-    // Call the verify-payment edge function which handles all database operations
-    const { data, error } = await supabase.functions.invoke('verify-payment', {
+    // Use the new payment-status endpoint instead of deprecated verify-payment  
+    const { data, error } = await supabase.functions.invoke('payment-status', {
       body: {
-        paymentId,
-        orderId,
-        signature,
-        bookingDetails: bookingDetails ? {
-          clientName: bookingDetails.clientName,
-          email: bookingDetails.email,
-          phone: bookingDetails.phone,
-          referenceId: bookingDetails.referenceId,
-          consultationType: bookingDetails.consultationType,
-          services: bookingDetails.services || [bookingDetails.consultationType],
-          date: bookingDetails.date ? 
-            (bookingDetails.date instanceof Date ? 
-              bookingDetails.date.toISOString() : bookingDetails.date) : undefined,
-          timeSlot: bookingDetails.timeSlot,
-          timeframe: bookingDetails.timeframe,
-          message: bookingDetails.message,
-          serviceCategory: bookingDetails.serviceCategory,
-          amount: bookingDetails.amount
-        } : undefined
+        order_id: orderId
       }
     });
     
     if (error) {
-      console.error("Error verifying payment with edge function:", error);
+      console.error("Error checking payment status:", error);
       return { success: false, error: error.message };
     }
     
-    if (!data.success || !data.verified) {
-      console.error("Payment verification failed:", data);
-      return { success: false, error: data.error || "Payment verification failed" };
+    const isVerified = data.success && data.status === 'captured';
+    if (!isVerified) {
+      console.error("Payment not captured yet:", data);
+      return { success: false, error: data.reason || "Payment not captured" };
     }
     
-    console.log("Payment verified successfully:", data);
+    console.log("Payment captured successfully:", data);
     
     // Store transaction reference in session for user recovery
     storePaymentDetailsInSession({

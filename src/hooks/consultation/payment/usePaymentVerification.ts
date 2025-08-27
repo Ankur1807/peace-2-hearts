@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { verifyPaymentAndCreateBooking } from '@/utils/payment/verificationService';
+import { useState, useEffect } from 'react';
+import { usePaymentStatus } from '@/hooks/payment/usePaymentStatus';
 import { BookingDetails } from '@/utils/types';
 
 interface UsePaymentVerificationProps {
@@ -14,38 +14,48 @@ export const usePaymentVerification = ({
   setPaymentCompleted,
 }: UsePaymentVerificationProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
+
+  const { statusResult, startPolling } = usePaymentStatus({
+    orderId: currentOrderId
+  });
+
+  // Monitor payment status changes
+  useEffect(() => {
+    if (statusResult) {
+      const isVerified = statusResult.success && statusResult.status === 'captured';
+      
+      if (isVerified) {
+        console.log("Payment captured successfully");
+        if (setPaymentCompleted) {
+          setPaymentCompleted(true);
+        }
+        setIsVerifying(false);
+        setIsProcessing(false);
+      } else if (statusResult.status === 'failed') {
+        console.log("Payment failed");
+        setIsVerifying(false);
+        setIsProcessing(false);
+      }
+    }
+  }, [statusResult, setPaymentCompleted, setIsProcessing]);
 
   const verifyPayment = async (response: any, amount: number, bookingDetails: BookingDetails, referenceId: string) => {
     try {
       setIsVerifying(true);
       
-      console.log("Verifying payment with unified verification service");
+      console.log("Starting payment status check for order:", response.razorpay_order_id);
       
-      // Use our unified verification service
-      const verificationResult = await verifyPaymentAndCreateBooking(
-        response.razorpay_payment_id,
-        response.razorpay_order_id,
-        response.razorpay_signature,
-        {
-          ...bookingDetails,
-          referenceId,
-          amount
-        }
-      );
+      // Set the order ID and start polling
+      setCurrentOrderId(response.razorpay_order_id);
+      startPolling();
       
-      console.log("Payment verification result:", verificationResult);
-      
-      if (verificationResult.success && verificationResult.verified) {
-        if (setPaymentCompleted) {
-          setPaymentCompleted(true);
-        }
-        return { success: true, verified: true };
-      }
-      
-      return { success: false, verified: false };
-    } finally {
+      return { success: true, verified: false }; // Will be updated via polling
+    } catch (error) {
+      console.error("Error starting payment verification:", error);
       setIsVerifying(false);
       setIsProcessing(false);
+      return { success: false, verified: false };
     }
   };
 
