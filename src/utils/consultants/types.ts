@@ -15,6 +15,15 @@ export interface Consultant {
   phone?: string | null;
 }
 
+export interface ConsultantPublic {
+  id: string;
+  specialization: string;
+  is_available: boolean;
+  hourly_rate: number;
+  available_days?: string[] | null;
+  available_hours?: string | null;
+}
+
 export interface CreateConsultantData extends Omit<Consultant, 'id'> {
   profile_picture: File | null;
 }

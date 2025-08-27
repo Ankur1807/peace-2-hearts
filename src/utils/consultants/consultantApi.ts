@@ -1,16 +1,16 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Consultant, CreateConsultantData } from "./types";
+import { Consultant, CreateConsultantData, ConsultantPublic } from "./types";
 import { upsertConsultantProfile } from "./profileManager";
 import { uploadProfilePicture } from "./storageBucket";
 
 /**
  * Fetches consultants with optional specialization filter
  */
-export const getConsultants = async (specialization?: string): Promise<Consultant[]> => {
+export const getConsultants = async (specialization?: string): Promise<ConsultantPublic[]> => {
   console.log("getConsultants called with specialization:", specialization);
   try {
     let query = supabase
-      .from('consultants')
+      .from('consultants_public')
       .select('*');
     
     if (specialization) {

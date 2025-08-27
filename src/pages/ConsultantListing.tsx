@@ -7,13 +7,13 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Consultant, getConsultants } from "@/utils/consultants";
+import { ConsultantPublic, getConsultants } from "@/utils/consultants";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const ConsultantListing = () => {
-  const [consultants, setConsultants] = useState<Consultant[]>([]);
+  const [consultants, setConsultants] = useState<ConsultantPublic[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -85,13 +85,9 @@ const ConsultantListing = () => {
                 <Card key={consultant.id} className="overflow-hidden">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-4">
-                      <Avatar className="h-12 w-12 border-2 border-white bg-primary/5">
-                        {consultant.profile_picture_url ? (
-                          <AvatarImage src={consultant.profile_picture_url} alt="Consultant" />
-                        ) : (
-                          <AvatarFallback>{getInitials()}</AvatarFallback>
-                        )}
-                      </Avatar>
+                       <Avatar className="h-12 w-12 border-2 border-white bg-primary/5">
+                         <AvatarFallback>{getInitials()}</AvatarFallback>
+                       </Avatar>
                       <div>
                         <CardTitle className="text-xl">Consultant</CardTitle>
                         <CardDescription>
@@ -103,9 +99,9 @@ const ConsultantListing = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 line-clamp-3 min-h-[4.5rem]">
-                      {consultant.bio || "This consultant specializes in providing expert guidance and support."}
-                    </p>
+                     <p className="text-gray-600 line-clamp-3 min-h-[4.5rem]">
+                       Specialized consultant providing expert guidance and support.
+                     </p>
                     <div className="mt-4 text-sm text-gray-500">
                       <div className="flex justify-between">
                         <span>Hourly Rate:</span>

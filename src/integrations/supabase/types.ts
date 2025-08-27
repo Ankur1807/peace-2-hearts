@@ -196,6 +196,13 @@ export type Database = {
             referencedRelation: "consultants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "consultations_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "consultants_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contact_messages: {
@@ -428,7 +435,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      consultants_public: {
+        Row: {
+          available_days: string[] | null
+          available_hours: string | null
+          hourly_rate: number | null
+          id: string | null
+          is_available: boolean | null
+          specialization: string | null
+        }
+        Insert: {
+          available_days?: string[] | null
+          available_hours?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          is_available?: boolean | null
+          specialization?: string | null
+        }
+        Update: {
+          available_days?: string[] | null
+          available_hours?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          is_available?: boolean | null
+          specialization?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       is_admin: {
