@@ -321,6 +321,72 @@ async function sendBookingConfirmationEmail(paymentId: string): Promise<void> {
   }
 }
 
+/**
+ * Main reconciliation function
+ */
+async function reconcilePayment(orderId: string): Promise<{
+  reconciled: boolean;
+  status: string;
+  payment_id?: string;
+  reason?: string;
+}> {
+  try {
+    // Fetch payments from Razorpay
+    const { success, payments, error } = await fetchOrderPayments(orderId);
+    
+    if (!success) {
+      return { 
+        reconciled: false, 
+        status: "error", 
+        reason: error || "Failed to fetch payments" 
+      };
+    }
+
+    if (!payments || payments.length === 0) {
+      return { 
+        reconciled: false, 
+        status: "not_found" 
+      };
+    }
+
+    // Find captured payment (use the latest one if multiple)
+    const capturedPayment = payments
+      .filter(p => p.status === 'captured')
+      .sort((a, b) => b.created_at - a.created_at)[0];
+
+    if (!capturedPayment) {
+      return { 
+        reconciled: false, 
+        status: "pending" 
+      };
+    }
+
+    // Upsert payment and consultation
+    const { success: upsertSuccess } = await upsertPaymentAndConsultation(capturedPayment);
+    
+    if (!upsertSuccess) {
+      return { 
+        reconciled: false, 
+        status: "error", 
+        reason: "Failed to update records" 
+      };
+    }
+
+    return {
+      reconciled: true,
+      status: "captured",
+      payment_id: capturedPayment.id
+    };
+  } catch (error) {
+    console.error("Error in reconcilePayment:", error);
+    return { 
+      reconciled: false, 
+      status: "error", 
+      reason: error.message 
+    };
+  }
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -406,7 +472,7 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { "Content-Type": "application/json", ...corsHeaders }
       }
     );
-
+  } catch (error) {
     logEvent("request_error", { 
       error: error.message, 
       http_status: 200 
